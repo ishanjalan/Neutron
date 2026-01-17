@@ -404,8 +404,8 @@ function createVideosStore() {
 	let items = $state<VideoItem[]>([]);
 	let settings = $state<CompressionSettings>(loadSettings());
 
-	function getFormatFromMime(mimeType: string): VideoFormat {
-		const map: Record<string, VideoFormat> = {
+	function getFormatFromMime(mimeType: string, fileName: string): VideoFormat {
+		const mimeMap: Record<string, VideoFormat> = {
 			'video/mp4': 'mp4',
 			'video/webm': 'webm',
 			'video/quicktime': 'mov',
@@ -413,7 +413,24 @@ function createVideosStore() {
 			'video/avi': 'avi',
 			'video/x-matroska': 'mkv'
 		};
-		return map[mimeType] || 'mp4';
+		
+		// First try MIME type
+		if (mimeMap[mimeType]) {
+			return mimeMap[mimeType];
+		}
+		
+		// Fallback to file extension (important for MKV which browsers often misreport)
+		const ext = fileName.toLowerCase().split('.').pop();
+		const extMap: Record<string, VideoFormat> = {
+			'mp4': 'mp4',
+			'm4v': 'mp4',
+			'webm': 'webm',
+			'mov': 'mov',
+			'avi': 'avi',
+			'mkv': 'mkv'
+		};
+		
+		return extMap[ext || ''] || 'mp4';
 	}
 
 	function generateId(): string {
@@ -429,7 +446,7 @@ function createVideosStore() {
 		},
 
 		async addFiles(files: FileList | File[]) {
-			const validTypes = [
+			const validMimeTypes = [
 				'video/mp4',
 				'video/webm',
 				'video/quicktime',
@@ -437,13 +454,21 @@ function createVideosStore() {
 				'video/avi',
 				'video/x-matroska'
 			];
+			
+			const validExtensions = ['mp4', 'm4v', 'webm', 'mov', 'avi', 'mkv'];
 
 			const newItems: VideoItem[] = [];
 
 			for (const file of files) {
-				if (!validTypes.includes(file.type)) continue;
+				// Check MIME type first, then fall back to extension
+				// (MKV files often have empty or generic MIME types in browsers)
+				const ext = file.name.toLowerCase().split('.').pop() || '';
+				const isValidMime = validMimeTypes.includes(file.type);
+				const isValidExt = validExtensions.includes(ext);
+				
+				if (!isValidMime && !isValidExt) continue;
 
-				const format = getFormatFromMime(file.type);
+				const format = getFormatFromMime(file.type, file.name);
 
 				// Get video metadata
 				let width: number | undefined;
