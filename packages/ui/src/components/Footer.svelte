@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Heart, Github, Shield, Image, Film, FileText, Disc3, ExternalLink } from 'lucide-svelte';
+	import { Heart, Github, Shield, Image, Film, FileText, Disc3, Coffee, Linkedin } from 'lucide-svelte';
 
 	type AppName = 'squish' | 'squash' | 'smash' | 'swirl';
 
@@ -98,12 +98,12 @@
 
 		<!-- Bottom row - minimal info -->
 		<div class="flex flex-col items-center gap-3 text-xs text-surface-500">
-			<div class="flex items-center gap-4">
+			<div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
 				<span class="flex items-center gap-1.5">
 					<Shield class="h-3.5 w-3.5 text-green-500/70" />
 					<span>100% Private</span>
 				</span>
-				<span class="text-surface-700">·</span>
+				<span class="text-surface-700 hidden sm:inline">·</span>
 				<a
 					href={currentAppData.github}
 					target="_blank"
@@ -113,20 +113,39 @@
 					<Github class="h-3.5 w-3.5" />
 					<span>GitHub</span>
 				</a>
-				<span class="text-surface-700">·</span>
-				<span class="flex items-center gap-1">
-					<span>Made with</span>
-					<Heart class="h-3 w-3 text-red-500/80 fill-red-500/80" />
-					<span>by</span>
-					<a
-						href="https://github.com/ishanjalan"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="hover:text-surface-300 transition-colors"
-					>
-						Ishan
-					</a>
-				</span>
+				<span class="text-surface-700 hidden sm:inline">·</span>
+				<a
+					href="https://www.linkedin.com/in/ishanjalan93/"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="flex items-center gap-1.5 transition-colors hover:text-sky-400"
+				>
+					<Linkedin class="h-3.5 w-3.5" />
+					<span>LinkedIn</span>
+				</a>
+				<span class="text-surface-700 hidden sm:inline">·</span>
+				<a
+					href="https://buymeacoffee.com/ishanjalan"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="flex items-center gap-1.5 transition-colors hover:text-yellow-400"
+				>
+					<Coffee class="h-3.5 w-3.5" />
+					<span>Buy me a coffee</span>
+				</a>
+			</div>
+			<div class="flex items-center gap-1">
+				<span>Made with</span>
+				<Heart class="h-3 w-3 text-red-500/80 fill-red-500/80" />
+				<span>by</span>
+				<a
+					href="https://github.com/ishanjalan"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="hover:text-surface-300 transition-colors"
+				>
+					Ishan Jalan
+				</a>
 			</div>
 		</div>
 	</div>
