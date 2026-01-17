@@ -64,8 +64,8 @@ body {
 /* Buttons and interactive elements */
 button:focus-visible,
 a:focus-visible,
-[role="button"]:focus-visible,
-[tabindex="0"]:focus-visible {
+[role='button']:focus-visible,
+[tabindex='0']:focus-visible {
 	outline: 2px solid var(--color-accent-start);
 	outline-offset: 2px;
 }
@@ -82,7 +82,7 @@ textarea:focus-visible {
    Custom Utilities
    ============================================ */
 .gradient-text {
-	@apply bg-gradient-to-r from-accent-start to-accent-end bg-clip-text text-transparent;
+	@apply from-accent-start to-accent-end bg-gradient-to-r bg-clip-text text-transparent;
 }
 
 .gradient-border {
@@ -96,7 +96,9 @@ textarea:focus-visible {
 	padding: 2px;
 	background: linear-gradient(135deg, var(--color-accent-start), var(--color-accent-end));
 	border-radius: inherit;
-	mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	mask:
+		linear-gradient(#fff 0 0) content-box,
+		linear-gradient(#fff 0 0);
 	mask-composite: exclude;
 	-webkit-mask-composite: xor;
 	pointer-events: none;
@@ -104,7 +106,7 @@ textarea:focus-visible {
 
 /* Glassmorphism - Dark mode only */
 .glass {
-	@apply bg-surface-900/70 backdrop-blur-xl border border-surface-700/30;
+	@apply bg-surface-900/70 border-surface-700/30 border backdrop-blur-xl;
 }
 
 /* Body scroll lock for modals */

@@ -1,27 +1,31 @@
 /**
  * Ghostscript client - type-safe wrapper for the Comlink worker
- * 
+ *
  * @example
  * ```ts
  * import { createGhostscriptClient } from '$lib/utils/ghostscript';
- * 
+ *
  * const gs = createGhostscriptClient('/Smash');
- * 
+ *
  * const result = await gs.compress(pdfData, 'ebook', (progress) => {
  *   console.log(`Progress: ${progress}%`);
  * });
- * 
+ *
  * if (result.success) {
  *   // result.data contains the compressed PDF
  * }
- * 
+ *
  * // When done, terminate the worker
  * gs.terminate();
  * ```
  */
 
 import { wrap, proxy, type Remote } from 'comlink';
-import type { GhostscriptWorkerAPI, CompressionPreset, CompressionResult } from '../workers/ghostscript.comlink';
+import type {
+	GhostscriptWorkerAPI,
+	CompressionPreset,
+	CompressionResult,
+} from '../workers/ghostscript.comlink';
 
 export type { CompressionPreset, CompressionResult };
 
@@ -48,15 +52,14 @@ export interface GhostscriptClient {
 
 /**
  * Create a Ghostscript client that manages the worker lifecycle
- * 
+ *
  * @param basePath - Base path for loading the WASM file (e.g., '/Smash')
  */
 export function createGhostscriptClient(basePath: string): GhostscriptClient {
 	// Create the worker
-	const worker = new Worker(
-		new URL('../workers/ghostscript.comlink.ts', import.meta.url),
-		{ type: 'module' }
-	);
+	const worker = new Worker(new URL('../workers/ghostscript.comlink.ts', import.meta.url), {
+		type: 'module',
+	});
 
 	// Wrap with Comlink
 	const api = wrap<GhostscriptWorkerAPI>(worker);
@@ -99,7 +102,7 @@ export function createGhostscriptClient(basePath: string): GhostscriptClient {
 
 		terminate(): void {
 			worker.terminate();
-		}
+		},
 	};
 }
 
@@ -137,12 +140,12 @@ export async function initGhostscript(basePath: string = ''): Promise<void> {
 	}
 
 	isInitializing = true;
-	
+
 	try {
 		legacyClient = createGhostscriptClient(basePath || '/Smash');
 		await legacyClient.isReady();
 		isInitialized = true;
-		initCallbacks.forEach(cb => cb());
+		initCallbacks.forEach((cb) => cb());
 		initCallbacks = [];
 	} finally {
 		isInitializing = false;
@@ -201,6 +204,6 @@ export async function compressPDF(
 	return {
 		result: result.data,
 		originalSize: result.originalSize,
-		compressedSize: result.compressedSize
+		compressedSize: result.compressedSize,
 	};
 }

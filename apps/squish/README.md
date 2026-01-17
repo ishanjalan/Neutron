@@ -18,12 +18,14 @@ Optimize images with cutting-edge WASM codecs. Compress JPEG, PNG, WebP, AVIF, J
 ## 🏗️ Tech Stack
 
 ### Core
+
 - **Svelte 5** — Runes reactivity system
 - **SvelteKit** — Static adapter for PWA
 - **TypeScript** — Type-safe development
 - **Tailwind CSS v4** — Utility-first styling
 
 ### Image Processing
+
 - **[icodec](https://github.com/nicholashollandmoore/icodec)** — Unified WASM codec interface
   - MozJPEG — Best JPEG compression
   - libwebp — WebP encoding
@@ -33,6 +35,7 @@ Optimize images with cutting-edge WASM codecs. Compress JPEG, PNG, WebP, AVIF, J
 - **[SVGO](https://github.com/nicholashollandmoore/svgo)** — SVG optimization
 
 ### Utilities
+
 - **[Comlink](https://github.com/GoogleChromeLabs/comlink)** — Type-safe Web Worker communication
 - **[JSZip](https://stuk.github.io/jszip/)** — Batch download as ZIP
 
@@ -59,6 +62,7 @@ Output is generated in the `build/` directory, ready for static hosting.
 ## 🔒 Privacy
 
 All processing happens **100% locally** in your browser:
+
 - Images never leave your device
 - No server uploads
 - Works offline as a PWA

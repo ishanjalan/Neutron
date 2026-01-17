@@ -4,14 +4,14 @@ import {
 	type VideoItem,
 	type OutputFormat,
 	estimateCompressionTime,
-	calculateBitrateForSize
+	calculateBitrateForSize,
 } from '$lib/stores/videos.svelte';
 import {
 	isWebCodecsSupported,
 	getWebCodecsCapabilities,
 	encodeWithWebCodecs,
 	getRecommendedCodecs,
-	type WebCodecsCapabilities
+	type WebCodecsCapabilities,
 } from './webcodecs';
 
 // WebCodecs capabilities cache
@@ -24,7 +24,7 @@ const queue: string[] = [];
 // Initialize and cache WebCodecs capabilities
 export async function initWebCodecs(): Promise<WebCodecsCapabilities> {
 	if (webCodecsCapabilities) return webCodecsCapabilities;
-	
+
 	webCodecsCapabilities = await getWebCodecsCapabilities();
 	console.log('WebCodecs capabilities:', webCodecsCapabilities);
 	return webCodecsCapabilities;
@@ -40,7 +40,7 @@ export function checkBrowserSupport(): { supported: boolean; reason?: string } {
 	if (!isWebCodecsSupported()) {
 		return {
 			supported: false,
-			reason: 'Your browser does not support WebCodecs. Please use Chrome, Edge, or Safari 16.4+.'
+			reason: 'Your browser does not support WebCodecs. Please use Chrome, Edge, or Safari 16.4+.',
 		};
 	}
 	return { supported: true };
@@ -77,7 +77,7 @@ async function processQueue() {
 			const id = queue.shift()!;
 			videos.updateItem(id, {
 				status: 'error',
-				error: 'WebCodecs not supported in this browser. Please use Chrome, Edge, or Safari 16.4+.'
+				error: 'WebCodecs not supported in this browser. Please use Chrome, Edge, or Safari 16.4+.',
 			});
 		}
 		isProcessing = false;
@@ -102,22 +102,24 @@ async function compressVideo(item: VideoItem) {
 			status: 'processing',
 			progress: 0,
 			progressStage: 'Initializing hardware encoder...',
-			eta: estimateCompressionTime(item, videos.settings)
+			eta: estimateCompressionTime(item, videos.settings),
 		});
 
 		const capabilities = await initWebCodecs();
-		
+
 		// Check if the required codec is supported
 		const outputFormat = item.outputFormat;
 		const { video: videoCodec } = getRecommendedCodecs(outputFormat);
-		
+
 		if (!capabilities.supportedVideoCodecs.includes(videoCodec)) {
-			throw new Error(`${videoCodec.toUpperCase()} codec not supported by your hardware. Try a different output format.`);
+			throw new Error(
+				`${videoCodec.toUpperCase()} codec not supported by your hardware. Try a different output format.`
+			);
 		}
 
 		const accelNote = capabilities.hardwareAcceleration ? ' (GPU)' : '';
 		videos.updateItem(item.id, {
-			progressStage: `Encoding with ${videoCodec.toUpperCase()}${accelNote}...`
+			progressStage: `Encoding with ${videoCodec.toUpperCase()}${accelNote}...`,
 		});
 
 		const result = await compressWithWebCodecs(item);
@@ -132,7 +134,7 @@ async function compressVideo(item: VideoItem) {
 			compressedUrl,
 			compressedBlob: result.blob,
 			compressionDuration: result.duration,
-			eta: undefined
+			eta: undefined,
 		});
 	} catch (error) {
 		console.error('Compression error:', error);
@@ -140,15 +142,13 @@ async function compressVideo(item: VideoItem) {
 			status: 'error',
 			error: error instanceof Error ? error.message : 'Compression failed',
 			progressStage: undefined,
-			eta: undefined
+			eta: undefined,
 		});
 	}
 }
 
 // Compress using WebCodecs (hardware acceleration via Mediabunny)
-async function compressWithWebCodecs(
-	item: VideoItem
-): Promise<{ blob: Blob; duration: number }> {
+async function compressWithWebCodecs(item: VideoItem): Promise<{ blob: Blob; duration: number }> {
 	const startTime = Date.now();
 	const quality = videos.settings.quality;
 	const outputFormat = item.outputFormat;
@@ -159,7 +159,7 @@ async function compressWithWebCodecs(
 		web: 1_500_000,
 		social: 3_000_000,
 		high: 6_000_000,
-		lossless: 20_000_000
+		lossless: 20_000_000,
 	};
 
 	// Calculate bitrate - either from target size or quality preset
@@ -176,7 +176,7 @@ async function compressWithWebCodecs(
 		'1080p': { width: 1920, height: 1080 },
 		'720p': { width: 1280, height: 720 },
 		'480p': { width: 854, height: 480 },
-		'360p': { width: 640, height: 360 }
+		'360p': { width: 640, height: 360 },
 	};
 
 	const resolution = resolutionMap[videos.settings.resolution] || resolutionMap['original'];
@@ -188,11 +188,11 @@ async function compressWithWebCodecs(
 		'128k': 128000,
 		'192k': 192000,
 		'256k': 256000,
-		'320k': 320000
+		'320k': 320000,
 	};
 
 	// Determine actual output format for container (AV1 and HEVC use MP4 container)
-	const containerFormat = (outputFormat === 'av1' || outputFormat === 'hevc') ? 'mp4' : outputFormat;
+	const containerFormat = outputFormat === 'av1' || outputFormat === 'hevc' ? 'mp4' : outputFormat;
 
 	const blob = await encodeWithWebCodecs(
 		item.file,
@@ -207,7 +207,7 @@ async function compressWithWebCodecs(
 			sampleRate: 48000,
 			channels: 2,
 			trimStart: item.trimStart,
-			trimEnd: item.trimEnd
+			trimEnd: item.trimEnd,
 		},
 		containerFormat as 'mp4' | 'webm',
 		quality,
@@ -216,22 +216,23 @@ async function compressWithWebCodecs(
 			videos.updateItem(item.id, {
 				progress: progress.progress,
 				progressStage: `${progress.stage} (${progress.framesProcessed}/${progress.totalFrames} frames)`,
-				eta: progress.fps > 0 
-					? Math.round((progress.totalFrames - progress.framesProcessed) / progress.fps)
-					: undefined
+				eta:
+					progress.fps > 0
+						? Math.round((progress.totalFrames - progress.framesProcessed) / progress.fps)
+						: undefined,
 			});
 		}
 	);
 
 	return {
 		blob,
-		duration: Date.now() - startTime
+		duration: Date.now() - startTime,
 	};
 }
 
 export function getOutputExtension(format: OutputFormat): string {
 	// AV1 and HEVC use MP4 container
-	return (format === 'av1' || format === 'hevc') ? '.mp4' : `.${format}`;
+	return format === 'av1' || format === 'hevc' ? '.mp4' : `.${format}`;
 }
 
 export function getOutputFilename(originalName: string, format: OutputFormat): string {
@@ -262,7 +263,7 @@ export async function reprocessVideo(id: string) {
 		compressedBlob: undefined,
 		previewUrl: undefined,
 		eta: undefined,
-		error: undefined
+		error: undefined,
 	});
 
 	// Get fresh item reference
@@ -296,7 +297,7 @@ export async function reprocessAllVideos() {
 			compressedUrl: undefined,
 			compressedBlob: undefined,
 			previewUrl: undefined,
-			eta: undefined
+			eta: undefined,
 		});
 	}
 
@@ -316,11 +317,11 @@ export async function getCapabilities(): Promise<{
 	webCodecs: WebCodecsCapabilities;
 }> {
 	const webCodecs = await initWebCodecs();
-	
+
 	return {
 		hardwareConcurrency: navigator.hardwareConcurrency || 4,
 		deviceMemory: (navigator as { deviceMemory?: number }).deviceMemory || 4,
-		webCodecs
+		webCodecs,
 	};
 }
 

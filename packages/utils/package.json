@@ -1,39 +1,43 @@
 {
-  "name": "@neutron/utils",
-  "version": "0.0.1",
-  "private": true,
-  "type": "module",
-  "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
-    },
-    "./format": {
-      "types": "./src/format.ts",
-      "default": "./src/format.ts"
-    },
-    "./download": {
-      "types": "./src/download.ts",
-      "default": "./src/download.ts"
-    },
-    "./focus-trap": {
-      "types": "./src/focus-trap.ts",
-      "default": "./src/focus-trap.ts"
-    },
-    "./validation": {
-      "types": "./src/validation.ts",
-      "default": "./src/validation.ts"
-    },
-    "./comlink": {
-      "types": "./src/comlink.ts",
-      "default": "./src/comlink.ts"
-    }
-  },
-  "devDependencies": {
-    "typescript": "^5.9.3"
-  },
-  "dependencies": {
-    "comlink": "^4.4.2",
-    "valibot": "^1.0.0"
-  }
+	"name": "@neutron/utils",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"lint": "eslint .",
+		"lint:fix": "eslint . --fix"
+	},
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"default": "./src/index.ts"
+		},
+		"./format": {
+			"types": "./src/format.ts",
+			"default": "./src/format.ts"
+		},
+		"./download": {
+			"types": "./src/download.ts",
+			"default": "./src/download.ts"
+		},
+		"./focus-trap": {
+			"types": "./src/focus-trap.ts",
+			"default": "./src/focus-trap.ts"
+		},
+		"./validation": {
+			"types": "./src/validation.ts",
+			"default": "./src/validation.ts"
+		},
+		"./comlink": {
+			"types": "./src/comlink.ts",
+			"default": "./src/comlink.ts"
+		}
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3"
+	},
+	"dependencies": {
+		"comlink": "^4.4.2",
+		"valibot": "^1.0.0"
+	}
 }

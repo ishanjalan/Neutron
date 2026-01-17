@@ -13,7 +13,7 @@
 </script>
 
 {#if pdfs.items.length > 0}
-	<div class="grid gap-4 sm:gap-6 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+	<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4 xl:grid-cols-5">
 		{#each pdfs.items as item, index (item.id)}
 			<div animate:flip={{ duration: 200 }}>
 				<PDFCard {item} {index} {canReorder} {showCompare} />

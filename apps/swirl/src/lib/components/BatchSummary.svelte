@@ -8,7 +8,7 @@
 		totalOriginalSize,
 		totalCompressedSize,
 		ondownloadAll,
-		onclose
+		onclose,
 	}: {
 		totalFiles: number;
 		totalOriginalSize: number;
@@ -18,7 +18,9 @@
 	} = $props();
 
 	const savings = $derived(totalOriginalSize > 0 ? totalOriginalSize - totalCompressedSize : 0);
-	const savingsPercent = $derived(totalOriginalSize > 0 ? Math.round((1 - totalCompressedSize / totalOriginalSize) * 100) : 0);
+	const savingsPercent = $derived(
+		totalOriginalSize > 0 ? Math.round((1 - totalCompressedSize / totalOriginalSize) * 100) : 0
+	);
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') {
@@ -57,19 +59,19 @@
 		transition:scale={{ duration: 200, start: 0.95 }}
 	>
 		<!-- Header -->
-		<div class="flex items-center justify-between mb-6">
+		<div class="mb-6 flex items-center justify-between">
 			<div class="flex items-center gap-3">
 				<div class="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/20">
 					<CheckCircle class="h-5 w-5 text-green-400" />
 				</div>
 				<div>
-					<h3 class="text-lg font-semibold text-surface-100">Processing Complete!</h3>
-					<p class="text-sm text-surface-500">Your GIFs are ready</p>
+					<h3 class="text-surface-100 text-lg font-semibold">Processing Complete!</h3>
+					<p class="text-surface-500 text-sm">Your GIFs are ready</p>
 				</div>
 			</div>
 			<button
 				onclick={onclose}
-				class="rounded-lg p-2 text-surface-400 hover:text-surface-200 hover:bg-surface-700 transition-colors"
+				class="text-surface-400 hover:text-surface-200 hover:bg-surface-700 rounded-lg p-2 transition-colors"
 				aria-label="Close"
 			>
 				<X class="h-5 w-5" />
@@ -77,45 +79,45 @@
 		</div>
 
 		<!-- Stats Grid -->
-		<div class="grid grid-cols-2 gap-4 mb-6">
+		<div class="mb-6 grid grid-cols-2 gap-4">
 			<!-- Files Processed -->
-			<div class="rounded-xl bg-surface-800/50 p-4">
-				<div class="flex items-center gap-2 mb-1">
+			<div class="bg-surface-800/50 rounded-xl p-4">
+				<div class="mb-1 flex items-center gap-2">
 					<Files class="h-4 w-4 text-blue-400" />
-					<span class="text-xs text-surface-500 uppercase tracking-wide">Files</span>
+					<span class="text-surface-500 text-xs uppercase tracking-wide">Files</span>
 				</div>
-				<p class="text-2xl font-bold text-surface-100">{totalFiles}</p>
+				<p class="text-surface-100 text-2xl font-bold">{totalFiles}</p>
 			</div>
 
 			<!-- Size Saved -->
-			<div class="rounded-xl bg-surface-800/50 p-4">
-				<div class="flex items-center gap-2 mb-1">
+			<div class="bg-surface-800/50 rounded-xl p-4">
+				<div class="mb-1 flex items-center gap-2">
 					<TrendingDown class="h-4 w-4 text-green-400" />
-					<span class="text-xs text-surface-500 uppercase tracking-wide">Saved</span>
+					<span class="text-surface-500 text-xs uppercase tracking-wide">Saved</span>
 				</div>
 				<p class="text-2xl font-bold text-green-400">{formatBytes(savings)}</p>
 			</div>
 
 			<!-- Before Size -->
-			<div class="rounded-xl bg-surface-800/50 p-4">
-				<div class="flex items-center gap-2 mb-1">
-					<span class="text-xs text-surface-500 uppercase tracking-wide">Before</span>
+			<div class="bg-surface-800/50 rounded-xl p-4">
+				<div class="mb-1 flex items-center gap-2">
+					<span class="text-surface-500 text-xs uppercase tracking-wide">Before</span>
 				</div>
-				<p class="text-lg font-semibold text-surface-300">{formatBytes(totalOriginalSize)}</p>
+				<p class="text-surface-300 text-lg font-semibold">{formatBytes(totalOriginalSize)}</p>
 			</div>
 
 			<!-- After Size -->
-			<div class="rounded-xl bg-surface-800/50 p-4">
-				<div class="flex items-center gap-2 mb-1">
-					<span class="text-xs text-surface-500 uppercase tracking-wide">After</span>
+			<div class="bg-surface-800/50 rounded-xl p-4">
+				<div class="mb-1 flex items-center gap-2">
+					<span class="text-surface-500 text-xs uppercase tracking-wide">After</span>
 				</div>
-				<p class="text-lg font-semibold text-surface-300">{formatBytes(totalCompressedSize)}</p>
+				<p class="text-surface-300 text-lg font-semibold">{formatBytes(totalCompressedSize)}</p>
 			</div>
 		</div>
 
 		<!-- Savings Badge -->
 		{#if savingsPercent > 0}
-			<div class="flex items-center justify-center mb-6">
+			<div class="mb-6 flex items-center justify-center">
 				<div class="inline-flex items-center gap-2 rounded-full bg-green-500/20 px-4 py-2">
 					<TrendingDown class="h-5 w-5 text-green-400" />
 					<span class="text-lg font-bold text-green-400">{savingsPercent}% smaller</span>
@@ -127,13 +129,13 @@
 		<div class="flex gap-3">
 			<button
 				onclick={onclose}
-				class="flex-1 rounded-xl bg-surface-700 px-4 py-3 text-sm font-medium text-surface-200 hover:bg-surface-600 transition-colors"
+				class="bg-surface-700 text-surface-200 hover:bg-surface-600 flex-1 rounded-xl px-4 py-3 text-sm font-medium transition-colors"
 			>
 				Close
 			</button>
 			<button
 				onclick={handleDownloadAndClose}
-				class="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent-start to-accent-end px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-accent-start/30 hover:shadow-xl hover:shadow-accent-start/40 transition-all"
+				class="from-accent-start to-accent-end shadow-accent-start/30 hover:shadow-accent-start/40 flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r px-4 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:shadow-xl"
 			>
 				<Package class="h-4 w-4" />
 				Download {totalFiles > 1 ? 'All as ZIP' : ''}

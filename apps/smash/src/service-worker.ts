@@ -38,8 +38,8 @@ sw.addEventListener('activate', (event) => {
 			const keys = await caches.keys();
 			await Promise.all(
 				keys
-					.filter(key => key !== CACHE_NAME && key !== WASM_CACHE)
-					.map(key => caches.delete(key))
+					.filter((key) => key !== CACHE_NAME && key !== WASM_CACHE)
+					.map((key) => caches.delete(key))
 			);
 			// Take control of all pages immediately
 			await sw.clients.claim();
@@ -58,12 +58,12 @@ sw.addEventListener('fetch', (event) => {
 	if (url.origin !== location.origin) return;
 
 	// Special handling for WASM files - cache-first with separate cache
-	if (WASM_FILES.some(f => url.pathname.endsWith(f))) {
+	if (WASM_FILES.some((f) => url.pathname.endsWith(f))) {
 		event.respondWith(
 			(async () => {
 				const cache = await caches.open(WASM_CACHE);
 				const cached = await cache.match(event.request);
-				
+
 				if (cached) {
 					return cached;
 				}
@@ -80,7 +80,7 @@ sw.addEventListener('fetch', (event) => {
 	}
 
 	// For app files, use cache-first strategy
-	if (APP_FILES.some(file => url.pathname.endsWith(file))) {
+	if (APP_FILES.some((file) => url.pathname.endsWith(file))) {
 		event.respondWith(
 			(async () => {
 				const cached = await caches.match(event.request);

@@ -8,23 +8,23 @@ export default defineConfig({
 		headers: {
 			// Required for SharedArrayBuffer support (WebCodecs)
 			'Cross-Origin-Opener-Policy': 'same-origin',
-			'Cross-Origin-Embedder-Policy': 'require-corp'
-		}
+			'Cross-Origin-Embedder-Policy': 'require-corp',
+		},
 	},
 	preview: {
 		headers: {
 			'Cross-Origin-Opener-Policy': 'same-origin',
-			'Cross-Origin-Embedder-Policy': 'require-corp'
-		}
+			'Cross-Origin-Embedder-Policy': 'require-corp',
+		},
 	},
 	worker: {
-		format: 'es'
+		format: 'es',
 	},
 	build: {
-		target: 'esnext'
+		target: 'esnext',
 	},
 	optimizeDeps: {
 		// Required for gifski-wasm to work properly with Vite
-		exclude: ['gifski-wasm']
-	}
+		exclude: ['gifski-wasm'],
+	},
 });

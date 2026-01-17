@@ -6,7 +6,7 @@
 		startTime = $bindable(0),
 		endTime = $bindable(0),
 		currentTime = 0,
-		onseek
+		onseek,
 	}: {
 		duration: number;
 		startTime: number;
@@ -69,10 +69,10 @@
 			const rect = containerRef.getBoundingClientRect();
 			const deltaX = e.clientX - dragStartX;
 			const deltaTime = (deltaX / rect.width) * duration;
-			
+
 			const newStart = dragStartTimeStart + deltaTime;
 			const newEnd = dragStartTimeEnd + deltaTime;
-			
+
 			if (newStart >= 0 && newEnd <= duration) {
 				startTime = newStart;
 				endTime = newEnd;
@@ -103,16 +103,16 @@
 
 <div class="space-y-3">
 	<!-- Label -->
-	<div class="flex items-center gap-2 text-sm font-medium text-surface-300">
+	<div class="text-surface-300 flex items-center gap-2 text-sm font-medium">
 		<Scissors class="h-4 w-4 text-pink-400" />
 		<span>Trim Video</span>
 		<span class="text-surface-500">({formatTime(clipDuration)} selected)</span>
 	</div>
 
 	<!-- Timeline -->
-	<div 
+	<div
 		bind:this={containerRef}
-		class="relative h-12 bg-surface-800 rounded-xl select-none touch-none overflow-hidden cursor-pointer"
+		class="bg-surface-800 relative h-12 cursor-pointer touch-none select-none overflow-hidden rounded-xl"
 		onclick={handleTrackClick}
 		role="slider"
 		aria-valuenow={startTime}
@@ -123,13 +123,13 @@
 		<!-- Timeline ticks -->
 		<div class="absolute inset-0 flex">
 			{#each Array(10) as _, i}
-				<div class="flex-1 border-r border-surface-700 first:border-l"></div>
+				<div class="border-surface-700 flex-1 border-r first:border-l"></div>
 			{/each}
 		</div>
 
 		<!-- Selected range (draggable) -->
-		<div 
-			class="absolute top-0 bottom-0 bg-gradient-to-r from-pink-500/30 to-rose-500/30 border-y-2 border-pink-500/50 cursor-grab active:cursor-grabbing"
+		<div
+			class="absolute bottom-0 top-0 cursor-grab border-y-2 border-pink-500/50 bg-gradient-to-r from-pink-500/30 to-rose-500/30 active:cursor-grabbing"
 			style="left: {startPercent}%; right: {100 - endPercent}%"
 			onpointerdown={handlePointerDownRange}
 			onpointermove={handlePointerMove}
@@ -143,15 +143,15 @@
 
 		<!-- Current playhead -->
 		{#if currentTime >= startTime && currentTime <= endTime}
-			<div 
-				class="absolute top-0 bottom-0 w-0.5 bg-white/80 pointer-events-none z-10"
+			<div
+				class="pointer-events-none absolute bottom-0 top-0 z-10 w-0.5 bg-white/80"
 				style="left: {currentPercent}%"
 			></div>
 		{/if}
 
 		<!-- Start handle -->
-		<div 
-			class="absolute top-0 bottom-0 w-4 cursor-ew-resize z-20 group"
+		<div
+			class="group absolute bottom-0 top-0 z-20 w-4 cursor-ew-resize"
 			style="left: calc({startPercent}% - 8px)"
 			onpointerdown={handlePointerDownStart}
 			onpointermove={handlePointerMove}
@@ -162,15 +162,21 @@
 			aria-valuenow={startTime}
 			tabindex="0"
 		>
-			<div class="absolute left-1/2 top-0 bottom-0 w-1 -translate-x-1/2 bg-pink-500 rounded-full group-hover:w-1.5 transition-all">
-				<div class="absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-pink-500 rounded-full shadow-lg"></div>
-				<div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-pink-500 rounded-full shadow-lg"></div>
+			<div
+				class="absolute bottom-0 left-1/2 top-0 w-1 -translate-x-1/2 rounded-full bg-pink-500 transition-all group-hover:w-1.5"
+			>
+				<div
+					class="absolute -top-1 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-pink-500 shadow-lg"
+				></div>
+				<div
+					class="absolute -bottom-1 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-pink-500 shadow-lg"
+				></div>
 			</div>
 		</div>
 
 		<!-- End handle -->
-		<div 
-			class="absolute top-0 bottom-0 w-4 cursor-ew-resize z-20 group"
+		<div
+			class="group absolute bottom-0 top-0 z-20 w-4 cursor-ew-resize"
 			style="left: calc({endPercent}% - 8px)"
 			onpointerdown={handlePointerDownEnd}
 			onpointermove={handlePointerMove}
@@ -181,9 +187,15 @@
 			aria-valuenow={endTime}
 			tabindex="0"
 		>
-			<div class="absolute left-1/2 top-0 bottom-0 w-1 -translate-x-1/2 bg-rose-500 rounded-full group-hover:w-1.5 transition-all">
-				<div class="absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-rose-500 rounded-full shadow-lg"></div>
-				<div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-rose-500 rounded-full shadow-lg"></div>
+			<div
+				class="absolute bottom-0 left-1/2 top-0 w-1 -translate-x-1/2 rounded-full bg-rose-500 transition-all group-hover:w-1.5"
+			>
+				<div
+					class="absolute -top-1 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-rose-500 shadow-lg"
+				></div>
+				<div
+					class="absolute -bottom-1 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-rose-500 shadow-lg"
+				></div>
 			</div>
 		</div>
 	</div>
@@ -191,9 +203,9 @@
 	<!-- Time labels -->
 	<div class="flex items-center justify-between text-xs">
 		<div class="flex items-center gap-2">
-			<span class="text-pink-400 font-medium">{formatTime(startTime)}</span>
+			<span class="font-medium text-pink-400">{formatTime(startTime)}</span>
 			<span class="text-surface-600">→</span>
-			<span class="text-rose-400 font-medium">{formatTime(endTime)}</span>
+			<span class="font-medium text-rose-400">{formatTime(endTime)}</span>
 		</div>
 		<span class="text-surface-500">Total: {formatTime(duration)}</span>
 	</div>
@@ -208,7 +220,7 @@
 				min="0"
 				max={endTime - 0.1}
 				step="0.1"
-				class="w-20 rounded-lg bg-surface-800 border border-surface-700 px-2 py-1 text-surface-100 text-center focus:outline-none focus:border-pink-500"
+				class="bg-surface-800 border-surface-700 text-surface-100 w-20 rounded-lg border px-2 py-1 text-center focus:border-pink-500 focus:outline-none"
 			/>
 		</label>
 		<label class="flex items-center gap-2">
@@ -219,7 +231,7 @@
 				min={startTime + 0.1}
 				max={duration}
 				step="0.1"
-				class="w-20 rounded-lg bg-surface-800 border border-surface-700 px-2 py-1 text-surface-100 text-center focus:outline-none focus:border-rose-500"
+				class="bg-surface-800 border-surface-700 text-surface-100 w-20 rounded-lg border px-2 py-1 text-center focus:border-rose-500 focus:outline-none"
 			/>
 		</label>
 	</div>

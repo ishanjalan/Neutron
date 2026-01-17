@@ -1,10 +1,10 @@
 /**
  * PDF Processing Utilities - Web App (WASM)
- * 
+ *
  * Uses Ghostscript WASM for compression (50-90% reduction)
  * Uses qpdf WASM for encryption (AES-256)
  * Uses pdf-lib for manipulation (merge, split, rotate, etc.)
- * 
+ *
  * All processing happens locally in the browser - files never leave your device.
  */
 
@@ -12,7 +12,12 @@ import { PDFDocument, rgb, StandardFonts, degrees } from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
 import { compressPDF as compressWithGS, isGhostscriptReady } from './ghostscript';
 import { encryptPDF as encryptWithQpdf, decryptPDF as decryptWithQpdf, isQpdfReady } from './qpdf';
-import { pdfs, type PDFItem, type ImageFormat, type CompressionPreset } from '$lib/stores/pdfs.svelte';
+import {
+	pdfs,
+	type PDFItem,
+	type ImageFormat,
+	type CompressionPreset,
+} from '$lib/stores/pdfs.svelte';
 import { base } from '$app/paths';
 
 // Configure PDF.js worker - use local bundled file with base path
@@ -52,7 +57,7 @@ export async function getBackendInfo(): Promise<{
 }> {
 	return {
 		ghostscript: { available: true, version: 'WASM' },
-		qpdf: { available: true, version: 'WASM' }
+		qpdf: { available: true, version: 'WASM' },
 	};
 }
 
@@ -69,10 +74,7 @@ interface CompressOptions {
  * Compress PDF - uses Ghostscript WASM for best compression
  * Falls back to pdf-lib if WASM fails
  */
-export async function compressPDF(
-	file: File,
-	options: CompressOptions
-): Promise<Blob> {
+export async function compressPDF(file: File, options: CompressOptions): Promise<Blob> {
 	const { preset = 'ebook', onProgress } = options;
 
 	const arrayBuffer = await file.arrayBuffer();
@@ -80,11 +82,7 @@ export async function compressPDF(
 	// Try Ghostscript WASM first for best compression (50-90% reduction)
 	try {
 		onProgress?.(5);
-		const { result } = await compressWithGS(
-			arrayBuffer,
-			preset,
-			onProgress
-		);
+		const { result } = await compressWithGS(arrayBuffer, preset, onProgress);
 		return new Blob([result], { type: 'application/pdf' });
 	} catch (e) {
 		console.warn('Ghostscript WASM compression failed, falling back to pdf-lib:', e);
@@ -98,17 +96,14 @@ export async function compressPDF(
  * pdf-lib compression (10-30% reduction)
  * Works without any external dependencies
  */
-async function compressPDFWithPdfLib(
-	file: File,
-	options: CompressOptions
-): Promise<Blob> {
+async function compressPDFWithPdfLib(file: File, options: CompressOptions): Promise<Blob> {
 	const { onProgress } = options;
 
 	onProgress?.(10);
 
 	const arrayBuffer = await file.arrayBuffer();
 	const srcPdf = await PDFDocument.load(arrayBuffer, {
-		ignoreEncryption: true
+		ignoreEncryption: true,
 	});
 
 	onProgress?.(30);
@@ -131,7 +126,7 @@ async function compressPDFWithPdfLib(
 	const pdfBytes = await newPdf.save({
 		useObjectStreams: true,
 		addDefaultPage: false,
-		objectsPerTick: 100
+		objectsPerTick: 100,
 	});
 
 	onProgress?.(100);
@@ -153,7 +148,7 @@ export async function mergePDFs(
 		const arrayBuffer = await files[i].arrayBuffer();
 		const pdf = await PDFDocument.load(arrayBuffer);
 		const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
-		pages.forEach(page => mergedPdf.addPage(page));
+		pages.forEach((page) => mergedPdf.addPage(page));
 
 		onProgress?.(Math.round(((i + 1) / files.length) * 100));
 	}
@@ -174,10 +169,7 @@ interface SplitOptions {
 	onProgress?: (progress: number) => void;
 }
 
-export async function splitPDF(
-	file: File,
-	options: SplitOptions
-): Promise<Blob[]> {
+export async function splitPDF(file: File, options: SplitOptions): Promise<Blob[]> {
 	const arrayBuffer = await file.arrayBuffer();
 	const pdf = await PDFDocument.load(arrayBuffer);
 	const totalPages = pdf.getPageCount();
@@ -188,29 +180,23 @@ export async function splitPDF(
 		const pageIndices = Array.from(
 			{ length: options.range.end - options.range.start + 1 },
 			(_, i) => options.range!.start - 1 + i
-		).filter(i => i >= 0 && i < totalPages);
+		).filter((i) => i >= 0 && i < totalPages);
 
 		const pages = await newPdf.copyPages(pdf, pageIndices);
-		pages.forEach(page => newPdf.addPage(page));
+		pages.forEach((page) => newPdf.addPage(page));
 		const bytes = await newPdf.save();
 		results.push(new Blob([bytes], { type: 'application/pdf' }));
 		options.onProgress?.(100);
-	}
-
-	else if (options.mode === 'extract' && options.pages) {
+	} else if (options.mode === 'extract' && options.pages) {
 		const newPdf = await PDFDocument.create();
-		const pageIndices = options.pages
-			.map(p => p - 1)
-			.filter(i => i >= 0 && i < totalPages);
+		const pageIndices = options.pages.map((p) => p - 1).filter((i) => i >= 0 && i < totalPages);
 
 		const pages = await newPdf.copyPages(pdf, pageIndices);
-		pages.forEach(page => newPdf.addPage(page));
+		pages.forEach((page) => newPdf.addPage(page));
 		const bytes = await newPdf.save();
 		results.push(new Blob([bytes], { type: 'application/pdf' }));
 		options.onProgress?.(100);
-	}
-
-	else if (options.mode === 'every-n' && options.everyN) {
+	} else if (options.mode === 'every-n' && options.everyN) {
 		const n = options.everyN;
 		for (let i = 0; i < totalPages; i += n) {
 			const newPdf = await PDFDocument.create();
@@ -218,7 +204,7 @@ export async function splitPDF(
 			const pageIndices = Array.from({ length: endPage - i }, (_, j) => i + j);
 
 			const pages = await newPdf.copyPages(pdf, pageIndices);
-			pages.forEach(page => newPdf.addPage(page));
+			pages.forEach((page) => newPdf.addPage(page));
 			const bytes = await newPdf.save();
 			results.push(new Blob([bytes], { type: 'application/pdf' }));
 
@@ -240,10 +226,7 @@ interface PDFToImagesOptions {
 	onProgress?: (progress: number) => void;
 }
 
-export async function pdfToImages(
-	file: File,
-	options: PDFToImagesOptions
-): Promise<Blob[]> {
+export async function pdfToImages(file: File, options: PDFToImagesOptions): Promise<Blob[]> {
 	const arrayBuffer = await file.arrayBuffer();
 	const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 	const scale = options.dpi / 72;
@@ -262,7 +245,7 @@ export async function pdfToImages(
 
 		const mimeType = options.format === 'jpg' ? 'image/jpeg' : `image/${options.format}`;
 		const blob = await new Promise<Blob>((resolve) => {
-			canvas.toBlob(blob => resolve(blob!), mimeType, options.quality / 100);
+			canvas.toBlob((blob) => resolve(blob!), mimeType, options.quality / 100);
 		});
 
 		images.push(blob);
@@ -297,7 +280,7 @@ export async function imagesToPDF(
 			const ctx = canvas.getContext('2d')!;
 			ctx.drawImage(img, 0, 0);
 			const pngBlob = await new Promise<Blob>((resolve) => {
-				canvas.toBlob(blob => resolve(blob!), 'image/png');
+				canvas.toBlob((blob) => resolve(blob!), 'image/png');
 			});
 			const pngBuffer = await pngBlob.arrayBuffer();
 			image = await pdf.embedPng(pngBuffer);
@@ -310,7 +293,7 @@ export async function imagesToPDF(
 			x: 0,
 			y: 0,
 			width: image.width,
-			height: image.height
+			height: image.height,
 		});
 
 		onProgress?.(Math.round(((i + 1) / files.length) * 100));
@@ -363,10 +346,7 @@ interface RotateOptions {
 	onProgress?: (progress: number) => void;
 }
 
-export async function rotatePDF(
-	file: File,
-	options: RotateOptions
-): Promise<Blob> {
+export async function rotatePDF(file: File, options: RotateOptions): Promise<Blob> {
 	const arrayBuffer = await file.arrayBuffer();
 	const pdf = await PDFDocument.load(arrayBuffer);
 	const totalPages = pdf.getPageCount();
@@ -391,10 +371,7 @@ interface DeletePagesOptions {
 	onProgress?: (progress: number) => void;
 }
 
-export async function deletePages(
-	file: File,
-	options: DeletePagesOptions
-): Promise<Blob> {
+export async function deletePages(file: File, options: DeletePagesOptions): Promise<Blob> {
 	const arrayBuffer = await file.arrayBuffer();
 	const pdf = await PDFDocument.load(arrayBuffer);
 
@@ -417,10 +394,7 @@ interface ReorderOptions {
 	onProgress?: (progress: number) => void;
 }
 
-export async function reorderPages(
-	file: File,
-	options: ReorderOptions
-): Promise<Blob> {
+export async function reorderPages(file: File, options: ReorderOptions): Promise<Blob> {
 	const arrayBuffer = await file.arrayBuffer();
 	const srcPdf = await PDFDocument.load(arrayBuffer);
 	const newPdf = await PDFDocument.create();
@@ -449,10 +423,7 @@ interface PageNumberOptions {
 	onProgress?: (progress: number) => void;
 }
 
-export async function addPageNumbers(
-	file: File,
-	options: PageNumberOptions
-): Promise<Blob> {
+export async function addPageNumbers(file: File, options: PageNumberOptions): Promise<Blob> {
 	const arrayBuffer = await file.arrayBuffer();
 	const pdf = await PDFDocument.load(arrayBuffer);
 	const font = await pdf.embedFont(StandardFonts.Helvetica);
@@ -494,7 +465,7 @@ export async function addPageNumbers(
 			y,
 			size: fontSize,
 			font,
-			color: rgb(0.3, 0.3, 0.3)
+			color: rgb(0.3, 0.3, 0.3),
 		});
 
 		options.onProgress?.(Math.round(((i + 1) / pages.length) * 100));
@@ -512,10 +483,7 @@ interface WatermarkOptions {
 	onProgress?: (progress: number) => void;
 }
 
-export async function addWatermark(
-	file: File,
-	options: WatermarkOptions
-): Promise<Blob> {
+export async function addWatermark(file: File, options: WatermarkOptions): Promise<Blob> {
 	const arrayBuffer = await file.arrayBuffer();
 	const pdf = await PDFDocument.load(arrayBuffer);
 	const font = await pdf.embedFont(StandardFonts.HelveticaBold);
@@ -538,7 +506,7 @@ export async function addWatermark(
 			font,
 			color: rgb(0.7, 0.7, 0.7),
 			opacity: opacity / 100,
-			rotate: degrees(angle)
+			rotate: degrees(angle),
 		});
 
 		options.onProgress?.(Math.round(((i + 1) / pages.length) * 100));
@@ -562,10 +530,7 @@ interface ProtectOptions {
  * Password protect a PDF - uses qpdf WASM for AES-256 encryption
  * Falls back to pdf-lib if WASM fails
  */
-export async function protectPDF(
-	file: File,
-	options: ProtectOptions
-): Promise<Blob> {
+export async function protectPDF(file: File, options: ProtectOptions): Promise<Blob> {
 	const { userPassword, ownerPassword = userPassword, onProgress } = options;
 
 	const arrayBuffer = await file.arrayBuffer();
@@ -573,12 +538,7 @@ export async function protectPDF(
 	// Try qpdf WASM first for AES-256 encryption
 	try {
 		onProgress?.(5);
-		const result = await encryptWithQpdf(
-			arrayBuffer,
-			userPassword,
-			ownerPassword,
-			onProgress
-		);
+		const result = await encryptWithQpdf(arrayBuffer, userPassword, ownerPassword, onProgress);
 		return new Blob([result], { type: 'application/pdf' });
 	} catch (e) {
 		console.warn('qpdf WASM protection failed, falling back to pdf-lib:', e);
@@ -592,10 +552,7 @@ export async function protectPDF(
  * pdf-lib encryption (AES-128)
  * Works without any external dependencies
  */
-async function protectPDFWithPdfLib(
-	file: File,
-	options: ProtectOptions
-): Promise<Blob> {
+async function protectPDFWithPdfLib(file: File, options: ProtectOptions): Promise<Blob> {
 	const { userPassword, ownerPassword = userPassword, onProgress } = options;
 
 	onProgress?.(10);
@@ -615,8 +572,8 @@ async function protectPDFWithPdfLib(
 			annotating: false,
 			fillingForms: false,
 			contentAccessibility: true,
-			documentAssembly: false
-		}
+			documentAssembly: false,
+		},
 	});
 
 	onProgress?.(100);
@@ -633,10 +590,7 @@ interface UnlockOptions {
  * Unlock a password-protected PDF - uses qpdf WASM
  * Falls back to pdf-lib if WASM fails
  */
-export async function unlockPDF(
-	file: File,
-	options: UnlockOptions
-): Promise<Blob> {
+export async function unlockPDF(file: File, options: UnlockOptions): Promise<Blob> {
 	const { password, onProgress } = options;
 
 	const arrayBuffer = await file.arrayBuffer();
@@ -644,11 +598,7 @@ export async function unlockPDF(
 	// Try qpdf WASM first
 	try {
 		onProgress?.(5);
-		const result = await decryptWithQpdf(
-			arrayBuffer,
-			password,
-			onProgress
-		);
+		const result = await decryptWithQpdf(arrayBuffer, password, onProgress);
 		return new Blob([result], { type: 'application/pdf' });
 	} catch (e) {
 		console.warn('qpdf WASM unlock failed, falling back to pdf-lib:', e);
@@ -662,10 +612,7 @@ export async function unlockPDF(
  * pdf-lib unlock
  * Works without any external dependencies
  */
-async function unlockPDFWithPdfLib(
-	file: File,
-	options: UnlockOptions
-): Promise<Blob> {
+async function unlockPDFWithPdfLib(file: File, options: UnlockOptions): Promise<Blob> {
 	const { password, onProgress } = options;
 
 	onProgress?.(10);
@@ -677,7 +624,7 @@ async function unlockPDFWithPdfLib(
 	// Load with password
 	const pdf = await PDFDocument.load(arrayBuffer, {
 		password,
-		ignoreEncryption: false
+		ignoreEncryption: false,
 	});
 
 	onProgress?.(70);
@@ -722,7 +669,7 @@ function parsePageRangeHelper(rangeStr: string, maxPages: number): number[] {
  */
 function getUserFriendlyError(error: unknown): string {
 	let message = '';
-	
+
 	if (error instanceof Error) {
 		message = error.message;
 	} else if (typeof error === 'string') {
@@ -730,57 +677,80 @@ function getUserFriendlyError(error: unknown): string {
 	} else if (error && typeof error === 'object' && 'message' in error) {
 		message = String((error as { message: unknown }).message);
 	}
-	
+
 	const lowerMessage = message.toLowerCase();
-	
+
 	// Password errors
-	if (lowerMessage.includes('password') || lowerMessage.includes('decrypt') || lowerMessage.includes('encrypted')) {
-		if (lowerMessage.includes('incorrect') || lowerMessage.includes('wrong') || lowerMessage.includes('invalid')) {
+	if (
+		lowerMessage.includes('password') ||
+		lowerMessage.includes('decrypt') ||
+		lowerMessage.includes('encrypted')
+	) {
+		if (
+			lowerMessage.includes('incorrect') ||
+			lowerMessage.includes('wrong') ||
+			lowerMessage.includes('invalid')
+		) {
 			return 'Incorrect password. Please check your password and try again.';
 		}
 		return 'This PDF is password-protected. Please enter the correct password.';
 	}
-	
+
 	// File format errors
-	if (lowerMessage.includes('invalid pdf') || lowerMessage.includes('not a pdf') || lowerMessage.includes('parse')) {
+	if (
+		lowerMessage.includes('invalid pdf') ||
+		lowerMessage.includes('not a pdf') ||
+		lowerMessage.includes('parse')
+	) {
 		return 'This file appears to be corrupted or is not a valid PDF. Try re-downloading it.';
 	}
-	
+
 	// Page range errors
-	if (lowerMessage.includes('page') && (lowerMessage.includes('range') || lowerMessage.includes('out of'))) {
+	if (
+		lowerMessage.includes('page') &&
+		(lowerMessage.includes('range') || lowerMessage.includes('out of'))
+	) {
 		return 'Invalid page range. Please check that the page numbers are within the document.';
 	}
-	
+
 	// No pages selected
 	if (lowerMessage.includes('no pages selected')) {
 		return message; // Already user-friendly
 	}
-	
+
 	// Memory/size errors
-	if (lowerMessage.includes('memory') || lowerMessage.includes('too large') || lowerMessage.includes('exceeded')) {
+	if (
+		lowerMessage.includes('memory') ||
+		lowerMessage.includes('too large') ||
+		lowerMessage.includes('exceeded')
+	) {
 		return 'This file is too large to process. Try a smaller file or reduce the quality settings.';
 	}
-	
+
 	// Network errors (for WASM loading)
-	if (lowerMessage.includes('network') || lowerMessage.includes('fetch') || lowerMessage.includes('load')) {
+	if (
+		lowerMessage.includes('network') ||
+		lowerMessage.includes('fetch') ||
+		lowerMessage.includes('load')
+	) {
 		return 'Failed to load processing engine. Please check your internet connection and try again.';
 	}
-	
+
 	// Ghostscript errors
 	if (lowerMessage.includes('ghostscript') || lowerMessage.includes('gs')) {
 		return 'Compression engine error. The file may be corrupted or use unsupported features.';
 	}
-	
-	// qpdf errors  
+
+	// qpdf errors
 	if (lowerMessage.includes('qpdf')) {
 		return 'Encryption engine error. The file may be corrupted or already encrypted.';
 	}
-	
+
 	// Generic fallback with original message if short, otherwise generic
 	if (message.length > 0 && message.length < 100) {
 		return message;
 	}
-	
+
 	return 'Something went wrong while processing your file. Please try again.';
 }
 
@@ -793,7 +763,7 @@ let isProcessing = false;
 export async function processFiles() {
 	if (isProcessing) return;
 
-	const pendingItems = pdfs.items.filter(i => i.status === 'pending');
+	const pendingItems = pdfs.items.filter((i) => i.status === 'pending');
 	if (pendingItems.length === 0) return;
 
 	isProcessing = true;
@@ -822,7 +792,7 @@ async function processItem(item: PDFItem) {
 		pdfs.updateItem(item.id, {
 			status: 'processing',
 			progress: 0,
-			progressStage: 'Processing...'
+			progressStage: 'Processing...',
 		});
 
 		let result: Blob | Blob[];
@@ -835,13 +805,14 @@ async function processItem(item: PDFItem) {
 					onProgress: (p) => {
 						pdfs.updateItem(item.id, {
 							progress: p,
-							progressStage: p < 30 ? 'Initializing...' : p < 80 ? 'Compressing...' : 'Finalizing...'
+							progressStage:
+								p < 30 ? 'Initializing...' : p < 80 ? 'Compressing...' : 'Finalizing...',
 						});
-					}
+					},
 				});
 				break;
 
-			case 'split':
+			case 'split': {
 				const pageCount = await getPageCount(item.file);
 				let splitOptions: SplitOptions;
 
@@ -849,74 +820,80 @@ async function processItem(item: PDFItem) {
 					splitOptions = {
 						mode: 'every-n',
 						everyN: settings.splitEveryN,
-						onProgress: (p) => pdfs.updateItem(item.id, { progress: p })
+						onProgress: (p) => pdfs.updateItem(item.id, { progress: p }),
 					};
 				} else {
 					// Use visual selection (item.selectedPages) if available, otherwise parse text input
-					const selectedPages = item.selectedPages && item.selectedPages.length > 0
-						? item.selectedPages
-						: parsePageRangeHelper(settings.splitRange, pageCount);
-					
+					const selectedPages =
+						item.selectedPages && item.selectedPages.length > 0
+							? item.selectedPages
+							: parsePageRangeHelper(settings.splitRange, pageCount);
+
 					if (selectedPages.length === 0) {
 						throw new Error('No pages selected. Please select pages to extract.');
 					}
-					
+
 					splitOptions = {
 						mode: 'extract',
 						pages: selectedPages,
-						onProgress: (p) => pdfs.updateItem(item.id, { progress: p })
+						onProgress: (p) => pdfs.updateItem(item.id, { progress: p }),
 					};
 				}
 
 				result = await splitPDF(item.file, splitOptions);
 				break;
+			}
 
 			case 'rotate':
 				result = await rotatePDF(item.file, {
 					angle: settings.rotationAngle,
-					onProgress: (p) => pdfs.updateItem(item.id, { progress: p })
+					onProgress: (p) => pdfs.updateItem(item.id, { progress: p }),
 				});
 				break;
 
-			case 'delete-pages':
+			case 'delete-pages': {
 				const deletePageCount = await getPageCount(item.file);
 				// Use visual selection (item.selectedPages) if available, otherwise parse text input
-				const pagesToDelete = item.selectedPages && item.selectedPages.length > 0
-					? item.selectedPages
-					: parsePageRangeHelper(settings.splitRange, deletePageCount);
-				
+				const pagesToDelete =
+					item.selectedPages && item.selectedPages.length > 0
+						? item.selectedPages
+						: parsePageRangeHelper(settings.splitRange, deletePageCount);
+
 				if (pagesToDelete.length === 0) {
 					throw new Error('No pages selected. Please select pages to delete.');
 				}
-				
+
 				result = await deletePages(item.file, {
 					pages: pagesToDelete,
-					onProgress: (p) => pdfs.updateItem(item.id, { progress: p })
+					onProgress: (p) => pdfs.updateItem(item.id, { progress: p }),
 				});
 				break;
+			}
 
-			case 'reorder':
+			case 'reorder': {
 				const reorderPageCount = await getPageCount(item.file);
-				const newOrder = item.selectedPages || Array.from({ length: reorderPageCount }, (_, i) => i + 1);
+				const newOrder =
+					item.selectedPages || Array.from({ length: reorderPageCount }, (_, i) => i + 1);
 				result = await reorderPages(item.file, {
 					newOrder,
-					onProgress: (p) => pdfs.updateItem(item.id, { progress: p })
+					onProgress: (p) => pdfs.updateItem(item.id, { progress: p }),
 				});
 				break;
+			}
 
 			case 'pdf-to-images':
 				result = await pdfToImages(item.file, {
 					format: settings.imageFormat,
 					dpi: settings.imageDPI,
 					quality: settings.imageQuality,
-					onProgress: (p) => pdfs.updateItem(item.id, { progress: p })
+					onProgress: (p) => pdfs.updateItem(item.id, { progress: p }),
 				});
 				break;
 
 			case 'add-page-numbers':
 				result = await addPageNumbers(item.file, {
 					position: settings.pageNumberPosition,
-					onProgress: (p) => pdfs.updateItem(item.id, { progress: p })
+					onProgress: (p) => pdfs.updateItem(item.id, { progress: p }),
 				});
 				break;
 
@@ -924,7 +901,7 @@ async function processItem(item: PDFItem) {
 				result = await addWatermark(item.file, {
 					text: settings.watermarkText || 'WATERMARK',
 					opacity: settings.watermarkOpacity,
-					onProgress: (p) => pdfs.updateItem(item.id, { progress: p })
+					onProgress: (p) => pdfs.updateItem(item.id, { progress: p }),
 				});
 				break;
 
@@ -933,7 +910,7 @@ async function processItem(item: PDFItem) {
 				result = await protectPDF(item.file, {
 					userPassword: settings.userPassword,
 					ownerPassword: settings.ownerPassword || settings.userPassword,
-					onProgress: (p) => pdfs.updateItem(item.id, { progress: p })
+					onProgress: (p) => pdfs.updateItem(item.id, { progress: p }),
 				});
 				break;
 
@@ -941,7 +918,7 @@ async function processItem(item: PDFItem) {
 				pdfs.updateItem(item.id, { progressStage: 'Decrypting with qpdf...' });
 				result = await unlockPDF(item.file, {
 					password: settings.userPassword,
-					onProgress: (p) => pdfs.updateItem(item.id, { progress: p })
+					onProgress: (p) => pdfs.updateItem(item.id, { progress: p }),
 				});
 				break;
 
@@ -957,7 +934,7 @@ async function processItem(item: PDFItem) {
 				progress: 100,
 				processedBlobs: result,
 				processedSize: totalSize,
-				progressStage: `${result.length} files created`
+				progressStage: `${result.length} files created`,
 			});
 		} else {
 			const processedUrl = URL.createObjectURL(result);
@@ -967,14 +944,14 @@ async function processItem(item: PDFItem) {
 				processedBlob: result,
 				processedUrl,
 				processedSize: result.size,
-				progressStage: 'Complete'
+				progressStage: 'Complete',
 			});
 		}
 	} catch (error) {
 		console.error('Processing error:', error);
 		pdfs.updateItem(item.id, {
 			status: 'error',
-			error: getUserFriendlyError(error)
+			error: getUserFriendlyError(error),
 		});
 	}
 }
@@ -986,12 +963,12 @@ async function processMerge(items: PDFItem[]) {
 		pdfs.updateItem(firstItem.id, {
 			status: 'processing',
 			progress: 0,
-			progressStage: 'Merging PDFs...'
+			progressStage: 'Merging PDFs...',
 		});
 
 		const sortedFiles = [...items]
 			.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-			.map(i => i.file);
+			.map((i) => i.file);
 
 		const result = await mergePDFs(sortedFiles, (p) => {
 			pdfs.updateItem(firstItem.id, { progress: p });
@@ -1005,7 +982,7 @@ async function processMerge(items: PDFItem[]) {
 			processedBlob: result,
 			processedUrl,
 			processedSize: result.size,
-			progressStage: `Merged ${items.length} PDFs`
+			progressStage: `Merged ${items.length} PDFs`,
 		});
 
 		for (let i = 1; i < items.length; i++) {
@@ -1015,7 +992,7 @@ async function processMerge(items: PDFItem[]) {
 		console.error('Merge error:', error);
 		pdfs.updateItem(firstItem.id, {
 			status: 'error',
-			error: getUserFriendlyError(error)
+			error: getUserFriendlyError(error),
 		});
 	}
 }
@@ -1027,12 +1004,12 @@ async function processImagesToPDF(items: PDFItem[]) {
 		pdfs.updateItem(firstItem.id, {
 			status: 'processing',
 			progress: 0,
-			progressStage: 'Creating PDF...'
+			progressStage: 'Creating PDF...',
 		});
 
 		const sortedFiles = [...items]
 			.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-			.map(i => i.file);
+			.map((i) => i.file);
 
 		const result = await imagesToPDF(sortedFiles, (p) => {
 			pdfs.updateItem(firstItem.id, { progress: p });
@@ -1046,7 +1023,7 @@ async function processImagesToPDF(items: PDFItem[]) {
 			processedBlob: result,
 			processedUrl,
 			processedSize: result.size,
-			progressStage: `Created from ${items.length} images`
+			progressStage: `Created from ${items.length} images`,
 		});
 
 		for (let i = 1; i < items.length; i++) {
@@ -1056,7 +1033,7 @@ async function processImagesToPDF(items: PDFItem[]) {
 		console.error('Images to PDF error:', error);
 		pdfs.updateItem(firstItem.id, {
 			status: 'error',
-			error: getUserFriendlyError(error)
+			error: getUserFriendlyError(error),
 		});
 	}
 }

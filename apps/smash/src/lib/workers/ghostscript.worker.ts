@@ -1,6 +1,6 @@
 /**
  * Ghostscript WASM Worker
- * 
+ *
  * Runs PDF compression in a Web Worker to avoid blocking the UI.
  * Uses ghostscript-wasm-esm package compiled to WebAssembly.
  */
@@ -49,7 +49,7 @@ async function initGhostscript(base: string): Promise<void> {
 			},
 			noInitialRun: true,
 			print: (text: string) => console.log('[GS]', text),
-			printErr: (text: string) => console.error('[GS Error]', text)
+			printErr: (text: string) => console.error('[GS Error]', text),
 		});
 
 		initialized = true;
@@ -61,7 +61,7 @@ async function initGhostscript(base: string): Promise<void> {
 		const response: CompressResponse = {
 			id: 'init',
 			type: 'error',
-			error: error instanceof Error ? error.message : 'Failed to initialize Ghostscript'
+			error: error instanceof Error ? error.message : 'Failed to initialize Ghostscript',
 		};
 		self.postMessage(response);
 		throw error;
@@ -106,7 +106,7 @@ async function compressPDF(request: CompressRequest): Promise<void> {
 			'-dGrayImageDownsampleType=/Bicubic',
 			'-dMonoImageDownsampleType=/Bicubic',
 			'-sOutputFile=/output.pdf',
-			'/input.pdf'
+			'/input.pdf',
 		];
 
 		reportProgress(30);
@@ -136,7 +136,7 @@ async function compressPDF(request: CompressRequest): Promise<void> {
 			success: true,
 			result: outputData.buffer,
 			originalSize: pdfData.byteLength,
-			compressedSize: outputData.byteLength
+			compressedSize: outputData.byteLength,
 		};
 
 		// Transfer the buffer for better performance
@@ -148,7 +148,7 @@ async function compressPDF(request: CompressRequest): Promise<void> {
 			success: false,
 			error: error instanceof Error ? error.message : 'Compression failed',
 			originalSize: pdfData.byteLength,
-			compressedSize: 0
+			compressedSize: 0,
 		};
 		self.postMessage(response);
 	}

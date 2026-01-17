@@ -6,22 +6,22 @@ export interface GifProcessingOptions {
 	targetSizeKB?: number;
 	colors?: number;
 	lossy?: number;
-	
+
 	// Resize options
 	width?: number;
 	height?: number;
 	fit?: 'contain' | 'cover' | 'fill';
-	
+
 	// Speed options
 	speedMultiplier?: number;
 	reverse?: boolean;
 	boomerang?: boolean;
-	
+
 	// Merge options
 	mode?: 'sequential' | 'horizontal' | 'vertical';
 	normalizeSize?: boolean;
 	outputWidth?: number;
-	
+
 	// Crop options
 	cropX1?: number;
 	cropY1?: number;
@@ -71,13 +71,13 @@ async function runGifsicle(
 	// Convert Uint8Arrays to Blobs
 	const inputFiles = inputs.map(({ data, name }) => ({
 		file: new Blob([data], { type: 'image/gif' }),
-		name
+		name,
 	}));
 
 	// Command is an array of command strings
 	const result = await gs.run({
 		input: inputFiles,
-		command: [commandString]
+		command: [commandString],
 	});
 
 	if (!result || result.length === 0) {
@@ -112,10 +112,7 @@ export async function optimizeGif(
 
 	onProgress?.(30);
 
-	const result = await runGifsicle(
-		[{ data: new Uint8Array(gifData), name: 'input.gif' }],
-		cmd
-	);
+	const result = await runGifsicle([{ data: new Uint8Array(gifData), name: 'input.gif' }], cmd);
 
 	onProgress?.(90);
 
@@ -123,7 +120,7 @@ export async function optimizeGif(
 		originalSize: gifData.byteLength,
 		outputSize: result.byteLength,
 		framesProcessed: 0,
-		processingTimeMs: performance.now() - startTime
+		processingTimeMs: performance.now() - startTime,
 	};
 
 	onProgress?.(100);
@@ -158,10 +155,7 @@ export async function resizeGif(
 
 	onProgress?.(50);
 
-	const result = await runGifsicle(
-		[{ data: new Uint8Array(gifData), name: 'input.gif' }],
-		cmd
-	);
+	const result = await runGifsicle([{ data: new Uint8Array(gifData), name: 'input.gif' }], cmd);
 
 	onProgress?.(90);
 
@@ -169,7 +163,7 @@ export async function resizeGif(
 		originalSize: gifData.byteLength,
 		outputSize: result.byteLength,
 		framesProcessed: 0,
-		processingTimeMs: performance.now() - startTime
+		processingTimeMs: performance.now() - startTime,
 	};
 
 	onProgress?.(100);
@@ -198,10 +192,7 @@ export async function changeGifSpeed(
 
 	onProgress?.(50);
 
-	const result = await runGifsicle(
-		[{ data: new Uint8Array(gifData), name: 'input.gif' }],
-		cmd
-	);
+	const result = await runGifsicle([{ data: new Uint8Array(gifData), name: 'input.gif' }], cmd);
 
 	onProgress?.(90);
 
@@ -209,7 +200,7 @@ export async function changeGifSpeed(
 		originalSize: gifData.byteLength,
 		outputSize: result.byteLength,
 		framesProcessed: 0,
-		processingTimeMs: performance.now() - startTime
+		processingTimeMs: performance.now() - startTime,
 	};
 
 	onProgress?.(100);
@@ -230,10 +221,7 @@ export async function reverseGif(
 
 	onProgress?.(50);
 
-	const result = await runGifsicle(
-		[{ data: new Uint8Array(gifData), name: 'input.gif' }],
-		cmd
-	);
+	const result = await runGifsicle([{ data: new Uint8Array(gifData), name: 'input.gif' }], cmd);
 
 	onProgress?.(90);
 
@@ -241,7 +229,7 @@ export async function reverseGif(
 		originalSize: gifData.byteLength,
 		outputSize: result.byteLength,
 		framesProcessed: 0,
-		processingTimeMs: performance.now() - startTime
+		processingTimeMs: performance.now() - startTime,
 	};
 
 	onProgress?.(100);
@@ -271,10 +259,7 @@ export async function cropGif(
 
 	onProgress?.(50);
 
-	const result = await runGifsicle(
-		[{ data: new Uint8Array(gifData), name: 'input.gif' }],
-		cmd
-	);
+	const result = await runGifsicle([{ data: new Uint8Array(gifData), name: 'input.gif' }], cmd);
 
 	onProgress?.(90);
 
@@ -282,7 +267,7 @@ export async function cropGif(
 		originalSize: gifData.byteLength,
 		outputSize: result.byteLength,
 		framesProcessed: 0,
-		processingTimeMs: performance.now() - startTime
+		processingTimeMs: performance.now() - startTime,
 	};
 
 	onProgress?.(100);
@@ -322,7 +307,7 @@ export async function mergeGifs(
 	const result = await runGifsicle(
 		[
 			{ data: new Uint8Array(gifData1), name: 'input1.gif' },
-			{ data: new Uint8Array(gifData2), name: 'input2.gif' }
+			{ data: new Uint8Array(gifData2), name: 'input2.gif' },
 		],
 		cmd
 	);
@@ -333,7 +318,7 @@ export async function mergeGifs(
 		originalSize: gifData1.byteLength + gifData2.byteLength,
 		outputSize: result.byteLength,
 		framesProcessed: 0,
-		processingTimeMs: performance.now() - startTime
+		processingTimeMs: performance.now() - startTime,
 	};
 
 	onProgress?.(100);

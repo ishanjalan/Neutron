@@ -8,22 +8,22 @@ export default defineConfig({
 		headers: {
 			// Required for FFmpeg.wasm SharedArrayBuffer support
 			'Cross-Origin-Opener-Policy': 'same-origin',
-			'Cross-Origin-Embedder-Policy': 'require-corp'
-		}
+			'Cross-Origin-Embedder-Policy': 'require-corp',
+		},
 	},
 	preview: {
 		headers: {
 			'Cross-Origin-Opener-Policy': 'same-origin',
-			'Cross-Origin-Embedder-Policy': 'require-corp'
-		}
+			'Cross-Origin-Embedder-Policy': 'require-corp',
+		},
 	},
 	optimizeDeps: {
-		exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util']
+		exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util'],
 	},
 	worker: {
-		format: 'es'
+		format: 'es',
 	},
 	build: {
-		target: 'esnext'
-	}
+		target: 'esnext',
+	},
 });

@@ -48,7 +48,7 @@ function toImageDataLike(imageData: ImageData): ImageDataLike {
 		width: imageData.width,
 		height: imageData.height,
 		depth: 8, // Standard web ImageData is always 8-bit per channel
-		data: imageData.data
+		data: imageData.data,
 	};
 }
 
@@ -87,7 +87,7 @@ async function initCodecs() {
 		avifCodec.loadEncoder(),
 		avifCodec.loadDecoder(),
 		jxlCodec.loadEncoder(),
-		jxlCodec.loadDecoder()
+		jxlCodec.loadDecoder(),
 	]);
 
 	codecsInitialized = true;
@@ -96,7 +96,7 @@ async function initCodecs() {
 // Decode image buffer to ImageData
 function decodeImage(buffer: ArrayBuffer, format: ImageFormat): ImageData {
 	const uint8 = new Uint8Array(buffer);
-	
+
 	switch (format) {
 		case 'jpeg':
 			return jpegCodec!.decode(uint8);
@@ -114,38 +114,43 @@ function decodeImage(buffer: ArrayBuffer, format: ImageFormat): ImageData {
 }
 
 // Encode ImageData to target format
-function encodeImage(imageData: ImageData, format: ImageFormat, quality: number, lossless: boolean): Uint8Array {
+function encodeImage(
+	imageData: ImageData,
+	format: ImageFormat,
+	quality: number,
+	lossless: boolean
+): Uint8Array {
 	// Convert to icodec's ImageDataLike format
 	const imageDataLike = toImageDataLike(imageData);
-	
+
 	switch (format) {
 		case 'jpeg':
 			// JPEG doesn't support lossless - use max quality (100) when lossless is requested
 			return jpegCodec!.encode(imageDataLike, { quality: lossless ? 100 : quality });
-		
+
 		case 'png':
 			// PNG encoding options: level controls compression, quantize controls lossiness
 			// For lossless: disable quantization (pngquant-style lossy compression)
 			// For lossy: enable quantization for smaller files
-			return pngCodec!.encode(imageDataLike, { 
+			return pngCodec!.encode(imageDataLike, {
 				level: lossless ? 4 : 3,
-				quantize: !lossless // Disable lossy quantization in lossless mode
+				quantize: !lossless, // Disable lossy quantization in lossless mode
 			});
-		
+
 		case 'webp':
 			// WebP has native lossless mode
 			if (lossless) {
 				return webpCodec!.encode(imageDataLike, { lossless: true });
 			}
 			return webpCodec!.encode(imageDataLike, { quality });
-		
+
 		case 'avif':
 			// AVIF encoding: quality 0-100, speed 0-10 (lower = slower/better)
 			if (lossless) {
 				return avifCodec!.encode(imageDataLike, { quality: 100, speed: 4 });
 			}
 			return avifCodec!.encode(imageDataLike, { quality, speed: 6 });
-		
+
 		case 'jxl':
 			// JPEG XL has native lossless mode
 			// For lossy: quality 0-100 (matches libjpeg scale)
@@ -153,7 +158,7 @@ function encodeImage(imageData: ImageData, format: ImageFormat, quality: number,
 				return jxlCodec!.encode(imageDataLike, { lossless: true });
 			}
 			return jxlCodec!.encode(imageDataLike, { quality });
-		
+
 		default:
 			throw new Error(`Unsupported output format: ${format}`);
 	}
@@ -167,7 +172,7 @@ function getMimeType(format: ImageFormat): string {
 		webp: 'image/webp',
 		avif: 'image/avif',
 		jxl: 'image/jxl',
-		svg: 'image/svg+xml'
+		svg: 'image/svg+xml',
 	};
 	return map[format];
 }
@@ -196,7 +201,10 @@ async function processCompression(request: WorkerRequest): Promise<void> {
 		sendProgress(id, 90);
 
 		// Convert Uint8Array to ArrayBuffer for transfer
-		const resultBuffer = result.buffer.slice(result.byteOffset, result.byteOffset + result.byteLength) as ArrayBuffer;
+		const resultBuffer = result.buffer.slice(
+			result.byteOffset,
+			result.byteOffset + result.byteLength
+		) as ArrayBuffer;
 
 		// Send result back (transfer ownership for performance)
 		const response: WorkerResponse = {
@@ -205,14 +213,14 @@ async function processCompression(request: WorkerRequest): Promise<void> {
 			result: resultBuffer,
 			mimeType: getMimeType(outputFormat),
 			width: imageData.width,
-			height: imageData.height
+			height: imageData.height,
 		};
 		(self as unknown as Worker).postMessage(response, [resultBuffer]);
 	} catch (error) {
 		const response: WorkerResponse = {
 			id,
 			success: false,
-			error: error instanceof Error ? error.message : 'Compression failed'
+			error: error instanceof Error ? error.message : 'Compression failed',
 		};
 		self.postMessage(response);
 	}

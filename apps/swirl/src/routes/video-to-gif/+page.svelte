@@ -5,12 +5,23 @@
 	import CompareSlider from '$lib/components/CompareSlider.svelte';
 	import { toast } from '@neutron/ui';
 	import TimelineSlider from '$lib/components/TimelineSlider.svelte';
-	import { Film, Settings, Download, Play, Pause, RotateCcw, Eye, Copy, Check, RefreshCw } from 'lucide-svelte';
+	import {
+		Film,
+		Settings,
+		Download,
+		Play,
+		Pause,
+		RotateCcw,
+		Eye,
+		Copy,
+		Check,
+		RefreshCw,
+	} from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 	import encode from 'gifski-wasm';
 	import { extractFramesFromVideo, checkBrowserSupport } from '$lib/utils/webcodecs';
-import { formatBytes, copyBlobToClipboard, isClipboardWriteSupported } from '@neutron/utils';
-import { optimizeGif } from '$lib/utils/gifsicle';
+	import { formatBytes, copyBlobToClipboard, isClipboardWriteSupported } from '@neutron/utils';
+	import { optimizeGif } from '$lib/utils/gifsicle';
 
 	// State
 	let videoFile = $state<File | null>(null);
@@ -28,7 +39,7 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 	let quality = $state(80);
 	let startTime = $state(0);
 	let endTime = $state(0);
-	
+
 	// Optimization
 	let optimizeOutput = $state(false);
 	let lossyLevel = $state(80);
@@ -49,13 +60,15 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 	// Derived estimates
 	const clipDuration = $derived(endTime - startTime);
 	const estimatedFrames = $derived(Math.ceil(clipDuration * fps));
-	const estimatedHeight = $derived(videoWidth > 0 ? Math.round(width * (videoHeight / videoWidth)) : 0);
+	const estimatedHeight = $derived(
+		videoWidth > 0 ? Math.round(width * (videoHeight / videoWidth)) : 0
+	);
 	// Rough GIF size estimate: frames * width * height * 0.05 bytes (very rough, depends on content)
 	const estimatedSizeBytes = $derived(estimatedFrames * width * estimatedHeight * 0.05);
 	const estimatedSizeStr = $derived(estimatedSizeBytes > 0 ? formatBytes(estimatedSizeBytes) : '—');
 
 	function handleFiles(files: File[]) {
-		const videoFiles = files.filter(f => f.type.startsWith('video/'));
+		const videoFiles = files.filter((f) => f.type.startsWith('video/'));
 		if (videoFiles.length === 0) {
 			toast.error('Please select a video file');
 			return;
@@ -64,11 +77,11 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 		videoFile = videoFiles[0];
 		if (videoUrl) URL.revokeObjectURL(videoUrl);
 		videoUrl = URL.createObjectURL(videoFile);
-		
+
 		// Reset result
 		if (resultUrl) URL.revokeObjectURL(resultUrl);
 		resultUrl = null;
-		
+
 		toast.success(`Loaded: ${videoFile.name}`);
 	}
 
@@ -78,7 +91,7 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 			videoWidth = videoElement.videoWidth;
 			videoHeight = videoElement.videoHeight;
 			endTime = Math.min(duration, 10); // Default to first 10 seconds
-			
+
 			// Auto-set width based on video aspect ratio
 			const aspectRatio = videoHeight / videoWidth;
 			if (videoWidth < 480) {
@@ -112,29 +125,29 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 
 	async function handleConvert() {
 		if (!videoFile || !videoElement) return;
-		
+
 		isProcessing = true;
 		progress = 0;
 		progressStage = 'Initializing...';
 		const startProcessTime = performance.now();
-		
+
 		// Clean up previous result
 		if (resultUrl) {
 			URL.revokeObjectURL(resultUrl);
 			resultUrl = null;
 		}
-		
+
 		try {
 			// Pause video during processing
 			videoElement.pause();
 			isPlaying = false;
-			
+
 			// Calculate dimensions
 			const aspectRatio = videoHeight / videoWidth;
 			const targetHeight = Math.round(width * aspectRatio);
-			
+
 			progressStage = 'Extracting frames...';
-			
+
 			// Extract frames using WebCodecs-enhanced extraction
 			const frames = await extractFramesFromVideo(
 				videoFile,
@@ -143,7 +156,7 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 					endTime,
 					fps,
 					width,
-					height: targetHeight
+					height: targetHeight,
 				},
 				(frameProgress) => {
 					progress = Math.round(frameProgress.progress * 0.5); // 0-50% for extraction
@@ -161,39 +174,40 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 				width,
 				height: targetHeight,
 				fps,
-				quality // gifski quality 1-100
+				quality, // gifski quality 1-100
 			});
-			
+
 			let finalBuffer = gifBuffer;
-			
+
 			// Optimize if enabled
 			if (optimizeOutput) {
 				progressStage = 'Optimizing GIF...';
 				progress = 85;
-				
+
 				const { result } = await optimizeGif(
 					gifBuffer.buffer,
 					{ lossy: lossyLevel, colors: 256 },
-					(p) => { progress = 85 + Math.round(p * 0.1); }
+					(p) => {
+						progress = 85 + Math.round(p * 0.1);
+					}
 				);
 				finalBuffer = new Uint8Array(result);
 			}
-			
+
 			progressStage = 'Finalizing...';
 			progress = 98;
-			
+
 			// Create blob and URL
 			const blob = new Blob([finalBuffer], { type: 'image/gif' });
 			resultBlob = blob;
 			resultUrl = URL.createObjectURL(blob);
 			resultSize = blob.size;
-			
+
 			progress = 100;
 			progressStage = 'Complete!';
 			processingTime = Math.round((performance.now() - startProcessTime) / 1000);
-			
+
 			toast.success(`Conversion complete in ${processingTime}s!`);
-			
 		} catch (error) {
 			console.error('Conversion error:', error);
 			toast.error('Conversion failed. Please try again.');
@@ -232,7 +246,9 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 		if (success) {
 			justCopied = true;
 			toast.success('Copied to clipboard!');
-			setTimeout(() => { justCopied = false; }, 2000);
+			setTimeout(() => {
+				justCopied = false;
+			}, 2000);
 		} else {
 			toast.error('Copy not supported in this browser');
 		}
@@ -257,30 +273,34 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 
 	<!-- Background decoration -->
 	<div class="fixed inset-0 -z-10 overflow-hidden">
-		<div class="absolute -top-1/2 -right-1/4 h-[800px] w-[800px] rounded-full bg-gradient-to-br from-pink-500/10 to-rose-500/10 blur-3xl"></div>
-		<div class="absolute -bottom-1/2 -left-1/4 h-[600px] w-[600px] rounded-full bg-gradient-to-tr from-rose-500/10 to-pink-500/10 blur-3xl"></div>
+		<div
+			class="absolute -right-1/4 -top-1/2 h-[800px] w-[800px] rounded-full bg-gradient-to-br from-pink-500/10 to-rose-500/10 blur-3xl"
+		></div>
+		<div
+			class="absolute -bottom-1/2 -left-1/4 h-[600px] w-[600px] rounded-full bg-gradient-to-tr from-rose-500/10 to-pink-500/10 blur-3xl"
+		></div>
 	</div>
 
-	<main class="flex-1 px-4 sm:px-6 lg:px-8 pt-28 pb-12">
+	<main class="flex-1 px-4 pb-12 pt-28 sm:px-6 lg:px-8">
 		<div class="mx-auto max-w-5xl">
 			<!-- Header -->
-			<div class="text-center mb-8" in:fade={{ duration: 200 }}>
-				<div class="inline-flex items-center gap-2 rounded-full bg-pink-500/10 px-4 py-1.5 text-sm font-medium text-pink-400 mb-4">
+			<div class="mb-8 text-center" in:fade={{ duration: 200 }}>
+				<div
+					class="mb-4 inline-flex items-center gap-2 rounded-full bg-pink-500/10 px-4 py-1.5 text-sm font-medium text-pink-400"
+				>
 					<Film class="h-4 w-4" />
 					Video to GIF
 				</div>
-				<h1 class="text-3xl font-bold text-surface-100">
+				<h1 class="text-surface-100 text-3xl font-bold">
 					Convert video to <span class="gradient-text">animated GIF</span>
 				</h1>
-				<p class="mt-2 text-surface-500">
-					Upload MP4, WebM, or MOV and convert to animated GIF
-				</p>
+				<p class="text-surface-500 mt-2">Upload MP4, WebM, or MOV and convert to animated GIF</p>
 			</div>
 
 			{#if !videoFile}
 				<!-- Drop Zone -->
 				<div in:fade={{ duration: 200 }}>
-					<DropZone 
+					<DropZone
 						accept=".mp4,.webm,.mov,.avi,.mkv,video/*"
 						acceptLabel="MP4, WebM, MOV, AVI"
 						onfiles={handleFiles}
@@ -291,27 +311,29 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 				<div class="grid gap-6 lg:grid-cols-2" in:fly={{ y: 20, duration: 300 }}>
 					<!-- Preview -->
 					<div class="glass rounded-2xl p-4">
-						<div class="aspect-video bg-surface-900 rounded-xl overflow-hidden relative">
+						<div class="bg-surface-900 relative aspect-video overflow-hidden rounded-xl">
 							<!-- svelte-ignore a11y_media_has_caption -->
 							<video
 								bind:this={videoElement}
 								src={videoUrl}
-								class="w-full h-full object-contain"
+								class="h-full w-full object-contain"
 								onloadedmetadata={handleVideoLoaded}
 								ontimeupdate={handleTimeUpdate}
-								onended={() => isPlaying = false}
+								onended={() => (isPlaying = false)}
 							></video>
-							
+
 							<!-- Play overlay -->
 							<button
 								onclick={togglePlayback}
-								class="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity"
+								class="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity hover:opacity-100"
 							>
-								<div class="h-16 w-16 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
+								<div
+									class="flex h-16 w-16 items-center justify-center rounded-full bg-white/20 backdrop-blur"
+								>
 									{#if isPlaying}
 										<Pause class="h-8 w-8 text-white" />
 									{:else}
-										<Play class="h-8 w-8 text-white ml-1" />
+										<Play class="ml-1 h-8 w-8 text-white" />
 									{/if}
 								</div>
 							</button>
@@ -329,11 +351,11 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 						</div>
 
 						<!-- File info -->
-						<div class="mt-4 flex items-center justify-between text-sm text-surface-500">
+						<div class="text-surface-500 mt-4 flex items-center justify-between text-sm">
 							<span class="truncate">{videoFile.name}</span>
 							<button
 								onclick={clearVideo}
-								class="flex items-center gap-1.5 text-surface-400 hover:text-red-400 transition-colors"
+								class="text-surface-400 flex items-center gap-1.5 transition-colors hover:text-red-400"
 							>
 								<RotateCcw class="h-4 w-4" />
 								Clear
@@ -343,15 +365,15 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 
 					<!-- Settings -->
 					<div class="glass rounded-2xl p-6">
-						<h3 class="flex items-center gap-2 text-lg font-semibold text-surface-100 mb-6">
-							<Settings class="h-5 w-5 text-accent-start" />
+						<h3 class="text-surface-100 mb-6 flex items-center gap-2 text-lg font-semibold">
+							<Settings class="text-accent-start h-5 w-5" />
 							Settings
 						</h3>
 
 						<div class="space-y-5">
 							<!-- FPS -->
 							<div>
-								<label class="block text-sm font-medium text-surface-300 mb-2">
+								<label class="text-surface-300 mb-2 block text-sm font-medium">
 									Frame Rate: <span class="text-accent-start">{fps} FPS</span>
 								</label>
 								<input
@@ -359,9 +381,9 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 									bind:value={fps}
 									min="5"
 									max="30"
-									class="w-full accent-accent-start"
+									class="accent-accent-start w-full"
 								/>
-								<div class="flex justify-between text-xs text-surface-500 mt-1">
+								<div class="text-surface-500 mt-1 flex justify-between text-xs">
 									<span>5 fps (smaller)</span>
 									<span>30 fps (smoother)</span>
 								</div>
@@ -369,7 +391,7 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 
 							<!-- Width -->
 							<div>
-								<label class="block text-sm font-medium text-surface-300 mb-2">
+								<label class="text-surface-300 mb-2 block text-sm font-medium">
 									Width: <span class="text-accent-start">{width}px</span>
 								</label>
 								<input
@@ -378,9 +400,9 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 									min="240"
 									max="1080"
 									step="40"
-									class="w-full accent-accent-start"
+									class="accent-accent-start w-full"
 								/>
-								<div class="flex justify-between text-xs text-surface-500 mt-1">
+								<div class="text-surface-500 mt-1 flex justify-between text-xs">
 									<span>240px</span>
 									<span>1080px</span>
 								</div>
@@ -388,7 +410,7 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 
 							<!-- Quality -->
 							<div>
-								<label class="block text-sm font-medium text-surface-300 mb-2">
+								<label class="text-surface-300 mb-2 block text-sm font-medium">
 									Quality: <span class="text-accent-start">{quality}%</span>
 								</label>
 								<input
@@ -396,31 +418,31 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 									bind:value={quality}
 									min="10"
 									max="100"
-									class="w-full accent-accent-start"
+									class="accent-accent-start w-full"
 								/>
-								<div class="flex justify-between text-xs text-surface-500 mt-1">
+								<div class="text-surface-500 mt-1 flex justify-between text-xs">
 									<span>Smaller file</span>
 									<span>Better quality</span>
 								</div>
 							</div>
 
 							<!-- Optimize Output -->
-							<div class="p-4 rounded-xl bg-surface-800/50 space-y-3">
-								<label class="flex items-center gap-3 cursor-pointer">
+							<div class="bg-surface-800/50 space-y-3 rounded-xl p-4">
+								<label class="flex cursor-pointer items-center gap-3">
 									<input
 										type="checkbox"
 										bind:checked={optimizeOutput}
-										class="w-5 h-5 rounded bg-surface-700 border-surface-600 text-accent-start focus:ring-accent-start"
+										class="bg-surface-700 border-surface-600 text-accent-start focus:ring-accent-start h-5 w-5 rounded"
 									/>
 									<div>
-										<span class="text-sm font-medium text-surface-200">Optimize output</span>
-										<p class="text-xs text-surface-500">Compress GIF further after creation</p>
+										<span class="text-surface-200 text-sm font-medium">Optimize output</span>
+										<p class="text-surface-500 text-xs">Compress GIF further after creation</p>
 									</div>
 								</label>
-								
+
 								{#if optimizeOutput}
-									<div class="pt-2 border-t border-surface-700">
-										<label class="block text-sm font-medium text-surface-300 mb-2">
+									<div class="border-surface-700 border-t pt-2">
+										<label class="text-surface-300 mb-2 block text-sm font-medium">
 											Compression: <span class="text-accent-start">{lossyLevel}</span>
 										</label>
 										<input
@@ -428,9 +450,9 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 											bind:value={lossyLevel}
 											min="0"
 											max="200"
-											class="w-full accent-accent-start"
+											class="accent-accent-start w-full"
 										/>
-										<div class="flex justify-between text-xs text-surface-500 mt-1">
+										<div class="text-surface-500 mt-1 flex justify-between text-xs">
 											<span>Lossless</span>
 											<span>Maximum compression</span>
 										</div>
@@ -440,20 +462,24 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 
 							<!-- Estimate Preview -->
 							{#if videoFile && clipDuration > 0}
-								<div class="p-4 rounded-xl bg-surface-800/50 border border-surface-700">
-									<p class="text-xs font-medium text-surface-400 uppercase tracking-wider mb-2">Estimated Output</p>
+								<div class="bg-surface-800/50 border-surface-700 rounded-xl border p-4">
+									<p class="text-surface-400 mb-2 text-xs font-medium uppercase tracking-wider">
+										Estimated Output
+									</p>
 									<div class="grid grid-cols-3 gap-3 text-center">
 										<div>
-											<p class="text-lg font-semibold text-surface-100">{width}×{estimatedHeight}</p>
-											<p class="text-xs text-surface-500">Dimensions</p>
+											<p class="text-surface-100 text-lg font-semibold">
+												{width}×{estimatedHeight}
+											</p>
+											<p class="text-surface-500 text-xs">Dimensions</p>
 										</div>
 										<div>
-											<p class="text-lg font-semibold text-surface-100">{estimatedFrames}</p>
-											<p class="text-xs text-surface-500">Frames</p>
+											<p class="text-surface-100 text-lg font-semibold">{estimatedFrames}</p>
+											<p class="text-surface-500 text-xs">Frames</p>
 										</div>
 										<div>
-											<p class="text-lg font-semibold text-accent-start">~{estimatedSizeStr}</p>
-											<p class="text-xs text-surface-500">Est. Size</p>
+											<p class="text-accent-start text-lg font-semibold">~{estimatedSizeStr}</p>
+											<p class="text-surface-500 text-xs">Est. Size</p>
 										</div>
 									</div>
 								</div>
@@ -463,10 +489,12 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 							<button
 								onclick={handleConvert}
 								disabled={isProcessing}
-								class="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent-start to-accent-end px-6 py-3 text-base font-semibold text-white shadow-lg shadow-accent-start/30 transition-all hover:shadow-xl hover:shadow-accent-start/40 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+								class="from-accent-start to-accent-end shadow-accent-start/30 hover:shadow-accent-start/40 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r px-6 py-3 text-base font-semibold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
 							>
 								{#if isProcessing}
-									<div class="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+									<div
+										class="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white"
+									></div>
 									{progressStage} ({progress}%)
 								{:else}
 									<Film class="h-5 w-5" />
@@ -477,9 +505,9 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 							<!-- Progress -->
 							{#if isProcessing}
 								<div class="space-y-2">
-									<div class="h-2 bg-surface-800 rounded-full overflow-hidden">
-										<div 
-											class="h-full bg-gradient-to-r from-accent-start to-accent-end transition-all duration-300"
+									<div class="bg-surface-800 h-2 overflow-hidden rounded-full">
+										<div
+											class="from-accent-start to-accent-end h-full bg-gradient-to-r transition-all duration-300"
 											style="width: {progress}%"
 										></div>
 									</div>
@@ -488,25 +516,32 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 
 							<!-- Result -->
 							{#if resultUrl}
-								<div class="mt-4 p-4 rounded-xl bg-green-500/10 border border-green-500/30" in:fly={{ y: 10, duration: 200 }}>
-									<div class="flex items-center justify-between mb-3">
+								<div
+									class="mt-4 rounded-xl border border-green-500/30 bg-green-500/10 p-4"
+									in:fly={{ y: 10, duration: 200 }}
+								>
+									<div class="mb-3 flex items-center justify-between">
 										<div>
-											<p class="text-green-400 font-medium">Conversion complete!</p>
-											<p class="text-sm text-surface-500">
+											<p class="font-medium text-green-400">Conversion complete!</p>
+											<p class="text-surface-500 text-sm">
 												Size: {formatBytes(resultSize)} • Time: {processingTime}s
 											</p>
 										</div>
 									</div>
-									
+
 									<!-- Preview -->
-									<div class="mb-3 rounded-lg overflow-hidden bg-surface-900">
-										<img src={resultUrl} alt="Result" class="w-full h-auto max-h-40 object-contain" />
+									<div class="bg-surface-900 mb-3 overflow-hidden rounded-lg">
+										<img
+											src={resultUrl}
+											alt="Result"
+											class="h-auto max-h-40 w-full object-contain"
+										/>
 									</div>
-									
+
 									<div class="flex gap-2">
 										<button
 											onclick={downloadResult}
-											class="flex-1 flex items-center justify-center gap-2 rounded-xl bg-green-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-green-600 transition-colors"
+											class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-green-600"
 										>
 											<Download class="h-4 w-4" />
 											Download
@@ -514,7 +549,7 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 										{#if isClipboardWriteSupported()}
 											<button
 												onclick={copyResult}
-												class="flex items-center justify-center gap-2 rounded-xl bg-surface-700 px-4 py-2.5 text-sm font-medium text-surface-200 hover:bg-surface-600 transition-colors"
+												class="bg-surface-700 text-surface-200 hover:bg-surface-600 flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors"
 												title="Copy to clipboard"
 											>
 												{#if justCopied}
@@ -525,15 +560,15 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 											</button>
 										{/if}
 										<button
-											onclick={() => showComparison = true}
-											class="flex items-center justify-center gap-2 rounded-xl bg-surface-700 px-4 py-2.5 text-sm font-medium text-surface-200 hover:bg-surface-600 transition-colors"
+											onclick={() => (showComparison = true)}
+											class="bg-surface-700 text-surface-200 hover:bg-surface-600 flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors"
 											title="Compare"
 										>
 											<Eye class="h-4 w-4" />
 										</button>
 										<button
 											onclick={resetResult}
-											class="flex items-center justify-center gap-2 rounded-xl bg-surface-700 px-4 py-2.5 text-sm font-medium text-surface-200 hover:bg-surface-600 transition-colors"
+											class="bg-surface-700 text-surface-200 hover:bg-surface-600 flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors"
 											title="Try again with different settings"
 										>
 											<RefreshCw class="h-4 w-4" />
@@ -558,6 +593,6 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 		compressedUrl={resultUrl}
 		originalSize={videoFile?.size || 0}
 		compressedSize={resultSize}
-		onclose={() => showComparison = false}
+		onclose={() => (showComparison = false)}
 	/>
 {/if}

@@ -1,0 +1,27 @@
+# Dependencies
+node_modules
+
+# Claude Code settings
+.claude
+
+# Build outputs
+build
+dist
+.svelte-kit
+
+# Test outputs
+coverage
+test-results
+playwright-report
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Static assets
+static
+
+# Generated files
+*.min.js
+*.min.css

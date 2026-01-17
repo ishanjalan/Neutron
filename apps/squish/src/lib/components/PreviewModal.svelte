@@ -6,7 +6,7 @@
 
 	let {
 		item,
-		onclose
+		onclose,
 	}: {
 		item: ImageItem;
 		onclose: () => void;
@@ -85,24 +85,20 @@
 	const displayUrl = $derived(item.compressedUrl || item.originalUrl);
 </script>
 
-<svelte:window
-	onmousemove={handleMouseMove}
-	onmouseup={handleMouseUp}
-	onkeydown={handleKeydown}
-/>
+<svelte:window onmousemove={handleMouseMove} onmouseup={handleMouseUp} onkeydown={handleKeydown} />
 
 <div
 	class="fixed inset-0 z-50 flex flex-col bg-black/95"
 	transition:scale={{ duration: 200, start: 0.95 }}
 >
 	<!-- Header -->
-	<div class="flex items-center justify-between px-4 py-3 bg-black/50 backdrop-blur-sm">
+	<div class="flex items-center justify-between bg-black/50 px-4 py-3 backdrop-blur-sm">
 		<div class="flex items-center gap-3">
-			<h3 class="text-sm font-medium text-white truncate max-w-[200px] md:max-w-none">
+			<h3 class="max-w-[200px] truncate text-sm font-medium text-white md:max-w-none">
 				{item.name}
 			</h3>
 			{#if item.status === 'completed' && item.compressedSize}
-				<span class="text-xs text-surface-400">
+				<span class="text-surface-400 text-xs">
 					{(item.compressedSize / 1024).toFixed(1)} KB
 				</span>
 			{/if}
@@ -113,18 +109,18 @@
 			<div class="flex items-center gap-1 rounded-lg bg-white/10 p-1">
 				<button
 					onclick={handleZoomOut}
-					class="flex h-8 w-8 items-center justify-center rounded-md text-white hover:bg-white/10 transition-colors"
+					class="flex h-8 w-8 items-center justify-center rounded-md text-white transition-colors hover:bg-white/10"
 					aria-label="Zoom out"
 					disabled={zoom <= MIN_ZOOM}
 				>
 					<ZoomOut class="h-4 w-4" />
 				</button>
-				<span class="min-w-[50px] text-center text-xs font-mono text-white">
+				<span class="min-w-[50px] text-center font-mono text-xs text-white">
 					{Math.round(zoom * 100)}%
 				</span>
 				<button
 					onclick={handleZoomIn}
-					class="flex h-8 w-8 items-center justify-center rounded-md text-white hover:bg-white/10 transition-colors"
+					class="flex h-8 w-8 items-center justify-center rounded-md text-white transition-colors hover:bg-white/10"
 					aria-label="Zoom in"
 					disabled={zoom >= MAX_ZOOM}
 				>
@@ -132,7 +128,7 @@
 				</button>
 				<button
 					onclick={handleReset}
-					class="flex h-8 w-8 items-center justify-center rounded-md text-white hover:bg-white/10 transition-colors"
+					class="flex h-8 w-8 items-center justify-center rounded-md text-white transition-colors hover:bg-white/10"
 					aria-label="Reset zoom"
 				>
 					<RotateCcw class="h-4 w-4" />
@@ -143,7 +139,7 @@
 			{#if item.status === 'completed'}
 				<button
 					onclick={handleDownload}
-					class="flex h-8 items-center gap-1.5 rounded-lg bg-accent-start px-3 text-sm font-medium text-white hover:bg-accent-start/80 transition-colors"
+					class="bg-accent-start hover:bg-accent-start/80 flex h-8 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-white transition-colors"
 				>
 					<Download class="h-4 w-4" />
 					<span class="hidden sm:inline">Download</span>
@@ -153,7 +149,7 @@
 			<!-- Close -->
 			<button
 				onclick={onclose}
-				class="flex h-8 w-8 items-center justify-center rounded-lg text-white hover:bg-white/10 transition-colors"
+				class="flex h-8 w-8 items-center justify-center rounded-lg text-white transition-colors hover:bg-white/10"
 				aria-label="Close preview"
 			>
 				<X class="h-5 w-5" />
@@ -165,7 +161,9 @@
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div
 		bind:this={containerRef}
-		class="flex-1 overflow-hidden {zoom > 1 ? 'cursor-grab' : 'cursor-zoom-in'} {isDragging ? 'cursor-grabbing' : ''}"
+		class="flex-1 overflow-hidden {zoom > 1 ? 'cursor-grab' : 'cursor-zoom-in'} {isDragging
+			? 'cursor-grabbing'
+			: ''}"
 		onwheel={handleWheel}
 		onmousedown={handleMouseDown}
 		ondblclick={handleZoomIn}
@@ -187,7 +185,7 @@
 	</div>
 
 	<!-- Footer hints -->
-	<div class="flex justify-center gap-4 px-4 py-2 text-xs text-surface-500 bg-black/50">
+	<div class="text-surface-500 flex justify-center gap-4 bg-black/50 px-4 py-2 text-xs">
 		<span>Scroll to zoom</span>
 		<span>Double-click to zoom in</span>
 		<span>Drag to pan</span>

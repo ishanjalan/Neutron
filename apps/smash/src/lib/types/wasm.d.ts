@@ -31,7 +31,11 @@ export interface PDFiumPage {
 
 export interface PDFiumRenderOptions {
 	scale?: number;
-	render?: (options: { data: Uint8Array; width: number; height: number }) => Promise<Buffer | Uint8Array>;
+	render?: (options: {
+		data: Uint8Array;
+		width: number;
+		height: number;
+	}) => Promise<Buffer | Uint8Array>;
 }
 
 export interface PDFiumRenderResult {
@@ -96,7 +100,7 @@ export interface RenderResult {
 }
 
 // QPDF operation types
-export type QPDFOperation = 
+export type QPDFOperation =
 	| { type: 'encrypt'; userPassword: string; ownerPassword: string; keyLength: 128 | 256 }
 	| { type: 'decrypt'; password: string }
 	| { type: 'linearize' }

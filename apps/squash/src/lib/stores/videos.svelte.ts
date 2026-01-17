@@ -48,7 +48,7 @@ export const SIZE_PRESETS = {
 	whatsapp: { label: 'WhatsApp', sizeMB: 16, icon: '📱' },
 	email: { label: 'Email', sizeMB: 25, icon: '📧' },
 	discord: { label: 'Discord', sizeMB: 50, icon: '💬' },
-	telegram: { label: 'Telegram', sizeMB: 100, icon: '✈️' }
+	telegram: { label: 'Telegram', sizeMB: 100, icon: '✈️' },
 } as const;
 
 // Quality presets - CRF values (lower = better quality, larger file)
@@ -58,36 +58,36 @@ export const QUALITY_PRESETS = {
 		label: 'Tiny',
 		desc: 'Max compression',
 		targetBitrate: '500k',
-		preset: 'fast'
+		preset: 'fast',
 	},
 	web: {
 		crf: 28,
 		label: 'Web',
 		desc: 'Balanced',
 		targetBitrate: '1000k',
-		preset: 'medium'
+		preset: 'medium',
 	},
 	social: {
 		crf: 23,
 		label: 'Social',
 		desc: 'Social media',
 		targetBitrate: '2000k',
-		preset: 'medium'
+		preset: 'medium',
 	},
 	high: {
 		crf: 18,
 		label: 'High',
 		desc: 'High quality',
 		targetBitrate: '4000k',
-		preset: 'slow'
+		preset: 'slow',
 	},
 	lossless: {
 		crf: 0,
 		label: 'Max Quality',
 		desc: 'Visually lossless',
 		targetBitrate: '0',
-		preset: 'veryslow'
-	}
+		preset: 'veryslow',
+	},
 } as const;
 
 export const RESOLUTION_OPTIONS: { value: Resolution; label: string; pixels: string }[] = [
@@ -97,7 +97,7 @@ export const RESOLUTION_OPTIONS: { value: Resolution; label: string; pixels: str
 	{ value: '1080p', label: 'Full HD', pixels: '1920×1080' },
 	{ value: '720p', label: 'HD', pixels: '1280×720' },
 	{ value: '480p', label: 'SD', pixels: '854×480' },
-	{ value: '360p', label: 'Low', pixels: '640×360' }
+	{ value: '360p', label: 'Low', pixels: '640×360' },
 ];
 
 export const AUDIO_BITRATE_OPTIONS = [
@@ -105,7 +105,7 @@ export const AUDIO_BITRATE_OPTIONS = [
 	{ value: '128k', label: '128 kbps', desc: 'Standard' },
 	{ value: '192k', label: '192 kbps', desc: 'Good' },
 	{ value: '256k', label: '256 kbps', desc: 'High' },
-	{ value: '320k', label: '320 kbps', desc: 'Best' }
+	{ value: '320k', label: '320 kbps', desc: 'Best' },
 ] as const;
 
 const SETTINGS_KEY = 'squash-settings-v2';
@@ -144,7 +144,7 @@ function getDefaultSettings(): CompressionSettings {
 		stripMetadata: false,
 		twoPass: false,
 		preset: 'medium',
-		targetSizeMB: undefined
+		targetSizeMB: undefined,
 	};
 }
 
@@ -152,23 +152,24 @@ function getDefaultSettings(): CompressionSettings {
 function parseBitrate(bitrate: string): number {
 	const match = bitrate.match(/^(\d+)([kmg])?$/i);
 	if (!match) return 1000000;
-	
+
 	const value = parseInt(match[1], 10);
 	const unit = match[2]?.toLowerCase();
-	
+
 	switch (unit) {
-		case 'k': return value * 1000;
-		case 'm': return value * 1000000;
-		case 'g': return value * 1000000000;
-		default: return value;
+		case 'k':
+			return value * 1000;
+		case 'm':
+			return value * 1000000;
+		case 'g':
+			return value * 1000000000;
+		default:
+			return value;
 	}
 }
 
 // Estimate output file size based on settings
-export function estimateFileSize(
-	video: VideoItem,
-	settings: CompressionSettings
-): number {
+export function estimateFileSize(video: VideoItem, settings: CompressionSettings): number {
 	// If target size is set, return that
 	if (settings.targetSizeMB) {
 		return settings.targetSizeMB * 1024 * 1024;
@@ -180,7 +181,7 @@ export function estimateFileSize(
 	// Get video bitrate from quality preset
 	const preset = QUALITY_PRESETS[settings.quality];
 	const videoBitrate = parseBitrate(preset.targetBitrate);
-	
+
 	// Lossless mode uses original bitrate as estimate
 	if (settings.quality === 'lossless') {
 		return video.originalSize * 0.9; // Slightly smaller due to better codec
@@ -194,7 +195,7 @@ export function estimateFileSize(
 			'128k': 128000,
 			'192k': 192000,
 			'256k': 256000,
-			'320k': 320000
+			'320k': 320000,
 		};
 		audioBitrate = audioBitrateMap[settings.audioBitrate] || 128000;
 	}
@@ -216,7 +217,7 @@ export function calculateBitrateForSize(
 	if (!duration || duration <= 0) return 2000000; // Default 2Mbps
 
 	const targetBytes = targetSizeMB * 1024 * 1024;
-	
+
 	// Reserve some bytes for audio
 	let audioBitrate = 0;
 	if (settings.audioCodec !== 'none') {
@@ -225,21 +226,21 @@ export function calculateBitrateForSize(
 			'128k': 128000,
 			'192k': 192000,
 			'256k': 256000,
-			'320k': 320000
+			'320k': 320000,
 		};
 		audioBitrate = audioBitrateMap[settings.audioBitrate] || 128000;
 	}
-	
+
 	const audioBytes = (audioBitrate * duration) / 8;
 	const availableBytesForVideo = targetBytes - audioBytes;
-	
+
 	if (availableBytesForVideo <= 0) {
 		return 100000; // Minimum bitrate
 	}
 
 	// Calculate video bitrate: (bytes * 8) / duration
 	const videoBitrate = (availableBytesForVideo * 8) / duration;
-	
+
 	// Clamp to reasonable range
 	return Math.max(100000, Math.min(20000000, Math.round(videoBitrate)));
 }
@@ -247,13 +248,13 @@ export function calculateBitrateForSize(
 // Get effective duration considering trim settings
 export function getEffectiveDuration(video: VideoItem): number {
 	const fullDuration = video.duration || 0;
-	
+
 	if (video.trimStart !== undefined || video.trimEnd !== undefined) {
 		const start = video.trimStart || 0;
 		const end = video.trimEnd ?? fullDuration;
 		return Math.max(0, end - start);
 	}
-	
+
 	return fullDuration;
 }
 
@@ -273,7 +274,7 @@ async function getVideoMetadata(
 				width: video.videoWidth,
 				height: video.videoHeight,
 				duration: video.duration,
-				bitrate
+				bitrate,
 			});
 		};
 
@@ -301,7 +302,7 @@ export function suggestOptimalSettings(video: VideoItem): {
 			preset: 'web',
 			format: 'mp4',
 			resolution: 'original',
-			note: 'High bitrate source detected - excellent compression potential'
+			note: 'High bitrate source detected - excellent compression potential',
 		};
 	}
 
@@ -311,7 +312,7 @@ export function suggestOptimalSettings(video: VideoItem): {
 			preset: 'social',
 			format: 'mp4',
 			resolution: '1080p',
-			note: '4K source - consider downscaling for web use'
+			note: '4K source - consider downscaling for web use',
 		};
 	}
 
@@ -321,7 +322,7 @@ export function suggestOptimalSettings(video: VideoItem): {
 			preset: 'tiny',
 			format: 'mp4',
 			resolution: 'original',
-			note: 'Long video - maximum compression recommended'
+			note: 'Long video - maximum compression recommended',
 		};
 	}
 
@@ -331,7 +332,7 @@ export function suggestOptimalSettings(video: VideoItem): {
 			preset: 'high',
 			format: 'mp4',
 			resolution: 'original',
-			note: 'Short clip - quality preservation recommended'
+			note: 'Short clip - quality preservation recommended',
 		};
 	}
 
@@ -341,7 +342,7 @@ export function suggestOptimalSettings(video: VideoItem): {
 			preset: 'high',
 			format: 'mp4',
 			resolution: 'original',
-			note: 'Low bitrate source - minimal compression advised'
+			note: 'Low bitrate source - minimal compression advised',
 		};
 	}
 
@@ -349,15 +350,12 @@ export function suggestOptimalSettings(video: VideoItem): {
 		preset: 'web',
 		format: 'mp4',
 		resolution: 'original',
-		note: 'Balanced settings for general use'
+		note: 'Balanced settings for general use',
 	};
 }
 
 // Estimate compression time
-export function estimateCompressionTime(
-	video: VideoItem,
-	settings: CompressionSettings
-): number {
+export function estimateCompressionTime(video: VideoItem, settings: CompressionSettings): number {
 	const { width = 1920, height = 1080, duration = 60 } = video;
 	const pixels = width * height;
 	const preset = QUALITY_PRESETS[settings.quality];
@@ -376,7 +374,7 @@ export function estimateCompressionTime(
 		fast: 0.7,
 		medium: 1,
 		slow: 1.5,
-		veryslow: 2.5
+		veryslow: 2.5,
 	};
 	baseMultiplier *= presetMultipliers[settings.preset] || 1;
 
@@ -411,25 +409,25 @@ function createVideosStore() {
 			'video/quicktime': 'mov',
 			'video/x-msvideo': 'avi',
 			'video/avi': 'avi',
-			'video/x-matroska': 'mkv'
+			'video/x-matroska': 'mkv',
 		};
-		
+
 		// First try MIME type
 		if (mimeMap[mimeType]) {
 			return mimeMap[mimeType];
 		}
-		
+
 		// Fallback to file extension (important for MKV which browsers often misreport)
 		const ext = fileName.toLowerCase().split('.').pop();
 		const extMap: Record<string, VideoFormat> = {
-			'mp4': 'mp4',
-			'm4v': 'mp4',
-			'webm': 'webm',
-			'mov': 'mov',
-			'avi': 'avi',
-			'mkv': 'mkv'
+			mp4: 'mp4',
+			m4v: 'mp4',
+			webm: 'webm',
+			mov: 'mov',
+			avi: 'avi',
+			mkv: 'mkv',
 		};
-		
+
 		return extMap[ext || ''] || 'mp4';
 	}
 
@@ -452,9 +450,9 @@ function createVideosStore() {
 				'video/quicktime',
 				'video/x-msvideo',
 				'video/avi',
-				'video/x-matroska'
+				'video/x-matroska',
 			];
-			
+
 			const validExtensions = ['mp4', 'm4v', 'webm', 'mov', 'avi', 'mkv'];
 
 			const newItems: VideoItem[] = [];
@@ -465,7 +463,7 @@ function createVideosStore() {
 				const ext = file.name.toLowerCase().split('.').pop() || '';
 				const isValidMime = validMimeTypes.includes(file.type);
 				const isValidExt = validExtensions.includes(ext);
-				
+
 				if (!isValidMime && !isValidExt) continue;
 
 				const format = getFormatFromMime(file.type, file.name);
@@ -499,7 +497,7 @@ function createVideosStore() {
 					width,
 					height,
 					duration,
-					bitrate
+					bitrate,
 				});
 			}
 
@@ -540,7 +538,7 @@ function createVideosStore() {
 					if (item.status === 'pending') {
 						return {
 							...item,
-							outputFormat: newSettings.outputFormat!
+							outputFormat: newSettings.outputFormat!,
 						};
 					}
 					return item;
@@ -568,7 +566,7 @@ function createVideosStore() {
 		// Get completed items
 		getCompletedItems() {
 			return items.filter((i) => i.status === 'completed');
-		}
+		},
 	};
 }
 

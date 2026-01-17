@@ -1,6 +1,6 @@
 /**
  * WebCodecs API Integration using Mediabunny
- * 
+ *
  * Provides 10-100x faster encoding by leveraging GPU hardware encoders
  * when available, with automatic codec detection and format handling.
  */
@@ -23,7 +23,7 @@ import {
 	canEncodeAudio,
 	type VideoCodec,
 	type AudioCodec,
-	type Quality
+	type Quality,
 } from 'mediabunny';
 
 // Supported WebCodecs codecs
@@ -67,7 +67,7 @@ const QUALITY_MAP: Record<string, Quality> = {
 	web: QUALITY_LOW,
 	social: QUALITY_MEDIUM,
 	high: QUALITY_HIGH,
-	lossless: QUALITY_VERY_HIGH
+	lossless: QUALITY_VERY_HIGH,
 };
 
 // Bitrate fallback values (when using numeric bitrates)
@@ -76,7 +76,7 @@ const BITRATE_MAP: Record<string, number> = {
 	web: 1_500_000,
 	social: 3_000_000,
 	high: 6_000_000,
-	lossless: 20_000_000
+	lossless: 20_000_000,
 };
 
 // Check if WebCodecs API is available
@@ -97,7 +97,7 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 			hardwareAcceleration: false,
 			supportedVideoCodecs: [],
 			supportedAudioCodecs: [],
-			maxResolution: { width: 0, height: 0 }
+			maxResolution: { width: 0, height: 0 },
 		};
 	}
 
@@ -110,7 +110,7 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 		{ codec: 'avc', mediabunnyCodec: 'avc' },
 		{ codec: 'vp9', mediabunnyCodec: 'vp9' },
 		{ codec: 'av1', mediabunnyCodec: 'av1' },
-		{ codec: 'hevc', mediabunnyCodec: 'hevc' }
+		{ codec: 'hevc', mediabunnyCodec: 'hevc' },
 	];
 
 	for (const test of videoCodecTests) {
@@ -118,7 +118,7 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 			// For AV1 and HEVC, we REQUIRE hardware acceleration
 			// Software encoding is too slow to be usable
 			const requiresHardware = test.codec === 'av1' || test.codec === 'hevc';
-			
+
 			if (requiresHardware) {
 				// Check if hardware encoder is actually available
 				try {
@@ -128,9 +128,9 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 						height: 1080,
 						bitrate: 5_000_000,
 						framerate: 30,
-						hardwareAcceleration: 'prefer-hardware'
+						hardwareAcceleration: 'prefer-hardware',
 					});
-					
+
 					// Only enable if hardware acceleration is confirmed
 					// Check that the browser didn't downgrade to software
 					if (support.supported) {
@@ -139,7 +139,7 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 						try {
 							const testEncoder = new VideoEncoder({
 								output: () => {},
-								error: () => {}
+								error: () => {},
 							});
 							await testEncoder.configure({
 								codec: getCodecString(test.codec),
@@ -147,13 +147,13 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 								height: 480,
 								bitrate: 1_000_000,
 								framerate: 30,
-								hardwareAcceleration: 'prefer-hardware'
+								hardwareAcceleration: 'prefer-hardware',
 							});
 							// If configure succeeds, check if it's using hardware
-							// @ts-ignore - hardwareAcceleration may not be in types
+							// @ts-expect-error - hardwareAcceleration may not be in types
 							const isHardware = testEncoder.encodeQueueSize !== undefined;
 							testEncoder.close();
-							
+
 							if (isHardware) {
 								supportedVideoCodecs.push(test.codec);
 								hardwareAcceleration = true;
@@ -171,12 +171,12 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 				const isSupported = await canEncodeVideo(test.mediabunnyCodec, {
 					width: 1920,
 					height: 1080,
-					bitrate: QUALITY_MEDIUM
+					bitrate: QUALITY_MEDIUM,
 				});
-				
+
 				if (isSupported) {
 					supportedVideoCodecs.push(test.codec);
-					
+
 					// Check if hardware acceleration is available
 					try {
 						const support = await VideoEncoder.isConfigSupported({
@@ -185,7 +185,7 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 							height: 1080,
 							bitrate: 5_000_000,
 							framerate: 30,
-							hardwareAcceleration: 'prefer-hardware'
+							hardwareAcceleration: 'prefer-hardware',
 						});
 						if (support.supported && support.config?.hardwareAcceleration === 'prefer-hardware') {
 							hardwareAcceleration = true;
@@ -203,7 +203,7 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 	// Test audio codecs using Mediabunny's canEncodeAudio
 	const audioCodecTests: { codec: WebCodecsAudioCodec; mediabunnyCodec: AudioCodec }[] = [
 		{ codec: 'aac', mediabunnyCodec: 'aac' },
-		{ codec: 'opus', mediabunnyCodec: 'opus' }
+		{ codec: 'opus', mediabunnyCodec: 'opus' },
 	];
 
 	for (const test of audioCodecTests) {
@@ -211,9 +211,9 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 			const isSupported = await canEncodeAudio(test.mediabunnyCodec, {
 				sampleRate: 48000,
 				numberOfChannels: 2,
-				bitrate: 128000
+				bitrate: 128000,
 			});
-			
+
 			if (isSupported) {
 				supportedAudioCodecs.push(test.codec);
 			}
@@ -228,7 +228,7 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 	const resolutions = [
 		{ width: 3840, height: 2160 }, // 4K
 		{ width: 2560, height: 1440 }, // 1440p
-		{ width: 1920, height: 1080 }  // 1080p
+		{ width: 1920, height: 1080 }, // 1080p
 	];
 
 	for (const res of resolutions) {
@@ -236,9 +236,9 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 			const isSupported = await canEncodeVideo('avc', {
 				width: res.width,
 				height: res.height,
-				bitrate: QUALITY_HIGH
+				bitrate: QUALITY_HIGH,
 			});
-			
+
 			if (isSupported) {
 				maxWidth = res.width;
 				maxHeight = res.height;
@@ -254,7 +254,7 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 		hardwareAcceleration,
 		supportedVideoCodecs,
 		supportedAudioCodecs,
-		maxResolution: { width: maxWidth, height: maxHeight }
+		maxResolution: { width: maxWidth, height: maxHeight },
 	};
 }
 
@@ -293,20 +293,20 @@ export async function encodeWithWebCodecs(
 			progress: 0,
 			framesProcessed: 0,
 			totalFrames: 0,
-			fps: 0
+			fps: 0,
 		});
 
 		// Create input from blob source
 		const input = new Input({
 			source: new BlobSource(file),
-			formats: ALL_FORMATS
+			formats: ALL_FORMATS,
 		});
 
 		// Wait for input to be ready and get metadata
 		const videoTracks = await input.getVideoTracks();
 		const videoTrack = videoTracks[0];
 		const duration = await input.computeDuration();
-		
+
 		// Get video track info for total frames estimation
 		// Use a reasonable default fps for estimation if we can't determine it
 		let fps = 30; // Default assumption
@@ -324,9 +324,10 @@ export async function encodeWithWebCodecs(
 		}
 
 		// Create output format with Fast Start for MP4
-		const format = outputFormat === 'mp4' 
-			? new Mp4OutputFormat({ fastStart: 'in-memory' })
-			: new WebMOutputFormat();
+		const format =
+			outputFormat === 'mp4'
+				? new Mp4OutputFormat({ fastStart: 'in-memory' })
+				: new WebMOutputFormat();
 
 		// Create buffer target for output
 		const target = new BufferTarget();
@@ -334,7 +335,7 @@ export async function encodeWithWebCodecs(
 		// Create output
 		const output = new Output({
 			format,
-			target
+			target,
 		});
 
 		// Map Squash quality presets to Mediabunny Quality
@@ -366,22 +367,22 @@ export async function encodeWithWebCodecs(
 				hardwareAcceleration: 'prefer-hardware',
 				width: config.width,
 				height: config.height,
-				forceTranscode: true // Ensure re-encoding with our settings
+				forceTranscode: true, // Ensure re-encoding with our settings
 			},
 			audio: {
 				codec: audioCodec,
 				bitrate: config.audioBitrate || 128000,
 				sampleRate: config.sampleRate || 48000,
-				numberOfChannels: config.channels || 2
+				numberOfChannels: config.channels || 2,
 			},
 			// Trim parameters
 			trim: {
 				start: trimStart,
-				end: trimEnd
+				end: trimEnd,
 			},
 			// Metadata handling - pass empty object to strip metadata
 			tags: stripMetadata ? {} : undefined,
-			showWarnings: false
+			showWarnings: false,
 		});
 
 		// Track progress
@@ -403,7 +404,7 @@ export async function encodeWithWebCodecs(
 				progress: Math.round(progress * 100),
 				framesProcessed,
 				totalFrames,
-				fps: Math.round(fps)
+				fps: Math.round(fps),
 			});
 		};
 
@@ -421,13 +422,12 @@ export async function encodeWithWebCodecs(
 			progress: 100,
 			framesProcessed: totalFrames,
 			totalFrames,
-			fps: totalFrames / ((performance.now() - startTime) / 1000)
+			fps: totalFrames / ((performance.now() - startTime) / 1000),
 		});
 
 		// Create output blob
 		const mimeType = outputFormat === 'mp4' ? 'video/mp4' : 'video/webm';
 		return new Blob([outputBuffer], { type: mimeType });
-
 	} catch (error) {
 		console.error('WebCodecs encoding error:', error);
 		throw new Error(
@@ -453,13 +453,13 @@ export async function isEncodingSupported(
 		const videoSupported = await canEncodeVideo(mediabunnyVideoCodec, {
 			width,
 			height,
-			bitrate: QUALITY_MEDIUM
+			bitrate: QUALITY_MEDIUM,
 		});
 
 		const audioSupported = await canEncodeAudio(mediabunnyAudioCodec, {
 			sampleRate: 48000,
 			numberOfChannels: 2,
-			bitrate: 128000
+			bitrate: 128000,
 		});
 
 		return videoSupported && audioSupported;
@@ -496,11 +496,10 @@ export async function checkHardwareAcceleration(codec: WebCodecsVideoCodec): Pro
 			height: 1080,
 			bitrate: 5_000_000,
 			framerate: 30,
-			hardwareAcceleration: 'prefer-hardware'
+			hardwareAcceleration: 'prefer-hardware',
 		});
 
-		return support.supported === true && 
-			support.config?.hardwareAcceleration === 'prefer-hardware';
+		return support.supported === true && support.config?.hardwareAcceleration === 'prefer-hardware';
 	} catch {
 		return false;
 	}

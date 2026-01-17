@@ -17,7 +17,7 @@
 		selectedPages = [],
 		onSelectionChange,
 		onOrderChange,
-		selectionMode = 'multiple'
+		selectionMode = 'multiple',
 	}: Props = $props();
 
 	let thumbnails = $state<Array<{ pageNum: number; dataUrl: string }>>([]);
@@ -134,19 +134,19 @@
 	<!-- Header with selection controls -->
 	{#if selectionMode === 'multiple' && pageCount > 0}
 		<div class="flex items-center justify-between">
-			<span class="text-sm text-surface-400">
+			<span class="text-surface-400 text-sm">
 				{selection.size} of {pageCount} pages selected
 			</span>
 			<div class="flex gap-2">
 				<button
 					onclick={selectAll}
-					class="px-2 py-1 text-xs text-surface-400 hover:text-surface-200 bg-surface-800 rounded-lg transition-colors"
+					class="text-surface-400 hover:text-surface-200 bg-surface-800 rounded-lg px-2 py-1 text-xs transition-colors"
 				>
 					Select All
 				</button>
 				<button
 					onclick={selectNone}
-					class="px-2 py-1 text-xs text-surface-400 hover:text-surface-200 bg-surface-800 rounded-lg transition-colors"
+					class="text-surface-400 hover:text-surface-200 bg-surface-800 rounded-lg px-2 py-1 text-xs transition-colors"
 				>
 					Clear
 				</button>
@@ -157,10 +157,21 @@
 	<!-- Loading state -->
 	{#if isLoading}
 		<div class="flex items-center justify-center py-8">
-			<div class="flex items-center gap-2 text-surface-500">
-				<svg class="animate-spin h-5 w-5" viewBox="0 0 24 24">
-					<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" opacity="0.25" />
-					<path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+			<div class="text-surface-500 flex items-center gap-2">
+				<svg class="h-5 w-5 animate-spin" viewBox="0 0 24 24">
+					<circle
+						cx="12"
+						cy="12"
+						r="10"
+						stroke="currentColor"
+						stroke-width="4"
+						fill="none"
+						opacity="0.25"
+					/>
+					<path
+						fill="currentColor"
+						d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+					/>
 				</svg>
 				<span>Loading pages...</span>
 			</div>
@@ -169,22 +180,22 @@
 
 	<!-- Error state -->
 	{#if error}
-		<div class="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+		<div class="rounded-lg border border-red-500/30 bg-red-500/10 p-4">
 			<p class="text-sm text-red-400">{error}</p>
 		</div>
 	{/if}
 
 	<!-- Thumbnails grid -->
 	{#if !isLoading && !error && thumbnails.length > 0}
-		<div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
-			{#each selectionMode === 'reorder' ? pageOrder : thumbnails.map(t => t.pageNum) as pageNum, index}
-				{@const thumb = thumbnails.find(t => t.pageNum === pageNum)}
+		<div class="grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8">
+			{#each selectionMode === 'reorder' ? pageOrder : thumbnails.map((t) => t.pageNum) as pageNum, index}
+				{@const thumb = thumbnails.find((t) => t.pageNum === pageNum)}
 				{#if thumb}
 					<button
-						class="group relative aspect-[3/4] rounded-lg overflow-hidden border-2 transition-all
+						class="group relative aspect-[3/4] overflow-hidden rounded-lg border-2 transition-all
 							{selection.has(pageNum)
-								? 'border-accent-start ring-2 ring-accent-start/30'
-								: 'border-surface-700 hover:border-surface-500'}
+							? 'border-accent-start ring-accent-start/30 ring-2'
+							: 'border-surface-700 hover:border-surface-500'}
 							{dragOverIndex === index ? 'border-accent-end scale-105' : ''}
 							{selectionMode === 'reorder' ? 'cursor-grab active:cursor-grabbing' : ''}"
 						onclick={() => togglePage(pageNum)}
@@ -193,33 +204,35 @@
 						ondragover={(e) => handleDragOver(e, index)}
 						ondragend={handleDragEnd}
 					>
-						<img
-							src={thumb.dataUrl}
-							alt="Page {pageNum}"
-							class="w-full h-full object-cover"
-						/>
+						<img src={thumb.dataUrl} alt="Page {pageNum}" class="h-full w-full object-cover" />
 
 						<!-- Page number badge -->
-						<div class="absolute bottom-1 right-1 px-1.5 py-0.5 bg-black/70 rounded text-xs text-white font-medium">
+						<div
+							class="absolute bottom-1 right-1 rounded bg-black/70 px-1.5 py-0.5 text-xs font-medium text-white"
+						>
 							{pageNum}
 						</div>
 
 						<!-- Selection indicator -->
 						{#if selectionMode !== 'reorder'}
-							<div class="absolute top-1 left-1">
+							<div class="absolute left-1 top-1">
 								{#if selection.has(pageNum)}
-									<div class="w-5 h-5 bg-accent-start rounded flex items-center justify-center">
+									<div class="bg-accent-start flex h-5 w-5 items-center justify-center rounded">
 										<Check class="h-3 w-3 text-white" />
 									</div>
 								{:else}
-									<div class="w-5 h-5 border-2 border-white/50 rounded group-hover:border-white transition-colors" />
+									<div
+										class="h-5 w-5 rounded border-2 border-white/50 transition-colors group-hover:border-white"
+									/>
 								{/if}
 							</div>
 						{/if}
 
 						<!-- Drag handle for reorder mode -->
 						{#if selectionMode === 'reorder'}
-							<div class="absolute top-1 left-1 p-1 bg-black/50 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+							<div
+								class="absolute left-1 top-1 rounded bg-black/50 p-1 opacity-0 transition-opacity group-hover:opacity-100"
+							>
 								<GripVertical class="h-3 w-3 text-white" />
 							</div>
 						{/if}
@@ -231,7 +244,7 @@
 
 	<!-- Empty state -->
 	{#if !isLoading && !error && thumbnails.length === 0}
-		<div class="text-center py-8 text-surface-500">
+		<div class="text-surface-500 py-8 text-center">
 			<p>No pages to display</p>
 		</div>
 	{/if}

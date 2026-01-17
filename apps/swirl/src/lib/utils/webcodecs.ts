@@ -1,6 +1,6 @@
 /**
  * WebCodecs API Integration
- * 
+ *
  * Provides video frame extraction capabilities,
  * leveraging GPU hardware acceleration when available.
  */
@@ -31,10 +31,7 @@ export interface FrameExtractionProgress {
 
 // Check if WebCodecs API is available
 export function isWebCodecsSupported(): boolean {
-	return (
-		typeof VideoDecoder !== 'undefined' &&
-		typeof VideoEncoder !== 'undefined'
-	);
+	return typeof VideoDecoder !== 'undefined' && typeof VideoEncoder !== 'undefined';
 }
 
 // Get codec string for WebCodecs API
@@ -60,7 +57,7 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 			supported: false,
 			hardwareAcceleration: false,
 			supportedVideoCodecs: [],
-			maxResolution: { width: 0, height: 0 }
+			maxResolution: { width: 0, height: 0 },
 		};
 	}
 
@@ -75,7 +72,7 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 			const codecString = getCodecString(codec);
 			const support = await VideoDecoder.isConfigSupported({
 				codec: codecString,
-				hardwareAcceleration: 'prefer-hardware'
+				hardwareAcceleration: 'prefer-hardware',
 			});
 			if (support.supported) {
 				supportedVideoCodecs.push(codec);
@@ -90,7 +87,7 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 		supported: supportedVideoCodecs.length > 0,
 		hardwareAcceleration,
 		supportedVideoCodecs,
-		maxResolution: { width: 3840, height: 2160 }
+		maxResolution: { width: 3840, height: 2160 },
 	};
 }
 
@@ -107,14 +104,14 @@ export async function extractFramesFromVideo(
 	onProgress?: (progress: FrameExtractionProgress) => void
 ): Promise<ImageData[]> {
 	const frames: ImageData[] = [];
-	
+
 	// Create a video element for seeking
 	const videoUrl = URL.createObjectURL(file);
 	const video = document.createElement('video');
 	video.src = videoUrl;
 	video.muted = true;
 	video.preload = 'auto';
-	
+
 	try {
 		// Wait for video to load
 		await new Promise<void>((resolve, reject) => {
@@ -139,8 +136,8 @@ export async function extractFramesFromVideo(
 		const totalFrames = Math.floor(clipDuration * options.fps);
 
 		for (let i = 0; i < totalFrames; i++) {
-			const frameTime = options.startTime + (i * frameInterval);
-			
+			const frameTime = options.startTime + i * frameInterval;
+
 			// Seek to frame time
 			video.currentTime = frameTime;
 			await new Promise<void>((resolve) => {
@@ -155,7 +152,7 @@ export async function extractFramesFromVideo(
 			onProgress?.({
 				currentFrame: i + 1,
 				totalFrames,
-				progress: Math.round(((i + 1) / totalFrames) * 100)
+				progress: Math.round(((i + 1) / totalFrames) * 100),
 			});
 		}
 	} finally {
@@ -180,7 +177,8 @@ export function checkBrowserSupport(): { supported: boolean; message?: string } 
 	if (!isWebCodecsSupported()) {
 		return {
 			supported: false,
-			message: 'Your browser does not support WebCodecs. Please use Chrome 94+, Edge 94+, or Safari 16.4+ for best performance.'
+			message:
+				'Your browser does not support WebCodecs. Please use Chrome 94+, Edge 94+, or Safari 16.4+ for best performance.',
 		};
 	}
 	return { supported: true };

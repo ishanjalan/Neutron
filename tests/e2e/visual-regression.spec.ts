@@ -1,12 +1,12 @@
 /**
  * Visual Regression Tests
- * 
+ *
  * These tests capture screenshots and compare against baselines
  * to catch unintended visual changes.
- * 
+ *
  * First run creates baseline screenshots.
  * Subsequent runs compare against baselines.
- * 
+ *
  * Run: npx playwright test visual-regression --update-snapshots  (to update baselines)
  * Run: npx playwright test visual-regression                      (to compare)
  */
@@ -34,7 +34,7 @@ test.describe('Visual Regression - Smash', () => {
 		await page.goto('/');
 		await page.waitForLoadState('networkidle');
 		await page.waitForTimeout(500);
-		
+
 		await expect(page).toHaveScreenshot('homepage-mobile.png', {
 			fullPage: true,
 			animations: 'disabled',
@@ -46,7 +46,7 @@ test.describe('Visual Regression - Smash', () => {
 		await page.goto('/compress');
 		await page.waitForLoadState('networkidle');
 		await page.waitForTimeout(500);
-		
+
 		await expect(page).toHaveScreenshot('compress-page.png', {
 			fullPage: true,
 			animations: 'disabled',
@@ -58,7 +58,7 @@ test.describe('Visual Regression - Smash', () => {
 		await page.goto('/merge');
 		await page.waitForLoadState('networkidle');
 		await page.waitForTimeout(500);
-		
+
 		await expect(page).toHaveScreenshot('merge-page.png', {
 			fullPage: true,
 			animations: 'disabled',
@@ -71,7 +71,7 @@ test.describe('Visual Regression - Components', () => {
 	test('header component', async ({ page }) => {
 		await page.goto('/');
 		await page.waitForLoadState('networkidle');
-		
+
 		const header = page.locator('header');
 		await expect(header).toHaveScreenshot('header.png', {
 			animations: 'disabled',
@@ -82,7 +82,7 @@ test.describe('Visual Regression - Components', () => {
 	test('footer component', async ({ page }) => {
 		await page.goto('/');
 		await page.waitForLoadState('networkidle');
-		
+
 		const footer = page.locator('footer');
 		await expect(footer).toHaveScreenshot('footer.png', {
 			animations: 'disabled',
@@ -93,7 +93,7 @@ test.describe('Visual Regression - Components', () => {
 	test('tool cards on homepage', async ({ page }) => {
 		await page.goto('/');
 		await page.waitForLoadState('networkidle');
-		
+
 		// Capture the first tool card
 		const firstCard = page.locator('a[href*="/compress"]').first();
 		await expect(firstCard).toHaveScreenshot('tool-card.png', {

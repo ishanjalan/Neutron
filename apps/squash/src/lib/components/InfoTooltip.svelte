@@ -8,7 +8,7 @@
 
 <button
 	type="button"
-	class="relative ml-1 text-surface-500 hover:text-surface-300 transition-colors"
+	class="text-surface-500 hover:text-surface-300 relative ml-1 transition-colors"
 	onmouseenter={() => (showTooltip = true)}
 	onmouseleave={() => (showTooltip = false)}
 	onfocus={() => (showTooltip = true)}
@@ -18,12 +18,14 @@
 	<Info class="h-4 w-4" />
 	{#if showTooltip}
 		<div
-			class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 rounded-lg bg-surface-800 text-sm text-surface-200 shadow-xl ring-1 ring-white/10 z-50 text-left font-normal"
+			class="bg-surface-800 text-surface-200 absolute bottom-full left-1/2 z-50 mb-2 w-64 -translate-x-1/2 rounded-lg p-3 text-left text-sm font-normal shadow-xl ring-1 ring-white/10"
 			transition:fade={{ duration: 100 }}
 			role="tooltip"
 		>
 			{content}
-			<div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-surface-800"></div>
+			<div
+				class="border-t-surface-800 absolute left-1/2 top-full -mt-1 -translate-x-1/2 border-4 border-transparent"
+			></div>
 		</div>
 	{/if}
 </button>

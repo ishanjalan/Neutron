@@ -8,7 +8,7 @@ const FOCUSABLE_SELECTORS = [
 	'select:not([disabled])',
 	'textarea:not([disabled])',
 	'[tabindex]:not([tabindex="-1"])',
-	'[contenteditable="true"]'
+	'[contenteditable="true"]',
 ].join(', ');
 
 interface FocusTrapState {
@@ -20,8 +20,9 @@ interface FocusTrapState {
 let activeTrap: FocusTrapState | null = null;
 
 function getFocusableElements(container: HTMLElement): HTMLElement[] {
-	return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTORS))
-		.filter(el => el.offsetParent !== null); // Only visible elements
+	return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTORS)).filter(
+		(el) => el.offsetParent !== null
+	); // Only visible elements
 }
 
 function handleKeyDown(e: KeyboardEvent, container: HTMLElement) {
@@ -59,7 +60,7 @@ export function trapFocus(container: HTMLElement): void {
 	activeTrap = {
 		container,
 		previouslyFocused,
-		handleKeyDown: boundKeyHandler
+		handleKeyDown: boundKeyHandler,
 	};
 
 	// Lock body scroll
@@ -102,7 +103,7 @@ export function focusTrap(node: HTMLElement) {
 	return {
 		destroy() {
 			releaseFocus();
-		}
+		},
 	};
 }
 

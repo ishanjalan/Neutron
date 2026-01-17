@@ -11,12 +11,12 @@ const config = {
 			assets: 'build',
 			fallback: 'index.html',
 			precompress: false,
-			strict: true
+			strict: true,
 		}),
 		paths: {
-			base: process.env.NODE_ENV === 'production' ? '/Smash' : ''
-		}
-	}
+			base: process.env.NODE_ENV === 'production' ? '/Smash' : '',
+		},
+	},
 };
 
 export default config;

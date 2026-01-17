@@ -6,13 +6,13 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: "pages"
+  group: 'pages'
   cancel-in-progress: true
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout monorepo
         uses: actions/checkout@v4
@@ -32,7 +32,7 @@ jobs:
         run: pnpm install
 
       # ===== BUILD ALL APPS =====
-      
+
       - name: Build Squish
         run: pnpm --filter squish build
         env:
@@ -54,7 +54,7 @@ jobs:
           NODE_ENV: production
 
       # ===== DEPLOY EACH APP =====
-      
+
       - name: Deploy Squish to ImageOptimser
         uses: peaceiris/actions-gh-pages@v3
         with:
@@ -62,7 +62,7 @@ jobs:
           external_repository: ishanjalan/ImageOptimser
           publish_branch: gh-pages
           publish_dir: ./apps/squish/build
-          commit_message: "Deploy from Neutron monorepo"
+          commit_message: 'Deploy from Neutron monorepo'
 
       - name: Deploy Squash
         uses: peaceiris/actions-gh-pages@v3
@@ -71,7 +71,7 @@ jobs:
           external_repository: ishanjalan/Squash
           publish_branch: gh-pages
           publish_dir: ./apps/squash/build
-          commit_message: "Deploy from Neutron monorepo"
+          commit_message: 'Deploy from Neutron monorepo'
 
       - name: Deploy Smash
         uses: peaceiris/actions-gh-pages@v3
@@ -80,7 +80,7 @@ jobs:
           external_repository: ishanjalan/Smash
           publish_branch: gh-pages
           publish_dir: ./apps/smash/build
-          commit_message: "Deploy from Neutron monorepo"
+          commit_message: 'Deploy from Neutron monorepo'
 
       - name: Deploy Swirl
         uses: peaceiris/actions-gh-pages@v3
@@ -89,4 +89,4 @@ jobs:
           external_repository: ishanjalan/Swirl
           publish_branch: gh-pages
           publish_dir: ./apps/swirl/build
-          commit_message: "Deploy from Neutron monorepo"
+          commit_message: 'Deploy from Neutron monorepo'

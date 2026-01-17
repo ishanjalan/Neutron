@@ -74,16 +74,14 @@
 
 <div class="mt-6 sm:mt-8">
 	<div class="mb-4 flex items-center justify-between">
-		<h2 class="text-lg font-semibold text-surface-200">
+		<h2 class="text-surface-200 text-lg font-semibold">
 			Videos
 			<span class="text-surface-500 font-normal">({videos.items.length})</span>
 		</h2>
-		<p class="text-xs text-surface-500">
-			Drag to reorder • Processing order: top to bottom
-		</p>
+		<p class="text-surface-500 text-xs">Drag to reorder • Processing order: top to bottom</p>
 	</div>
 
-	<div class="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+	<div class="grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
 		{#each videos.items as item, index (item.id)}
 			<div
 				class="relative transition-transform duration-200 {dragOverIndex === index &&
@@ -106,7 +104,7 @@
 				<!-- Drop indicator -->
 				{#if dragOverIndex === index && draggedItem?.id !== item.id}
 					<div
-						class="absolute -top-2 left-0 right-0 h-1 rounded-full bg-accent-start"
+						class="bg-accent-start absolute -top-2 left-0 right-0 h-1 rounded-full"
 						transition:fade={{ duration: 150 }}
 					></div>
 				{/if}
@@ -116,7 +114,7 @@
 				<!-- Queue position indicator -->
 				{#if item.status === 'pending'}
 					<div
-						class="absolute -top-1 -left-1 flex h-6 w-6 items-center justify-center rounded-full bg-surface-700 text-xs font-bold text-surface-300 ring-2 ring-surface-900"
+						class="bg-surface-700 text-surface-300 ring-surface-900 absolute -left-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ring-2"
 					>
 						{index + 1}
 					</div>

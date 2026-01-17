@@ -69,7 +69,7 @@ export async function downloadAllAsZip(
 export function getOutputFilename(originalName: string, suffix?: string): string {
 	const baseName = originalName.replace(/\.[^/.]+$/, '');
 	const extension = '.gif';
-	
+
 	if (suffix) {
 		return `${baseName}-${suffix}${extension}`;
 	}
@@ -89,7 +89,7 @@ export async function copyBlobToClipboard(blob: Blob): Promise<boolean> {
 
 		// Create a ClipboardItem with the blob
 		const clipboardItem = new ClipboardItem({
-			[blob.type]: blob
+			[blob.type]: blob,
 		});
 
 		await navigator.clipboard.write([clipboardItem]);

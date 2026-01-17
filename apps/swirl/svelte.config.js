@@ -11,12 +11,12 @@ const config = {
 			assets: 'build',
 			fallback: 'index.html',
 			precompress: false,
-			strict: true
+			strict: true,
 		}),
 		paths: {
-			base: process.env.NODE_ENV === 'production' ? '/Swirl' : ''
-		}
-	}
+			base: process.env.NODE_ENV === 'production' ? '/Swirl' : '',
+		},
+	},
 };
 
 export default config;

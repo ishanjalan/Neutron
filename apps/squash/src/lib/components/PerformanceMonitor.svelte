@@ -64,7 +64,7 @@
 			avgCompressionTime,
 			avgSavings,
 			webCodecsCount,
-			ffmpegCount
+			ffmpegCount,
 		};
 	});
 
@@ -84,18 +84,20 @@
 
 {#if open}
 	<div
-		class="fixed bottom-4 right-4 z-40 w-96 rounded-2xl bg-surface-900 shadow-2xl ring-1 ring-white/10 overflow-hidden"
+		class="bg-surface-900 fixed bottom-4 right-4 z-40 w-96 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10"
 		transition:slide={{ duration: 200 }}
 	>
 		<!-- Header -->
-		<div class="flex items-center justify-between border-b border-surface-700/50 px-4 py-3 bg-gradient-to-r from-surface-900 to-surface-800">
+		<div
+			class="border-surface-700/50 from-surface-900 to-surface-800 flex items-center justify-between border-b bg-gradient-to-r px-4 py-3"
+		>
 			<div class="flex items-center gap-2">
-				<Activity class="h-4 w-4 text-accent-start" />
-				<span class="text-sm font-semibold text-surface-200">Performance Monitor</span>
+				<Activity class="text-accent-start h-4 w-4" />
+				<span class="text-surface-200 text-sm font-semibold">Performance Monitor</span>
 			</div>
 			<button
 				onclick={onclose}
-				class="rounded p-1 text-surface-400 hover:bg-surface-800 hover:text-surface-200 transition-colors"
+				class="text-surface-400 hover:bg-surface-800 hover:text-surface-200 rounded p-1 transition-colors"
 				aria-label="Close"
 			>
 				<XIcon class="h-4 w-4" />
@@ -104,42 +106,44 @@
 
 		{#if loading}
 			<div class="p-6 text-center">
-				<div class="animate-spin h-8 w-8 border-2 border-accent-start border-t-transparent rounded-full mx-auto"></div>
-				<p class="mt-2 text-sm text-surface-400">Detecting capabilities...</p>
+				<div
+					class="border-accent-start mx-auto h-8 w-8 animate-spin rounded-full border-2 border-t-transparent"
+				></div>
+				<p class="text-surface-400 mt-2 text-sm">Detecting capabilities...</p>
 			</div>
 		{:else if capabilities}
 			<!-- Encoder Status -->
-			<div class="p-4 border-b border-surface-700/50">
-				<h4 class="text-xs font-semibold text-surface-400 uppercase tracking-wider mb-3">
+			<div class="border-surface-700/50 border-b p-4">
+				<h4 class="text-surface-400 mb-3 text-xs font-semibold uppercase tracking-wider">
 					Encoders
 				</h4>
-				
+
 				<!-- WebCodecs Status -->
-				<div class="rounded-lg bg-surface-800/50 p-3 mb-2">
-					<div class="flex items-center justify-between mb-2">
+				<div class="bg-surface-800/50 mb-2 rounded-lg p-3">
+					<div class="mb-2 flex items-center justify-between">
 						<div class="flex items-center gap-2">
 							<Gpu class="h-4 w-4 text-purple-400" />
-							<span class="text-sm font-medium text-surface-200">WebCodecs</span>
+							<span class="text-surface-200 text-sm font-medium">WebCodecs</span>
 						</div>
 						{#if capabilities.webCodecs.supported}
-							<span class="flex items-center gap-1 text-green-400 text-xs font-medium">
+							<span class="flex items-center gap-1 text-xs font-medium text-green-400">
 								<Check class="h-3 w-3" />
 								Available
 							</span>
 						{:else}
-							<span class="flex items-center gap-1 text-surface-500 text-xs">
+							<span class="text-surface-500 flex items-center gap-1 text-xs">
 								<XIcon class="h-3 w-3" />
 								Not supported
 							</span>
 						{/if}
 					</div>
-					
+
 					{#if capabilities.webCodecs.supported}
 						<div class="space-y-1.5 text-xs">
 							<div class="flex items-center justify-between">
 								<span class="text-surface-400">Hardware Acceleration</span>
 								{#if capabilities.webCodecs.hardwareAcceleration}
-									<span class="text-green-400 font-medium">GPU Enabled 🚀</span>
+									<span class="font-medium text-green-400">GPU Enabled 🚀</span>
 								{:else}
 									<span class="text-amber-400">Software only</span>
 								{/if}
@@ -147,13 +151,16 @@
 							<div class="flex items-center justify-between">
 								<span class="text-surface-400">Video Codecs</span>
 								<span class="text-surface-200">
-									{capabilities.webCodecs.supportedVideoCodecs.map(c => c.toUpperCase()).join(', ')}
+									{capabilities.webCodecs.supportedVideoCodecs
+										.map((c) => c.toUpperCase())
+										.join(', ')}
 								</span>
 							</div>
 							<div class="flex items-center justify-between">
 								<span class="text-surface-400">Max Resolution</span>
 								<span class="text-surface-200">
-									{capabilities.webCodecs.maxResolution.width}×{capabilities.webCodecs.maxResolution.height}
+									{capabilities.webCodecs.maxResolution.width}×{capabilities.webCodecs.maxResolution
+										.height}
 								</span>
 							</div>
 						</div>
@@ -161,24 +168,24 @@
 				</div>
 
 				<!-- FFmpeg Status -->
-				<div class="rounded-lg bg-surface-800/50 p-3">
-					<div class="flex items-center justify-between mb-2">
+				<div class="bg-surface-800/50 rounded-lg p-3">
+					<div class="mb-2 flex items-center justify-between">
 						<div class="flex items-center gap-2">
 							<Server class="h-4 w-4 text-orange-400" />
-							<span class="text-sm font-medium text-surface-200">FFmpeg.wasm</span>
+							<span class="text-surface-200 text-sm font-medium">FFmpeg.wasm</span>
 						</div>
 						{#if capabilities.ffmpegLoaded}
-							<span class="flex items-center gap-1 text-green-400 text-xs font-medium">
+							<span class="flex items-center gap-1 text-xs font-medium text-green-400">
 								<Check class="h-3 w-3" />
 								Loaded
 							</span>
 						{:else if videos.ffmpegLoading}
-							<span class="text-amber-400 text-xs">Loading...</span>
+							<span class="text-xs text-amber-400">Loading...</span>
 						{:else}
 							<span class="text-surface-500 text-xs">Not loaded</span>
 						{/if}
 					</div>
-					
+
 					{#if capabilities.ffmpegLoaded}
 						<div class="space-y-1.5 text-xs">
 							<div class="flex items-center justify-between">
@@ -197,37 +204,37 @@
 			</div>
 
 			<!-- System Capabilities -->
-			<div class="p-4 border-b border-surface-700/50">
-				<h4 class="text-xs font-semibold text-surface-400 uppercase tracking-wider mb-3">
-					System
-				</h4>
+			<div class="border-surface-700/50 border-b p-4">
+				<h4 class="text-surface-400 mb-3 text-xs font-semibold uppercase tracking-wider">System</h4>
 				<div class="space-y-2">
 					<div class="flex items-center justify-between">
-						<div class="flex items-center gap-2 text-sm text-surface-300">
-							<Cpu class="h-4 w-4 text-surface-500" />
+						<div class="text-surface-300 flex items-center gap-2 text-sm">
+							<Cpu class="text-surface-500 h-4 w-4" />
 							CPU Threads
 						</div>
-						<span class="font-mono text-sm text-surface-200">{capabilities.hardwareConcurrency}</span>
+						<span class="text-surface-200 font-mono text-sm"
+							>{capabilities.hardwareConcurrency}</span
+						>
 					</div>
 					<div class="flex items-center justify-between">
-						<div class="flex items-center gap-2 text-sm text-surface-300">
-							<HardDrive class="h-4 w-4 text-surface-500" />
+						<div class="text-surface-300 flex items-center gap-2 text-sm">
+							<HardDrive class="text-surface-500 h-4 w-4" />
 							Device Memory
 						</div>
-						<span class="font-mono text-sm text-surface-200">{capabilities.deviceMemory} GB</span>
+						<span class="text-surface-200 font-mono text-sm">{capabilities.deviceMemory} GB</span>
 					</div>
 					<div class="flex items-center justify-between">
-						<div class="flex items-center gap-2 text-sm text-surface-300">
-							<Zap class="h-4 w-4 text-surface-500" />
+						<div class="text-surface-300 flex items-center gap-2 text-sm">
+							<Zap class="text-surface-500 h-4 w-4" />
 							SharedArrayBuffer
 						</div>
 						{#if capabilities.sharedArrayBuffer}
-							<span class="flex items-center gap-1 text-green-400 text-xs">
+							<span class="flex items-center gap-1 text-xs text-green-400">
 								<Check class="h-3 w-3" />
 								Yes
 							</span>
 						{:else}
-							<span class="flex items-center gap-1 text-amber-400 text-xs">
+							<span class="flex items-center gap-1 text-xs text-amber-400">
 								<XIcon class="h-3 w-3" />
 								No
 							</span>
@@ -238,40 +245,49 @@
 
 			<!-- Session Statistics -->
 			<div class="p-4">
-				<h4 class="text-xs font-semibold text-surface-400 uppercase tracking-wider mb-3">
+				<h4 class="text-surface-400 mb-3 text-xs font-semibold uppercase tracking-wider">
 					Session Stats
 				</h4>
 				<div class="space-y-2">
 					<div class="flex items-center justify-between">
-						<span class="text-sm text-surface-300">Videos processed</span>
-						<span class="font-mono text-sm text-surface-200">{stats().totalProcessed}</span>
+						<span class="text-surface-300 text-sm">Videos processed</span>
+						<span class="text-surface-200 font-mono text-sm">{stats().totalProcessed}</span>
 					</div>
 					{#if stats().totalProcessed > 0}
 						<div class="flex items-center justify-between">
-							<span class="text-sm text-surface-300">Total saved</span>
-							<span class="font-mono text-sm text-green-400">{formatBytes(stats().totalSaved)}</span>
+							<span class="text-surface-300 text-sm">Total saved</span>
+							<span class="font-mono text-sm text-green-400">{formatBytes(stats().totalSaved)}</span
+							>
 						</div>
 						<div class="flex items-center justify-between">
-							<span class="text-sm text-surface-300">Avg. savings</span>
-							<span class="font-mono text-sm text-accent-start">{stats().avgSavings}%</span>
+							<span class="text-surface-300 text-sm">Avg. savings</span>
+							<span class="text-accent-start font-mono text-sm">{stats().avgSavings}%</span>
 						</div>
 						<div class="flex items-center justify-between">
-							<span class="text-sm text-surface-300">Avg. time</span>
-							<span class="font-mono text-sm text-surface-200">{formatDuration(stats().avgCompressionTime)}</span>
+							<span class="text-surface-300 text-sm">Avg. time</span>
+							<span class="text-surface-200 font-mono text-sm"
+								>{formatDuration(stats().avgCompressionTime)}</span
+							>
 						</div>
 						<!-- Encoder Usage Breakdown -->
 						{#if stats().webCodecsCount > 0 || stats().ffmpegCount > 0}
-							<div class="pt-2 mt-2 border-t border-surface-700/50">
-								<div class="text-xs text-surface-400 uppercase tracking-wider mb-2">Encoder Usage</div>
+							<div class="border-surface-700/50 mt-2 border-t pt-2">
+								<div class="text-surface-400 mb-2 text-xs uppercase tracking-wider">
+									Encoder Usage
+								</div>
 								<div class="flex gap-3">
 									{#if stats().webCodecsCount > 0}
-										<div class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-purple-500/10 border border-purple-500/20">
+										<div
+											class="flex items-center gap-1.5 rounded-md border border-purple-500/20 bg-purple-500/10 px-2 py-1"
+										>
 											<Gpu class="h-3 w-3 text-purple-400" />
 											<span class="text-xs text-purple-300">{stats().webCodecsCount} GPU</span>
 										</div>
 									{/if}
 									{#if stats().ffmpegCount > 0}
-										<div class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-orange-500/10 border border-orange-500/20">
+										<div
+											class="flex items-center gap-1.5 rounded-md border border-orange-500/20 bg-orange-500/10 px-2 py-1"
+										>
 											<Server class="h-3 w-3 text-orange-400" />
 											<span class="text-xs text-orange-300">{stats().ffmpegCount} Software</span>
 										</div>
@@ -285,9 +301,11 @@
 
 			<!-- Encoder Preference -->
 			<div class="px-4 pb-4">
-				<div class="rounded-lg bg-gradient-to-r from-purple-500/10 to-orange-500/10 p-3 border border-purple-500/20">
-					<p class="text-xs text-surface-300">
-						<span class="font-medium text-purple-400">Hybrid Mode:</span> 
+				<div
+					class="rounded-lg border border-purple-500/20 bg-gradient-to-r from-purple-500/10 to-orange-500/10 p-3"
+				>
+					<p class="text-surface-300 text-xs">
+						<span class="font-medium text-purple-400">Hybrid Mode:</span>
 						{#if capabilities.webCodecs.supported && capabilities.webCodecs.hardwareAcceleration}
 							Using GPU acceleration for MP4/WebM, FFmpeg for AV1 and complex operations.
 						{:else if capabilities.webCodecs.supported}

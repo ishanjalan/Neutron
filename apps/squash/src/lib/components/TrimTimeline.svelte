@@ -39,7 +39,7 @@
 			video.src = videoUrl;
 			video.crossOrigin = 'anonymous';
 			video.muted = true;
-			
+
 			await new Promise<void>((resolve, reject) => {
 				video.onloadedmetadata = () => resolve();
 				video.onerror = () => reject(new Error('Failed to load video'));
@@ -48,26 +48,26 @@
 
 			const canvas = document.createElement('canvas');
 			const ctx = canvas.getContext('2d')!;
-			
+
 			const frameCount = Math.min(8, Math.max(4, Math.ceil(duration / 5)));
 			const frames: string[] = [];
-			
+
 			canvas.width = 160;
 			canvas.height = 90;
 
 			for (let i = 0; i < frameCount; i++) {
-				const targetTime = (duration / frameCount) * i + (duration / frameCount / 2);
+				const targetTime = (duration / frameCount) * i + duration / frameCount / 2;
 				video.currentTime = targetTime;
-				
+
 				await new Promise<void>((resolve) => {
 					video.onseeked = () => resolve();
 					setTimeout(resolve, 500); // Fallback timeout
 				});
-				
+
 				ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 				frames.push(canvas.toDataURL('image/jpeg', 0.5));
 			}
-			
+
 			thumbnails = frames;
 		} catch (e) {
 			console.warn('Could not generate thumbnails:', e);
@@ -90,7 +90,7 @@
 
 	function handleMouseMove(e: MouseEvent) {
 		if (!containerRef) return;
-		
+
 		const rect = containerRef.getBoundingClientRect();
 		const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
 		const percentage = x / rect.width;
@@ -119,7 +119,7 @@
 
 	function handleTrackHover(e: MouseEvent) {
 		if (!containerRef || isDraggingStart || isDraggingEnd) return;
-		
+
 		const rect = containerRef.getBoundingClientRect();
 		const x = e.clientX - rect.left;
 		const percentage = Math.max(0, Math.min(1, x / rect.width));
@@ -133,7 +133,7 @@
 
 	function handleKeyDown(e: KeyboardEvent) {
 		const step = e.shiftKey ? 1 : 0.1; // 1s with Shift, 0.1s without
-		
+
 		if (e.key === 'ArrowLeft') {
 			e.preventDefault();
 			if (e.target === document.activeElement) {
@@ -165,7 +165,7 @@
 	<!-- Timeline Track -->
 	<div
 		bind:this={containerRef}
-		class="relative h-14 rounded-lg bg-surface-800 overflow-hidden cursor-crosshair"
+		class="bg-surface-800 relative h-14 cursor-crosshair overflow-hidden rounded-lg"
 		onmousemove={handleTrackHover}
 		onmouseleave={handleTrackLeave}
 		role="slider"
@@ -185,29 +185,30 @@
 			</div>
 		{:else if isGeneratingThumbnails}
 			<div class="absolute inset-0 flex items-center justify-center">
-				<div class="w-4 h-4 border-2 border-surface-600 border-t-accent-start rounded-full animate-spin"></div>
+				<div
+					class="border-surface-600 border-t-accent-start h-4 w-4 animate-spin rounded-full border-2"
+				></div>
 			</div>
 		{/if}
 
 		<!-- Dimmed regions (before start and after end) -->
+		<div class="absolute bottom-0 left-0 top-0 bg-black/60" style="width: {startPercent}%"></div>
 		<div
-			class="absolute top-0 bottom-0 left-0 bg-black/60"
-			style="width: {startPercent}%"
-		></div>
-		<div
-			class="absolute top-0 bottom-0 right-0 bg-black/60"
+			class="absolute bottom-0 right-0 top-0 bg-black/60"
 			style="width: {100 - endPercent}%"
 		></div>
 
 		<!-- Selected region border -->
 		<div
-			class="absolute top-0 bottom-0 border-y-2 border-purple-500/70"
+			class="absolute bottom-0 top-0 border-y-2 border-purple-500/70"
 			style="left: {startPercent}%; right: {100 - endPercent}%"
 		></div>
 
 		<!-- Start handle -->
 		<div
-			class="absolute top-0 bottom-0 w-3 cursor-ew-resize bg-purple-500 flex items-center justify-center z-10 transition-all {isDraggingStart ? 'ring-2 ring-purple-300' : 'hover:bg-purple-400'}"
+			class="absolute bottom-0 top-0 z-10 flex w-3 cursor-ew-resize items-center justify-center bg-purple-500 transition-all {isDraggingStart
+				? 'ring-2 ring-purple-300'
+				: 'hover:bg-purple-400'}"
 			style="left: {startPercent}%; transform: translateX(-50%)"
 			onmousedown={(e) => handleMouseDown(e, 'start')}
 			role="slider"
@@ -215,12 +216,14 @@
 			aria-valuenow={Math.round(localStart * 10) / 10}
 			tabindex="0"
 		>
-			<div class="w-0.5 h-6 bg-white/80 rounded-full"></div>
+			<div class="h-6 w-0.5 rounded-full bg-white/80"></div>
 		</div>
 
 		<!-- End handle -->
 		<div
-			class="absolute top-0 bottom-0 w-3 cursor-ew-resize bg-purple-500 flex items-center justify-center z-10 transition-all {isDraggingEnd ? 'ring-2 ring-purple-300' : 'hover:bg-purple-400'}"
+			class="absolute bottom-0 top-0 z-10 flex w-3 cursor-ew-resize items-center justify-center bg-purple-500 transition-all {isDraggingEnd
+				? 'ring-2 ring-purple-300'
+				: 'hover:bg-purple-400'}"
 			style="left: {endPercent}%; transform: translateX(-50%)"
 			onmousedown={(e) => handleMouseDown(e, 'end')}
 			role="slider"
@@ -228,13 +231,13 @@
 			aria-valuenow={Math.round(localEnd * 10) / 10}
 			tabindex="0"
 		>
-			<div class="w-0.5 h-6 bg-white/80 rounded-full"></div>
+			<div class="h-6 w-0.5 rounded-full bg-white/80"></div>
 		</div>
 
 		<!-- Hover preview time -->
 		{#if previewTime !== null && !isDraggingStart && !isDraggingEnd}
 			<div
-				class="absolute -top-8 transform -translate-x-1/2 px-2 py-1 rounded bg-surface-700 text-xs text-surface-200 whitespace-nowrap z-20"
+				class="bg-surface-700 text-surface-200 absolute -top-8 z-20 -translate-x-1/2 transform whitespace-nowrap rounded px-2 py-1 text-xs"
 				style="left: {previewPosition}px"
 			>
 				{formatTimeInput(previewTime)}
@@ -243,14 +246,15 @@
 	</div>
 
 	<!-- Time labels -->
-	<div class="flex items-center justify-between mt-2 text-xs">
+	<div class="mt-2 flex items-center justify-between text-xs">
 		<div class="flex items-center gap-2">
 			<span class="text-surface-500">Start:</span>
 			<span class="font-mono text-purple-400">{formatTimeInput(localStart)}</span>
 		</div>
-		<div class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-purple-500/20">
+		<div class="flex items-center gap-1.5 rounded-lg bg-purple-500/20 px-2 py-1">
 			<span class="text-surface-400">Duration:</span>
-			<span class="font-mono font-semibold text-purple-400">{formatTimeInput(trimmedDuration)}</span>
+			<span class="font-mono font-semibold text-purple-400">{formatTimeInput(trimmedDuration)}</span
+			>
 		</div>
 		<div class="flex items-center gap-2">
 			<span class="text-surface-500">End:</span>

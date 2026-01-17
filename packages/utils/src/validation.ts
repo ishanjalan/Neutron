@@ -1,11 +1,11 @@
 /**
  * Valibot-based validation utilities for Neutron
  * ~92% smaller than Zod, perfect for client-side validation
- * 
+ *
  * @example
  * ```ts
  * import { validateSettings, PDFSettingsSchema } from '@neutron/utils/validation';
- * 
+ *
  * const result = validateSettings(userInput);
  * if (result.success) {
  *   console.log(result.data); // Type-safe validated data
@@ -30,11 +30,7 @@ export const EmailSchema = v.pipe(
 );
 
 /** Non-empty string */
-export const NonEmptyString = v.pipe(
-	v.string(),
-	v.trim(),
-	v.minLength(1, 'Cannot be empty')
-);
+export const NonEmptyString = v.pipe(v.string(), v.trim(), v.minLength(1, 'Cannot be empty'));
 
 /** Positive integer */
 export const PositiveInt = v.pipe(
@@ -74,7 +70,7 @@ export const PDFToolSchema = v.picklist([
 	'add-page-numbers',
 	'watermark',
 	'protect',
-	'unlock'
+	'unlock',
 ]);
 
 export const CompressionPresetSchema = v.picklist(['screen', 'ebook', 'printer', 'prepress']);
@@ -89,7 +85,7 @@ export const PageNumberPositionSchema = v.picklist([
 	'bottom-center',
 	'bottom-right',
 	'top-center',
-	'top-right'
+	'top-right',
 ]);
 
 export const SplitModeSchema = v.picklist(['range', 'extract', 'every-n']);
@@ -108,7 +104,7 @@ export const PDFSettingsSchema = v.object({
 	ownerPassword: v.string(),
 	watermarkText: v.string(),
 	watermarkOpacity: Percentage,
-	pageNumberPosition: PageNumberPositionSchema
+	pageNumberPosition: PageNumberPositionSchema,
 });
 
 export type PDFSettings = v.InferOutput<typeof PDFSettingsSchema>;
@@ -128,7 +124,7 @@ export const ResolutionSchema = v.picklist([
 	'1080p',
 	'720p',
 	'480p',
-	'360p'
+	'360p',
 ]);
 
 export const AudioBitrateSchema = v.picklist(['64k', '128k', '192k', '256k', '320k']);
@@ -141,7 +137,7 @@ export const PresetSchema = v.picklist([
 	'fast',
 	'medium',
 	'slow',
-	'veryslow'
+	'veryslow',
 ]);
 
 export const CompressionSettingsSchema = v.object({
@@ -153,7 +149,7 @@ export const CompressionSettingsSchema = v.object({
 	stripMetadata: v.boolean(),
 	twoPass: v.boolean(),
 	preset: PresetSchema,
-	targetSizeMB: v.optional(v.pipe(v.number(), v.minValue(1)))
+	targetSizeMB: v.optional(v.pipe(v.number(), v.minValue(1))),
 });
 
 export type CompressionSettings = v.InferOutput<typeof CompressionSettingsSchema>;
@@ -169,7 +165,7 @@ export const ImageSettingsSchema = v.object({
 	quality: Percentage,
 	maxWidth: v.optional(PositiveInt),
 	maxHeight: v.optional(PositiveInt),
-	preserveAspectRatio: v.boolean()
+	preserveAspectRatio: v.boolean(),
 });
 
 export type ImageSettings = v.InferOutput<typeof ImageSettingsSchema>;
@@ -182,7 +178,7 @@ export const GIFSettingsSchema = v.object({
 	fps: v.pipe(v.number(), v.minValue(1), v.maxValue(60)),
 	width: v.optional(PositiveInt),
 	quality: v.pipe(v.number(), v.minValue(1), v.maxValue(100)),
-	loop: v.pipe(v.number(), v.minValue(0)) // 0 = infinite
+	loop: v.pipe(v.number(), v.minValue(0)), // 0 = infinite
 });
 
 export type GIFSettings = v.InferOutput<typeof GIFSettingsSchema>;

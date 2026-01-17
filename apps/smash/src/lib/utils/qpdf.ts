@@ -1,6 +1,6 @@
 /**
  * qpdf WASM Wrapper
- * 
+ *
  * Provides PDF encryption and decryption using qpdf compiled to WASM.
  * Supports AES-256 encryption for strong security.
  */
@@ -28,7 +28,7 @@ async function init(): Promise<any> {
 		},
 		noInitialRun: true,
 		print: (text: string) => console.log('[qpdf]', text),
-		printErr: (text: string) => console.error('[qpdf Error]', text)
+		printErr: (text: string) => console.error('[qpdf Error]', text),
 	});
 
 	qpdfModule = await initPromise;
@@ -64,7 +64,7 @@ export async function encryptPDF(
 			ownerPassword || userPassword,
 			'256', // AES-256 encryption
 			'--',
-			outputPath
+			outputPath,
 		];
 
 		onProgress?.(40);
@@ -121,12 +121,7 @@ export async function decryptPDF(
 		onProgress?.(20);
 
 		// qpdf arguments for decryption
-		const args = [
-			'--password=' + password,
-			'--decrypt',
-			inputPath,
-			outputPath
-		];
+		const args = ['--password=' + password, '--decrypt', inputPath, outputPath];
 
 		onProgress?.(40);
 

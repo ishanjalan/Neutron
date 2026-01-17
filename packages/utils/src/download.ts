@@ -23,7 +23,9 @@ export function isFileSystemAccessSupported(): boolean {
  * Check if clipboard write is supported
  */
 export function isClipboardWriteSupported(): boolean {
-	return typeof navigator !== 'undefined' && 'clipboard' in navigator && 'write' in navigator.clipboard;
+	return (
+		typeof navigator !== 'undefined' && 'clipboard' in navigator && 'write' in navigator.clipboard
+	);
 }
 
 /**
@@ -31,7 +33,7 @@ export function isClipboardWriteSupported(): boolean {
  */
 export async function copyBlobToClipboard(blob: Blob): Promise<boolean> {
 	if (!isClipboardWriteSupported()) return false;
-	
+
 	try {
 		const item = new ClipboardItem({ [blob.type]: blob });
 		await navigator.clipboard.write([item]);

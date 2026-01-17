@@ -24,10 +24,14 @@
 	// Global toast state
 	let toasts = $state<Toast[]>([]);
 
-	export function addToast(message: string, type: ToastType = 'info', options: ToastOptions = {}): string {
+	export function addToast(
+		message: string,
+		type: ToastType = 'info',
+		options: ToastOptions = {}
+	): string {
 		const id = `toast_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 		const duration = options.duration ?? 3000;
-		
+
 		toasts = [...toasts, { id, message, type, duration, action: options.action }];
 
 		// Auto-dismiss
@@ -41,7 +45,7 @@
 	}
 
 	export function removeToast(id: string): void {
-		toasts = toasts.filter(t => t.id !== id);
+		toasts = toasts.filter((t) => t.id !== id);
 	}
 
 	// Convenience methods
@@ -57,7 +61,7 @@
 		info: (message: string, options?: ToastOptions | number) => {
 			const opts = typeof options === 'number' ? { duration: options } : options;
 			return addToast(message, 'info', opts);
-		}
+		},
 	};
 </script>
 
@@ -67,19 +71,19 @@
 	const icons = {
 		success: Check,
 		error: AlertCircle,
-		info: Info
+		info: Info,
 	};
 
 	const styles = {
 		success: 'bg-green-500/10 border-green-500/30 text-green-500',
 		error: 'bg-red-500/10 border-red-500/30 text-red-500',
-		info: 'bg-accent-start/10 border-accent-start/30 text-accent-start'
+		info: 'bg-accent-start/10 border-accent-start/30 text-accent-start',
 	};
 </script>
 
 {#if toasts.length > 0}
 	<div
-		class="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-w-sm"
+		class="fixed bottom-4 right-4 z-[100] flex max-w-sm flex-col gap-2"
 		role="region"
 		aria-label="Notifications"
 		aria-live="polite"
@@ -92,20 +96,23 @@
 				role="alert"
 			>
 				<svelte:component this={icons[t.type]} class="h-5 w-5 flex-shrink-0" />
-				<p class="flex-1 text-sm font-medium text-surface-100">
+				<p class="text-surface-100 flex-1 text-sm font-medium">
 					{t.message}
 				</p>
 				{#if t.action}
 					<button
-						onclick={() => { t.action?.onClick(); removeToast(t.id); }}
-						class="flex-shrink-0 rounded-lg px-3 py-1 text-sm font-semibold text-accent-start bg-accent-start/20 transition-colors hover:bg-accent-start/30"
+						onclick={() => {
+							t.action?.onClick();
+							removeToast(t.id);
+						}}
+						class="text-accent-start bg-accent-start/20 hover:bg-accent-start/30 flex-shrink-0 rounded-lg px-3 py-1 text-sm font-semibold transition-colors"
 					>
 						{t.action.label}
 					</button>
 				{/if}
 				<button
 					onclick={() => removeToast(t.id)}
-					class="flex-shrink-0 rounded-lg p-1 text-surface-400 transition-colors hover:bg-surface-700 hover:text-surface-300"
+					class="text-surface-400 hover:bg-surface-700 hover:text-surface-300 flex-shrink-0 rounded-lg p-1 transition-colors"
 					aria-label="Dismiss notification"
 				>
 					<X class="h-4 w-4" />

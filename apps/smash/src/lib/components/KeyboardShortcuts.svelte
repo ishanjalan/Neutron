@@ -22,7 +22,7 @@
 		{ keys: ['⌘/Ctrl', 'Shift', 'D'], description: 'Download all as ZIP' },
 		{ keys: ['⌘/Ctrl', 'V'], description: 'Paste from clipboard' },
 		{ keys: ['Escape'], description: 'Clear all / Close modal' },
-		{ keys: ['?'], description: 'Show this help' }
+		{ keys: ['?'], description: 'Show this help' },
 	];
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -53,17 +53,17 @@
 
 		<!-- Modal -->
 		<div
-			class="glass relative max-w-md w-full rounded-2xl p-6 shadow-2xl"
+			class="glass relative w-full max-w-md rounded-2xl p-6 shadow-2xl"
 			transition:scale={{ duration: 200, start: 0.95 }}
 		>
 			<!-- Header -->
-			<div class="flex items-center justify-between mb-6">
-				<h2 id="shortcuts-title" class="text-xl font-semibold text-surface-100">
+			<div class="mb-6 flex items-center justify-between">
+				<h2 id="shortcuts-title" class="text-surface-100 text-xl font-semibold">
 					Keyboard Shortcuts
 				</h2>
 				<button
 					onclick={() => (show = false)}
-					class="flex h-8 w-8 items-center justify-center rounded-lg text-surface-400 hover:text-surface-200 hover:bg-surface-700 transition-colors"
+					class="text-surface-400 hover:text-surface-200 hover:bg-surface-700 flex h-8 w-8 items-center justify-center rounded-lg transition-colors"
 					aria-label="Close"
 				>
 					<X class="h-5 w-5" />
@@ -74,11 +74,11 @@
 			<div class="space-y-3">
 				{#each shortcuts as shortcut}
 					<div class="flex items-center justify-between">
-						<span class="text-sm text-surface-400">{shortcut.description}</span>
+						<span class="text-surface-400 text-sm">{shortcut.description}</span>
 						<div class="flex items-center gap-1">
 							{#each shortcut.keys as key}
 								<kbd
-									class="px-2 py-1 text-xs font-medium bg-surface-800 text-surface-300 rounded border border-surface-700"
+									class="bg-surface-800 text-surface-300 border-surface-700 rounded border px-2 py-1 text-xs font-medium"
 								>
 									{key}
 								</kbd>

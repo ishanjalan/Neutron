@@ -8,7 +8,7 @@
 	let fileInput: HTMLInputElement;
 	let errorMessage = $state<string | null>(null);
 	let errorTimeout: ReturnType<typeof setTimeout>;
-	
+
 	// URL input state
 	let showUrlInput = $state(false);
 	let urlValue = $state('');
@@ -25,7 +25,7 @@
 		'image/jxl',
 		'image/svg+xml',
 		'image/heic',
-		'image/heif'
+		'image/heif',
 	];
 	const hasImages = $derived(images.items.length > 0);
 
@@ -36,7 +36,7 @@
 		{ name: 'AVIF', color: 'from-purple-500 to-pink-500' },
 		{ name: 'JXL', color: 'from-amber-500 to-orange-500' },
 		{ name: 'SVG', color: 'from-cyan-500 to-blue-500' },
-		{ name: 'HEIC', color: 'from-pink-500 to-rose-500' }
+		{ name: 'HEIC', color: 'from-pink-500 to-rose-500' },
 	];
 
 	function showError(message: string) {
@@ -68,7 +68,7 @@
 
 	async function processFiles(files: FileList | File[]) {
 		const fileArray = Array.from(files);
-		const validFiles = fileArray.filter(f => validTypes.includes(f.type));
+		const validFiles = fileArray.filter((f) => validTypes.includes(f.type));
 		const skippedCount = fileArray.length - validFiles.length;
 
 		if (skippedCount > 0) {
@@ -126,11 +126,11 @@
 		try {
 			// Validate URL
 			const parsedUrl = new URL(url);
-			
+
 			// Fetch the image
 			const response = await fetch(url, {
 				mode: 'cors',
-				credentials: 'omit'
+				credentials: 'omit',
 			});
 
 			if (!response.ok) {
@@ -143,17 +143,18 @@
 			}
 
 			const blob = await response.blob();
-			
+
 			// Extract filename from URL or use default
 			const pathname = parsedUrl.pathname;
-			const filename = pathname.split('/').pop() || `image-${Date.now()}.${contentType.split('/')[1] || 'png'}`;
-			
+			const filename =
+				pathname.split('/').pop() || `image-${Date.now()}.${contentType.split('/')[1] || 'png'}`;
+
 			// Create File object
 			const file = new File([blob], filename, { type: blob.type });
-			
+
 			// Process the file
 			await processFiles([file]);
-			
+
 			// Close the input
 			closeUrlInput();
 		} catch (error) {
@@ -210,29 +211,31 @@
 	{#if hasImages}
 		<!-- Compact dropzone when images exist - minimum 44px touch target -->
 		<div
-			class="group flex items-center justify-center gap-4 rounded-2xl border-2 border-dashed min-h-[56px] py-5 sm:py-6 px-6 transition-all duration-300 cursor-pointer {isDragging
+			class="group flex min-h-[56px] cursor-pointer items-center justify-center gap-4 rounded-2xl border-2 border-dashed px-6 py-5 transition-all duration-300 sm:py-6 {isDragging
 				? 'border-accent-start bg-accent-start/5'
 				: 'border-surface-700 hover:border-accent-start/50'}"
 		>
-			<div class="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-800 transition-colors group-hover:bg-accent-start/10">
+			<div
+				class="bg-surface-800 group-hover:bg-accent-start/10 flex h-12 w-12 items-center justify-center rounded-xl transition-colors"
+			>
 				{#if isDragging}
-					<FileImage class="h-6 w-6 text-accent-start animate-pulse" />
+					<FileImage class="text-accent-start h-6 w-6 animate-pulse" />
 				{:else}
-					<Upload class="h-6 w-6 text-surface-400 group-hover:text-accent-start" />
+					<Upload class="text-surface-400 group-hover:text-accent-start h-6 w-6" />
 				{/if}
 			</div>
-			<p class="text-lg text-surface-500">
+			<p class="text-surface-500 text-lg">
 				{#if isDragging}
-					<span class="font-medium text-accent-start">Release to add more</span>
+					<span class="text-accent-start font-medium">Release to add more</span>
 				{:else}
-					Drop more images or <span class="font-medium text-accent-start">click to browse</span>
+					Drop more images or <span class="text-accent-start font-medium">click to browse</span>
 				{/if}
 			</p>
 		</div>
 	{:else}
 		<!-- Full dropzone when no images -->
 		<div
-			class="group relative overflow-hidden rounded-2xl border-2 border-dashed py-12 sm:py-16 transition-all duration-300 cursor-pointer {isDragging
+			class="group relative cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed py-12 transition-all duration-300 sm:py-16 {isDragging
 				? 'border-accent-start bg-accent-start/5 scale-[1.01]'
 				: 'border-surface-700 hover:border-accent-start/50'}"
 		>
@@ -246,26 +249,28 @@
 				<!-- Icon -->
 				<div
 					class="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl transition-all duration-300 {isDragging
-						? 'bg-accent-start/20 scale-110 rotate-3'
+						? 'bg-accent-start/20 rotate-3 scale-110'
 						: 'bg-surface-800 group-hover:bg-accent-start/10 group-hover:scale-105'}"
 				>
 					{#if isDragging}
-						<FileImage class="h-8 w-8 text-accent-start animate-pulse" />
+						<FileImage class="text-accent-start h-8 w-8 animate-pulse" />
 					{:else}
 						<Upload
-							class="h-8 w-8 text-surface-400 transition-all group-hover:text-accent-start group-hover:-translate-y-1"
+							class="text-surface-400 group-hover:text-accent-start h-8 w-8 transition-all group-hover:-translate-y-1"
 						/>
 					{/if}
 				</div>
 
 				<!-- Text -->
 				{#if isDragging}
-					<p class="text-xl font-semibold text-accent-start">Release to upload</p>
-					<p class="mt-2 text-base text-accent-start/70">Your images are ready to be optimized</p>
+					<p class="text-accent-start text-xl font-semibold">Release to upload</p>
+					<p class="text-accent-start/70 mt-2 text-base">Your images are ready to be optimized</p>
 				{:else}
-					<p class="text-xl font-semibold text-surface-300">Drop images here</p>
-					<p class="mt-2 text-base text-surface-500">
-						or <span class="font-medium text-accent-start underline-offset-2 hover:underline">click to browse</span>
+					<p class="text-surface-300 text-xl font-semibold">Drop images here</p>
+					<p class="text-surface-500 mt-2 text-base">
+						or <span class="text-accent-start font-medium underline-offset-2 hover:underline"
+							>click to browse</span
+						>
 					</p>
 				{/if}
 
@@ -279,7 +284,7 @@
 						</span>
 					{/each}
 				</div>
-				<p class="mt-5 text-sm text-surface-400">
+				<p class="text-surface-400 mt-5 text-sm">
 					Max file size: Unlimited • Batch upload supported • Paste from clipboard
 				</p>
 			</div>
@@ -289,36 +294,40 @@
 	<!-- URL Input section -->
 	{#if !hasImages}
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div class="mt-4 flex justify-center" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()}>
+		<div
+			class="mt-4 flex justify-center"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+		>
 			{#if showUrlInput}
-				<div class="flex items-center gap-2 w-full max-w-md" transition:fade={{ duration: 150 }}>
+				<div class="flex w-full max-w-md items-center gap-2" transition:fade={{ duration: 150 }}>
 					<div class="relative flex-1">
-						<Link class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400" />
+						<Link class="text-surface-400 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
 						<input
 							bind:this={urlInputRef}
 							bind:value={urlValue}
 							type="url"
 							placeholder="https://example.com/image.jpg"
-							class="w-full rounded-xl bg-surface-800 border border-surface-700 pl-10 pr-4 py-2.5 text-sm text-surface-100 placeholder:text-surface-500 focus:border-accent-start focus:outline-none focus:ring-1 focus:ring-accent-start"
+							class="bg-surface-800 border-surface-700 text-surface-100 placeholder:text-surface-500 focus:border-accent-start focus:ring-accent-start w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-1"
 							onkeydown={handleUrlKeydown}
 							disabled={isLoadingUrl}
 						/>
 					</div>
 					{#if isLoadingUrl}
 						<div class="flex h-10 w-10 items-center justify-center">
-							<Loader2 class="h-5 w-5 text-accent-start animate-spin" />
+							<Loader2 class="text-accent-start h-5 w-5 animate-spin" />
 						</div>
 					{:else}
 						<button
 							onclick={() => fetchImageFromUrl(urlValue)}
 							disabled={!urlValue.trim()}
-							class="flex h-10 items-center gap-2 rounded-xl bg-accent-start px-4 text-sm font-medium text-white transition-all hover:bg-accent-start/90 disabled:opacity-50 disabled:cursor-not-allowed"
+							class="bg-accent-start hover:bg-accent-start/90 flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-medium text-white transition-all disabled:cursor-not-allowed disabled:opacity-50"
 						>
 							Fetch
 						</button>
 						<button
 							onclick={closeUrlInput}
-							class="flex h-10 w-10 items-center justify-center rounded-xl text-surface-400 hover:bg-surface-700 hover:text-surface-200"
+							class="text-surface-400 hover:bg-surface-700 hover:text-surface-200 flex h-10 w-10 items-center justify-center rounded-xl"
 							aria-label="Close URL input"
 						>
 							<X class="h-5 w-5" />
@@ -328,7 +337,7 @@
 			{:else}
 				<button
 					onclick={handleUrlInputClick}
-					class="flex items-center gap-2 text-sm text-surface-400 hover:text-accent-start transition-colors"
+					class="text-surface-400 hover:text-accent-start flex items-center gap-2 text-sm transition-colors"
 				>
 					<Link class="h-4 w-4" />
 					<span>or paste image URL</span>
@@ -340,7 +349,7 @@
 	<!-- Error message -->
 	{#if errorMessage}
 		<div
-			class="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 flex items-center gap-2 rounded-lg bg-red-500/10 border border-red-500/30 px-4 py-2 text-sm text-red-500"
+			class="absolute bottom-full left-1/2 mb-3 flex -translate-x-1/2 items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-red-500"
 			transition:fade={{ duration: 150 }}
 			role="alert"
 		>

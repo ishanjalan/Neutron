@@ -1,26 +1,26 @@
 /**
  * Ghostscript WASM Worker (Comlink version)
- * 
+ *
  * Type-safe, cleaner API using Comlink.
  * This is an example of how to modernize the existing worker.
- * 
+ *
  * @example Usage:
  * ```ts
  * import { createWorker, createCallback } from '@neutron/utils/comlink';
  * import type { GhostscriptWorkerAPI } from './ghostscript.comlink';
- * 
+ *
  * const worker = createWorker<GhostscriptWorkerAPI>(
  *   new Worker(new URL('./ghostscript.comlink.ts', import.meta.url), { type: 'module' })
  * );
- * 
+ *
  * // Initialize with base path
  * await worker.init('/Smash');
- * 
+ *
  * // Compress with progress callback
  * const result = await worker.compress(pdfData, 'ebook', createCallback((progress) => {
  *   console.log(`Progress: ${progress}%`);
  * }));
- * 
+ *
  * console.log(`Compressed: ${result.originalSize} -> ${result.compressedSize}`);
  * ```
  */
@@ -64,7 +64,7 @@ const api = {
 				},
 				noInitialRun: true,
 				print: (text: string) => console.log('[GS]', text),
-				printErr: (text: string) => console.error('[GS Error]', text)
+				printErr: (text: string) => console.error('[GS Error]', text),
 			});
 
 			initialized = true;
@@ -98,7 +98,7 @@ const api = {
 				success: false,
 				originalSize: pdfData.byteLength,
 				compressedSize: 0,
-				error: 'Ghostscript not initialized. Call init() first.'
+				error: 'Ghostscript not initialized. Call init() first.',
 			};
 		}
 
@@ -128,7 +128,7 @@ const api = {
 				'-dGrayImageDownsampleType=/Bicubic',
 				'-dMonoImageDownsampleType=/Bicubic',
 				'-sOutputFile=/output.pdf',
-				'/input.pdf'
+				'/input.pdf',
 			];
 
 			onProgress?.(30);
@@ -157,7 +157,7 @@ const api = {
 					success: true,
 					data: outputData.buffer,
 					originalSize: pdfData.byteLength,
-					compressedSize: outputData.byteLength
+					compressedSize: outputData.byteLength,
 				},
 				[outputData.buffer]
 			);
@@ -166,10 +166,10 @@ const api = {
 				success: false,
 				originalSize: pdfData.byteLength,
 				compressedSize: 0,
-				error: error instanceof Error ? error.message : 'Compression failed'
+				error: error instanceof Error ? error.message : 'Compression failed',
 			};
 		}
-	}
+	},
 };
 
 // Export the API type for consumer type safety

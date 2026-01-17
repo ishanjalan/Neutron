@@ -8,7 +8,7 @@
 		message = 'Are you sure?',
 		confirmText = 'Confirm',
 		onconfirm,
-		oncancel
+		oncancel,
 	}: {
 		open: boolean;
 		title?: string;
@@ -49,14 +49,16 @@
 			<!-- Header -->
 			<div class="mb-4 flex items-start justify-between">
 				<div class="flex items-center gap-3">
-					<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/20 text-red-500">
+					<div
+						class="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/20 text-red-500"
+					>
 						<AlertTriangle class="h-5 w-5" />
 					</div>
-					<h2 id="modal-title" class="text-lg font-semibold text-surface-100">{title}</h2>
+					<h2 id="modal-title" class="text-surface-100 text-lg font-semibold">{title}</h2>
 				</div>
 				<button
 					onclick={oncancel}
-					class="rounded-lg p-2 text-surface-400 transition-colors hover:bg-surface-700 hover:text-surface-100"
+					class="text-surface-400 hover:bg-surface-700 hover:text-surface-100 rounded-lg p-2 transition-colors"
 					aria-label="Close"
 				>
 					<X class="h-5 w-5" />
@@ -64,13 +66,13 @@
 			</div>
 
 			<!-- Body -->
-			<p class="mb-6 text-surface-400">{message}</p>
+			<p class="text-surface-400 mb-6">{message}</p>
 
 			<!-- Actions -->
 			<div class="flex justify-end gap-3">
 				<button
 					onclick={oncancel}
-					class="rounded-xl bg-surface-700 px-5 py-2.5 text-sm font-medium text-surface-300 transition-all hover:bg-surface-600"
+					class="bg-surface-700 text-surface-300 hover:bg-surface-600 rounded-xl px-5 py-2.5 text-sm font-medium transition-all"
 				>
 					Cancel
 				</button>

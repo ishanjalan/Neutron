@@ -13,7 +13,7 @@ import {
 	EmailSchema,
 	Percentage,
 	PositiveInt,
-	v
+	v,
 } from '@neutron/utils/validation';
 
 describe('Common Validators', () => {
@@ -79,7 +79,7 @@ describe('PDFSettingsSchema', () => {
 		ownerPassword: '',
 		watermarkText: '',
 		watermarkOpacity: 30,
-		pageNumberPosition: 'bottom-center'
+		pageNumberPosition: 'bottom-center',
 	};
 
 	it('should accept valid PDF settings', () => {
@@ -90,7 +90,7 @@ describe('PDFSettingsSchema', () => {
 	it('should reject invalid tool', () => {
 		const result = validate(PDFSettingsSchema, {
 			...validSettings,
-			tool: 'invalid-tool'
+			tool: 'invalid-tool',
 		});
 		expect(result.success).toBe(false);
 	});
@@ -98,7 +98,7 @@ describe('PDFSettingsSchema', () => {
 	it('should reject invalid compression preset', () => {
 		const result = validate(PDFSettingsSchema, {
 			...validSettings,
-			compressionPreset: 'ultra'
+			compressionPreset: 'ultra',
 		});
 		expect(result.success).toBe(false);
 	});
@@ -106,7 +106,7 @@ describe('PDFSettingsSchema', () => {
 	it('should reject quality outside 0-100', () => {
 		const result = validate(PDFSettingsSchema, {
 			...validSettings,
-			imageQuality: 150
+			imageQuality: 150,
 		});
 		expect(result.success).toBe(false);
 	});
@@ -121,7 +121,7 @@ describe('CompressionSettingsSchema', () => {
 		audioCodec: 'aac',
 		stripMetadata: false,
 		twoPass: false,
-		preset: 'medium'
+		preset: 'medium',
 	};
 
 	it('should accept valid compression settings', () => {
@@ -132,7 +132,7 @@ describe('CompressionSettingsSchema', () => {
 	it('should accept optional targetSizeMB', () => {
 		const result = validate(CompressionSettingsSchema, {
 			...validSettings,
-			targetSizeMB: 50
+			targetSizeMB: 50,
 		});
 		expect(result.success).toBe(true);
 	});
@@ -140,7 +140,7 @@ describe('CompressionSettingsSchema', () => {
 	it('should reject targetSizeMB less than 1', () => {
 		const result = validate(CompressionSettingsSchema, {
 			...validSettings,
-			targetSizeMB: 0.5
+			targetSizeMB: 0.5,
 		});
 		expect(result.success).toBe(false);
 	});

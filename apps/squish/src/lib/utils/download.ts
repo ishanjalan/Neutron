@@ -54,9 +54,11 @@ export async function downloadAllAsZip(
 
 	const content = await zip.generateAsync(
 		{ type: 'blob' },
-		onProgress ? (metadata) => {
-			onProgress(metadata.percent);
-		} : undefined
+		onProgress
+			? (metadata) => {
+					onProgress(metadata.percent);
+				}
+			: undefined
 	);
 	downloadBlob(content, `optimized-images-${Date.now()}.zip`);
 }
@@ -70,7 +72,7 @@ export function isFileSystemAccessSupported(): boolean {
 export function isLargeBatch(items: ImageItem[]): boolean {
 	const totalSize = items.reduce((acc, i) => acc + (i.compressedSize || 0), 0);
 	const totalSizeMB = totalSize / (1024 * 1024);
-	
+
 	return items.length > LARGE_BATCH_COUNT || totalSizeMB > LARGE_BATCH_SIZE_MB;
 }
 
@@ -81,10 +83,10 @@ export async function downloadWithFileSystemAPI(items: ImageItem[]): Promise<voi
 	}
 
 	// Request directory access from user
-	// @ts-ignore - File System Access API types may not be available
+	// @ts-expect-error - File System Access API types may not be available
 	const dirHandle: FileSystemDirectoryHandle = await window.showDirectoryPicker({
 		mode: 'readwrite',
-		startIn: 'downloads'
+		startIn: 'downloads',
 	});
 
 	// Track filenames to avoid duplicates
@@ -121,8 +123,8 @@ export async function downloadAllSmart(
 		onProgress?: ZipProgressCallback;
 	}
 ): Promise<void> {
-	const validItems = items.filter(i => i.compressedBlob);
-	
+	const validItems = items.filter((i) => i.compressedBlob);
+
 	if (validItems.length === 0) return;
 
 	// If forcing a specific method
@@ -157,7 +159,7 @@ export function getDownloadInfo(items: ImageItem[]): {
 	fsapiSupported: boolean;
 	recommendedMethod: 'zip' | 'fsapi';
 } {
-	const validItems = items.filter(i => i.compressedBlob);
+	const validItems = items.filter((i) => i.compressedBlob);
 	const totalSize = validItems.reduce((acc, i) => acc + (i.compressedSize || 0), 0);
 	const totalSizeMB = totalSize / (1024 * 1024);
 	const isLarge = isLargeBatch(validItems);
@@ -169,6 +171,6 @@ export function getDownloadInfo(items: ImageItem[]): {
 		totalSizeMB,
 		isLarge,
 		fsapiSupported,
-		recommendedMethod: isLarge && fsapiSupported ? 'fsapi' : 'zip'
+		recommendedMethod: isLarge && fsapiSupported ? 'fsapi' : 'zip',
 	};
 }

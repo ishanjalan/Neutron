@@ -45,7 +45,7 @@ async function getDB(): Promise<IDBPDatabase<SquashDB>> {
 			if (!db.objectStoreNames.contains('settings')) {
 				db.createObjectStore('settings');
 			}
-		}
+		},
 	});
 
 	return dbInstance;
@@ -58,11 +58,7 @@ export function isLargeFile(size: number): boolean {
 	return size > LARGE_FILE_THRESHOLD;
 }
 
-export async function storeVideo(
-	id: string,
-	file: File,
-	compressedBlob?: Blob
-): Promise<void> {
+export async function storeVideo(id: string, file: File, compressedBlob?: Blob): Promise<void> {
 	const db = await getDB();
 
 	await db.put('videos', {
@@ -73,9 +69,9 @@ export async function storeVideo(
 			name: file.name,
 			size: file.size,
 			type: file.type,
-			lastModified: file.lastModified
+			lastModified: file.lastModified,
 		},
-		createdAt: Date.now()
+		createdAt: Date.now(),
 	});
 }
 
@@ -131,7 +127,7 @@ export async function getStorageUsage(): Promise<{
 	return {
 		count: all.length,
 		totalSize,
-		compressedSize
+		compressedSize,
 	};
 }
 

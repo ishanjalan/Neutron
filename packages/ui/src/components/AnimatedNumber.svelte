@@ -4,7 +4,7 @@
 	let {
 		value,
 		duration = 500,
-		format = (n: number) => n.toString()
+		format = (n: number) => n.toString(),
 	}: {
 		value: number;
 		duration?: number;
@@ -46,14 +46,14 @@
 	$effect(() => {
 		// When value changes, start animation
 		const newValue = value;
-		
+
 		if (!initialized) {
 			displayValue = newValue;
 			targetValue = newValue;
 			initialized = true;
 			return;
 		}
-		
+
 		// Cancel any existing animation
 		if (animationFrame !== null) {
 			cancelAnimationFrame(animationFrame);
@@ -63,7 +63,7 @@
 		startValue = displayValue;
 		targetValue = newValue;
 		startTime = null;
-		
+
 		// Only animate if value actually changed
 		if (startValue !== newValue) {
 			animationFrame = requestAnimationFrame(animate);

@@ -8,13 +8,11 @@
 
 	let { onclose }: { onclose: () => void } = $props();
 
-	const completedItems = $derived(images.items.filter(i => i.status === 'completed'));
+	const completedItems = $derived(images.items.filter((i) => i.status === 'completed'));
 	const stats = $derived(images.batchStats);
 
 	// Calculate stats
-	const totalOriginalSize = $derived(
-		completedItems.reduce((acc, i) => acc + i.originalSize, 0)
-	);
+	const totalOriginalSize = $derived(completedItems.reduce((acc, i) => acc + i.originalSize, 0));
 	const totalCompressedSize = $derived(
 		completedItems.reduce((acc, i) => acc + (i.compressedSize || 0), 0)
 	);
@@ -45,31 +43,38 @@
 		if (completedItems.length > 0) {
 			await downloadAllAsZip(completedItems);
 			const savedFormatted = formatBytes(totalSaved);
-			toast.success(`Downloaded ${completedItems.length} ${completedItems.length === 1 ? 'image' : 'images'} as ZIP (${savedFormatted} saved!)`);
+			toast.success(
+				`Downloaded ${completedItems.length} ${completedItems.length === 1 ? 'image' : 'images'} as ZIP (${savedFormatted} saved!)`
+			);
 		}
 	}
 </script>
 
 {#if completedItems.length > 0 && stats.endTime}
 	<div
-		class="glass mb-6 sm:mb-8 rounded-2xl overflow-hidden"
+		class="glass mb-6 overflow-hidden rounded-2xl sm:mb-8"
 		in:scale={{ duration: 300, start: 0.95 }}
 		out:fade={{ duration: 150 }}
 	>
 		<!-- Header -->
-		<div class="bg-gradient-to-r from-accent-start/20 to-accent-end/20 px-5 py-4 flex items-center justify-between">
+		<div
+			class="from-accent-start/20 to-accent-end/20 flex items-center justify-between bg-gradient-to-r px-5 py-4"
+		>
 			<div class="flex items-center gap-3">
 				<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/20">
 					<CheckCircle class="h-5 w-5 text-green-500" />
 				</div>
 				<div>
-					<h3 class="font-semibold text-surface-100">Batch Complete!</h3>
-					<p class="text-sm text-surface-400">{completedItems.length} {completedItems.length === 1 ? 'image' : 'images'} optimized</p>
+					<h3 class="text-surface-100 font-semibold">Batch Complete!</h3>
+					<p class="text-surface-400 text-sm">
+						{completedItems.length}
+						{completedItems.length === 1 ? 'image' : 'images'} optimized
+					</p>
 				</div>
 			</div>
 			<button
 				onclick={onclose}
-				class="rounded-lg p-2 text-surface-400 transition-colors hover:bg-surface-700 hover:text-surface-200"
+				class="text-surface-400 hover:bg-surface-700 hover:text-surface-200 rounded-lg p-2 transition-colors"
 				aria-label="Dismiss summary"
 			>
 				<X class="h-5 w-5" />
@@ -77,61 +82,86 @@
 		</div>
 
 		<!-- Stats Grid -->
-		<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-5">
+		<div class="grid grid-cols-2 gap-4 p-5 sm:grid-cols-4">
 			<!-- Total Saved -->
 			<div class="flex items-center gap-3">
-				<div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-green-500/10">
+				<div
+					class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-green-500/10"
+				>
 					<TrendingDown class="h-5 w-5 text-green-500" />
 				</div>
 				<div>
-					<p class="text-xs text-surface-400 uppercase tracking-wide">Saved</p>
-					<p class="text-lg font-bold text-green-500"><AnimatedNumber value={totalSaved} format={formatBytes} duration={800} /></p>
-					<p class="text-xs text-surface-500">-<AnimatedNumber value={savingsPercent} format={(n) => Math.round(n).toString()} />%</p>
+					<p class="text-surface-400 text-xs uppercase tracking-wide">Saved</p>
+					<p class="text-lg font-bold text-green-500">
+						<AnimatedNumber value={totalSaved} format={formatBytes} duration={800} />
+					</p>
+					<p class="text-surface-500 text-xs">
+						-<AnimatedNumber value={savingsPercent} format={(n) => Math.round(n).toString()} />%
+					</p>
 				</div>
 			</div>
 
 			<!-- Processing Time -->
 			<div class="flex items-center gap-3">
-				<div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-accent-start/10">
-					<Clock class="h-5 w-5 text-accent-start" />
+				<div
+					class="bg-accent-start/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl"
+				>
+					<Clock class="text-accent-start h-5 w-5" />
 				</div>
 				<div>
-					<p class="text-xs text-surface-400 uppercase tracking-wide">Time</p>
-					<p class="text-lg font-bold text-surface-100"><AnimatedNumber value={processingTime} format={formatTime} duration={800} /></p>
-					<p class="text-xs text-surface-500"><AnimatedNumber value={avgTimePerImage} format={(n) => Math.round(n).toString()} />ms avg</p>
+					<p class="text-surface-400 text-xs uppercase tracking-wide">Time</p>
+					<p class="text-surface-100 text-lg font-bold">
+						<AnimatedNumber value={processingTime} format={formatTime} duration={800} />
+					</p>
+					<p class="text-surface-500 text-xs">
+						<AnimatedNumber value={avgTimePerImage} format={(n) => Math.round(n).toString()} />ms
+						avg
+					</p>
 				</div>
 			</div>
 
 			<!-- Speed -->
 			<div class="flex items-center gap-3">
-				<div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
+				<div
+					class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-500/10"
+				>
 					<Zap class="h-5 w-5 text-amber-500" />
 				</div>
 				<div>
-					<p class="text-xs text-surface-400 uppercase tracking-wide">Speed</p>
-					<p class="text-lg font-bold text-surface-100"><AnimatedNumber value={parseFloat(imagesPerSecond)} format={(n) => n.toFixed(1)} duration={800} /></p>
-					<p class="text-xs text-surface-500">images/sec</p>
+					<p class="text-surface-400 text-xs uppercase tracking-wide">Speed</p>
+					<p class="text-surface-100 text-lg font-bold">
+						<AnimatedNumber
+							value={parseFloat(imagesPerSecond)}
+							format={(n) => n.toFixed(1)}
+							duration={800}
+						/>
+					</p>
+					<p class="text-surface-500 text-xs">images/sec</p>
 				</div>
 			</div>
 
 			<!-- Final Size -->
 			<div class="flex items-center gap-3">
-				<div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
+				<div
+					class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-500/10"
+				>
 					<HardDrive class="h-5 w-5 text-blue-500" />
 				</div>
 				<div>
-					<p class="text-xs text-surface-400 uppercase tracking-wide">Final Size</p>
-					<p class="text-lg font-bold text-surface-100"><AnimatedNumber value={totalCompressedSize} format={formatBytes} duration={800} /></p>
-					<p class="text-xs text-surface-500">from {formatBytes(totalOriginalSize)}</p>
+					<p class="text-surface-400 text-xs uppercase tracking-wide">Final Size</p>
+					<p class="text-surface-100 text-lg font-bold">
+						<AnimatedNumber value={totalCompressedSize} format={formatBytes} duration={800} />
+					</p>
+					<p class="text-surface-500 text-xs">from {formatBytes(totalOriginalSize)}</p>
 				</div>
 			</div>
 		</div>
 
 		<!-- Download Button -->
-		<div class="border-t border-surface-700/50 px-5 py-4 flex justify-end">
+		<div class="border-surface-700/50 flex justify-end border-t px-5 py-4">
 			<button
 				onclick={handleDownloadAll}
-				class="flex items-center gap-2 rounded-xl bg-gradient-to-r from-accent-start to-accent-end px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-accent-start/30 transition-all hover:shadow-xl hover:shadow-accent-start/40 hover:scale-105"
+				class="from-accent-start to-accent-end shadow-accent-start/30 hover:shadow-accent-start/40 flex items-center gap-2 rounded-xl bg-gradient-to-r px-5 py-2.5 text-sm font-medium text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
 			>
 				<Download class="h-5 w-5" />
 				Download All ({completedItems.length})

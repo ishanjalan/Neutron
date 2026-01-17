@@ -13,7 +13,7 @@
 	const { onDismiss, compact = false }: Props = $props();
 
 	// Compute stats from completed items
-	const completedItems = $derived(pdfs.items.filter(i => i.status === 'completed'));
+	const completedItems = $derived(pdfs.items.filter((i) => i.status === 'completed'));
 	const hasCompletedItems = $derived(completedItems.length > 0);
 
 	const totalOriginalSize = $derived(
@@ -42,14 +42,14 @@
 			<div class="flex items-center justify-between text-xs">
 				<span class="text-surface-400">{completedItems.length} done</span>
 				{#if totalSavings !== 0}
-					<span class="{totalSavings > 0 ? 'text-green-400' : 'text-amber-400'}">
+					<span class={totalSavings > 0 ? 'text-green-400' : 'text-amber-400'}>
 						{totalSavings > 0 ? '-' : '+'}{Math.abs(savingsPercent)}%
 					</span>
 				{/if}
 			</div>
 			<button
 				onclick={handleDownloadAll}
-				class="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors"
+				class="flex w-full items-center justify-center gap-2 rounded-lg bg-green-500/20 px-3 py-2 text-xs font-medium text-green-400 transition-colors hover:bg-green-500/30"
 			>
 				<Download class="h-3.5 w-3.5" />
 				Download {completedItems.length > 1 ? 'All' : ''}
@@ -57,25 +57,27 @@
 		</div>
 	{:else}
 		<!-- Full mode -->
-		<div 
-			class="glass rounded-2xl p-4 border border-surface-700/50"
+		<div
+			class="glass border-surface-700/50 rounded-2xl border p-4"
 			transition:fly={{ y: 20, duration: 300 }}
 		>
 			<!-- Header -->
-			<div class="flex items-center justify-between mb-4">
+			<div class="mb-4 flex items-center justify-between">
 				<div class="flex items-center gap-2">
-					<div class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+					<div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-500/20">
 						<Check class="h-4 w-4 text-green-400" />
 					</div>
 					<div>
-						<h3 class="font-semibold text-surface-200">Processing Complete</h3>
-						<p class="text-xs text-surface-500">{completedItems.length} file{completedItems.length !== 1 ? 's' : ''} processed</p>
+						<h3 class="text-surface-200 font-semibold">Processing Complete</h3>
+						<p class="text-surface-500 text-xs">
+							{completedItems.length} file{completedItems.length !== 1 ? 's' : ''} processed
+						</p>
 					</div>
 				</div>
 				{#if onDismiss}
 					<button
 						onclick={onDismiss}
-						class="p-1.5 text-surface-500 hover:text-surface-300 transition-colors rounded-lg hover:bg-surface-700/50"
+						class="text-surface-500 hover:text-surface-300 hover:bg-surface-700/50 rounded-lg p-1.5 transition-colors"
 					>
 						<X class="h-4 w-4" />
 					</button>
@@ -83,31 +85,36 @@
 			</div>
 
 			<!-- Stats Grid -->
-			<div class="grid grid-cols-3 gap-3 mb-4">
+			<div class="mb-4 grid grid-cols-3 gap-3">
 				<!-- Original Size -->
 				<div class="bg-surface-800/50 rounded-xl p-3 text-center">
-					<div class="text-xs text-surface-500 mb-1">Original</div>
-					<div class="font-semibold text-surface-200 text-sm">
+					<div class="text-surface-500 mb-1 text-xs">Original</div>
+					<div class="text-surface-200 text-sm font-semibold">
 						<AnimatedNumber value={totalOriginalSize} format={formatBytes} />
 					</div>
 				</div>
 
 				<!-- New Size -->
 				<div class="bg-surface-800/50 rounded-xl p-3 text-center">
-					<div class="text-xs text-surface-500 mb-1">New Size</div>
-					<div class="font-semibold text-surface-200 text-sm">
+					<div class="text-surface-500 mb-1 text-xs">New Size</div>
+					<div class="text-surface-200 text-sm font-semibold">
 						<AnimatedNumber value={totalProcessedSize} format={formatBytes} />
 					</div>
 				</div>
 
 				<!-- Savings -->
-				<div class="bg-gradient-to-br from-accent-start/20 to-accent-end/20 rounded-xl p-3 text-center border border-accent-start/20">
-					<div class="text-xs text-surface-500 mb-1">Saved</div>
-					<div class="font-semibold text-accent-start text-sm">
+				<div
+					class="from-accent-start/20 to-accent-end/20 border-accent-start/20 rounded-xl border bg-gradient-to-br p-3 text-center"
+				>
+					<div class="text-surface-500 mb-1 text-xs">Saved</div>
+					<div class="text-accent-start text-sm font-semibold">
 						{#if totalSavings > 0}
 							<AnimatedNumber value={savingsPercent} format={(n) => `${Math.round(n)}%`} />
 						{:else if totalSavings < 0}
-							+<AnimatedNumber value={Math.abs(savingsPercent)} format={(n) => `${Math.round(n)}%`} />
+							+<AnimatedNumber
+								value={Math.abs(savingsPercent)}
+								format={(n) => `${Math.round(n)}%`}
+							/>
 						{:else}
 							0%
 						{/if}
@@ -118,7 +125,7 @@
 			<!-- Download All Button -->
 			<button
 				onclick={handleDownloadAll}
-				class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-accent-start to-accent-end text-white font-semibold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-accent-start/30"
+				class="from-accent-start to-accent-end shadow-accent-start/30 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r px-4 py-2.5 font-semibold text-white shadow-lg transition-all hover:opacity-90"
 			>
 				<Download class="h-4 w-4" />
 				Download {completedItems.length > 1 ? 'All' : ''}

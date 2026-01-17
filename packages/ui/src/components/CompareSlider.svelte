@@ -6,7 +6,7 @@
 	let {
 		originalUrl,
 		compressedUrl,
-		onclose
+		onclose,
 	}: {
 		originalUrl: string;
 		compressedUrl: string;
@@ -84,21 +84,23 @@
 	<!-- Close button -->
 	<button
 		onclick={onclose}
-		class="absolute top-4 right-4 z-10 rounded-full bg-white/10 p-3 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+		class="absolute right-4 top-4 z-10 rounded-full bg-white/10 p-3 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
 		aria-label="Close comparison"
 	>
 		<X class="h-6 w-6" />
 	</button>
 
 	<!-- Instructions -->
-	<div class="absolute top-4 left-1/2 -translate-x-1/2 rounded-full bg-white/10 px-4 py-2 text-sm text-white backdrop-blur-sm">
+	<div
+		class="absolute left-1/2 top-4 -translate-x-1/2 rounded-full bg-white/10 px-4 py-2 text-sm text-white backdrop-blur-sm"
+	>
 		Drag slider to compare • Use arrow keys • Press Esc to close
 	</div>
 
 	<!-- Comparison container -->
 	<div
 		bind:this={containerRef}
-		class="relative w-[95vw] max-w-5xl aspect-auto select-none overflow-hidden rounded-2xl touch-none shadow-2xl"
+		class="relative aspect-auto w-[95vw] max-w-5xl touch-none select-none overflow-hidden rounded-2xl shadow-2xl"
 		onpointerdown={handlePointerDown}
 		onpointermove={handlePointerMove}
 		onpointerup={handlePointerUp}
@@ -115,33 +117,39 @@
 		<img
 			src={compressedUrl}
 			alt="Compressed"
-			class="block w-full h-auto max-h-[85vh] object-contain pointer-events-none"
+			class="pointer-events-none block h-auto max-h-[85vh] w-full object-contain"
 			draggable="false"
 		/>
 
 		<!-- Original image (clipped, top layer) -->
 		<div
-			class="absolute inset-0 overflow-hidden pointer-events-none"
+			class="pointer-events-none absolute inset-0 overflow-hidden"
 			style="clip-path: polygon(0 0, {sliderPosition}% 0, {sliderPosition}% 100%, 0 100%)"
 		>
 			<img
 				src={originalUrl}
 				alt="Original"
-				class="block w-full h-auto max-h-[85vh] object-contain"
+				class="block h-auto max-h-[85vh] w-full object-contain"
 				draggable="false"
 			/>
 		</div>
 
 		<!-- Slider line -->
 		<div
-			class="absolute top-0 bottom-0 w-1 -ml-0.5 bg-white shadow-[0_0_10px_rgba(0,0,0,0.5)] pointer-events-none"
+			class="pointer-events-none absolute bottom-0 top-0 -ml-0.5 w-1 bg-white shadow-[0_0_10px_rgba(0,0,0,0.5)]"
 			style="left: {sliderPosition}%"
 		>
 			<!-- Handle circle -->
 			<div
-				class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-xl"
+				class="absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-xl"
 			>
-				<svg class="h-6 w-6 text-surface-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<svg
+					class="text-surface-600 h-6 w-6"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+				>
 					<path d="M18 8L22 12L18 16" />
 					<path d="M6 8L2 12L6 16" />
 				</svg>
@@ -149,10 +157,14 @@
 		</div>
 
 		<!-- Labels -->
-		<div class="absolute bottom-4 left-4 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm pointer-events-none">
+		<div
+			class="pointer-events-none absolute bottom-4 left-4 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm"
+		>
 			Original
 		</div>
-		<div class="absolute bottom-4 right-4 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm pointer-events-none">
+		<div
+			class="pointer-events-none absolute bottom-4 right-4 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm"
+		>
 			Compressed
 		</div>
 	</div>

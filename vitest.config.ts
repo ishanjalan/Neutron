@@ -15,14 +15,8 @@ export default defineConfig({
 		coverage: {
 			provider: 'v8',
 			reporter: ['text', 'json', 'html'],
-			exclude: [
-				'node_modules/',
-				'**/build/**',
-				'**/*.config.*',
-				'**/.*',
-				'tests/e2e/**'
-			]
-		}
+			exclude: ['node_modules/', '**/build/**', '**/*.config.*', '**/.*', 'tests/e2e/**'],
+		},
 	},
 	resolve: {
 		alias: {
@@ -30,7 +24,7 @@ export default defineConfig({
 			'@neutron/utils/validation': resolve(__dirname, 'packages/utils/src/validation.ts'),
 			'@neutron/utils/comlink': resolve(__dirname, 'packages/utils/src/comlink.ts'),
 			'@neutron/ui': resolve(__dirname, 'packages/ui/src'),
-			'@neutron/ui/motion': resolve(__dirname, 'packages/ui/src/utils/motion.ts')
-		}
-	}
+			'@neutron/ui/motion': resolve(__dirname, 'packages/ui/src/utils/motion.ts'),
+		},
+	},
 });

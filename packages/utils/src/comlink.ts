@@ -1,30 +1,30 @@
 /**
  * Comlink utilities for type-safe Web Worker communication
- * 
+ *
  * @example Worker file (compress.worker.ts):
  * ```ts
  * import { expose } from '@neutron/utils/comlink';
- * 
+ *
  * const api = {
  *   async compress(data: ArrayBuffer, quality: number): Promise<ArrayBuffer> {
  *     // Heavy compression work here
  *     return compressedData;
  *   }
  * };
- * 
+ *
  * export type CompressWorkerAPI = typeof api;
  * expose(api);
  * ```
- * 
+ *
  * @example Main thread usage:
  * ```ts
  * import { createWorker } from '@neutron/utils/comlink';
  * import type { CompressWorkerAPI } from './compress.worker';
- * 
+ *
  * const worker = createWorker<CompressWorkerAPI>(
  *   new Worker(new URL('./compress.worker.ts', import.meta.url), { type: 'module' })
  * );
- * 
+ *
  * // Call worker methods like normal async functions!
  * const result = await worker.compress(data, 85);
  * ```
@@ -49,10 +49,7 @@ export function createWorker<T>(worker: Worker): Remote<T> {
  * @param url - URL to the worker script
  * @param options - Worker options
  */
-export function createWorkerFromURL<T>(
-	url: URL | string,
-	options?: WorkerOptions
-): Remote<T> {
+export function createWorkerFromURL<T>(url: URL | string, options?: WorkerOptions): Remote<T> {
 	const worker = new Worker(url, { type: 'module', ...options });
 	return wrap<T>(worker);
 }
@@ -60,7 +57,7 @@ export function createWorkerFromURL<T>(
 /**
  * Transfer ArrayBuffer ownership to worker (zero-copy)
  * Use this when sending large binary data to avoid copying
- * 
+ *
  * @example
  * ```ts
  * const buffer = new ArrayBuffer(1024 * 1024);
@@ -82,7 +79,7 @@ export function transferBuffers(buffers: ArrayBuffer[]): ArrayBuffer[] {
 /**
  * Create a callback proxy that can be called from the worker
  * Useful for progress callbacks
- * 
+ *
  * @example
  * ```ts
  * await worker.compress(data, createCallback((progress: number) => {
@@ -125,7 +122,7 @@ export class WorkerPool<T> {
 			this.queue.push({
 				task: task as (worker: Remote<T>) => Promise<unknown>,
 				resolve: resolve as (value: unknown) => void,
-				reject
+				reject,
 			});
 			this.processQueue();
 		});
@@ -170,12 +167,6 @@ export class WorkerPool<T> {
 /**
  * Helper to create a worker pool
  */
-export function createWorkerPool<T>(
-	workerUrl: URL | string,
-	poolSize?: number
-): WorkerPool<T> {
-	return new WorkerPool<T>(
-		() => new Worker(workerUrl, { type: 'module' }),
-		poolSize
-	);
+export function createWorkerPool<T>(workerUrl: URL | string, poolSize?: number): WorkerPool<T> {
+	return new WorkerPool<T>(() => new Worker(workerUrl, { type: 'module' }), poolSize);
 }

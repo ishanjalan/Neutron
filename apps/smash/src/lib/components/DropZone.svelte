@@ -5,7 +5,7 @@
 	let isDragging = $state(false);
 	let fileInput: HTMLInputElement;
 
-	const currentTool = $derived(TOOLS.find(t => t.value === pdfs.settings.tool));
+	const currentTool = $derived(TOOLS.find((t) => t.value === pdfs.settings.tool));
 	const acceptedFormats = $derived(currentTool?.accepts || '.pdf');
 	const hasItems = $derived(pdfs.items.length > 0);
 	const isImageTool = $derived(pdfs.settings.tool === 'images-to-pdf');
@@ -15,8 +15,8 @@
 			? [
 					{ name: 'JPG', color: 'from-orange-500 to-red-500' },
 					{ name: 'PNG', color: 'from-green-500 to-emerald-500' },
-					{ name: 'WebP', color: 'from-purple-500 to-pink-500' }
-			  ]
+					{ name: 'WebP', color: 'from-purple-500 to-pink-500' },
+				]
 			: [{ name: 'PDF', color: 'from-sky-500 to-cyan-500' }]
 	);
 
@@ -68,7 +68,9 @@
 	class="relative"
 	role="button"
 	tabindex="0"
-	aria-label={isImageTool ? 'Drop images here or click to browse' : 'Drop PDF files here or click to browse'}
+	aria-label={isImageTool
+		? 'Drop images here or click to browse'
+		: 'Drop PDF files here or click to browse'}
 	ondragenter={handleDragEnter}
 	ondragleave={handleDragLeave}
 	ondragover={handleDragOver}
@@ -97,30 +99,30 @@
 		>
 			<!-- Icon -->
 			<div
-				class="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-start/20 to-accent-end/20 {isDragging
+				class="from-accent-start/20 to-accent-end/20 relative flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br {isDragging
 					? 'animate-pulse-glow'
 					: ''}"
 			>
 				{#if isImageTool}
 					<Image
-						class="h-10 w-10 text-accent-start transition-transform {isDragging ? 'scale-110' : ''}"
+						class="text-accent-start h-10 w-10 transition-transform {isDragging ? 'scale-110' : ''}"
 					/>
 				{:else}
 					<FileText
-						class="h-10 w-10 text-accent-start transition-transform {isDragging ? 'scale-110' : ''}"
+						class="text-accent-start h-10 w-10 transition-transform {isDragging ? 'scale-110' : ''}"
 					/>
 				{/if}
 
 				<div
-					class="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-surface-800 ring-2 ring-surface-900"
+					class="bg-surface-800 ring-surface-900 absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full ring-2"
 				>
-					<Upload class="h-4 w-4 text-accent-start" />
+					<Upload class="text-accent-start h-4 w-4" />
 				</div>
 			</div>
 
 			<!-- Text -->
 			<div class="text-center">
-				<p class="text-lg sm:text-xl font-medium text-surface-200">
+				<p class="text-surface-200 text-lg font-medium sm:text-xl">
 					{#if isDragging}
 						Drop to add files
 					{:else if hasItems}
@@ -129,7 +131,7 @@
 						Drop {isImageTool ? 'images' : 'PDFs'} here or click to browse
 					{/if}
 				</p>
-				<p class="mt-2 text-sm text-surface-500">
+				<p class="text-surface-500 mt-2 text-sm">
 					{#if isImageTool}
 						Supports JPG, PNG, WebP
 					{:else}
@@ -154,7 +156,7 @@
 
 		<!-- Animated border gradient on drag -->
 		{#if isDragging}
-			<div class="absolute inset-0 rounded-3xl gradient-border pointer-events-none"></div>
+			<div class="gradient-border pointer-events-none absolute inset-0 rounded-3xl"></div>
 		{/if}
 	</div>
 </div>

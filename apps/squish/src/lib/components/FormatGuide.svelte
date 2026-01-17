@@ -13,7 +13,7 @@
 			bestFor: 'Photos, complex images',
 			pros: ['Smallest file size for photos', 'Universal support'],
 			cons: ['No transparency', 'Quality loss on re-save'],
-			support: '100%'
+			support: '100%',
 		},
 		{
 			name: 'PNG',
@@ -22,7 +22,7 @@
 			bestFor: 'Screenshots, graphics with transparency',
 			pros: ['Transparency support', 'Lossless quality'],
 			cons: ['Larger files than JPEG', 'Not ideal for photos'],
-			support: '100%'
+			support: '100%',
 		},
 		{
 			name: 'WebP',
@@ -31,7 +31,7 @@
 			bestFor: 'Web images (recommended)',
 			pros: ['25-35% smaller than JPEG', 'Supports transparency', 'Great quality'],
 			cons: ['No support in very old browsers'],
-			support: '97%'
+			support: '97%',
 		},
 		{
 			name: 'AVIF',
@@ -40,7 +40,7 @@
 			bestFor: 'Maximum compression',
 			pros: ['50% smaller than JPEG', 'Excellent quality', 'HDR support'],
 			cons: ['Slower encoding', 'Limited browser support'],
-			support: '93%'
+			support: '93%',
 		},
 		{
 			name: 'JPEG XL',
@@ -49,8 +49,8 @@
 			bestFor: 'Best quality & compression',
 			pros: ['Best quality at any size', 'Lossless JPEG recompression', 'Progressive loading'],
 			cons: ['Limited browser support (Safari, Chrome flag)'],
-			support: '~25%'
-		}
+			support: '~25%',
+		},
 	];
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -87,13 +87,13 @@
 
 		<!-- Modal -->
 		<div
-			class="relative w-full max-w-2xl rounded-2xl bg-surface-900 p-6 shadow-2xl"
+			class="bg-surface-900 relative w-full max-w-2xl rounded-2xl p-6 shadow-2xl"
 			transition:scale={{ duration: 200, start: 0.95 }}
 		>
 			<!-- Close button -->
 			<button
 				onclick={onclose}
-				class="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-lg text-surface-400 transition-colors hover:bg-surface-800"
+				class="text-surface-400 hover:bg-surface-800 absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg transition-colors"
 				aria-label="Close"
 			>
 				<X class="h-5 w-5" />
@@ -101,37 +101,35 @@
 
 			<!-- Header -->
 			<div class="mb-6">
-				<h2 id="format-guide-title" class="text-xl font-semibold text-surface-100">
-					Format Guide
-				</h2>
-				<p class="mt-1 text-sm text-surface-500">
-					Choose the right format for your use case
-				</p>
+				<h2 id="format-guide-title" class="text-surface-100 text-xl font-semibold">Format Guide</h2>
+				<p class="text-surface-500 mt-1 text-sm">Choose the right format for your use case</p>
 			</div>
 
 			<!-- Format Grid -->
 			<div class="grid gap-4 sm:grid-cols-2">
 				{#each formats as format}
-					<div class="rounded-xl border border-surface-700 p-4">
-						<div class="flex items-center gap-3 mb-3">
-							<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br {format.color}">
+					<div class="border-surface-700 rounded-xl border p-4">
+						<div class="mb-3 flex items-center gap-3">
+							<div
+								class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br {format.color}"
+							>
 								<format.icon class="h-5 w-5 text-white" />
 							</div>
 							<div>
-								<h3 class="font-semibold text-surface-100">{format.name}</h3>
-								<div class="flex items-center gap-1 text-xs text-surface-500">
+								<h3 class="text-surface-100 font-semibold">{format.name}</h3>
+								<div class="text-surface-500 flex items-center gap-1 text-xs">
 									<Globe class="h-3 w-3" />
 									<span>{format.support} browser support</span>
 								</div>
 							</div>
 						</div>
-						
-						<p class="text-sm font-medium text-accent-start mb-2">{format.bestFor}</p>
-						
+
+						<p class="text-accent-start mb-2 text-sm font-medium">{format.bestFor}</p>
+
 						<div class="space-y-2 text-xs">
 							<div>
-								<span class="text-green-500 font-medium">Pros:</span>
-								<ul class="mt-0.5 text-surface-400">
+								<span class="font-medium text-green-500">Pros:</span>
+								<ul class="text-surface-400 mt-0.5">
 									{#each format.pros as pro}
 										<li class="flex items-start gap-1">
 											<span class="text-green-500">+</span>
@@ -141,8 +139,8 @@
 								</ul>
 							</div>
 							<div>
-								<span class="text-amber-500 font-medium">Cons:</span>
-								<ul class="mt-0.5 text-surface-400">
+								<span class="font-medium text-amber-500">Cons:</span>
+								<ul class="text-surface-400 mt-0.5">
 									{#each format.cons as con}
 										<li class="flex items-start gap-1">
 											<span class="text-amber-500">-</span>
@@ -157,12 +155,13 @@
 			</div>
 
 			<!-- Recommendation -->
-			<div class="mt-6 rounded-lg bg-accent-start/10 p-4">
-				<p class="text-sm text-surface-300">
-					<strong class="text-accent-start">Recommendation:</strong> Use <strong>WebP</strong> for 
-					most web images — it offers the best balance of quality, file size, and compatibility. 
-					Use <strong>AVIF</strong> for maximum compression, or <strong>JPEG XL</strong> for best quality 
-					when targeting Safari or progressive enhancement.
+			<div class="bg-accent-start/10 mt-6 rounded-lg p-4">
+				<p class="text-surface-300 text-sm">
+					<strong class="text-accent-start">Recommendation:</strong> Use <strong>WebP</strong> for
+					most web images — it offers the best balance of quality, file size, and compatibility. Use
+					<strong>AVIF</strong>
+					for maximum compression, or <strong>JPEG XL</strong> for best quality when targeting Safari
+					or progressive enhancement.
 				</p>
 			</div>
 		</div>

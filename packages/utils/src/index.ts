@@ -1,6 +1,11 @@
 // Re-export all utilities
 export { formatBytes, formatPercent, formatDuration } from './format';
-export { downloadBlob, isFileSystemAccessSupported, isClipboardWriteSupported, copyBlobToClipboard } from './download';
+export {
+	downloadBlob,
+	isFileSystemAccessSupported,
+	isClipboardWriteSupported,
+	copyBlobToClipboard,
+} from './download';
 export { trapFocus, releaseFocus, focusTrap, createFocusTrap } from './focus-trap';
 
 // Validation utilities (Valibot)
@@ -28,7 +33,7 @@ export {
 	validateCompressionSettings,
 	getValidationErrors,
 	// Valibot namespace for advanced usage
-	v
+	v,
 } from './validation';
 
 export type { PDFSettings, CompressionSettings, ImageSettings, GIFSettings } from './validation';

@@ -8,7 +8,12 @@
 		compact?: boolean;
 	}
 
-	let { accept = '.gif,.mp4,.webm,.mov,.webp,.png,.apng', acceptLabel = 'GIF, MP4, WebM, MOV, WebP, PNG', onfiles, compact = false }: Props = $props();
+	let {
+		accept = '.gif,.mp4,.webm,.mov,.webp,.png,.apng',
+		acceptLabel = 'GIF, MP4, WebM, MOV, WebP, PNG',
+		onfiles,
+		compact = false,
+	}: Props = $props();
 
 	let isDragging = $state(false);
 	let fileInput: HTMLInputElement;
@@ -21,7 +26,7 @@
 		{ name: 'GIF', color: 'from-pink-500 to-rose-500' },
 		{ name: 'MP4', color: 'from-orange-500 to-amber-500' },
 		{ name: 'WebM', color: 'from-green-500 to-emerald-500' },
-		{ name: 'WebP', color: 'from-blue-500 to-cyan-500' }
+		{ name: 'WebP', color: 'from-blue-500 to-cyan-500' },
 	];
 
 	function handleDragEnter(e: DragEvent) {
@@ -68,7 +73,7 @@
 
 	async function handleUrlSubmit(e?: Event) {
 		e?.preventDefault();
-		
+
 		const url = urlInput.trim();
 		if (!url) return;
 
@@ -85,17 +90,17 @@
 
 		try {
 			const response = await fetch(url);
-			
+
 			if (!response.ok) {
 				throw new Error(`Failed to fetch: ${response.status}`);
 			}
 
 			const contentType = response.headers.get('content-type') || '';
 			const blob = await response.blob();
-			
+
 			// Extract filename from URL or generate one
 			let filename = url.split('/').pop()?.split('?')[0] || 'file';
-			
+
 			// Add extension based on content type if missing
 			if (!filename.includes('.')) {
 				if (contentType.includes('gif')) filename += '.gif';
@@ -156,41 +161,46 @@
 	{#if compact}
 		<!-- Compact dropzone -->
 		<div
-			class="group flex items-center justify-center gap-4 rounded-2xl border-2 border-dashed py-4 sm:py-5 px-6 transition-all duration-300 cursor-pointer {isDragging
+			class="group flex cursor-pointer items-center justify-center gap-4 rounded-2xl border-2 border-dashed px-6 py-4 transition-all duration-300 sm:py-5 {isDragging
 				? 'border-accent-start bg-accent-start/5'
 				: 'border-surface-700 hover:border-accent-start/50'}"
 		>
-			<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-800 transition-colors group-hover:bg-accent-start/10">
+			<div
+				class="bg-surface-800 group-hover:bg-accent-start/10 flex h-10 w-10 items-center justify-center rounded-xl transition-colors"
+			>
 				{#if isDragging}
-					<Film class="h-5 w-5 text-accent-start animate-pulse" />
+					<Film class="text-accent-start h-5 w-5 animate-pulse" />
 				{:else}
-					<Upload class="h-5 w-5 text-surface-400 group-hover:text-accent-start" />
+					<Upload class="text-surface-400 group-hover:text-accent-start h-5 w-5" />
 				{/if}
 			</div>
-			<p class="text-base text-surface-500">
+			<p class="text-surface-500 text-base">
 				{#if isDragging}
-					<span class="font-medium text-accent-start">Release to add more</span>
+					<span class="text-accent-start font-medium">Release to add more</span>
 				{:else}
-					Drop more files or <span class="font-medium text-accent-start">click to browse</span>
+					Drop more files or <span class="text-accent-start font-medium">click to browse</span>
 				{/if}
 			</p>
 		</div>
-		
+
 		<!-- URL input for compact mode -->
 		{#if !showUrlInput}
 			<button
 				type="button"
-				class="mt-2 text-sm text-surface-500 hover:text-accent-start transition-colors"
-				onclick={(e) => { e.stopPropagation(); showUrlInput = true; }}
+				class="text-surface-500 hover:text-accent-start mt-2 text-sm transition-colors"
+				onclick={(e) => {
+					e.stopPropagation();
+					showUrlInput = true;
+				}}
 			>
-				<Link class="inline h-3.5 w-3.5 mr-1" />
+				<Link class="mr-1 inline h-3.5 w-3.5" />
 				or paste a URL
 			</button>
 		{/if}
 	{:else}
 		<!-- Full dropzone -->
 		<div
-			class="group relative overflow-hidden rounded-2xl border-2 border-dashed py-12 sm:py-16 transition-all duration-300 cursor-pointer {isDragging
+			class="group relative cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed py-12 transition-all duration-300 sm:py-16 {isDragging
 				? 'border-accent-start bg-accent-start/5 scale-[1.01]'
 				: 'border-surface-700 hover:border-accent-start/50'}"
 		>
@@ -204,26 +214,28 @@
 				<!-- Icon -->
 				<div
 					class="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl transition-all duration-300 {isDragging
-						? 'bg-accent-start/20 scale-110 rotate-3'
+						? 'bg-accent-start/20 rotate-3 scale-110'
 						: 'bg-surface-800 group-hover:bg-accent-start/10 group-hover:scale-105'}"
 				>
 					{#if isDragging}
-						<Film class="h-8 w-8 text-accent-start animate-pulse" />
+						<Film class="text-accent-start h-8 w-8 animate-pulse" />
 					{:else}
 						<Upload
-							class="h-8 w-8 text-surface-400 transition-all group-hover:text-accent-start group-hover:-translate-y-1"
+							class="text-surface-400 group-hover:text-accent-start h-8 w-8 transition-all group-hover:-translate-y-1"
 						/>
 					{/if}
 				</div>
 
 				<!-- Text -->
 				{#if isDragging}
-					<p class="text-xl font-semibold text-accent-start">Release to upload</p>
-					<p class="mt-2 text-base text-accent-start/70">Your files are ready to be processed</p>
+					<p class="text-accent-start text-xl font-semibold">Release to upload</p>
+					<p class="text-accent-start/70 mt-2 text-base">Your files are ready to be processed</p>
 				{:else}
-					<p class="text-xl font-semibold text-surface-300">Drop files here</p>
-					<p class="mt-2 text-base text-surface-500">
-						or <span class="font-medium text-accent-start underline-offset-2 hover:underline">click to browse</span>
+					<p class="text-surface-300 text-xl font-semibold">Drop files here</p>
+					<p class="text-surface-500 mt-2 text-base">
+						or <span class="text-accent-start font-medium underline-offset-2 hover:underline"
+							>click to browse</span
+						>
 					</p>
 				{/if}
 
@@ -237,7 +249,7 @@
 						</span>
 					{/each}
 				</div>
-				<p class="mt-5 text-sm text-surface-400">
+				<p class="text-surface-400 mt-5 text-sm">
 					{acceptLabel} • Large files supported • Batch upload
 				</p>
 
@@ -245,8 +257,11 @@
 				{#if !showUrlInput}
 					<button
 						type="button"
-						class="mt-4 inline-flex items-center gap-1.5 text-sm text-surface-500 hover:text-accent-start transition-colors"
-						onclick={(e) => { e.stopPropagation(); showUrlInput = true; }}
+						class="text-surface-500 hover:text-accent-start mt-4 inline-flex items-center gap-1.5 text-sm transition-colors"
+						onclick={(e) => {
+							e.stopPropagation();
+							showUrlInput = true;
+						}}
 					>
 						<Link class="h-4 w-4" />
 						or paste a URL
@@ -261,21 +276,21 @@
 		<div class="mt-3" onclick={(e) => e.stopPropagation()}>
 			<div class="flex gap-2">
 				<div class="relative flex-1">
-					<Link class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-500" />
+					<Link class="text-surface-500 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
 					<input
 						type="url"
 						bind:value={urlInput}
 						onkeydown={handleUrlKeydown}
 						placeholder="https://example.com/image.gif"
 						disabled={isLoadingUrl}
-						class="w-full rounded-xl bg-surface-800 border border-surface-700 pl-10 pr-4 py-2.5 text-sm text-surface-100 placeholder:text-surface-500 focus:border-accent-start focus:outline-none focus:ring-1 focus:ring-accent-start disabled:opacity-50"
+						class="bg-surface-800 border-surface-700 text-surface-100 placeholder:text-surface-500 focus:border-accent-start focus:ring-accent-start w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 disabled:opacity-50"
 					/>
 				</div>
 				<button
 					type="button"
 					onclick={handleUrlSubmit}
 					disabled={isLoadingUrl || !urlInput.trim()}
-					class="rounded-xl bg-accent-start px-4 py-2.5 text-sm font-medium text-white hover:bg-accent-start/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+					class="bg-accent-start hover:bg-accent-start/90 rounded-xl px-4 py-2.5 text-sm font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
 				>
 					{#if isLoadingUrl}
 						<Loader2 class="h-4 w-4 animate-spin" />
@@ -285,8 +300,12 @@
 				</button>
 				<button
 					type="button"
-					onclick={() => { showUrlInput = false; urlInput = ''; urlError = ''; }}
-					class="rounded-xl bg-surface-800 px-3 py-2.5 text-surface-400 hover:text-surface-100 hover:bg-surface-700 transition-colors"
+					onclick={() => {
+						showUrlInput = false;
+						urlInput = '';
+						urlError = '';
+					}}
+					class="bg-surface-800 text-surface-400 hover:text-surface-100 hover:bg-surface-700 rounded-xl px-3 py-2.5 transition-colors"
 				>
 					<X class="h-4 w-4" />
 				</button>

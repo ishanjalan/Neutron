@@ -21,10 +21,7 @@ export default defineConfig({
 	workers: process.env.CI ? 1 : undefined,
 
 	// Reporter to use
-	reporter: [
-		['html', { open: 'never' }],
-		['list']
-	],
+	reporter: [['html', { open: 'never' }], ['list']],
 
 	// Shared settings for all projects
 	use: {
@@ -38,32 +35,32 @@ export default defineConfig({
 		screenshot: 'only-on-failure',
 
 		// Video recording
-		video: 'retain-on-failure'
+		video: 'retain-on-failure',
 	},
 
 	// Configure projects for major browsers
 	projects: [
 		{
 			name: 'chromium',
-			use: { ...devices['Desktop Chrome'] }
+			use: { ...devices['Desktop Chrome'] },
 		},
 		{
 			name: 'firefox',
-			use: { ...devices['Desktop Firefox'] }
+			use: { ...devices['Desktop Firefox'] },
 		},
 		{
 			name: 'webkit',
-			use: { ...devices['Desktop Safari'] }
+			use: { ...devices['Desktop Safari'] },
 		},
 		// Mobile viewports
 		{
 			name: 'Mobile Chrome',
-			use: { ...devices['Pixel 5'] }
+			use: { ...devices['Pixel 5'] },
 		},
 		{
 			name: 'Mobile Safari',
-			use: { ...devices['iPhone 12'] }
-		}
+			use: { ...devices['iPhone 12'] },
+		},
 	],
 
 	// Run your local dev server before starting the tests
@@ -71,6 +68,6 @@ export default defineConfig({
 		command: 'pnpm dev:smash',
 		url: 'http://localhost:5174',
 		reuseExistingServer: true,
-		timeout: 120 * 1000
-	}
+		timeout: 120 * 1000,
+	},
 });

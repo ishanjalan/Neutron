@@ -4,7 +4,16 @@
 	import { Toast, toast } from '@neutron/ui';
 	import { mergePDFs, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
-	import { Layers, Upload, FileText, Download, Trash2, Loader2, CheckCircle, GripVertical } from 'lucide-svelte';
+	import {
+		Layers,
+		Upload,
+		FileText,
+		Download,
+		Trash2,
+		Loader2,
+		CheckCircle,
+		GripVertical,
+	} from 'lucide-svelte';
 	import { fade, fly, slide } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 
@@ -35,7 +44,9 @@
 	}
 
 	async function handleFiles(newFiles: File[]) {
-		const pdfFiles = newFiles.filter(f => f.type === 'application/pdf' || f.name.endsWith('.pdf'));
+		const pdfFiles = newFiles.filter(
+			(f) => f.type === 'application/pdf' || f.name.endsWith('.pdf')
+		);
 		if (pdfFiles.length === 0) {
 			toast.error('Please select PDF files');
 			return;
@@ -50,7 +61,7 @@
 				id: generateId(),
 				file,
 				originalUrl: URL.createObjectURL(file),
-				order: startOrder + i
+				order: startOrder + i,
 			};
 
 			try {
@@ -70,15 +81,15 @@
 	}
 
 	function removeFile(id: string) {
-		const file = files.find(f => f.id === id);
+		const file = files.find((f) => f.id === id);
 		if (file) URL.revokeObjectURL(file.originalUrl);
-		files = files.filter(f => f.id !== id).map((f, i) => ({ ...f, order: i }));
+		files = files.filter((f) => f.id !== id).map((f, i) => ({ ...f, order: i }));
 		mergedBlob = null;
 		mergedUrl = null;
 	}
 
 	function moveFile(id: string, direction: 'up' | 'down') {
-		const index = files.findIndex(f => f.id === id);
+		const index = files.findIndex((f) => f.id === id);
 		if (direction === 'up' && index > 0) {
 			const newFiles = [...files];
 			[newFiles[index - 1], newFiles[index]] = [newFiles[index], newFiles[index - 1]];
@@ -102,7 +113,7 @@
 		progress = 0;
 
 		try {
-			const sortedFiles = [...files].sort((a, b) => a.order - b.order).map(f => f.file);
+			const sortedFiles = [...files].sort((a, b) => a.order - b.order).map((f) => f.file);
 			const result = await mergePDFs(sortedFiles, (p) => {
 				progress = p;
 			});
@@ -139,7 +150,12 @@
 	function handleDragLeave(e: DragEvent) {
 		e.preventDefault();
 		const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-		if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) {
+		if (
+			e.clientX < rect.left ||
+			e.clientX > rect.right ||
+			e.clientY < rect.top ||
+			e.clientY > rect.bottom
+		) {
 			isDragging = false;
 		}
 	}
@@ -180,8 +196,8 @@
 	function handleItemDragOver(e: DragEvent, targetId: string) {
 		e.preventDefault();
 		if (draggedItem && draggedItem !== targetId) {
-			const draggedIndex = files.findIndex(f => f.id === draggedItem);
-			const targetIndex = files.findIndex(f => f.id === targetId);
+			const draggedIndex = files.findIndex((f) => f.id === draggedItem);
+			const targetIndex = files.findIndex((f) => f.id === targetId);
 			if (draggedIndex !== -1 && targetIndex !== -1) {
 				const newFiles = [...files];
 				const [removed] = newFiles.splice(draggedIndex, 1);
@@ -206,19 +222,23 @@
 	<Header />
 
 	<div class="fixed inset-0 -z-10 overflow-hidden">
-		<div class="absolute -top-1/2 -right-1/4 h-[800px] w-[800px] rounded-full bg-gradient-to-br from-blue-500/10 to-cyan-500/10 blur-3xl"></div>
+		<div
+			class="absolute -right-1/4 -top-1/2 h-[800px] w-[800px] rounded-full bg-gradient-to-br from-blue-500/10 to-cyan-500/10 blur-3xl"
+		></div>
 	</div>
 
-	<main class="flex-1 px-4 sm:px-6 lg:px-8 pt-28 pb-12">
+	<main class="flex-1 px-4 pb-12 pt-28 sm:px-6 lg:px-8">
 		<div class="mx-auto max-w-4xl">
 			<!-- Header -->
-			<div class="text-center mb-8" in:fade={{ duration: 200 }}>
-				<div class="inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-4 py-1.5 text-sm font-medium text-blue-400 mb-4">
+			<div class="mb-8 text-center" in:fade={{ duration: 200 }}>
+				<div
+					class="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-4 py-1.5 text-sm font-medium text-blue-400"
+				>
 					<Layers class="h-4 w-4" />
 					Merge PDFs
 				</div>
-				<h1 class="text-3xl font-bold text-surface-100">Combine multiple PDFs into one</h1>
-				<p class="mt-2 text-surface-500">Drag to reorder, then merge into a single document</p>
+				<h1 class="text-surface-100 text-3xl font-bold">Combine multiple PDFs into one</h1>
+				<p class="text-surface-500 mt-2">Drag to reorder, then merge into a single document</p>
 			</div>
 
 			<!-- Drop Zone -->
@@ -231,9 +251,11 @@
 				ondrop={handleDrop}
 				onclick={openFilePicker}
 				onkeydown={(e) => e.key === 'Enter' && openFilePicker()}
-				class="relative overflow-hidden rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer {isDragging
+				class="relative cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed transition-all duration-300 {isDragging
 					? 'border-accent-start bg-accent-start/10 scale-[1.02]'
-					: 'border-surface-700 hover:border-surface-600 bg-surface-900/50'} {hasFiles ? 'py-6' : 'py-12'}"
+					: 'border-surface-700 hover:border-surface-600 bg-surface-900/50'} {hasFiles
+					? 'py-6'
+					: 'py-12'}"
 			>
 				<input
 					bind:this={fileInput}
@@ -245,10 +267,12 @@
 				/>
 
 				<div class="flex flex-col items-center justify-center gap-4 px-6">
-					<div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20">
+					<div
+						class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20"
+					>
 						<Upload class="h-8 w-8 text-blue-400" />
 					</div>
-					<p class="text-lg font-medium text-surface-200">
+					<p class="text-surface-200 text-lg font-medium">
 						{hasFiles ? 'Add more PDFs' : 'Drop PDFs here or click to browse'}
 					</p>
 				</div>
@@ -257,40 +281,45 @@
 			<!-- File List -->
 			{#if hasFiles}
 				<div class="mt-6 space-y-2" in:fly={{ y: 20, duration: 200 }}>
-					<div class="flex items-center justify-between text-sm text-surface-400 mb-2">
+					<div class="text-surface-400 mb-2 flex items-center justify-between text-sm">
 						<span>Drag to reorder • {files.length} PDFs • {totalPages} pages total</span>
 						<span>{formatBytes(totalSize)}</span>
 					</div>
 
 					{#each files.sort((a, b) => a.order - b.order) as pdfFile (pdfFile.id)}
 						<div
-							class="glass rounded-xl p-3 flex items-center justify-between cursor-grab active:cursor-grabbing transition-transform {draggedItem === pdfFile.id ? 'opacity-50 scale-95' : ''}"
+							class="glass flex cursor-grab items-center justify-between rounded-xl p-3 transition-transform active:cursor-grabbing {draggedItem ===
+							pdfFile.id
+								? 'scale-95 opacity-50'
+								: ''}"
 							draggable="true"
 							ondragstart={(e) => handleItemDragStart(e, pdfFile.id)}
 							ondragover={(e) => handleItemDragOver(e, pdfFile.id)}
 							ondragend={handleItemDragEnd}
 							animate:flip={{ duration: 200 }}
 						>
-							<div class="flex items-center gap-3 min-w-0 flex-1">
-								<GripVertical class="h-5 w-5 text-surface-500 flex-shrink-0" />
-								<span class="text-sm font-bold text-surface-400 w-6">{pdfFile.order + 1}</span>
-								<div class="h-12 w-12 rounded-lg bg-surface-800 overflow-hidden flex-shrink-0">
+							<div class="flex min-w-0 flex-1 items-center gap-3">
+								<GripVertical class="text-surface-500 h-5 w-5 flex-shrink-0" />
+								<span class="text-surface-400 w-6 text-sm font-bold">{pdfFile.order + 1}</span>
+								<div class="bg-surface-800 h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
 									{#if pdfFile.thumbnail}
-										<img src={pdfFile.thumbnail} alt="" class="w-full h-full object-cover" />
+										<img src={pdfFile.thumbnail} alt="" class="h-full w-full object-cover" />
 									{:else}
-										<div class="w-full h-full flex items-center justify-center">
-											<FileText class="h-6 w-6 text-surface-500" />
+										<div class="flex h-full w-full items-center justify-center">
+											<FileText class="text-surface-500 h-6 w-6" />
 										</div>
 									{/if}
 								</div>
 								<div class="min-w-0 flex-1">
-									<p class="text-sm font-medium text-surface-200 truncate">{pdfFile.file.name}</p>
-									<p class="text-xs text-surface-500">{formatBytes(pdfFile.file.size)} • {pdfFile.pageCount || '?'} pages</p>
+									<p class="text-surface-200 truncate text-sm font-medium">{pdfFile.file.name}</p>
+									<p class="text-surface-500 text-xs">
+										{formatBytes(pdfFile.file.size)} • {pdfFile.pageCount || '?'} pages
+									</p>
 								</div>
 							</div>
 							<button
 								onclick={() => removeFile(pdfFile.id)}
-								class="p-2 text-surface-500 hover:text-red-400 transition-colors"
+								class="text-surface-500 p-2 transition-colors hover:text-red-400"
 							>
 								<Trash2 class="h-4 w-4" />
 							</button>
@@ -301,29 +330,35 @@
 				<!-- Progress Bar -->
 				{#if isProcessing}
 					<div class="mt-4">
-						<div class="h-2 bg-surface-700 rounded-full overflow-hidden">
-							<div class="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all" style="width: {progress}%"></div>
+						<div class="bg-surface-700 h-2 overflow-hidden rounded-full">
+							<div
+								class="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all"
+								style="width: {progress}%"
+							></div>
 						</div>
-						<p class="text-sm text-surface-400 mt-1 text-center">Merging... {progress}%</p>
+						<p class="text-surface-400 mt-1 text-center text-sm">Merging... {progress}%</p>
 					</div>
 				{/if}
 
 				<!-- Result -->
 				{#if mergedBlob && !isProcessing}
-					<div class="mt-6 p-4 rounded-xl bg-green-500/10 border border-green-500/30" in:fly={{ y: 10, duration: 200 }}>
+					<div
+						class="mt-6 rounded-xl border border-green-500/30 bg-green-500/10 p-4"
+						in:fly={{ y: 10, duration: 200 }}
+					>
 						<div class="flex items-center justify-between">
 							<div>
-								<p class="text-green-400 font-medium flex items-center gap-2">
+								<p class="flex items-center gap-2 font-medium text-green-400">
 									<CheckCircle class="h-4 w-4" />
 									Merge complete!
 								</p>
-								<p class="text-sm text-surface-500">
+								<p class="text-surface-500 text-sm">
 									{files.length} PDFs → 1 PDF ({formatBytes(mergedBlob.size)})
 								</p>
 							</div>
 							<button
 								onclick={downloadMerged}
-								class="flex items-center gap-2 rounded-xl bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600 transition-colors"
+								class="flex items-center gap-2 rounded-xl bg-green-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-600"
 							>
 								<Download class="h-4 w-4" />
 								Download
@@ -336,7 +371,7 @@
 				<button
 					onclick={handleMerge}
 					disabled={files.length < 2 || isProcessing}
-					class="mt-6 w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-blue-500/30 transition-all hover:shadow-xl hover:shadow-blue-500/40 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+					class="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-blue-500/30 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-500/40 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
 				>
 					{#if isProcessing}
 						<Loader2 class="h-5 w-5 animate-spin" />

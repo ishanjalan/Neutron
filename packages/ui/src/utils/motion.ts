@@ -1,11 +1,11 @@
 /**
  * Motion animation utilities for Neutron
  * Lightweight, performant animations with the Motion library
- * 
+ *
  * @example
  * ```ts
  * import { fadeIn, slideUp, staggerChildren, prefersReducedMotion } from '@neutron/ui/motion';
- * 
+ *
  * // Use in Svelte onMount
  * onMount(() => {
  *   if (!prefersReducedMotion()) {
@@ -145,17 +145,14 @@ export function staggerChildren(
 		duration: 0.4,
 		easing: 'ease-out',
 		delay: stagger(staggerDelay),
-		...animOptions
+		...animOptions,
 	});
 }
 
 /**
  * Pulse animation (for attention)
  */
-export function pulse(
-	selector: string | Element | Element[],
-	options?: Partial<AnimationOptions>
-) {
+export function pulse(selector: string | Element | Element[], options?: Partial<AnimationOptions>) {
 	return safeAnimate(
 		selector,
 		{ scale: [1, 1.05, 1] },
@@ -166,10 +163,7 @@ export function pulse(
 /**
  * Shake animation (for errors)
  */
-export function shake(
-	selector: string | Element | Element[],
-	options?: Partial<AnimationOptions>
-) {
+export function shake(selector: string | Element | Element[], options?: Partial<AnimationOptions>) {
 	return safeAnimate(
 		selector,
 		{ x: [0, -10, 10, -10, 10, 0] },
@@ -190,7 +184,7 @@ export function bounce(
 		{
 			duration: 0.5,
 			easing: spring({ stiffness: 300, damping: 10 }),
-			...options
+			...options,
 		}
 	);
 }

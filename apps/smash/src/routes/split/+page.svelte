@@ -4,7 +4,16 @@
 	import { Toast, toast } from '@neutron/ui';
 	import { splitPDF, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
-	import { Scissors, Upload, FileText, Download, Trash2, Loader2, CheckCircle, Settings } from 'lucide-svelte';
+	import {
+		Scissors,
+		Upload,
+		FileText,
+		Download,
+		Trash2,
+		Loader2,
+		CheckCircle,
+		Settings,
+	} from 'lucide-svelte';
 	import { fade, fly, slide } from 'svelte/transition';
 
 	interface PDFFile {
@@ -34,7 +43,7 @@
 	}
 
 	async function handleFiles(newFiles: File[]) {
-		const file = newFiles.find(f => f.type === 'application/pdf' || f.name.endsWith('.pdf'));
+		const file = newFiles.find((f) => f.type === 'application/pdf' || f.name.endsWith('.pdf'));
 		if (!file) {
 			toast.error('Please select a PDF file');
 			return;
@@ -47,7 +56,7 @@
 		const newPdf: PDFFile = {
 			id: generateId(),
 			file,
-			originalUrl: URL.createObjectURL(file)
+			originalUrl: URL.createObjectURL(file),
 		};
 
 		try {
@@ -72,11 +81,11 @@
 
 	function parsePageRange(rangeStr: string, maxPages: number): number[] {
 		const pages = new Set<number>();
-		const parts = rangeStr.split(',').map(s => s.trim());
+		const parts = rangeStr.split(',').map((s) => s.trim());
 
 		for (const part of parts) {
 			if (part.includes('-')) {
-				const [start, end] = part.split('-').map(s => parseInt(s.trim(), 10));
+				const [start, end] = part.split('-').map((s) => parseInt(s.trim(), 10));
 				if (!isNaN(start) && !isNaN(end)) {
 					for (let i = Math.max(1, start); i <= Math.min(maxPages, end); i++) {
 						pages.add(i);
@@ -107,7 +116,9 @@
 				results = await splitPDF(pdfFile.file, {
 					mode: 'every-n',
 					everyN,
-					onProgress: (p) => { progress = p; }
+					onProgress: (p) => {
+						progress = p;
+					},
 				});
 			} else {
 				const pages = parsePageRange(pageRange, pdfFile.pageCount || 0);
@@ -117,7 +128,9 @@
 				results = await splitPDF(pdfFile.file, {
 					mode: 'extract',
 					pages,
-					onProgress: (p) => { progress = p; }
+					onProgress: (p) => {
+						progress = p;
+					},
 				});
 			}
 
@@ -183,7 +196,12 @@
 	function handleDragLeave(e: DragEvent) {
 		e.preventDefault();
 		const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-		if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) {
+		if (
+			e.clientX < rect.left ||
+			e.clientX > rect.right ||
+			e.clientY < rect.top ||
+			e.clientY > rect.bottom
+		) {
 			isDragging = false;
 		}
 	}
@@ -222,19 +240,23 @@
 	<Header />
 
 	<div class="fixed inset-0 -z-10 overflow-hidden">
-		<div class="absolute -top-1/2 -right-1/4 h-[800px] w-[800px] rounded-full bg-gradient-to-br from-pink-500/10 to-rose-500/10 blur-3xl"></div>
+		<div
+			class="absolute -right-1/4 -top-1/2 h-[800px] w-[800px] rounded-full bg-gradient-to-br from-pink-500/10 to-rose-500/10 blur-3xl"
+		></div>
 	</div>
 
-	<main class="flex-1 px-4 sm:px-6 lg:px-8 pt-28 pb-12">
+	<main class="flex-1 px-4 pb-12 pt-28 sm:px-6 lg:px-8">
 		<div class="mx-auto max-w-4xl">
 			<!-- Header -->
-			<div class="text-center mb-8" in:fade={{ duration: 200 }}>
-				<div class="inline-flex items-center gap-2 rounded-full bg-pink-500/10 px-4 py-1.5 text-sm font-medium text-pink-400 mb-4">
+			<div class="mb-8 text-center" in:fade={{ duration: 200 }}>
+				<div
+					class="mb-4 inline-flex items-center gap-2 rounded-full bg-pink-500/10 px-4 py-1.5 text-sm font-medium text-pink-400"
+				>
 					<Scissors class="h-4 w-4" />
 					Split PDF
 				</div>
-				<h1 class="text-3xl font-bold text-surface-100">Extract or split pages from PDF</h1>
-				<p class="mt-2 text-surface-500">Choose specific pages or split every N pages</p>
+				<h1 class="text-surface-100 text-3xl font-bold">Extract or split pages from PDF</h1>
+				<p class="text-surface-500 mt-2">Choose specific pages or split every N pages</p>
 			</div>
 
 			<div class="grid gap-6 lg:grid-cols-2">
@@ -251,7 +273,7 @@
 							ondrop={handleDrop}
 							onclick={openFilePicker}
 							onkeydown={(e) => e.key === 'Enter' && openFilePicker()}
-							class="relative overflow-hidden rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer py-16 {isDragging
+							class="relative cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed py-16 transition-all duration-300 {isDragging
 								? 'border-accent-start bg-accent-start/10 scale-[1.02]'
 								: 'border-surface-700 hover:border-surface-600 bg-surface-900/50'}"
 						>
@@ -263,32 +285,36 @@
 								onchange={handleFileInput}
 							/>
 							<div class="flex flex-col items-center justify-center gap-4 px-6">
-								<div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500/20 to-rose-500/20">
+								<div
+									class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500/20 to-rose-500/20"
+								>
 									<Upload class="h-8 w-8 text-pink-400" />
 								</div>
-								<p class="text-lg font-medium text-surface-200">Drop a PDF here or click to browse</p>
+								<p class="text-surface-200 text-lg font-medium">
+									Drop a PDF here or click to browse
+								</p>
 							</div>
 						</div>
 					{:else if pdfFile}
 						<!-- File Card -->
 						<div class="glass rounded-2xl p-4" in:fly={{ y: 20, duration: 200 }}>
 							<div class="flex items-start gap-4">
-								<div class="h-24 w-20 rounded-lg bg-surface-800 overflow-hidden flex-shrink-0">
+								<div class="bg-surface-800 h-24 w-20 flex-shrink-0 overflow-hidden rounded-lg">
 									{#if pdfFile.thumbnail}
-										<img src={pdfFile.thumbnail} alt="" class="w-full h-full object-cover" />
+										<img src={pdfFile.thumbnail} alt="" class="h-full w-full object-cover" />
 									{:else}
-										<div class="w-full h-full flex items-center justify-center">
-											<FileText class="h-10 w-10 text-surface-500" />
+										<div class="flex h-full w-full items-center justify-center">
+											<FileText class="text-surface-500 h-10 w-10" />
 										</div>
 									{/if}
 								</div>
-								<div class="flex-1 min-w-0">
-									<p class="font-medium text-surface-200 truncate">{pdfFile.file.name}</p>
-									<p class="text-sm text-surface-500 mt-1">{formatBytes(pdfFile.file.size)}</p>
-									<p class="text-sm text-surface-500">{pdfFile.pageCount} pages</p>
+								<div class="min-w-0 flex-1">
+									<p class="text-surface-200 truncate font-medium">{pdfFile.file.name}</p>
+									<p class="text-surface-500 mt-1 text-sm">{formatBytes(pdfFile.file.size)}</p>
+									<p class="text-surface-500 text-sm">{pdfFile.pageCount} pages</p>
 									<button
 										onclick={removeFile}
-										class="mt-2 text-sm text-red-400 hover:text-red-300 flex items-center gap-1"
+										class="mt-2 flex items-center gap-1 text-sm text-red-400 hover:text-red-300"
 									>
 										<Trash2 class="h-3 w-3" />
 										Remove
@@ -298,19 +324,25 @@
 
 							{#if isProcessing}
 								<div class="mt-4">
-									<div class="h-2 bg-surface-700 rounded-full overflow-hidden">
-										<div class="h-full bg-gradient-to-r from-pink-500 to-rose-500 transition-all" style="width: {progress}%"></div>
+									<div class="bg-surface-700 h-2 overflow-hidden rounded-full">
+										<div
+											class="h-full bg-gradient-to-r from-pink-500 to-rose-500 transition-all"
+											style="width: {progress}%"
+										></div>
 									</div>
-									<p class="text-sm text-surface-400 mt-1 text-center">Processing... {progress}%</p>
+									<p class="text-surface-400 mt-1 text-center text-sm">Processing... {progress}%</p>
 								</div>
 							{/if}
 						</div>
 
 						<!-- Results -->
 						{#if resultBlobs.length > 0}
-							<div class="mt-4 p-4 rounded-xl bg-green-500/10 border border-green-500/30" in:fly={{ y: 10, duration: 200 }}>
-								<div class="flex items-center justify-between mb-3">
-									<p class="text-green-400 font-medium flex items-center gap-2">
+							<div
+								class="mt-4 rounded-xl border border-green-500/30 bg-green-500/10 p-4"
+								in:fly={{ y: 10, duration: 200 }}
+							>
+								<div class="mb-3 flex items-center justify-between">
+									<p class="flex items-center gap-2 font-medium text-green-400">
 										<CheckCircle class="h-4 w-4" />
 										{resultBlobs.length} file{resultBlobs.length !== 1 ? 's' : ''} created
 									</p>
@@ -322,9 +354,9 @@
 										Download All
 									</button>
 								</div>
-								<div class="space-y-1 max-h-40 overflow-y-auto">
+								<div class="max-h-40 space-y-1 overflow-y-auto">
 									{#each resultBlobs as blob, i}
-										<div class="flex items-center justify-between text-sm py-1">
+										<div class="flex items-center justify-between py-1 text-sm">
 											<span class="text-surface-400">Part {i + 1} ({formatBytes(blob.size)})</span>
 											<button
 												onclick={() => downloadResult(i)}
@@ -342,32 +374,32 @@
 
 				<!-- Right: Settings -->
 				<div class="glass rounded-2xl p-6" in:fly={{ y: 20, delay: 100, duration: 200 }}>
-					<h3 class="flex items-center gap-2 text-lg font-semibold text-surface-100 mb-6">
-						<Settings class="h-5 w-5 text-accent-start" />
+					<h3 class="text-surface-100 mb-6 flex items-center gap-2 text-lg font-semibold">
+						<Settings class="text-accent-start h-5 w-5" />
 						Split Options
 					</h3>
 
 					<!-- Mode Selection -->
 					<div class="space-y-4">
 						<div>
-							<label class="block text-sm font-medium text-surface-300 mb-3">Split Method</label>
+							<label class="text-surface-300 mb-3 block text-sm font-medium">Split Method</label>
 							<div class="grid grid-cols-2 gap-2">
 								<button
-									onclick={() => splitMode = 'extract'}
-									class="px-4 py-3 rounded-xl text-left transition-all {splitMode === 'extract'
+									onclick={() => (splitMode = 'extract')}
+									class="rounded-xl px-4 py-3 text-left transition-all {splitMode === 'extract'
 										? 'bg-accent-start text-white'
 										: 'bg-surface-800 text-surface-400 hover:text-surface-200 hover:bg-surface-700'}"
 								>
-									<span class="font-medium block">Extract Pages</span>
+									<span class="block font-medium">Extract Pages</span>
 									<span class="text-xs opacity-70">Select specific pages</span>
 								</button>
 								<button
-									onclick={() => splitMode = 'every-n'}
-									class="px-4 py-3 rounded-xl text-left transition-all {splitMode === 'every-n'
+									onclick={() => (splitMode = 'every-n')}
+									class="rounded-xl px-4 py-3 text-left transition-all {splitMode === 'every-n'
 										? 'bg-accent-start text-white'
 										: 'bg-surface-800 text-surface-400 hover:text-surface-200 hover:bg-surface-700'}"
 								>
-									<span class="font-medium block">Split Every N</span>
+									<span class="block font-medium">Split Every N</span>
 									<span class="text-xs opacity-70">Create multiple files</span>
 								</button>
 							</div>
@@ -375,14 +407,14 @@
 
 						{#if splitMode === 'extract'}
 							<div in:slide={{ duration: 150 }}>
-								<label class="block text-sm font-medium text-surface-300 mb-2">Page Range</label>
+								<label class="text-surface-300 mb-2 block text-sm font-medium">Page Range</label>
 								<input
 									type="text"
 									bind:value={pageRange}
 									placeholder="e.g., 1-5, 8, 12-15"
-									class="w-full rounded-xl bg-surface-800 border border-surface-700 px-4 py-2.5 text-surface-100 placeholder:text-surface-600 focus:border-accent-start focus:outline-none"
+									class="bg-surface-800 border-surface-700 text-surface-100 placeholder:text-surface-600 focus:border-accent-start w-full rounded-xl border px-4 py-2.5 focus:outline-none"
 								/>
-								<p class="text-xs text-surface-500 mt-1">
+								<p class="text-surface-500 mt-1 text-xs">
 									{#if pdfFile}
 										Document has {pdfFile.pageCount} pages
 									{:else}
@@ -392,18 +424,18 @@
 							</div>
 						{:else}
 							<div in:slide={{ duration: 150 }}>
-								<label class="block text-sm font-medium text-surface-300 mb-2">Split every</label>
+								<label class="text-surface-300 mb-2 block text-sm font-medium">Split every</label>
 								<div class="flex items-center gap-2">
 									<input
 										type="number"
 										bind:value={everyN}
 										min="1"
 										max={pdfFile?.pageCount || 100}
-										class="w-24 rounded-xl bg-surface-800 border border-surface-700 px-4 py-2.5 text-surface-100 focus:border-accent-start focus:outline-none"
+										class="bg-surface-800 border-surface-700 text-surface-100 focus:border-accent-start w-24 rounded-xl border px-4 py-2.5 focus:outline-none"
 									/>
 									<span class="text-surface-400">page{everyN !== 1 ? 's' : ''}</span>
 								</div>
-								<p class="text-xs text-surface-500 mt-1">
+								<p class="text-surface-500 mt-1 text-xs">
 									{#if pdfFile && everyN > 0}
 										Will create ~{Math.ceil((pdfFile.pageCount || 1) / everyN)} files
 									{/if}
@@ -416,7 +448,7 @@
 					<button
 						onclick={handleSplit}
 						disabled={!hasFile || isProcessing || (splitMode === 'extract' && !pageRange)}
-						class="mt-6 w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-pink-500/30 transition-all hover:shadow-xl hover:shadow-pink-500/40 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+						class="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-pink-500/30 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-pink-500/40 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
 					>
 						{#if isProcessing}
 							<Loader2 class="h-5 w-5 animate-spin" />

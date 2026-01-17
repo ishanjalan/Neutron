@@ -1,5 +1,10 @@
 // Stores
-export { videos, QUALITY_PRESETS, RESOLUTION_OPTIONS, AUDIO_BITRATE_OPTIONS } from './stores/videos.svelte';
+export {
+	videos,
+	QUALITY_PRESETS,
+	RESOLUTION_OPTIONS,
+	AUDIO_BITRATE_OPTIONS,
+} from './stores/videos.svelte';
 export type {
 	VideoItem,
 	VideoFormat,
@@ -7,7 +12,7 @@ export type {
 	VideoStatus,
 	Resolution,
 	AudioCodec,
-	CompressionSettings
+	CompressionSettings,
 } from './stores/videos.svelte';
 
 // Utils
@@ -19,10 +24,16 @@ export {
 	getOutputFilename,
 	getCapabilities,
 	preloadEncoder,
-	checkBrowserSupport
+	checkBrowserSupport,
 } from './utils/compress';
 export { downloadVideo, downloadAllAsZip } from './utils/download';
-export { formatBytes, formatDuration, formatETA, formatTimeInput, parseTimeInput } from './utils/format';
+export {
+	formatBytes,
+	formatDuration,
+	formatETA,
+	formatTimeInput,
+	parseTimeInput,
+} from './utils/format';
 export { createFocusTrap, trapFocus, releaseFocus, focusTrap } from './utils/focus-trap';
 export {
 	storeVideo,
@@ -33,5 +44,5 @@ export {
 	clearAllVideos,
 	getStorageUsage,
 	cleanupOldEntries,
-	isLargeFile
+	isLargeFile,
 } from './utils/storage';

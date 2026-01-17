@@ -14,7 +14,7 @@
 		FileText,
 		ChevronsLeft,
 		ChevronsRight,
-		Sidebar
+		Sidebar,
 	} from 'lucide-svelte';
 	import { onMount, onDestroy, tick } from 'svelte';
 	import { fly } from 'svelte/transition';
@@ -44,7 +44,9 @@
 	let thumbnailPage = $state(0);
 	const totalThumbnailPages = $derived(Math.ceil(totalPages / THUMBNAILS_PER_PAGE));
 	const thumbnailStartPage = $derived(thumbnailPage * THUMBNAILS_PER_PAGE + 1);
-	const thumbnailEndPage = $derived(Math.min((thumbnailPage + 1) * THUMBNAILS_PER_PAGE, totalPages));
+	const thumbnailEndPage = $derived(
+		Math.min((thumbnailPage + 1) * THUMBNAILS_PER_PAGE, totalPages)
+	);
 
 	// Page data - only store loaded thumbnails
 	let thumbnailCache = $state<Map<number, string>>(new Map());
@@ -184,10 +186,10 @@
 		if (pageNum >= 1 && pageNum <= totalPages) {
 			currentPage = pageNum;
 			renderPage(pageNum);
-			
+
 			// Load nearby thumbnails for sidebar
 			loadThumbnailRange(Math.max(1, pageNum - 10), Math.min(totalPages, pageNum + 10));
-			
+
 			// Scroll thumbnail into view
 			scrollToCurrentPage();
 		}
@@ -208,12 +210,15 @@
 		const container = e.target as HTMLDivElement;
 		const scrollTop = container.scrollTop;
 		const clientHeight = container.clientHeight;
-		
+
 		// Calculate which pages are currently visible
 		const thumbnailHeight = 160; // approximate height of each thumbnail item
 		const startPage = Math.floor(scrollTop / thumbnailHeight) + 1;
-		const endPage = Math.min(totalPages, Math.ceil((scrollTop + clientHeight) / thumbnailHeight) + 2);
-		
+		const endPage = Math.min(
+			totalPages,
+			Math.ceil((scrollTop + clientHeight) / thumbnailHeight) + 2
+		);
+
 		// Load thumbnails that are about to be visible
 		loadThumbnailRange(Math.max(1, startPage - 2), Math.min(totalPages, endPage + 2));
 	}
@@ -323,35 +328,41 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<div class="flex flex-col h-full min-h-0 bg-surface-950 rounded-2xl overflow-hidden border border-surface-800">
+<div
+	class="bg-surface-950 border-surface-800 flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border"
+>
 	<!-- Toolbar -->
-	<div class="flex items-center justify-between px-4 py-2 bg-surface-900/80 border-b border-surface-800">
+	<div
+		class="bg-surface-900/80 border-surface-800 flex items-center justify-between border-b px-4 py-2"
+	>
 		<!-- Left: File info + sidebar toggle -->
 		<div class="flex items-center gap-3">
 			<!-- Sidebar toggle -->
 			<button
 				onclick={toggleSidebar}
-				class="p-1.5 rounded-lg transition-colors {sidebarVisible ? 'bg-surface-700 text-surface-200' : 'text-surface-400 hover:text-surface-200 hover:bg-surface-700'}"
+				class="rounded-lg p-1.5 transition-colors {sidebarVisible
+					? 'bg-surface-700 text-surface-200'
+					: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700'}"
 				title="{sidebarVisible ? 'Hide' : 'Show'} sidebar"
 			>
 				<Sidebar class="h-4 w-4" />
 			</button>
-			
+
 			{#if onClose}
 				<button
 					onclick={onClose}
-					class="p-1.5 rounded-lg text-surface-400 hover:text-surface-200 hover:bg-surface-700 transition-colors"
+					class="text-surface-400 hover:text-surface-200 hover:bg-surface-700 rounded-lg p-1.5 transition-colors"
 					title="Close"
 				>
 					<X class="h-4 w-4" />
 				</button>
 			{/if}
 			<div class="flex items-center gap-2">
-				<FileText class="h-4 w-4 text-accent-start" />
-				<span class="text-sm font-medium text-surface-200 truncate max-w-[200px]" title={item.name}>
+				<FileText class="text-accent-start h-4 w-4" />
+				<span class="text-surface-200 max-w-[200px] truncate text-sm font-medium" title={item.name}>
 					{item.name}
 				</span>
-				<span class="text-xs text-surface-500">
+				<span class="text-surface-500 text-xs">
 					{formatBytes(item.originalSize)}
 				</span>
 			</div>
@@ -362,7 +373,7 @@
 			<button
 				onclick={prevPage}
 				disabled={currentPage <= 1}
-				class="p-1.5 rounded-lg text-surface-400 hover:text-surface-200 hover:bg-surface-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+				class="text-surface-400 hover:text-surface-200 hover:bg-surface-700 rounded-lg p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-30"
 				title="Previous page"
 			>
 				<ChevronLeft class="h-4 w-4" />
@@ -375,7 +386,7 @@
 					max={totalPages}
 					value={currentPage}
 					onchange={(e) => goToPage(parseInt(e.currentTarget.value) || 1)}
-					class="w-14 px-2 py-1 rounded bg-surface-800 border border-surface-700 text-surface-200 text-center text-sm focus:border-accent-start focus:outline-none"
+					class="bg-surface-800 border-surface-700 text-surface-200 focus:border-accent-start w-14 rounded border px-2 py-1 text-center text-sm focus:outline-none"
 				/>
 				<span class="text-surface-500">/ {totalPages.toLocaleString()}</span>
 			</div>
@@ -383,7 +394,7 @@
 			<button
 				onclick={nextPage}
 				disabled={currentPage >= totalPages}
-				class="p-1.5 rounded-lg text-surface-400 hover:text-surface-200 hover:bg-surface-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+				class="text-surface-400 hover:text-surface-200 hover:bg-surface-700 rounded-lg p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-30"
 				title="Next page"
 			>
 				<ChevronRight class="h-4 w-4" />
@@ -395,33 +406,37 @@
 			<button
 				onclick={zoomOut}
 				disabled={zoom <= 0.5}
-				class="p-1.5 rounded-lg text-surface-400 hover:text-surface-200 hover:bg-surface-700 disabled:opacity-30 transition-colors"
+				class="text-surface-400 hover:text-surface-200 hover:bg-surface-700 rounded-lg p-1.5 transition-colors disabled:opacity-30"
 				title="Zoom out"
 			>
 				<ZoomOut class="h-4 w-4" />
 			</button>
-			<span class="text-xs text-surface-500 w-12 text-center">{Math.round(zoom * 100)}%</span>
+			<span class="text-surface-500 w-12 text-center text-xs">{Math.round(zoom * 100)}%</span>
 			<button
 				onclick={zoomIn}
 				disabled={zoom >= 3}
-				class="p-1.5 rounded-lg text-surface-400 hover:text-surface-200 hover:bg-surface-700 disabled:opacity-30 transition-colors"
+				class="text-surface-400 hover:text-surface-200 hover:bg-surface-700 rounded-lg p-1.5 transition-colors disabled:opacity-30"
 				title="Zoom in"
 			>
 				<ZoomIn class="h-4 w-4" />
 			</button>
 
-			<div class="w-px h-5 bg-surface-700 mx-2"></div>
+			<div class="bg-surface-700 mx-2 h-5 w-px"></div>
 
 			<button
-				onclick={() => viewMode = 'single'}
-				class="p-1.5 rounded-lg transition-colors {viewMode === 'single' ? 'bg-accent-start text-white' : 'text-surface-400 hover:text-surface-200 hover:bg-surface-700'}"
+				onclick={() => (viewMode = 'single')}
+				class="rounded-lg p-1.5 transition-colors {viewMode === 'single'
+					? 'bg-accent-start text-white'
+					: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700'}"
 				title="Single page view"
 			>
 				<List class="h-4 w-4" />
 			</button>
 			<button
-				onclick={() => viewMode = 'thumbnails'}
-				class="p-1.5 rounded-lg transition-colors {viewMode === 'thumbnails' ? 'bg-accent-start text-white' : 'text-surface-400 hover:text-surface-200 hover:bg-surface-700'}"
+				onclick={() => (viewMode = 'thumbnails')}
+				class="rounded-lg p-1.5 transition-colors {viewMode === 'thumbnails'
+					? 'bg-accent-start text-white'
+					: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700'}"
 				title="Thumbnail view"
 			>
 				<Grid3X3 class="h-4 w-4" />
@@ -431,26 +446,29 @@
 
 	<!-- Selection toolbar (for page operations) -->
 	{#if isPageSelectionTool && viewMode === 'thumbnails'}
-		<div class="flex items-center justify-between px-4 py-2 bg-surface-800/50 border-b border-surface-700/50" transition:fly={{ y: -10, duration: 150 }}>
-			<div class="text-sm text-surface-400">
+		<div
+			class="bg-surface-800/50 border-surface-700/50 flex items-center justify-between border-b px-4 py-2"
+			transition:fly={{ y: -10, duration: 150 }}
+		>
+			<div class="text-surface-400 text-sm">
 				{selectedPages.size.toLocaleString()} of {totalPages.toLocaleString()} pages selected
 			</div>
 			<div class="flex items-center gap-2">
 				<button
 					onclick={() => selectRange(thumbnailStartPage, thumbnailEndPage)}
-					class="px-2 py-1 text-xs text-surface-400 hover:text-surface-200 bg-surface-700 hover:bg-surface-600 rounded transition-colors"
+					class="text-surface-400 hover:text-surface-200 bg-surface-700 hover:bg-surface-600 rounded px-2 py-1 text-xs transition-colors"
 				>
 					Select This Page
 				</button>
 				<button
 					onclick={selectAll}
-					class="px-2 py-1 text-xs text-surface-400 hover:text-surface-200 bg-surface-700 hover:bg-surface-600 rounded transition-colors"
+					class="text-surface-400 hover:text-surface-200 bg-surface-700 hover:bg-surface-600 rounded px-2 py-1 text-xs transition-colors"
 				>
 					Select All
 				</button>
 				<button
 					onclick={selectNone}
-					class="px-2 py-1 text-xs text-surface-400 hover:text-surface-200 bg-surface-700 hover:bg-surface-600 rounded transition-colors"
+					class="text-surface-400 hover:text-surface-200 bg-surface-700 hover:bg-surface-600 rounded px-2 py-1 text-xs transition-colors"
 				>
 					Clear
 				</button>
@@ -459,17 +477,17 @@
 	{/if}
 
 	<!-- Main content area -->
-	<div class="flex-1 flex overflow-hidden min-h-0">
+	<div class="flex min-h-0 flex-1 overflow-hidden">
 		<!-- macOS Preview-style sidebar with thumbnails -->
 		{#if sidebarVisible}
-			<div 
-				class="w-44 flex-shrink-0 bg-surface-900/70 border-r border-surface-800 flex flex-col overflow-hidden"
+			<div
+				class="bg-surface-900/70 border-surface-800 flex w-44 flex-shrink-0 flex-col overflow-hidden border-r"
 				transition:fly={{ x: -176, duration: 200 }}
 			>
-				<div 
+				<div
 					bind:this={sidebarScrollContainer}
 					onscroll={handleSidebarScroll}
-					class="flex-1 overflow-y-auto py-3 px-2 scrollbar-thin min-h-0"
+					class="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-2 py-3"
 				>
 					<div class="flex flex-col items-center gap-3">
 						{#each allPages() as pageNum}
@@ -480,44 +498,41 @@
 									goToPage(pageNum);
 									if (isPageSelectionTool) togglePageSelection(pageNum);
 								}}
-								class="group flex flex-col items-center gap-1.5 w-full"
+								class="group flex w-full flex-col items-center gap-1.5"
 							>
 								<!-- Thumbnail container with selection highlight -->
-								<div 
-									class="relative rounded-md overflow-hidden transition-all duration-150 
+								<div
+									class="relative overflow-hidden rounded-md transition-all duration-150
 										{currentPage === pageNum
-											? 'ring-[3px] ring-accent-start shadow-lg shadow-accent-start/30'
-											: selectedPages.has(pageNum)
-												? 'ring-[3px] ring-green-500 shadow-lg shadow-green-500/30'
-												: 'ring-1 ring-surface-700 hover:ring-surface-500 hover:shadow-md'}"
+										? 'ring-accent-start shadow-accent-start/30 shadow-lg ring-[3px]'
+										: selectedPages.has(pageNum)
+											? 'shadow-lg shadow-green-500/30 ring-[3px] ring-green-500'
+											: 'ring-surface-700 hover:ring-surface-500 ring-1 hover:shadow-md'}"
 								>
 									{#if thumb}
-										<img 
-											src={thumb} 
-											alt="Page {pageNum}" 
-											class="w-28 bg-white"
-											draggable="false"
-										/>
+										<img src={thumb} alt="Page {pageNum}" class="w-28 bg-white" draggable="false" />
 									{:else}
-										<div class="w-28 aspect-[3/4] bg-surface-800 animate-pulse flex items-center justify-center">
-											<Loader2 class="h-4 w-4 animate-spin text-surface-600" />
+										<div
+											class="bg-surface-800 flex aspect-[3/4] w-28 animate-pulse items-center justify-center"
+										>
+											<Loader2 class="text-surface-600 h-4 w-4 animate-spin" />
 										</div>
 									{/if}
-									
+
 									<!-- Selection checkmark for page tools -->
 									{#if isPageSelectionTool && selectedPages.has(pageNum)}
-										<div class="absolute top-1.5 left-1.5 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center shadow-md">
+										<div
+											class="absolute left-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-green-500 shadow-md"
+										>
 											<Check class="h-3 w-3 text-white" />
 										</div>
 									{/if}
 								</div>
-								
+
 								<!-- Page number below thumbnail (macOS Preview style) -->
-								<span 
+								<span
 									class="text-[11px] font-medium transition-colors
-										{currentPage === pageNum 
-											? 'text-accent-start' 
-											: 'text-surface-500 group-hover:text-surface-300'}"
+										{currentPage === pageNum ? 'text-accent-start' : 'text-surface-500 group-hover:text-surface-300'}"
 								>
 									{pageNum}
 								</span>
@@ -529,21 +544,21 @@
 		{/if}
 
 		<!-- Main view -->
-		<div class="flex-1 overflow-auto bg-surface-950 p-4">
+		<div class="bg-surface-950 flex-1 overflow-auto p-4">
 			{#if isLoading}
-				<div class="flex items-center justify-center h-full">
-					<div class="flex flex-col items-center gap-3 text-surface-500">
+				<div class="flex h-full items-center justify-center">
+					<div class="text-surface-500 flex flex-col items-center gap-3">
 						<Loader2 class="h-8 w-8 animate-spin" />
 						<span>Loading PDF...</span>
 					</div>
 				</div>
 			{:else if error}
-				<div class="flex items-center justify-center h-full">
+				<div class="flex h-full items-center justify-center">
 					<div class="text-center">
-						<p class="text-red-400 mb-2">{error}</p>
+						<p class="mb-2 text-red-400">{error}</p>
 						<button
 							onclick={loadPDF}
-							class="px-4 py-2 text-sm bg-surface-800 text-surface-200 rounded-lg hover:bg-surface-700 transition-colors"
+							class="bg-surface-800 text-surface-200 hover:bg-surface-700 rounded-lg px-4 py-2 text-sm transition-colors"
 						>
 							Retry
 						</button>
@@ -551,16 +566,16 @@
 				</div>
 			{:else if viewMode === 'single'}
 				<!-- Single page view -->
-				<div class="flex items-center justify-center min-h-full">
+				<div class="flex min-h-full items-center justify-center">
 					{#if currentPageCanvas}
 						<div
-							class="shadow-2xl shadow-black/50 rounded-lg overflow-hidden bg-white"
+							class="overflow-hidden rounded-lg bg-white shadow-2xl shadow-black/50"
 							style="max-width: {pageWidth}px"
 						>
 							<img
 								src={currentPageCanvas}
 								alt="Page {currentPage}"
-								class="w-full h-auto"
+								class="h-auto w-full"
 								draggable="false"
 							/>
 						</div>
@@ -571,11 +586,11 @@
 				<div class="space-y-4">
 					<!-- Pagination header -->
 					{#if totalThumbnailPages > 1}
-						<div class="flex items-center justify-between bg-surface-900/50 rounded-lg p-3">
+						<div class="bg-surface-900/50 flex items-center justify-between rounded-lg p-3">
 							<button
 								onclick={() => goToThumbnailPage(0)}
 								disabled={thumbnailPage === 0}
-								class="p-1.5 rounded-lg text-surface-400 hover:text-surface-200 hover:bg-surface-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+								class="text-surface-400 hover:text-surface-200 hover:bg-surface-700 rounded-lg p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-30"
 								title="First page"
 							>
 								<ChevronsLeft class="h-4 w-4" />
@@ -583,20 +598,26 @@
 							<button
 								onclick={() => goToThumbnailPage(thumbnailPage - 1)}
 								disabled={thumbnailPage === 0}
-								class="p-1.5 rounded-lg text-surface-400 hover:text-surface-200 hover:bg-surface-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+								class="text-surface-400 hover:text-surface-200 hover:bg-surface-700 rounded-lg p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-30"
 								title="Previous"
 							>
 								<ChevronLeft class="h-4 w-4" />
 							</button>
 
-							<div class="text-sm text-surface-400">
-								Showing pages <span class="font-medium text-surface-200">{thumbnailStartPage.toLocaleString()}</span> - <span class="font-medium text-surface-200">{thumbnailEndPage.toLocaleString()}</span> of {totalPages.toLocaleString()}
+							<div class="text-surface-400 text-sm">
+								Showing pages <span class="text-surface-200 font-medium"
+									>{thumbnailStartPage.toLocaleString()}</span
+								>
+								-
+								<span class="text-surface-200 font-medium">{thumbnailEndPage.toLocaleString()}</span
+								>
+								of {totalPages.toLocaleString()}
 							</div>
 
 							<button
 								onclick={() => goToThumbnailPage(thumbnailPage + 1)}
 								disabled={thumbnailPage >= totalThumbnailPages - 1}
-								class="p-1.5 rounded-lg text-surface-400 hover:text-surface-200 hover:bg-surface-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+								class="text-surface-400 hover:text-surface-200 hover:bg-surface-700 rounded-lg p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-30"
 								title="Next"
 							>
 								<ChevronRight class="h-4 w-4" />
@@ -604,7 +625,7 @@
 							<button
 								onclick={() => goToThumbnailPage(totalThumbnailPages - 1)}
 								disabled={thumbnailPage >= totalThumbnailPages - 1}
-								class="p-1.5 rounded-lg text-surface-400 hover:text-surface-200 hover:bg-surface-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+								class="text-surface-400 hover:text-surface-200 hover:bg-surface-700 rounded-lg p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-30"
 								title="Last page"
 							>
 								<ChevronsRight class="h-4 w-4" />
@@ -613,7 +634,9 @@
 					{/if}
 
 					<!-- Thumbnail grid -->
-					<div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
+					<div
+						class="grid grid-cols-4 gap-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10"
+					>
 						{#each visiblePages() as pageNum}
 							{@const thumb = thumbnailCache.get(pageNum)}
 							<button
@@ -625,33 +648,35 @@
 										viewMode = 'single';
 									}
 								}}
-								class="relative aspect-[3/4] rounded-lg overflow-hidden border-2 transition-all bg-white
+								class="relative aspect-[3/4] overflow-hidden rounded-lg border-2 bg-white transition-all
 									{selectedPages.has(pageNum)
-										? 'border-green-500 ring-2 ring-green-500/30 scale-[1.02]'
-										: 'border-surface-700 hover:border-surface-500'}"
+									? 'scale-[1.02] border-green-500 ring-2 ring-green-500/30'
+									: 'border-surface-700 hover:border-surface-500'}"
 							>
 								{#if thumb}
-									<img
-										src={thumb}
-										alt="Page {pageNum}"
-										class="w-full h-full object-contain"
-									/>
+									<img src={thumb} alt="Page {pageNum}" class="h-full w-full object-contain" />
 								{:else}
-									<div class="w-full h-full bg-surface-200 animate-pulse flex items-center justify-center">
-										<Loader2 class="h-4 w-4 animate-spin text-surface-400" />
+									<div
+										class="bg-surface-200 flex h-full w-full animate-pulse items-center justify-center"
+									>
+										<Loader2 class="text-surface-400 h-4 w-4 animate-spin" />
 									</div>
 								{/if}
-								<div class="absolute bottom-1 right-1 px-1.5 py-0.5 bg-black/70 rounded text-xs text-white font-medium">
+								<div
+									class="absolute bottom-1 right-1 rounded bg-black/70 px-1.5 py-0.5 text-xs font-medium text-white"
+								>
 									{pageNum}
 								</div>
 								{#if isPageSelectionTool}
-									<div class="absolute top-1 left-1">
+									<div class="absolute left-1 top-1">
 										{#if selectedPages.has(pageNum)}
-											<div class="w-5 h-5 bg-green-500 rounded flex items-center justify-center shadow-lg">
+											<div
+												class="flex h-5 w-5 items-center justify-center rounded bg-green-500 shadow-lg"
+											>
 												<Check class="h-3 w-3 text-white" />
 											</div>
 										{:else}
-											<div class="w-5 h-5 border-2 border-white/60 rounded bg-black/20"></div>
+											<div class="h-5 w-5 rounded border-2 border-white/60 bg-black/20"></div>
 										{/if}
 									</div>
 								{/if}
@@ -664,9 +689,13 @@
 	</div>
 
 	<!-- Bottom status bar -->
-	<div class="flex items-center justify-between px-4 py-2 bg-surface-900/80 border-t border-surface-800 text-xs text-surface-500">
+	<div
+		class="bg-surface-900/80 border-surface-800 text-surface-500 flex items-center justify-between border-t px-4 py-2 text-xs"
+	>
 		<div>
-			{totalPages.toLocaleString()} page{totalPages !== 1 ? 's' : ''} • {formatBytes(item.originalSize)}
+			{totalPages.toLocaleString()} page{totalPages !== 1 ? 's' : ''} • {formatBytes(
+				item.originalSize
+			)}
 		</div>
 		<div class="flex items-center gap-4">
 			{#if isPageSelectionTool && selectedPages.size > 0}

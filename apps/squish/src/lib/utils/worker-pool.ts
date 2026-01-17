@@ -28,7 +28,7 @@ const MIN_WORKERS = 1;
 // Pool state
 let workers: PoolWorker[] = [];
 let jobQueue: CompressionJob[] = [];
-let jobCallbacks: Map<string, CompressionJob> = new Map();
+const jobCallbacks: Map<string, CompressionJob> = new Map();
 let poolInitialized = false;
 let poolInitializing = false;
 
@@ -46,15 +46,14 @@ function getOptimalWorkerCount(): number {
 function createWorker(): Promise<PoolWorker> {
 	return new Promise((resolve, reject) => {
 		try {
-			const worker = new Worker(
-				new URL('../workers/compress.worker.ts', import.meta.url),
-				{ type: 'module' }
-			);
+			const worker = new Worker(new URL('../workers/compress.worker.ts', import.meta.url), {
+				type: 'module',
+			});
 
 			const poolWorker: PoolWorker = {
 				worker,
 				busy: false,
-				currentJobId: null
+				currentJobId: null,
 			};
 
 			// Handle messages from worker
@@ -95,7 +94,7 @@ function createWorker(): Promise<PoolWorker> {
 
 			worker.onerror = (error) => {
 				console.error('Worker error:', error);
-				
+
 				// If worker had a job, report error
 				if (poolWorker.currentJobId) {
 					const job = jobCallbacks.get(poolWorker.currentJobId);
@@ -124,16 +123,18 @@ function createWorker(): Promise<PoolWorker> {
 // Initialize the worker pool
 export async function initPool(): Promise<void> {
 	if (poolInitialized || poolInitializing) return;
-	
+
 	poolInitializing = true;
 
 	try {
 		const workerCount = getOptimalWorkerCount();
 		console.log(`Initializing worker pool with ${workerCount} workers`);
 
-		const workerPromises = Array(workerCount).fill(null).map(() => createWorker());
+		const workerPromises = Array(workerCount)
+			.fill(null)
+			.map(() => createWorker());
 		workers = await Promise.all(workerPromises);
-		
+
 		poolInitialized = true;
 		console.log('Worker pool initialized');
 
@@ -149,7 +150,7 @@ export async function initPool(): Promise<void> {
 
 // Find an available worker
 function getAvailableWorker(): PoolWorker | null {
-	return workers.find(w => !w.busy) || null;
+	return workers.find((w) => !w.busy) || null;
 }
 
 // Process the next job in queue
@@ -176,7 +177,7 @@ function assignJobToWorker(poolWorker: PoolWorker, job: CompressionJob): void {
 		inputFormat: job.inputFormat,
 		outputFormat: job.outputFormat,
 		quality: job.quality,
-		lossless: job.lossless
+		lossless: job.lossless,
 	};
 
 	// Transfer the buffer to the worker for better performance
@@ -192,7 +193,7 @@ export async function queueJob(job: CompressionJob): Promise<void> {
 
 	// Check if a worker is available
 	const availableWorker = getAvailableWorker();
-	
+
 	if (availableWorker) {
 		// Assign immediately
 		assignJobToWorker(availableWorker, job);
@@ -222,7 +223,7 @@ export function processImage(
 			lossless,
 			onProgress,
 			onComplete: (result, mimeType, width, height) => resolve({ result, mimeType, width, height }),
-			onError: (error) => reject(new Error(error))
+			onError: (error) => reject(new Error(error)),
 		};
 
 		queueJob(job);
@@ -251,7 +252,7 @@ export function getPoolStatus(): {
 	return {
 		initialized: poolInitialized,
 		workerCount: workers.length,
-		busyWorkers: workers.filter(w => w.busy).length,
-		queuedJobs: jobQueue.length
+		busyWorkers: workers.filter((w) => w.busy).length,
+		queuedJobs: jobQueue.length,
 	};
 }

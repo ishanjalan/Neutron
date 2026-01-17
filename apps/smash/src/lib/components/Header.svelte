@@ -33,15 +33,15 @@
 	});
 </script>
 
-<header class="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 py-4">
+<header class="fixed left-0 right-0 top-0 z-50 px-4 py-4 sm:px-6 lg:px-8">
 	<div class="mx-auto max-w-7xl">
 		<nav
-			class="glass flex items-center justify-between rounded-2xl px-4 sm:px-6 py-3 shadow-lg shadow-black/5"
+			class="glass flex items-center justify-between rounded-2xl px-4 py-3 shadow-lg shadow-black/5 sm:px-6"
 		>
 			<!-- Logo -->
 			<a
 				href="{base}/"
-				class="flex items-center gap-3 group"
+				class="group flex items-center gap-3"
 				onclick={(e) => {
 					e.preventDefault();
 					window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -51,7 +51,7 @@
 				}}
 			>
 				<div
-					class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accent-start to-accent-end shadow-lg shadow-accent-start/30 transition-transform group-hover:scale-110"
+					class="from-accent-start to-accent-end shadow-accent-start/30 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg transition-transform group-hover:scale-110"
 				>
 					<FileText class="h-5 w-5 text-white" strokeWidth={2.5} />
 				</div>
@@ -70,19 +70,19 @@
 						transition:fade={{ duration: 150 }}
 					>
 						<WifiOff class="h-4 w-4" />
-						<span class="text-sm font-medium hidden sm:inline">Offline</span>
+						<span class="hidden text-sm font-medium sm:inline">Offline</span>
 					</div>
 				{/if}
 
-			<a
-				href="https://github.com/ishanjalan/Neutron/tree/main/apps/smash"
-				target="_blank"
-				rel="noopener noreferrer"
-				class="flex h-10 w-10 items-center justify-center rounded-xl text-surface-400 transition-all hover:bg-surface-800 hover:text-surface-100"
-				title="View on GitHub"
-			>
-				<Github class="h-5 w-5" />
-			</a>
+				<a
+					href="https://github.com/ishanjalan/Neutron/tree/main/apps/smash"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="text-surface-400 hover:bg-surface-800 hover:text-surface-100 flex h-10 w-10 items-center justify-center rounded-xl transition-all"
+					title="View on GitHub"
+				>
+					<Github class="h-5 w-5" />
+				</a>
 			</div>
 		</nav>
 	</div>
@@ -91,7 +91,7 @@
 <!-- Offline toast notification -->
 {#if showOfflineToast}
 	<div
-		class="fixed top-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl bg-amber-500 px-4 py-3 text-white shadow-lg"
+		class="fixed left-1/2 top-20 z-50 flex -translate-x-1/2 items-center gap-3 rounded-xl bg-amber-500 px-4 py-3 text-white shadow-lg"
 		transition:fade={{ duration: 200 }}
 	>
 		<WifiOff class="h-5 w-5" />

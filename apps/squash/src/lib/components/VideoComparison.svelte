@@ -105,20 +105,20 @@
 	<!-- Close button -->
 	<button
 		onclick={onclose}
-		class="absolute top-4 right-4 z-20 rounded-full bg-white/10 p-3 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+		class="absolute right-4 top-4 z-20 rounded-full bg-white/10 p-3 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
 		aria-label="Close comparison"
 	>
 		<X class="h-6 w-6" />
 	</button>
 
 	<!-- Info badges -->
-	<div class="absolute top-4 left-4 z-20 flex items-center gap-4">
-		<div class="rounded-xl bg-surface-800/90 px-4 py-2 backdrop-blur-sm">
-			<div class="text-xs text-surface-400 uppercase tracking-wide">Original</div>
+	<div class="absolute left-4 top-4 z-20 flex items-center gap-4">
+		<div class="bg-surface-800/90 rounded-xl px-4 py-2 backdrop-blur-sm">
+			<div class="text-surface-400 text-xs uppercase tracking-wide">Original</div>
 			<div class="text-lg font-bold text-white">{formatBytes(originalSize)}</div>
 		</div>
-		<div class="rounded-xl bg-gradient-to-r from-accent-start to-accent-end px-4 py-2 shadow-lg">
-			<div class="text-xs text-white/80 uppercase tracking-wide">Compressed</div>
+		<div class="from-accent-start to-accent-end rounded-xl bg-gradient-to-r px-4 py-2 shadow-lg">
+			<div class="text-xs uppercase tracking-wide text-white/80">Compressed</div>
 			<div class="text-lg font-bold text-white">
 				{formatBytes(compressedSize)}
 				<span class="ml-2 text-sm font-normal">(-{savings}%)</span>
@@ -129,7 +129,7 @@
 	<!-- Comparison container -->
 	<div
 		bind:this={containerRef}
-		class="relative max-h-[80vh] max-w-[95vw] overflow-hidden rounded-2xl shadow-2xl select-none"
+		class="relative max-h-[80vh] max-w-[95vw] select-none overflow-hidden rounded-2xl shadow-2xl"
 		onmousedown={handleMouseDown}
 		ontouchstart={handleTouchStart}
 		ontouchmove={handleTouchMove}
@@ -152,16 +152,15 @@
 				autoplay
 				playsinline
 			></video>
-			<div class="absolute bottom-4 left-4 rounded-lg bg-black/70 px-3 py-1.5 text-sm font-medium text-white">
+			<div
+				class="absolute bottom-4 left-4 rounded-lg bg-black/70 px-3 py-1.5 text-sm font-medium text-white"
+			>
 				Original
 			</div>
 		</div>
 
 		<!-- Compressed video (clipped) -->
-		<div
-			class="absolute inset-0 overflow-hidden"
-			style="clip-path: inset(0 0 0 {sliderPosition}%)"
-		>
+		<div class="absolute inset-0 overflow-hidden" style="clip-path: inset(0 0 0 {sliderPosition}%)">
 			<!-- svelte-ignore a11y_media_has_caption -->
 			<video
 				src={compressedUrl}
@@ -171,14 +170,16 @@
 				autoplay
 				playsinline
 			></video>
-			<div class="absolute bottom-4 right-4 rounded-lg bg-gradient-to-r from-accent-start to-accent-end px-3 py-1.5 text-sm font-bold text-white shadow-lg">
+			<div
+				class="from-accent-start to-accent-end absolute bottom-4 right-4 rounded-lg bg-gradient-to-r px-3 py-1.5 text-sm font-bold text-white shadow-lg"
+			>
 				Compressed
 			</div>
 		</div>
 
 		<!-- Slider handle -->
 		<div
-			class="absolute top-0 bottom-0 z-10 w-1 cursor-ew-resize transition-transform"
+			class="absolute bottom-0 top-0 z-10 w-1 cursor-ew-resize transition-transform"
 			style="left: {sliderPosition}%; transform: translateX(-50%)"
 		>
 			<!-- Line -->
@@ -186,18 +187,22 @@
 
 			<!-- Handle -->
 			<div
-				class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-xl transition-transform {isDragging ? 'scale-110' : 'hover:scale-105'}"
+				class="absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-xl transition-transform {isDragging
+					? 'scale-110'
+					: 'hover:scale-105'}"
 			>
-				<ChevronLeft class="h-5 w-5 text-surface-600 -mr-1" />
-				<ChevronRight class="h-5 w-5 text-surface-600 -ml-1" />
+				<ChevronLeft class="text-surface-600 -mr-1 h-5 w-5" />
+				<ChevronRight class="text-surface-600 -ml-1 h-5 w-5" />
 			</div>
 		</div>
 	</div>
 
 	<!-- Instructions -->
 	<div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-center">
-		<p class="text-sm text-surface-400">
-			Drag slider to compare • Press <kbd class="rounded bg-surface-800 px-2 py-0.5">←</kbd> <kbd class="rounded bg-surface-800 px-2 py-0.5">→</kbd> to adjust • <kbd class="rounded bg-surface-800 px-2 py-0.5">Esc</kbd> to close
+		<p class="text-surface-400 text-sm">
+			Drag slider to compare • Press <kbd class="bg-surface-800 rounded px-2 py-0.5">←</kbd>
+			<kbd class="bg-surface-800 rounded px-2 py-0.5">→</kbd>
+			to adjust • <kbd class="bg-surface-800 rounded px-2 py-0.5">Esc</kbd> to close
 		</p>
 	</div>
 </div>

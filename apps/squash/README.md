@@ -18,17 +18,20 @@ GPU-accelerated video compression powered by WebCodecs. Compress videos at warp 
 ## 🏗️ Tech Stack
 
 ### Core
+
 - **Svelte 5** — Runes reactivity system
 - **SvelteKit** — Static adapter for PWA
 - **TypeScript** — Type-safe development
 - **Tailwind CSS v4** — Utility-first styling
 
 ### Video Processing
+
 - **[Mediabunny](https://mediabunny.dev)** — Lightweight WebCodecs wrapper
 - **WebCodecs API** — Native browser video encoding/decoding
 - **Hardware Acceleration** — GPU-powered encoding when available
 
 ### Utilities
+
 - **[Comlink](https://github.com/GoogleChromeLabs/comlink)** — Type-safe Web Worker communication
 - **[idb](https://github.com/nicholashollandmoore/idb)** — IndexedDB for large file handling
 - **[JSZip](https://stuk.github.io/jszip/)** — Batch download as ZIP
@@ -36,6 +39,7 @@ GPU-accelerated video compression powered by WebCodecs. Compress videos at warp 
 ## 🖥️ Browser Support
 
 WebCodecs requires modern browsers with hardware encoding support:
+
 - ✅ Chrome 94+
 - ✅ Edge 94+
 - ✅ Safari 16.4+
@@ -64,6 +68,7 @@ Output is generated in the `build/` directory, ready for static hosting.
 ## 🔒 Privacy
 
 All processing happens **100% locally** in your browser:
+
 - Videos never leave your device
 - No server uploads
 - Works offline as a PWA

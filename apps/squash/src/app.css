@@ -47,7 +47,7 @@ body {
 
 /* Custom utilities */
 .gradient-text {
-	@apply bg-gradient-to-r from-accent-start to-accent-end bg-clip-text text-transparent;
+	@apply from-accent-start to-accent-end bg-gradient-to-r bg-clip-text text-transparent;
 }
 
 .gradient-border {
@@ -61,7 +61,9 @@ body {
 	padding: 2px;
 	background: linear-gradient(135deg, var(--color-accent-start), var(--color-accent-end));
 	border-radius: inherit;
-	mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	mask:
+		linear-gradient(#fff 0 0) content-box,
+		linear-gradient(#fff 0 0);
 	mask-composite: exclude;
 	-webkit-mask-composite: xor;
 	pointer-events: none;
@@ -69,12 +71,12 @@ body {
 
 /* Glassmorphism - Dark mode only */
 .glass {
-	@apply bg-surface-900/70 backdrop-blur-xl border border-surface-700/30;
+	@apply bg-surface-900/70 border-surface-700/30 border backdrop-blur-xl;
 }
 
 /* Focus styles */
 :focus-visible {
-	@apply outline-none ring-2 ring-accent-start ring-offset-2 ring-offset-surface-950;
+	@apply ring-accent-start ring-offset-surface-950 outline-none ring-2 ring-offset-2;
 }
 
 /* Scrollbar styling */

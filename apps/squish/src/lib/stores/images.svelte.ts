@@ -95,7 +95,7 @@ function getDefaultSettings(): CompressionSettings {
 		resizePercentage: 50,
 		resizeMaxWidth: 1920,
 		resizeMaxHeight: 1080,
-		maintainAspectRatio: true
+		maintainAspectRatio: true,
 	};
 }
 
@@ -105,7 +105,7 @@ async function getImageDimensions(file: File): Promise<{ width: number; height: 
 	if (file.type === 'image/heic' || file.type === 'image/heif') {
 		return null; // Dimensions will be set after conversion
 	}
-	
+
 	return new Promise((resolve, reject) => {
 		const img = new Image();
 		const url = URL.createObjectURL(file);
@@ -137,7 +137,7 @@ function createImagesStore() {
 			'image/jxl': 'jxl',
 			'image/svg+xml': 'svg',
 			'image/heic': 'heic',
-			'image/heif': 'heic'
+			'image/heif': 'heic',
 		};
 		return map[mimeType] || 'jpeg';
 	}
@@ -182,7 +182,7 @@ function createImagesStore() {
 				'image/jxl',
 				'image/svg+xml',
 				'image/heic',
-				'image/heif'
+				'image/heif',
 			];
 
 			const newItems: ImageItem[] = [];
@@ -191,7 +191,7 @@ function createImagesStore() {
 				if (!validTypes.includes(file.type)) continue;
 
 				const format = getFormatFromMime(file.type);
-				
+
 				// Determine output format:
 				// - SVG defaults to SVG if 'same', but can now be converted to raster
 				// - HEIC must be converted (can't output HEIC), default to WebP
@@ -204,7 +204,8 @@ function createImagesStore() {
 					// HEIC is input-only, always convert to user's preferred format (or WebP if 'same')
 					outputFormat = settings.outputFormat === 'same' ? 'webp' : settings.outputFormat;
 				} else {
-					outputFormat = settings.outputFormat === 'same' ? format as OutputFormat : settings.outputFormat;
+					outputFormat =
+						settings.outputFormat === 'same' ? (format as OutputFormat) : settings.outputFormat;
 				}
 
 				// Get dimensions asynchronously (returns null for HEIC)
@@ -231,7 +232,7 @@ function createImagesStore() {
 					status: 'pending',
 					progress: 0,
 					width,
-					height
+					height,
 				});
 			}
 
@@ -300,9 +301,10 @@ function createImagesStore() {
 						}
 						return {
 							...item,
-							outputFormat: newSettings.outputFormat === 'same' 
-								? item.format as OutputFormat 
-								: newSettings.outputFormat!
+							outputFormat:
+								newSettings.outputFormat === 'same'
+									? (item.format as OutputFormat)
+									: newSettings.outputFormat!,
 						};
 					}
 					return item;
@@ -338,7 +340,7 @@ function createImagesStore() {
 		},
 
 		selectAll() {
-			selectedIds = new Set(items.map(i => i.id));
+			selectedIds = new Set(items.map((i) => i.id));
 		},
 
 		selectNone() {
@@ -350,18 +352,18 @@ function createImagesStore() {
 		},
 
 		getSelectedItems() {
-			return items.filter(i => selectedIds.has(i.id));
+			return items.filter((i) => selectedIds.has(i.id));
 		},
 
 		removeSelected() {
-			const toRemove = items.filter(i => selectedIds.has(i.id));
-			toRemove.forEach(item => {
+			const toRemove = items.filter((i) => selectedIds.has(i.id));
+			toRemove.forEach((item) => {
 				URL.revokeObjectURL(item.originalUrl);
 				if (item.compressedUrl) URL.revokeObjectURL(item.compressedUrl);
 			});
-			items = items.filter(i => !selectedIds.has(i.id));
+			items = items.filter((i) => !selectedIds.has(i.id));
 			selectedIds = new Set();
-		}
+		},
 	};
 }
 

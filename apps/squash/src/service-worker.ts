@@ -10,13 +10,11 @@ const RUNTIME_CACHE_NAME = 'squash-runtime-v1';
 // Assets to cache immediately (app shell)
 const PRECACHE_ASSETS = [
 	...build, // App build files (JS, CSS bundles)
-	...files // Static files (icons, manifest, etc.)
+	...files, // Static files (icons, manifest, etc.)
 ];
 
 // External libraries to cache (Mediabunny)
-const EXTERNAL_LIBS = [
-	'https://cdn.jsdelivr.net/npm/mediabunny'
-];
+const EXTERNAL_LIBS = ['https://cdn.jsdelivr.net/npm/mediabunny'];
 
 // Check if a URL is an external library we should cache
 function isExternalLib(url: string): boolean {
@@ -28,10 +26,10 @@ self.addEventListener('install', (event) => {
 	event.waitUntil(
 		(async () => {
 			const cache = await caches.open(CACHE_NAME);
-			
+
 			// Cache all precache assets
 			await cache.addAll(PRECACHE_ASSETS);
-			
+
 			// Skip waiting to activate immediately
 			await self.skipWaiting();
 		})()
@@ -44,21 +42,20 @@ self.addEventListener('activate', (event) => {
 		(async () => {
 			// Get all cache keys
 			const keys = await caches.keys();
-			
+
 			// Delete old caches (keep current app cache and runtime cache)
 			await Promise.all(
 				keys
-					.filter((key) => 
-						key !== CACHE_NAME && 
-						key !== RUNTIME_CACHE_NAME &&
-						!key.startsWith('squash-cache-') // Keep versioned caches during transition
+					.filter(
+						(key) =>
+							key !== CACHE_NAME && key !== RUNTIME_CACHE_NAME && !key.startsWith('squash-cache-') // Keep versioned caches during transition
 					)
 					.map((key) => caches.delete(key))
 			);
-			
+
 			// Claim all clients immediately
 			await self.clients.claim();
-			
+
 			// Notify all clients that the service worker is ready
 			const clients = await self.clients.matchAll({ type: 'window' });
 			clients.forEach((client) => {
@@ -111,19 +108,19 @@ self.addEventListener('fetch', (event) => {
 async function cacheFirst(request: Request, cacheName: string): Promise<Response> {
 	const cache = await caches.open(cacheName);
 	const cachedResponse = await cache.match(request);
-	
+
 	if (cachedResponse) {
 		return cachedResponse;
 	}
 
 	try {
 		const networkResponse = await fetch(request);
-		
+
 		// Cache successful responses
 		if (networkResponse.ok) {
 			cache.put(request, networkResponse.clone());
 		}
-		
+
 		return networkResponse;
 	} catch (error) {
 		// Return offline fallback for navigation requests
@@ -133,7 +130,7 @@ async function cacheFirst(request: Request, cacheName: string): Promise<Response
 				return offlineResponse;
 			}
 		}
-		
+
 		throw error;
 	}
 }
@@ -144,20 +141,20 @@ async function networkFirst(request: Request, cacheName: string): Promise<Respon
 
 	try {
 		const networkResponse = await fetch(request);
-		
+
 		// Cache successful responses
 		if (networkResponse.ok) {
 			cache.put(request, networkResponse.clone());
 		}
-		
+
 		return networkResponse;
 	} catch (error) {
 		const cachedResponse = await cache.match(request);
-		
+
 		if (cachedResponse) {
 			return cachedResponse;
 		}
-		
+
 		throw error;
 	}
 }
@@ -168,15 +165,17 @@ async function staleWhileRevalidate(request: Request, cacheName: string): Promis
 	const cachedResponse = await cache.match(request);
 
 	// Fetch in background to update cache
-	const fetchPromise = fetch(request).then((networkResponse) => {
-		if (networkResponse.ok) {
-			cache.put(request, networkResponse.clone());
-		}
-		return networkResponse;
-	}).catch(() => {
-		// Ignore network errors for background updates
-		return null;
-	});
+	const fetchPromise = fetch(request)
+		.then((networkResponse) => {
+			if (networkResponse.ok) {
+				cache.put(request, networkResponse.clone());
+			}
+			return networkResponse;
+		})
+		.catch(() => {
+			// Ignore network errors for background updates
+			return null;
+		});
 
 	// Return cached response immediately, or wait for network
 	if (cachedResponse) {

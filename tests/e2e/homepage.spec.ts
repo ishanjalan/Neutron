@@ -61,11 +61,11 @@ test.describe('Compress Tool', () => {
 test.describe('Accessibility', () => {
 	test('should have no accessibility violations on homepage', async ({ page }) => {
 		await page.goto('/');
-		
+
 		// Check for basic accessibility features
 		const main = page.locator('main');
 		await expect(main).toBeVisible();
-		
+
 		// All images should have alt text or be decorative
 		const images = page.locator('img');
 		const imageCount = await images.count();
@@ -79,7 +79,7 @@ test.describe('Accessibility', () => {
 
 	test('should be keyboard navigable', async ({ page }) => {
 		await page.goto('/');
-		
+
 		// Tab through main navigation
 		await page.keyboard.press('Tab');
 		const firstFocused = await page.evaluate(() => document.activeElement?.tagName);
@@ -91,10 +91,10 @@ test.describe('Responsive Design', () => {
 	test('should work on mobile viewport', async ({ page }) => {
 		await page.setViewportSize({ width: 375, height: 667 });
 		await page.goto('/');
-		
+
 		const heading = page.locator('h1');
 		await expect(heading).toBeVisible();
-		
+
 		// Tool cards should still be visible
 		const toolCards = page.locator('a[href*="/compress"]');
 		await expect(toolCards.first()).toBeVisible();
@@ -103,7 +103,7 @@ test.describe('Responsive Design', () => {
 	test('should work on tablet viewport', async ({ page }) => {
 		await page.setViewportSize({ width: 768, height: 1024 });
 		await page.goto('/');
-		
+
 		const heading = page.locator('h1');
 		await expect(heading).toBeVisible();
 	});

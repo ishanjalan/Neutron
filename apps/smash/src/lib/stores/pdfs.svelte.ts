@@ -1,12 +1,12 @@
 export type PDFStatus = 'pending' | 'processing' | 'completed' | 'error';
-export type PDFTool = 
-	| 'compress' 
-	| 'merge' 
-	| 'split' 
+export type PDFTool =
+	| 'compress'
+	| 'merge'
+	| 'split'
 	| 'rotate'
 	| 'delete-pages'
 	| 'reorder'
-	| 'pdf-to-images' 
+	| 'pdf-to-images'
 	| 'images-to-pdf'
 	| 'add-page-numbers'
 	| 'watermark'
@@ -76,166 +76,166 @@ export interface PDFSettings {
 // Ghostscript compression presets (real PDF compression, preserves text)
 // User-friendly labels with clear recommendations
 export const COMPRESSION_PRESETS = {
-	screen: { 
-		label: 'Email/Web', 
-		desc: 'Smallest (~70% reduction)', 
+	screen: {
+		label: 'Email/Web',
+		desc: 'Smallest (~70% reduction)',
 		icon: 'Monitor',
 		dpi: 72,
 		gsFlag: '/screen',
-		recommended: false
+		recommended: false,
 	},
-	ebook: { 
-		label: 'Reading', 
-		desc: 'Balanced (~50% reduction)', 
+	ebook: {
+		label: 'Reading',
+		desc: 'Balanced (~50% reduction)',
 		icon: 'BookOpen',
 		dpi: 150,
 		gsFlag: '/ebook',
-		recommended: true
+		recommended: true,
 	},
-	printer: { 
-		label: 'Print-Ready', 
-		desc: 'High quality (~30% reduction)', 
+	printer: {
+		label: 'Print-Ready',
+		desc: 'High quality (~30% reduction)',
 		icon: 'Printer',
 		dpi: 300,
 		gsFlag: '/printer',
-		recommended: false
+		recommended: false,
 	},
-	prepress: { 
-		label: 'Professional', 
-		desc: 'Maximum quality', 
+	prepress: {
+		label: 'Professional',
+		desc: 'Maximum quality',
 		icon: 'FileCheck',
 		dpi: 300,
 		gsFlag: '/prepress',
-		recommended: false
-	}
+		recommended: false,
+	},
 } as const;
 
 // DPI options for image export
 export const DPI_OPTIONS = [
 	{ value: 72 as const, label: 'Screen (72)', desc: 'Web/preview' },
 	{ value: 150 as const, label: 'Medium (150)', desc: 'General use' },
-	{ value: 300 as const, label: 'Print (300)', desc: 'High quality' }
+	{ value: 300 as const, label: 'Print (300)', desc: 'High quality' },
 ];
 
 // Image format options
 export const IMAGE_FORMAT_OPTIONS = [
 	{ value: 'png' as const, label: 'PNG', desc: 'Lossless' },
 	{ value: 'jpg' as const, label: 'JPG', desc: 'Smaller files' },
-	{ value: 'webp' as const, label: 'WebP', desc: 'Modern format' }
+	{ value: 'webp' as const, label: 'WebP', desc: 'Modern format' },
 ];
 
 // Tool definitions - organized by category
 export const TOOLS = [
 	// Core tools
-	{ 
-		value: 'compress' as const, 
-		label: 'Compress', 
+	{
+		value: 'compress' as const,
+		label: 'Compress',
 		desc: 'Reduce PDF file size',
 		icon: 'Minimize2',
 		accepts: '.pdf',
-		category: 'core'
+		category: 'core',
 	},
-	{ 
-		value: 'merge' as const, 
-		label: 'Merge', 
+	{
+		value: 'merge' as const,
+		label: 'Merge',
 		desc: 'Combine multiple PDFs',
 		icon: 'Layers',
 		accepts: '.pdf',
-		category: 'core'
+		category: 'core',
 	},
-	{ 
-		value: 'split' as const, 
-		label: 'Split', 
+	{
+		value: 'split' as const,
+		label: 'Split',
 		desc: 'Extract pages from PDF',
 		icon: 'Scissors',
 		accepts: '.pdf',
-		category: 'core'
+		category: 'core',
 	},
 	// Page manipulation
-	{ 
-		value: 'rotate' as const, 
-		label: 'Rotate', 
+	{
+		value: 'rotate' as const,
+		label: 'Rotate',
 		desc: 'Rotate PDF pages',
 		icon: 'RotateCw',
 		accepts: '.pdf',
-		category: 'pages'
+		category: 'pages',
 	},
-	{ 
-		value: 'delete-pages' as const, 
-		label: 'Delete Pages', 
+	{
+		value: 'delete-pages' as const,
+		label: 'Delete Pages',
 		desc: 'Remove pages from PDF',
 		icon: 'Trash2',
 		accepts: '.pdf',
-		category: 'pages'
+		category: 'pages',
 	},
-	{ 
-		value: 'reorder' as const, 
-		label: 'Reorder', 
+	{
+		value: 'reorder' as const,
+		label: 'Reorder',
 		desc: 'Rearrange PDF pages',
 		icon: 'ArrowUpDown',
 		accepts: '.pdf',
-		category: 'pages'
+		category: 'pages',
 	},
 	// Conversion
-	{ 
-		value: 'pdf-to-images' as const, 
-		label: 'PDF → Images', 
+	{
+		value: 'pdf-to-images' as const,
+		label: 'PDF → Images',
 		desc: 'Convert pages to images',
 		icon: 'Image',
 		accepts: '.pdf',
-		category: 'convert'
+		category: 'convert',
 	},
-	{ 
-		value: 'images-to-pdf' as const, 
-		label: 'Images → PDF', 
+	{
+		value: 'images-to-pdf' as const,
+		label: 'Images → PDF',
 		desc: 'Create PDF from images',
 		icon: 'FileText',
 		accepts: '.jpg,.jpeg,.png,.webp',
-		category: 'convert'
+		category: 'convert',
 	},
 	// Editing
-	{ 
-		value: 'add-page-numbers' as const, 
-		label: 'Page Numbers', 
+	{
+		value: 'add-page-numbers' as const,
+		label: 'Page Numbers',
 		desc: 'Add page numbers to PDF',
 		icon: 'Hash',
 		accepts: '.pdf',
-		category: 'edit'
+		category: 'edit',
 	},
-	{ 
-		value: 'watermark' as const, 
-		label: 'Watermark', 
+	{
+		value: 'watermark' as const,
+		label: 'Watermark',
 		desc: 'Add text watermark',
 		icon: 'Stamp',
 		accepts: '.pdf',
-		category: 'edit'
+		category: 'edit',
 	},
 	// Security
-	{ 
-		value: 'protect' as const, 
-		label: 'Protect', 
+	{
+		value: 'protect' as const,
+		label: 'Protect',
 		desc: 'Add password protection',
 		icon: 'Lock',
 		accepts: '.pdf',
-		category: 'security'
+		category: 'security',
 	},
-	{ 
-		value: 'unlock' as const, 
-		label: 'Unlock', 
+	{
+		value: 'unlock' as const,
+		label: 'Unlock',
 		desc: 'Remove password protection',
 		icon: 'Unlock',
 		accepts: '.pdf',
-		category: 'security'
+		category: 'security',
 	},
 	// OCR
-	{ 
-		value: 'ocr' as const, 
-		label: 'OCR', 
+	{
+		value: 'ocr' as const,
+		label: 'OCR',
 		desc: 'Extract text from scanned PDFs',
 		icon: 'FileSearch',
 		accepts: '.pdf',
-		category: 'convert'
-	}
+		category: 'convert',
+	},
 ] as const;
 
 // Tool categories for organized display
@@ -244,7 +244,7 @@ export const TOOL_CATEGORIES = [
 	{ id: 'pages', label: 'Page Tools' },
 	{ id: 'convert', label: 'Convert' },
 	{ id: 'edit', label: 'Edit' },
-	{ id: 'security', label: 'Security' }
+	{ id: 'security', label: 'Security' },
 ] as const;
 
 // Default settings
@@ -264,7 +264,7 @@ const DEFAULT_SETTINGS: PDFSettings = {
 	watermarkOpacity: 30,
 	pageNumberPosition: 'bottom-center',
 	ocrLanguage: 'eng',
-	ocrOutputMode: 'searchable-pdf'
+	ocrOutputMode: 'searchable-pdf',
 };
 
 // Load settings from localStorage
@@ -307,11 +307,11 @@ function createPDFStore() {
 		async addFiles(files: FileList | File[]) {
 			const fileArray = Array.from(files);
 			const currentTool = settings.tool;
-			
+
 			for (const file of fileArray) {
 				const isPDF = file.type === 'application/pdf';
 				const isImage = file.type.startsWith('image/');
-				
+
 				// Validate file type based on current tool
 				if (currentTool === 'images-to-pdf' && !isImage) continue;
 				if (currentTool !== 'images-to-pdf' && !isPDF) continue;
@@ -325,7 +325,7 @@ function createPDFStore() {
 					status: 'pending',
 					progress: 0,
 					order: items.length,
-					isImage
+					isImage,
 				};
 
 				items = [...items, item];
@@ -335,13 +335,13 @@ function createPDFStore() {
 		// Add files from paths (desktop/Tauri mode)
 		async addFilesFromPaths(paths: string[]) {
 			const currentTool = settings.tool;
-			
+
 			for (const filePath of paths) {
 				const fileName = filePath.split(/[/\\]/).pop() || 'file';
 				const ext = fileName.split('.').pop()?.toLowerCase() || '';
 				const isPDF = ext === 'pdf';
 				const isImage = ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext);
-				
+
 				// Validate file type based on current tool
 				if (currentTool === 'images-to-pdf' && !isImage) continue;
 				if (currentTool !== 'images-to-pdf' && !isPDF) continue;
@@ -349,7 +349,9 @@ function createPDFStore() {
 				// Create a placeholder File object for compatibility
 				// The actual file operations will use filePath in Tauri mode
 				const placeholderBlob = new Blob([], { type: isPDF ? 'application/pdf' : `image/${ext}` });
-				const placeholderFile = new File([placeholderBlob], fileName, { type: placeholderBlob.type });
+				const placeholderFile = new File([placeholderBlob], fileName, {
+					type: placeholderBlob.type,
+				});
 
 				const item: PDFItem = {
 					id: crypto.randomUUID(),
@@ -361,7 +363,7 @@ function createPDFStore() {
 					status: 'pending',
 					progress: 0,
 					order: items.length,
-					isImage
+					isImage,
 				};
 
 				items = [...items, item];
@@ -422,8 +424,8 @@ function createPDFStore() {
 		// Set tool
 		setTool(tool: PDFTool) {
 			// Clear items when switching tools (different file types)
-			const currentAccepts = TOOLS.find(t => t.value === settings.tool)?.accepts;
-			const newAccepts = TOOLS.find(t => t.value === tool)?.accepts;
+			const currentAccepts = TOOLS.find((t) => t.value === settings.tool)?.accepts;
+			const newAccepts = TOOLS.find((t) => t.value === tool)?.accepts;
 			if (currentAccepts !== newAccepts) {
 				this.clearAll();
 			}
@@ -434,7 +436,7 @@ function createPDFStore() {
 		// Get item by ID
 		getItemById(id: string) {
 			return items.find((i) => i.id === id);
-		}
+		},
 	};
 }
 

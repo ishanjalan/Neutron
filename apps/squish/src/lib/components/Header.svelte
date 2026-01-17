@@ -23,13 +23,14 @@
 	let deferredPrompt: any = null;
 
 	// Detect if Mac for keyboard shortcut display
-	const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+	const isMac =
+		typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 	const modKey = isMac ? '⌘' : 'Ctrl';
 
 	const shortcuts = [
 		{ keys: `${modKey}+Shift+D`, action: 'Download all as ZIP' },
 		{ keys: `${modKey}+V`, action: 'Paste image from clipboard' },
-		{ keys: 'Escape', action: 'Clear all images' }
+		{ keys: 'Escape', action: 'Clear all images' },
 	];
 
 	function handleClickOutside(e: MouseEvent) {
@@ -64,7 +65,7 @@
 
 		deferredPrompt.prompt();
 		const { outcome } = await deferredPrompt.userChoice;
-		
+
 		if (outcome === 'accepted') {
 			showInstallPrompt = false;
 		}
@@ -107,15 +108,15 @@
 
 <svelte:window onclick={handleClickOutside} />
 
-<header class="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 py-4">
+<header class="fixed left-0 right-0 top-0 z-50 px-4 py-4 sm:px-6 lg:px-8">
 	<div class="mx-auto max-w-7xl">
 		<nav
-			class="glass flex items-center justify-between rounded-2xl px-4 sm:px-6 py-3 shadow-lg shadow-black/5"
+			class="glass flex items-center justify-between rounded-2xl px-4 py-3 shadow-lg shadow-black/5 sm:px-6"
 		>
 			<!-- Logo -->
-			<a href="{base}/" class="flex items-center gap-3 group" onclick={handleLogoClick}>
+			<a href="{base}/" class="group flex items-center gap-3" onclick={handleLogoClick}>
 				<div
-					class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accent-start to-accent-end shadow-lg shadow-accent-start/30 transition-transform group-hover:scale-110"
+					class="from-accent-start to-accent-end shadow-accent-start/30 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg transition-transform group-hover:scale-110"
 				>
 					<Zap class="h-5 w-5 text-white" strokeWidth={2.5} />
 				</div>
@@ -134,7 +135,7 @@
 						title="You're offline. Previously cached files still work."
 					>
 						<WifiOff class="h-4 w-4" />
-						<span class="text-xs font-medium hidden sm:inline">Offline</span>
+						<span class="hidden text-xs font-medium sm:inline">Offline</span>
 					</div>
 				{/if}
 
@@ -142,20 +143,26 @@
 				{#if showInstallPrompt}
 					<button
 						onclick={handleInstallClick}
-						class="flex items-center gap-2 rounded-xl bg-accent-start/10 px-3 py-2 text-accent-start hover:bg-accent-start/20 transition-colors"
+						class="bg-accent-start/10 text-accent-start hover:bg-accent-start/20 flex items-center gap-2 rounded-xl px-3 py-2 transition-colors"
 						transition:scale={{ duration: 150, start: 0.95 }}
 						title="Install Squish as an app"
 					>
 						<Download class="h-4 w-4" />
-						<span class="text-xs font-medium hidden sm:inline">Install App</span>
+						<span class="hidden text-xs font-medium sm:inline">Install App</span>
 					</button>
 				{/if}
 
 				<!-- Keyboard shortcuts -->
 				<div class="relative" data-shortcuts-popover>
 					<button
-						onclick={(e) => { e.stopPropagation(); showShortcuts = !showShortcuts; showFirstRunHint = false; }}
-						class="flex h-10 w-10 items-center justify-center rounded-xl text-surface-400 transition-all hover:bg-surface-800 hover:text-surface-100 {showFirstRunHint ? 'ring-2 ring-accent-start ring-offset-2 ring-offset-surface-900' : ''}"
+						onclick={(e) => {
+							e.stopPropagation();
+							showShortcuts = !showShortcuts;
+							showFirstRunHint = false;
+						}}
+						class="text-surface-400 hover:bg-surface-800 hover:text-surface-100 flex h-10 w-10 items-center justify-center rounded-xl transition-all {showFirstRunHint
+							? 'ring-accent-start ring-offset-surface-900 ring-2 ring-offset-2'
+							: ''}"
 						aria-label="Keyboard shortcuts"
 						aria-expanded={showShortcuts}
 						aria-haspopup="true"
@@ -166,26 +173,30 @@
 					<!-- First-run hint -->
 					{#if showFirstRunHint && !showShortcuts}
 						<div
-							class="absolute right-0 top-full mt-2 w-72 rounded-xl bg-gradient-to-br from-accent-start to-accent-end p-4 shadow-xl"
+							class="from-accent-start to-accent-end absolute right-0 top-full mt-2 w-72 rounded-xl bg-gradient-to-br p-4 shadow-xl"
 							transition:scale={{ duration: 200, start: 0.95 }}
 							data-first-run-hint
 						>
 							<button
 								onclick={dismissFirstRunHint}
-								class="absolute top-2 right-2 p-1 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+								class="absolute right-2 top-2 rounded-lg p-1 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
 								aria-label="Dismiss"
 							>
 								<X class="h-4 w-4" />
 							</button>
 							<div class="flex items-start gap-3">
-								<div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-white/20">
+								<div
+									class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-white/20"
+								>
 									<Command class="h-4 w-4 text-white" />
 								</div>
 								<div>
 									<h3 class="text-sm font-semibold text-white">Pro tip: Keyboard shortcuts!</h3>
 									<p class="mt-1 text-xs text-white/80">
-										Paste images with <kbd class="rounded bg-white/20 px-1.5 py-0.5 font-mono">{modKey}+V</kbd>, 
-										download all with <kbd class="rounded bg-white/20 px-1.5 py-0.5 font-mono">{modKey}+Shift+D</kbd>
+										Paste images with <kbd class="rounded bg-white/20 px-1.5 py-0.5 font-mono"
+											>{modKey}+V</kbd
+										>, download all with
+										<kbd class="rounded bg-white/20 px-1.5 py-0.5 font-mono">{modKey}+Shift+D</kbd>
 									</p>
 									<button
 										onclick={dismissFirstRunHint}
@@ -200,19 +211,21 @@
 
 					{#if showShortcuts}
 						<div
-							class="absolute right-0 top-full mt-2 w-64 rounded-xl bg-surface-800 p-4 shadow-xl ring-1 ring-white/10"
+							class="bg-surface-800 absolute right-0 top-full mt-2 w-64 rounded-xl p-4 shadow-xl ring-1 ring-white/10"
 							transition:scale={{ duration: 150, start: 0.95 }}
 							role="tooltip"
 						>
-							<h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-surface-100">
-								<Command class="h-4 w-4 text-accent-start" />
+							<h3 class="text-surface-100 mb-3 flex items-center gap-2 text-sm font-semibold">
+								<Command class="text-accent-start h-4 w-4" />
 								Keyboard Shortcuts
 							</h3>
 							<ul class="space-y-2">
 								{#each shortcuts as shortcut}
 									<li class="flex items-center justify-between text-sm">
 										<span class="text-surface-400">{shortcut.action}</span>
-										<kbd class="rounded bg-surface-700 px-2 py-0.5 font-mono text-xs text-surface-300">
+										<kbd
+											class="bg-surface-700 text-surface-300 rounded px-2 py-0.5 font-mono text-xs"
+										>
 											{shortcut.keys}
 										</kbd>
 									</li>
@@ -222,15 +235,15 @@
 					{/if}
 				</div>
 
-			<a
-				href="https://github.com/ishanjalan/Neutron/tree/main/apps/squish"
-				target="_blank"
-				rel="noopener noreferrer"
-				class="flex h-10 w-10 items-center justify-center rounded-xl text-surface-400 transition-all hover:bg-surface-800 hover:text-surface-100"
-				aria-label="View source on GitHub"
-			>
-				<Github class="h-5 w-5" />
-			</a>
+				<a
+					href="https://github.com/ishanjalan/Neutron/tree/main/apps/squish"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="text-surface-400 hover:bg-surface-800 hover:text-surface-100 flex h-10 w-10 items-center justify-center rounded-xl transition-all"
+					aria-label="View source on GitHub"
+				>
+					<Github class="h-5 w-5" />
+				</a>
 			</div>
 		</nav>
 	</div>

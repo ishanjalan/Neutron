@@ -6,25 +6,25 @@ export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
 	optimizeDeps: {
 		// Exclude WASM packages from pre-bundling (they need special handling)
-		exclude: ['icodec']
+		exclude: ['icodec'],
 	},
 	build: {
-		target: 'esnext'
+		target: 'esnext',
 	},
 	worker: {
 		// Use ES modules for workers (required for dynamic imports in workers)
 		format: 'es',
 		plugins: () => [
 			// Apply same plugins to workers
-			tailwindcss()
+			tailwindcss(),
 		],
 		rollupOptions: {
 			output: {
 				// Ensure proper chunking for workers
 				format: 'es',
 				// Don't inline WASM modules
-				inlineDynamicImports: false
-			}
-		}
-	}
+				inlineDynamicImports: false,
+			},
+		},
+	},
 });

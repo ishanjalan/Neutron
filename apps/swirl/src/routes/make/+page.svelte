@@ -4,12 +4,26 @@
 	import DropZone from '$lib/components/DropZone.svelte';
 	import CompareSlider from '$lib/components/CompareSlider.svelte';
 	import { toast } from '@neutron/ui';
-	import { Images, Settings, Download, Play, Pause, Trash2, GripVertical, Plus, Loader2, Copy, Check, Eye, RefreshCw } from 'lucide-svelte';
+	import {
+		Images,
+		Settings,
+		Download,
+		Play,
+		Pause,
+		Trash2,
+		GripVertical,
+		Plus,
+		Loader2,
+		Copy,
+		Check,
+		Eye,
+		RefreshCw,
+	} from 'lucide-svelte';
 	import { fade, fly, slide } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 	import encode from 'gifski-wasm';
-import { formatBytes, copyBlobToClipboard, isClipboardWriteSupported } from '@neutron/utils';
-import { optimizeGif } from '$lib/utils/gifsicle';
+	import { formatBytes, copyBlobToClipboard, isClipboardWriteSupported } from '@neutron/utils';
+	import { optimizeGif } from '$lib/utils/gifsicle';
 
 	interface Frame {
 		id: string;
@@ -35,7 +49,7 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 	let loop = $state(0); // 0 = infinite
 	let outputWidth = $state(480);
 	let quality = $state(80);
-	
+
 	// Optimization
 	let optimizeOutput = $state(false);
 	let lossyLevel = $state(80);
@@ -57,7 +71,7 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 	}
 
 	async function handleFiles(files: File[]) {
-		const imageFiles = files.filter(f => f.type.startsWith('image/') && !f.type.includes('gif'));
+		const imageFiles = files.filter((f) => f.type.startsWith('image/') && !f.type.includes('gif'));
 		if (imageFiles.length === 0) {
 			toast.error('Please select image files (PNG, JPG, WebP)');
 			return;
@@ -74,19 +88,19 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 				url,
 				delay: globalDelay,
 				width,
-				height
+				height,
 			});
 		}
 
 		frames = [...frames, ...newFrames];
-		
+
 		// Auto-set output width based on first frame if no frames existed
 		if (frames.length === newFrames.length && newFrames.length > 0) {
 			outputWidth = Math.min(newFrames[0].width, 480);
 		}
 
 		toast.success(`Added ${newFrames.length} frame(s)`);
-		
+
 		// Clear previous result
 		if (resultUrl) {
 			URL.revokeObjectURL(resultUrl);
@@ -104,19 +118,19 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 	}
 
 	function removeFrame(id: string) {
-		const frame = frames.find(f => f.id === id);
+		const frame = frames.find((f) => f.id === id);
 		if (frame) {
 			URL.revokeObjectURL(frame.url);
 		}
-		frames = frames.filter(f => f.id !== id);
+		frames = frames.filter((f) => f.id !== id);
 	}
 
 	function updateFrameDelay(id: string, delay: number) {
-		frames = frames.map(f => f.id === id ? { ...f, delay } : f);
+		frames = frames.map((f) => (f.id === id ? { ...f, delay } : f));
 	}
 
 	function applyGlobalDelay() {
-		frames = frames.map(f => ({ ...f, delay: globalDelay }));
+		frames = frames.map((f) => ({ ...f, delay: globalDelay }));
 		toast.success('Applied delay to all frames');
 	}
 
@@ -136,8 +150,8 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 
 	function handleDrop(targetIndex: number) {
 		if (!draggedFrame) return;
-		
-		const sourceIndex = frames.findIndex(f => f.id === draggedFrame!.id);
+
+		const sourceIndex = frames.findIndex((f) => f.id === draggedFrame!.id);
 		if (sourceIndex === targetIndex) {
 			draggedFrame = null;
 			dragOverIndex = null;
@@ -148,7 +162,7 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 		newFrames.splice(sourceIndex, 1);
 		newFrames.splice(targetIndex, 0, draggedFrame);
 		frames = newFrames;
-		
+
 		draggedFrame = null;
 		dragOverIndex = null;
 	}
@@ -175,7 +189,7 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 
 	function playNextFrame() {
 		if (!isPlaying || frames.length === 0) return;
-		
+
 		const frame = frames[currentFrameIndex];
 		previewInterval = setTimeout(() => {
 			currentFrameIndex = (currentFrameIndex + 1) % frames.length;
@@ -250,24 +264,26 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 				width: outputWidth,
 				height: outputHeight,
 				frameDurations, // Per-frame durations in ms
-				quality // gifski quality 1-100
+				quality, // gifski quality 1-100
 			});
 
 			let finalBuffer = gifBuffer;
-			
+
 			// Optimize if enabled
 			if (optimizeOutput) {
 				progressStage = 'Optimizing GIF...';
 				progress = 80;
-				
+
 				const { result } = await optimizeGif(
 					gifBuffer.buffer,
 					{ lossy: lossyLevel, colors: 256 },
-					(p) => { progress = 80 + Math.round(p * 0.15); }
+					(p) => {
+						progress = 80 + Math.round(p * 0.15);
+					}
 				);
 				finalBuffer = new Uint8Array(result);
 			}
-			
+
 			progressStage = 'Finalizing GIF...';
 			progress = 98;
 
@@ -280,7 +296,6 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 			progress = 100;
 			progressStage = 'Complete!';
 			toast.success('GIF created successfully!');
-
 		} catch (error) {
 			console.error('GIF creation error:', error);
 			toast.error('Failed to create GIF');
@@ -312,7 +327,9 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 		if (success) {
 			justCopied = true;
 			toast.success('Copied to clipboard!');
-			setTimeout(() => { justCopied = false; }, 2000);
+			setTimeout(() => {
+				justCopied = false;
+			}, 2000);
 		} else {
 			toast.error('Copy not supported in this browser');
 		}
@@ -329,7 +346,7 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 
 	function clearAll() {
 		stopPreview();
-		frames.forEach(f => URL.revokeObjectURL(f.url));
+		frames.forEach((f) => URL.revokeObjectURL(f.url));
 		frames = [];
 		if (resultUrl) {
 			URL.revokeObjectURL(resultUrl);
@@ -340,7 +357,9 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 
 	// Derived
 	const totalDuration = $derived(frames.reduce((sum, f) => sum + f.delay, 0));
-	const estimatedFps = $derived(frames.length > 0 ? Math.round(1000 / (totalDuration / frames.length)) : 0);
+	const estimatedFps = $derived(
+		frames.length > 0 ? Math.round(1000 / (totalDuration / frames.length)) : 0
+	);
 </script>
 
 <svelte:head>
@@ -352,24 +371,28 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 
 	<!-- Background decoration -->
 	<div class="fixed inset-0 -z-10 overflow-hidden">
-		<div class="absolute -top-1/2 -right-1/4 h-[800px] w-[800px] rounded-full bg-gradient-to-br from-green-500/10 to-emerald-500/10 blur-3xl"></div>
-		<div class="absolute -bottom-1/2 -left-1/4 h-[600px] w-[600px] rounded-full bg-gradient-to-tr from-emerald-500/10 to-green-500/10 blur-3xl"></div>
+		<div
+			class="absolute -right-1/4 -top-1/2 h-[800px] w-[800px] rounded-full bg-gradient-to-br from-green-500/10 to-emerald-500/10 blur-3xl"
+		></div>
+		<div
+			class="absolute -bottom-1/2 -left-1/4 h-[600px] w-[600px] rounded-full bg-gradient-to-tr from-emerald-500/10 to-green-500/10 blur-3xl"
+		></div>
 	</div>
 
-	<main class="flex-1 px-4 sm:px-6 lg:px-8 pt-28 pb-12">
+	<main class="flex-1 px-4 pb-12 pt-28 sm:px-6 lg:px-8">
 		<div class="mx-auto max-w-5xl">
 			<!-- Header -->
-			<div class="text-center mb-8" in:fade={{ duration: 200 }}>
-				<div class="inline-flex items-center gap-2 rounded-full bg-green-500/10 px-4 py-1.5 text-sm font-medium text-green-400 mb-4">
+			<div class="mb-8 text-center" in:fade={{ duration: 200 }}>
+				<div
+					class="mb-4 inline-flex items-center gap-2 rounded-full bg-green-500/10 px-4 py-1.5 text-sm font-medium text-green-400"
+				>
 					<Images class="h-4 w-4" />
 					GIF Maker
 				</div>
-				<h1 class="text-3xl font-bold text-surface-100">
+				<h1 class="text-surface-100 text-3xl font-bold">
 					Create GIF from <span class="gradient-text">images</span>
 				</h1>
-				<p class="mt-2 text-surface-500">
-					Combine PNG, JPG, or WebP images into an animated GIF
-				</p>
+				<p class="text-surface-500 mt-2">Combine PNG, JPG, or WebP images into an animated GIF</p>
 			</div>
 
 			<div class="grid gap-6 lg:grid-cols-2">
@@ -377,33 +400,41 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 				<div>
 					<!-- Preview -->
 					{#if frames.length > 0}
-						<div class="glass rounded-2xl p-4 mb-4" in:fly={{ y: -10, duration: 200 }}>
-							<div class="aspect-video bg-surface-900 rounded-xl overflow-hidden relative flex items-center justify-center">
+						<div class="glass mb-4 rounded-2xl p-4" in:fly={{ y: -10, duration: 200 }}>
+							<div
+								class="bg-surface-900 relative flex aspect-video items-center justify-center overflow-hidden rounded-xl"
+							>
 								{#if resultUrl}
-									<img src={resultUrl} alt="Result GIF" class="max-w-full max-h-full object-contain" />
+									<img
+										src={resultUrl}
+										alt="Result GIF"
+										class="max-h-full max-w-full object-contain"
+									/>
 								{:else if frames[currentFrameIndex]}
-									<img 
-										src={frames[currentFrameIndex].url} 
-										alt="Frame {currentFrameIndex + 1}" 
-										class="max-w-full max-h-full object-contain"
+									<img
+										src={frames[currentFrameIndex].url}
+										alt="Frame {currentFrameIndex + 1}"
+										class="max-h-full max-w-full object-contain"
 									/>
 								{/if}
-								
+
 								<!-- Play overlay -->
 								<button
 									onclick={togglePreview}
-									class="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity"
+									class="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity hover:opacity-100"
 								>
-									<div class="h-16 w-16 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
+									<div
+										class="flex h-16 w-16 items-center justify-center rounded-full bg-white/20 backdrop-blur"
+									>
 										{#if isPlaying}
 											<Pause class="h-8 w-8 text-white" />
 										{:else}
-											<Play class="h-8 w-8 text-white ml-1" />
+											<Play class="ml-1 h-8 w-8 text-white" />
 										{/if}
 									</div>
 								</button>
 							</div>
-							
+
 							<!-- Preview info -->
 							<div class="mt-3 flex items-center justify-between text-sm">
 								<span class="text-surface-400">
@@ -417,7 +448,7 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 					{/if}
 
 					<!-- Drop Zone -->
-					<DropZone 
+					<DropZone
 						accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
 						acceptLabel="PNG, JPG, WebP"
 						onfiles={handleFiles}
@@ -427,19 +458,22 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 					<!-- Frame List -->
 					{#if frames.length > 0}
 						<div class="mt-4 space-y-2" in:fly={{ y: 20, duration: 200 }}>
-							<div class="flex items-center justify-between mb-2">
-								<h3 class="text-sm font-medium text-surface-300">Frames ({frames.length})</h3>
+							<div class="mb-2 flex items-center justify-between">
+								<h3 class="text-surface-300 text-sm font-medium">Frames ({frames.length})</h3>
 								<button
 									onclick={clearAll}
-									class="text-xs text-surface-500 hover:text-red-400 transition-colors"
+									class="text-surface-500 text-xs transition-colors hover:text-red-400"
 								>
 									Clear all
 								</button>
 							</div>
-							
+
 							{#each frames as frame, index (frame.id)}
-								<div 
-									class="glass rounded-xl p-3 flex items-center gap-3 cursor-move {dragOverIndex === index ? 'ring-2 ring-accent-start' : ''}"
+								<div
+									class="glass flex cursor-move items-center gap-3 rounded-xl p-3 {dragOverIndex ===
+									index
+										? 'ring-accent-start ring-2'
+										: ''}"
 									draggable="true"
 									ondragstart={() => handleDragStart(frame)}
 									ondragover={(e) => handleDragOver(e, index)}
@@ -452,16 +486,16 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 									<div class="text-surface-600 cursor-grab active:cursor-grabbing">
 										<GripVertical class="h-5 w-5" />
 									</div>
-									
-									<div class="h-12 w-12 rounded-lg bg-surface-800 overflow-hidden flex-shrink-0">
-										<img src={frame.url} alt="" class="w-full h-full object-cover" />
+
+									<div class="bg-surface-800 h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
+										<img src={frame.url} alt="" class="h-full w-full object-cover" />
 									</div>
-									
-									<div class="flex-1 min-w-0">
-										<p class="text-sm font-medium text-surface-200 truncate">Frame {index + 1}</p>
-										<p class="text-xs text-surface-500">{frame.width}×{frame.height}</p>
+
+									<div class="min-w-0 flex-1">
+										<p class="text-surface-200 truncate text-sm font-medium">Frame {index + 1}</p>
+										<p class="text-surface-500 text-xs">{frame.width}×{frame.height}</p>
 									</div>
-									
+
 									<label class="flex items-center gap-2">
 										<input
 											type="number"
@@ -469,15 +503,16 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 											min="10"
 											max="5000"
 											step="10"
-											onchange={(e) => updateFrameDelay(frame.id, parseInt(e.currentTarget.value) || 100)}
-											class="w-16 rounded-lg bg-surface-800 px-2 py-1 text-sm text-surface-100 text-center"
+											onchange={(e) =>
+												updateFrameDelay(frame.id, parseInt(e.currentTarget.value) || 100)}
+											class="bg-surface-800 text-surface-100 w-16 rounded-lg px-2 py-1 text-center text-sm"
 										/>
-										<span class="text-xs text-surface-500">ms</span>
+										<span class="text-surface-500 text-xs">ms</span>
 									</label>
-									
+
 									<button
 										onclick={() => removeFrame(frame.id)}
-										class="p-2 text-surface-500 hover:text-red-400 transition-colors"
+										class="text-surface-500 p-2 transition-colors hover:text-red-400"
 									>
 										<Trash2 class="h-4 w-4" />
 									</button>
@@ -488,16 +523,16 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 				</div>
 
 				<!-- Right: Settings -->
-				<div class="glass rounded-2xl p-6 h-fit" in:fly={{ y: 20, delay: 100, duration: 200 }}>
-					<h3 class="flex items-center gap-2 text-lg font-semibold text-surface-100 mb-6">
-						<Settings class="h-5 w-5 text-accent-start" />
+				<div class="glass h-fit rounded-2xl p-6" in:fly={{ y: 20, delay: 100, duration: 200 }}>
+					<h3 class="text-surface-100 mb-6 flex items-center gap-2 text-lg font-semibold">
+						<Settings class="text-accent-start h-5 w-5" />
 						Settings
 					</h3>
 
 					<div class="space-y-5">
 						<!-- Global Delay -->
 						<div>
-							<label class="block text-sm font-medium text-surface-300 mb-2">
+							<label class="text-surface-300 mb-2 block text-sm font-medium">
 								Frame Delay: <span class="text-accent-start">{globalDelay}ms</span>
 							</label>
 							<div class="flex gap-2">
@@ -507,16 +542,16 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 									min="10"
 									max="1000"
 									step="10"
-									class="flex-1 accent-accent-start"
+									class="accent-accent-start flex-1"
 								/>
 								<button
 									onclick={applyGlobalDelay}
-									class="px-3 py-1 rounded-lg bg-surface-700 text-xs text-surface-300 hover:bg-surface-600 transition-colors"
+									class="bg-surface-700 text-surface-300 hover:bg-surface-600 rounded-lg px-3 py-1 text-xs transition-colors"
 								>
 									Apply all
 								</button>
 							</div>
-							<div class="flex justify-between text-xs text-surface-500 mt-1">
+							<div class="text-surface-500 mt-1 flex justify-between text-xs">
 								<span>10ms (fast)</span>
 								<span>1000ms (slow)</span>
 							</div>
@@ -524,7 +559,7 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 
 						<!-- Output Width -->
 						<div>
-							<label class="block text-sm font-medium text-surface-300 mb-2">
+							<label class="text-surface-300 mb-2 block text-sm font-medium">
 								Width: <span class="text-accent-start">{outputWidth}px</span>
 							</label>
 							<input
@@ -533,9 +568,9 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 								min="100"
 								max="1080"
 								step="20"
-								class="w-full accent-accent-start"
+								class="accent-accent-start w-full"
 							/>
-							<div class="flex justify-between text-xs text-surface-500 mt-1">
+							<div class="text-surface-500 mt-1 flex justify-between text-xs">
 								<span>100px</span>
 								<span>1080px</span>
 							</div>
@@ -543,7 +578,7 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 
 						<!-- Quality -->
 						<div>
-							<label class="block text-sm font-medium text-surface-300 mb-2">
+							<label class="text-surface-300 mb-2 block text-sm font-medium">
 								Quality: <span class="text-accent-start">{quality}%</span>
 							</label>
 							<input
@@ -551,9 +586,9 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 								bind:value={quality}
 								min="10"
 								max="100"
-								class="w-full accent-accent-start"
+								class="accent-accent-start w-full"
 							/>
-							<div class="flex justify-between text-xs text-surface-500 mt-1">
+							<div class="text-surface-500 mt-1 flex justify-between text-xs">
 								<span>Smaller file</span>
 								<span>Better colors</span>
 							</div>
@@ -561,39 +596,41 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 
 						<!-- Loop -->
 						<div>
-							<label class="block text-sm font-medium text-surface-300 mb-2">
-								Loop: <span class="text-accent-start">{loop === 0 ? 'Infinite' : loop + ' times'}</span>
+							<label class="text-surface-300 mb-2 block text-sm font-medium">
+								Loop: <span class="text-accent-start"
+									>{loop === 0 ? 'Infinite' : loop + ' times'}</span
+								>
 							</label>
 							<input
 								type="range"
 								bind:value={loop}
 								min="0"
 								max="10"
-								class="w-full accent-accent-start"
+								class="accent-accent-start w-full"
 							/>
-							<div class="flex justify-between text-xs text-surface-500 mt-1">
+							<div class="text-surface-500 mt-1 flex justify-between text-xs">
 								<span>Infinite</span>
 								<span>10 times</span>
 							</div>
 						</div>
 
 						<!-- Optimize Output -->
-						<div class="p-4 rounded-xl bg-surface-800/50 space-y-3">
-							<label class="flex items-center gap-3 cursor-pointer">
+						<div class="bg-surface-800/50 space-y-3 rounded-xl p-4">
+							<label class="flex cursor-pointer items-center gap-3">
 								<input
 									type="checkbox"
 									bind:checked={optimizeOutput}
-									class="w-5 h-5 rounded bg-surface-700 border-surface-600 text-accent-start focus:ring-accent-start"
+									class="bg-surface-700 border-surface-600 text-accent-start focus:ring-accent-start h-5 w-5 rounded"
 								/>
 								<div>
-									<span class="text-sm font-medium text-surface-200">Optimize output</span>
-									<p class="text-xs text-surface-500">Compress GIF further after creation</p>
+									<span class="text-surface-200 text-sm font-medium">Optimize output</span>
+									<p class="text-surface-500 text-xs">Compress GIF further after creation</p>
 								</div>
 							</label>
-							
+
 							{#if optimizeOutput}
-								<div class="pt-2 border-t border-surface-700">
-									<label class="block text-sm font-medium text-surface-300 mb-2">
+								<div class="border-surface-700 border-t pt-2">
+									<label class="text-surface-300 mb-2 block text-sm font-medium">
 										Compression: <span class="text-accent-start">{lossyLevel}</span>
 									</label>
 									<input
@@ -601,9 +638,9 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 										bind:value={lossyLevel}
 										min="0"
 										max="200"
-										class="w-full accent-accent-start"
+										class="accent-accent-start w-full"
 									/>
-									<div class="flex justify-between text-xs text-surface-500 mt-1">
+									<div class="text-surface-500 mt-1 flex justify-between text-xs">
 										<span>Lossless</span>
 										<span>Maximum compression</span>
 									</div>
@@ -615,7 +652,7 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 						<button
 							onclick={handleCreate}
 							disabled={frames.length < 2 || isProcessing}
-							class="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent-start to-accent-end px-6 py-3 text-base font-semibold text-white shadow-lg shadow-accent-start/30 transition-all hover:shadow-xl hover:shadow-accent-start/40 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+							class="from-accent-start to-accent-end shadow-accent-start/30 hover:shadow-accent-start/40 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r px-6 py-3 text-base font-semibold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
 						>
 							{#if isProcessing}
 								<Loader2 class="h-5 w-5 animate-spin" />
@@ -628,9 +665,9 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 
 						<!-- Progress -->
 						{#if isProcessing}
-							<div class="h-2 bg-surface-800 rounded-full overflow-hidden">
-								<div 
-									class="h-full bg-gradient-to-r from-accent-start to-accent-end transition-all duration-300"
+							<div class="bg-surface-800 h-2 overflow-hidden rounded-full">
+								<div
+									class="from-accent-start to-accent-end h-full bg-gradient-to-r transition-all duration-300"
 									style="width: {progress}%"
 								></div>
 							</div>
@@ -638,20 +675,23 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 
 						<!-- Result -->
 						{#if resultUrl}
-							<div class="mt-4 p-4 rounded-xl bg-green-500/10 border border-green-500/30" in:fly={{ y: 10, duration: 200 }}>
-								<div class="flex items-center justify-between mb-3">
+							<div
+								class="mt-4 rounded-xl border border-green-500/30 bg-green-500/10 p-4"
+								in:fly={{ y: 10, duration: 200 }}
+							>
+								<div class="mb-3 flex items-center justify-between">
 									<div>
-										<p class="text-green-400 font-medium">GIF created!</p>
-										<p class="text-sm text-surface-500">
+										<p class="font-medium text-green-400">GIF created!</p>
+										<p class="text-surface-500 text-sm">
 											{formatBytes(resultSize)} • {frames.length} frames
 										</p>
 									</div>
 								</div>
-								
+
 								<div class="flex gap-2">
 									<button
 										onclick={downloadResult}
-										class="flex-1 flex items-center justify-center gap-2 rounded-xl bg-green-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-green-600 transition-colors"
+										class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-green-600"
 									>
 										<Download class="h-4 w-4" />
 										Download
@@ -659,7 +699,7 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 									{#if isClipboardWriteSupported()}
 										<button
 											onclick={copyResult}
-											class="flex items-center justify-center gap-2 rounded-xl bg-surface-700 px-4 py-2.5 text-sm font-medium text-surface-200 hover:bg-surface-600 transition-colors"
+											class="bg-surface-700 text-surface-200 hover:bg-surface-600 flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors"
 											title="Copy to clipboard"
 										>
 											{#if justCopied}
@@ -670,15 +710,15 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 										</button>
 									{/if}
 									<button
-										onclick={() => showComparison = true}
-										class="flex items-center justify-center gap-2 rounded-xl bg-surface-700 px-4 py-2.5 text-sm font-medium text-surface-200 hover:bg-surface-600 transition-colors"
+										onclick={() => (showComparison = true)}
+										class="bg-surface-700 text-surface-200 hover:bg-surface-600 flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors"
 										title="Compare"
 									>
 										<Eye class="h-4 w-4" />
 									</button>
 									<button
 										onclick={resetResult}
-										class="flex items-center justify-center gap-2 rounded-xl bg-surface-700 px-4 py-2.5 text-sm font-medium text-surface-200 hover:bg-surface-600 transition-colors"
+										class="bg-surface-700 text-surface-200 hover:bg-surface-600 flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors"
 										title="Try again with different settings"
 									>
 										<RefreshCw class="h-4 w-4" />
@@ -702,6 +742,6 @@ import { optimizeGif } from '$lib/utils/gifsicle';
 		compressedUrl={resultUrl}
 		originalSize={frames.reduce((sum, f) => sum + f.file.size, 0)}
 		compressedSize={resultSize}
-		onclose={() => showComparison = false}
+		onclose={() => (showComparison = false)}
 	/>
 {/if}

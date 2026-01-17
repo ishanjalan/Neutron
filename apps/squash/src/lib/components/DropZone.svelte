@@ -13,7 +13,7 @@
 		{ name: 'WebM', color: 'from-green-500 to-emerald-500' },
 		{ name: 'MOV', color: 'from-blue-500 to-indigo-500' },
 		{ name: 'AVI', color: 'from-purple-500 to-pink-500' },
-		{ name: 'MKV', color: 'from-cyan-500 to-teal-500' }
+		{ name: 'MKV', color: 'from-cyan-500 to-teal-500' },
 	];
 
 	function handleDragEnter(e: DragEvent) {
@@ -84,29 +84,31 @@
 	{#if hasVideos}
 		<!-- Compact dropzone when videos exist -->
 		<div
-			class="group flex items-center justify-center gap-4 rounded-2xl border-2 border-dashed py-4 sm:py-5 px-6 transition-all duration-300 cursor-pointer {isDragging
+			class="group flex cursor-pointer items-center justify-center gap-4 rounded-2xl border-2 border-dashed px-6 py-4 transition-all duration-300 sm:py-5 {isDragging
 				? 'border-accent-start bg-accent-start/5'
 				: 'border-surface-700 hover:border-accent-start/50'}"
 		>
-			<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-800 transition-colors group-hover:bg-accent-start/10">
+			<div
+				class="bg-surface-800 group-hover:bg-accent-start/10 flex h-10 w-10 items-center justify-center rounded-xl transition-colors"
+			>
 				{#if isDragging}
-					<Film class="h-5 w-5 text-accent-start animate-pulse" />
+					<Film class="text-accent-start h-5 w-5 animate-pulse" />
 				{:else}
-					<Upload class="h-5 w-5 text-surface-400 group-hover:text-accent-start" />
+					<Upload class="text-surface-400 group-hover:text-accent-start h-5 w-5" />
 				{/if}
 			</div>
-			<p class="text-base text-surface-500">
+			<p class="text-surface-500 text-base">
 				{#if isDragging}
-					<span class="font-medium text-accent-start">Release to add more</span>
+					<span class="text-accent-start font-medium">Release to add more</span>
 				{:else}
-					Drop more videos or <span class="font-medium text-accent-start">click to browse</span>
+					Drop more videos or <span class="text-accent-start font-medium">click to browse</span>
 				{/if}
 			</p>
 		</div>
 	{:else}
 		<!-- Full dropzone when no videos -->
 		<div
-			class="group relative overflow-hidden rounded-2xl border-2 border-dashed py-12 sm:py-16 transition-all duration-300 cursor-pointer {isDragging
+			class="group relative cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed py-12 transition-all duration-300 sm:py-16 {isDragging
 				? 'border-accent-start bg-accent-start/5 scale-[1.01]'
 				: 'border-surface-700 hover:border-accent-start/50'}"
 		>
@@ -120,26 +122,28 @@
 				<!-- Icon -->
 				<div
 					class="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl transition-all duration-300 {isDragging
-						? 'bg-accent-start/20 scale-110 rotate-3'
+						? 'bg-accent-start/20 rotate-3 scale-110'
 						: 'bg-surface-800 group-hover:bg-accent-start/10 group-hover:scale-105'}"
 				>
 					{#if isDragging}
-						<Film class="h-8 w-8 text-accent-start animate-pulse" />
+						<Film class="text-accent-start h-8 w-8 animate-pulse" />
 					{:else}
 						<Upload
-							class="h-8 w-8 text-surface-400 transition-all group-hover:text-accent-start group-hover:-translate-y-1"
+							class="text-surface-400 group-hover:text-accent-start h-8 w-8 transition-all group-hover:-translate-y-1"
 						/>
 					{/if}
 				</div>
 
 				<!-- Text -->
 				{#if isDragging}
-					<p class="text-xl font-semibold text-accent-start">Release to upload</p>
-					<p class="mt-2 text-base text-accent-start/70">Your videos are ready to be compressed</p>
+					<p class="text-accent-start text-xl font-semibold">Release to upload</p>
+					<p class="text-accent-start/70 mt-2 text-base">Your videos are ready to be compressed</p>
 				{:else}
-					<p class="text-xl font-semibold text-surface-300">Drop videos here</p>
-					<p class="mt-2 text-base text-surface-500">
-						or <span class="font-medium text-accent-start underline-offset-2 hover:underline">click to browse</span>
+					<p class="text-surface-300 text-xl font-semibold">Drop videos here</p>
+					<p class="text-surface-500 mt-2 text-base">
+						or <span class="text-accent-start font-medium underline-offset-2 hover:underline"
+							>click to browse</span
+						>
 					</p>
 				{/if}
 
@@ -153,7 +157,7 @@
 						</span>
 					{/each}
 				</div>
-				<p class="mt-5 text-sm text-surface-400">
+				<p class="text-surface-400 mt-5 text-sm">
 					Max file size: Unlimited • Batch upload supported
 				</p>
 			</div>
