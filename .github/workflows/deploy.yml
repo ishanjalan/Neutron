@@ -1,0 +1,138 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+    inputs:
+      deploy_all:
+        description: 'Deploy all apps regardless of changes'
+        required: false
+        default: 'false'
+        type: boolean
+
+concurrency:
+  group: "pages-changed"
+  cancel-in-progress: true
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      squish: ${{ steps.changes.outputs.squish }}
+      squash: ${{ steps.changes.outputs.squash }}
+      smash: ${{ steps.changes.outputs.smash }}
+      swirl: ${{ steps.changes.outputs.swirl }}
+      packages: ${{ steps.changes.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Detect changed paths
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            squish:
+              - 'apps/squish/**'
+            squash:
+              - 'apps/squash/**'
+            smash:
+              - 'apps/smash/**'
+            swirl:
+              - 'apps/swirl/**'
+            packages:
+              - 'packages/**'
+
+  build-and-deploy:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ===== SQUISH =====
+      - name: Build Squish
+        if: needs.detect-changes.outputs.squish == 'true' || needs.detect-changes.outputs.packages == 'true' || github.event.inputs.deploy_all == 'true'
+        run: pnpm --filter squish build
+        env:
+          NODE_ENV: production
+
+      - name: Deploy Squish
+        if: needs.detect-changes.outputs.squish == 'true' || needs.detect-changes.outputs.packages == 'true' || github.event.inputs.deploy_all == 'true'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          personal_token: ${{ secrets.DEPLOY_TOKEN }}
+          external_repository: ishanjalan/ImageOptimser
+          publish_branch: gh-pages
+          publish_dir: ./apps/squish/build
+          commit_message: "Deploy Squish from Neutron monorepo"
+
+      # ===== SQUASH =====
+      - name: Build Squash
+        if: needs.detect-changes.outputs.squash == 'true' || needs.detect-changes.outputs.packages == 'true' || github.event.inputs.deploy_all == 'true'
+        run: pnpm --filter squash build
+        env:
+          NODE_ENV: production
+
+      - name: Deploy Squash
+        if: needs.detect-changes.outputs.squash == 'true' || needs.detect-changes.outputs.packages == 'true' || github.event.inputs.deploy_all == 'true'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          personal_token: ${{ secrets.DEPLOY_TOKEN }}
+          external_repository: ishanjalan/Squash
+          publish_branch: gh-pages
+          publish_dir: ./apps/squash/build
+          commit_message: "Deploy Squash from Neutron monorepo"
+
+      # ===== SMASH =====
+      - name: Build Smash
+        if: needs.detect-changes.outputs.smash == 'true' || needs.detect-changes.outputs.packages == 'true' || github.event.inputs.deploy_all == 'true'
+        run: pnpm --filter smash build
+        env:
+          NODE_ENV: production
+
+      - name: Deploy Smash
+        if: needs.detect-changes.outputs.smash == 'true' || needs.detect-changes.outputs.packages == 'true' || github.event.inputs.deploy_all == 'true'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          personal_token: ${{ secrets.DEPLOY_TOKEN }}
+          external_repository: ishanjalan/Smash
+          publish_branch: gh-pages
+          publish_dir: ./apps/smash/build
+          commit_message: "Deploy Smash from Neutron monorepo"
+
+      # ===== SWIRL =====
+      - name: Build Swirl
+        if: needs.detect-changes.outputs.swirl == 'true' || needs.detect-changes.outputs.packages == 'true' || github.event.inputs.deploy_all == 'true'
+        run: pnpm --filter swirl build
+        env:
+          NODE_ENV: production
+
+      - name: Deploy Swirl
+        if: needs.detect-changes.outputs.swirl == 'true' || needs.detect-changes.outputs.packages == 'true' || github.event.inputs.deploy_all == 'true'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          personal_token: ${{ secrets.DEPLOY_TOKEN }}
+          external_repository: ishanjalan/Swirl
+          publish_branch: gh-pages
+          publish_dir: ./apps/swirl/build
+          commit_message: "Deploy Swirl from Neutron monorepo"

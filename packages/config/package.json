@@ -1,0 +1,10 @@
+{
+  "name": "@neutron/config",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tailwind/base.css": "./tailwind/base.css",
+    "./typescript/base.json": "./typescript/base.json"
+  }
+}

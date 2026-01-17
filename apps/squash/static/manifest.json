@@ -1,0 +1,67 @@
+{
+	"name": "Squash - Video Compressor",
+	"short_name": "Squash",
+	"description": "A blazing-fast, privacy-first video compressor that runs entirely in your browser. Compress and convert videos with FFmpeg — no uploads, no servers, no compromises.",
+	"start_url": "/",
+	"display": "standalone",
+	"background_color": "#09090b",
+	"theme_color": "#f97316",
+	"orientation": "any",
+	"categories": ["utilities", "productivity", "video"],
+	"icons": [
+		{
+			"src": "/icon-192.svg",
+			"sizes": "192x192",
+			"type": "image/svg+xml",
+			"purpose": "any maskable"
+		},
+		{
+			"src": "/icon-512.svg",
+			"sizes": "512x512",
+			"type": "image/svg+xml",
+			"purpose": "any maskable"
+		}
+	],
+	"screenshots": [],
+	"shortcuts": [
+		{
+			"name": "Compress Video",
+			"short_name": "Compress",
+			"description": "Open Squash to compress videos",
+			"url": "/",
+			"icons": [
+				{
+					"src": "/icon-192.svg",
+					"sizes": "192x192"
+				}
+			]
+		}
+	],
+	"share_target": {
+		"action": "/",
+		"method": "POST",
+		"enctype": "multipart/form-data",
+		"params": {
+			"files": [
+				{
+					"name": "video",
+					"accept": ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"]
+				}
+			]
+		}
+	},
+	"file_handlers": [
+		{
+			"action": "/",
+			"accept": {
+				"video/mp4": [".mp4"],
+				"video/webm": [".webm"],
+				"video/quicktime": [".mov"],
+				"video/x-msvideo": [".avi"]
+			}
+		}
+	],
+	"launch_handler": {
+		"client_mode": "navigate-existing"
+	}
+}

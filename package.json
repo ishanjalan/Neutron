@@ -1,0 +1,17 @@
+{
+  "name": "neutron",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "check": "turbo check",
+    "dev:squish": "turbo dev --filter=squish",
+    "dev:squash": "turbo dev --filter=squash",
+    "dev:smash": "turbo dev --filter=smash",
+    "dev:swirl": "turbo dev --filter=swirl"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.0"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
