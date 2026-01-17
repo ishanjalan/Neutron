@@ -45,7 +45,7 @@
 			"files": [
 				{
 					"name": "video",
-					"accept": ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"]
+					"accept": ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo", "video/x-matroska"]
 				}
 			]
 		}
@@ -53,12 +53,13 @@
 	"file_handlers": [
 		{
 			"action": "/",
-			"accept": {
-				"video/mp4": [".mp4"],
-				"video/webm": [".webm"],
-				"video/quicktime": [".mov"],
-				"video/x-msvideo": [".avi"]
-			}
+		"accept": {
+			"video/mp4": [".mp4"],
+			"video/webm": [".webm"],
+			"video/quicktime": [".mov"],
+			"video/x-msvideo": [".avi"],
+			"video/x-matroska": [".mkv"]
+		}
 		}
 	],
 	"launch_handler": {
