@@ -124,15 +124,15 @@
 					</div>
 				{/if}
 
-				<a
-					href="https://github.com/ishanjalan/Swirl"
-					target="_blank"
-					rel="noopener noreferrer"
-					class="flex h-10 w-10 items-center justify-center rounded-xl text-surface-400 transition-all hover:bg-surface-800 hover:text-surface-100"
-					title="View on GitHub"
-				>
-					<Github class="h-5 w-5" />
-				</a>
+			<a
+				href="https://github.com/ishanjalan/Neutron/tree/main/apps/swirl"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="flex h-10 w-10 items-center justify-center rounded-xl text-surface-400 transition-all hover:bg-surface-800 hover:text-surface-100"
+				title="View on GitHub"
+			>
+				<Github class="h-5 w-5" />
+			</a>
 
 				<!-- Mobile menu button -->
 				<button

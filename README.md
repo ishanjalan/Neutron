@@ -81,12 +81,14 @@ pnpm --filter squish build
 
 ## 🚀 Deployment
 
-The apps are automatically deployed to GitHub Pages when changes are pushed to the `main` branch. Each app deploys to its own repository:
+The apps are automatically deployed to GitHub Pages when changes are pushed to the `main` branch.
 
-- Squish → [ishanjalan/ImageOptimser](https://github.com/ishanjalan/ImageOptimser)
-- Squash → [ishanjalan/Squash](https://github.com/ishanjalan/Squash)
-- Smash → [ishanjalan/Smash](https://github.com/ishanjalan/Smash)
-- Swirl → [ishanjalan/Swirl](https://github.com/ishanjalan/Swirl)
+| App | Source | Live URL |
+|-----|--------|----------|
+| Squish | [`apps/squish/`](apps/squish) | [ishanjalan.github.io/ImageOptimser](https://ishanjalan.github.io/ImageOptimser/) |
+| Squash | [`apps/squash/`](apps/squash) | [ishanjalan.github.io/Squash](https://ishanjalan.github.io/Squash/) |
+| Smash | [`apps/smash/`](apps/smash) | [ishanjalan.github.io/Smash](https://ishanjalan.github.io/Smash/) |
+| Swirl | [`apps/swirl/`](apps/swirl) | [ishanjalan.github.io/Swirl](https://ishanjalan.github.io/Swirl/) |
 
 ## 📄 License
 
