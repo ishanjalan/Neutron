@@ -3,3 +3,4 @@ export { default as Toast, toast, addToast, removeToast, type ToastType, type To
 export { default as ConfirmModal } from './components/ConfirmModal.svelte';
 export { default as AnimatedNumber } from './components/AnimatedNumber.svelte';
 export { default as CompareSlider } from './components/CompareSlider.svelte';
+export { default as Footer } from './components/Footer.svelte';
