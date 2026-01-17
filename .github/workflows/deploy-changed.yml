@@ -67,7 +67,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       # ===== SQUISH =====
       - name: Build Squish
