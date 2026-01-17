@@ -2,8 +2,8 @@
 	import { images, formatBytes, type ImageItem, type OutputFormat } from '$lib';
 	import { downloadImage } from '$lib/utils/download';
 	import { reprocessImage, getOutputFilename } from '$lib/utils/compress';
-	import { toast } from './Toast.svelte';
-	import CompareSlider from './CompareSlider.svelte';
+	import { toast } from '@neutron/ui';
+	import { CompareSlider } from '@neutron/ui';
 	import PreviewModal from './PreviewModal.svelte';
 	import { Download, X, AlertCircle, Check, Loader2, ArrowRight, ChevronDown, RotateCcw, SplitSquareHorizontal, ImageIcon, Copy, Square, CheckSquare } from 'lucide-svelte';
 	import { fade, scale } from 'svelte/transition';

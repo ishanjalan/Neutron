@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import Toast, { toast } from '$lib/components/Toast.svelte';
+	import { Toast, toast } from '@neutron/ui';
 	import { mergePDFs, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
 	import { Layers, Upload, FileText, Download, Trash2, Loader2, CheckCircle, GripVertical } from 'lucide-svelte';

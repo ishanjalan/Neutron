@@ -2,7 +2,7 @@
 	import { pdfs, formatBytes, type PDFItem } from '$lib/stores/pdfs.svelte';
 	import { downloadFile, getOutputFilename, processFiles } from '$lib/utils/pdf';
 	import { downloadMultipleFiles } from '$lib/utils/download';
-	import CompareSlider from './CompareSlider.svelte';
+	import { CompareSlider } from '@neutron/ui';
 	import {
 		X,
 		Download,

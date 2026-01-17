@@ -4,12 +4,13 @@
 	import DropZone from '$lib/components/DropZone.svelte';
 	import CompareSlider from '$lib/components/CompareSlider.svelte';
 	import BatchSummary from '$lib/components/BatchSummary.svelte';
-	import { toast } from '$lib/components/Toast.svelte';
+	import { toast } from '@neutron/ui';
 	import { Gauge, Settings, Download, Trash2, Loader2, Play, Rewind, ArrowLeftRight, Clock, Film, Maximize2, RefreshCw, Eye, Copy, Check } from 'lucide-svelte';
 	import { fade, fly, slide } from 'svelte/transition';
 	import { changeGifSpeed, reverseGif } from '$lib/utils/gifsicle';
-	import { parseGifFile, formatDuration, formatBytes, type GifMetadata } from '$lib/utils/gif-parser';
-	import { downloadAllAsZip, downloadBlob, copyBlobToClipboard, isClipboardWriteSupported } from '$lib/utils/download';
+	import { parseGifFile, formatDuration, type GifMetadata } from '$lib/utils/gif-parser';
+	import { formatBytes, downloadBlob, copyBlobToClipboard, isClipboardWriteSupported } from '@neutron/utils';
+	import { downloadAllAsZip } from '$lib/utils/download';
 
 	interface GifFile {
 		id: string;

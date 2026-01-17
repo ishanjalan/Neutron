@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { X } from 'lucide-svelte';
 	import { scale, fade } from 'svelte/transition';
-	import { formatBytes } from '$lib/utils/gif-parser';
+	import { formatBytes } from '@neutron/utils';
 
 	let {
 		originalUrl,

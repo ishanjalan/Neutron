@@ -3,12 +3,12 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import DropZone from '$lib/components/DropZone.svelte';
 	import CompareSlider from '$lib/components/CompareSlider.svelte';
-	import { toast } from '$lib/components/Toast.svelte';
+	import { toast } from '@neutron/ui';
 	import { Crop, Settings, Download, Trash2, Eye, Loader2, RotateCcw, Clock, Film, Copy, Check, RefreshCw } from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { cropGif } from '$lib/utils/gifsicle';
-	import { parseGifFile, formatDuration, formatBytes, type GifMetadata } from '$lib/utils/gif-parser';
-	import { downloadBlob, copyBlobToClipboard, isClipboardWriteSupported } from '$lib/utils/download';
+	import { parseGifFile, formatDuration, type GifMetadata } from '$lib/utils/gif-parser';
+	import { formatBytes, downloadBlob, copyBlobToClipboard, isClipboardWriteSupported } from '@neutron/utils';
 
 	// GIF state
 	let gifFile = $state<File | null>(null);

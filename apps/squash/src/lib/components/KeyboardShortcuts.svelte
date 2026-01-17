@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { X, Keyboard } from 'lucide-svelte';
 	import { fade, scale } from 'svelte/transition';
-	import { createFocusTrap } from '$lib/utils/focus-trap';
+	import { createFocusTrap } from '@neutron/utils';
 
 	interface Props {
 		open: boolean;

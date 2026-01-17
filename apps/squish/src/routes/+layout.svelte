@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
-	import Toast from '$lib/components/Toast.svelte';
+	import { Toast } from '@neutron/ui';
 	import { base } from '$app/paths';
 
 	let { children } = $props();

@@ -4,15 +4,13 @@
 	import DropZone from '$lib/components/DropZone.svelte';
 	import ImageList from '$lib/components/ImageList.svelte';
 	import Settings from '$lib/components/Settings.svelte';
-	import ConfirmModal from '$lib/components/ConfirmModal.svelte';
 	import BatchSummary from '$lib/components/BatchSummary.svelte';
-	import AnimatedNumber from '$lib/components/AnimatedNumber.svelte';
+	import { ConfirmModal, AnimatedNumber, toast } from '@neutron/ui';
 	import { images, formatBytes } from '$lib';
 	import { processImages, cancelProcessing } from '$lib/utils/compress';
 	import { Download, Trash2, Sparkles, Zap, Shield, Gauge, ArrowDown, XCircle } from 'lucide-svelte';
 	import { downloadAllAsZip } from '$lib/utils/download';
 	import { fade, fly } from 'svelte/transition';
-	import { toast } from '$lib/components/Toast.svelte';
 	import type { ImageItem } from '$lib/stores/images.svelte';
 
 	let showClearConfirm = $state(false);

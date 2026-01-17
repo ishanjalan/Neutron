@@ -2,7 +2,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import DropZone from '$lib/components/DropZone.svelte';
-	import { toast } from '$lib/components/Toast.svelte';
+	import { toast } from '@neutron/ui';
 	import { Layers, Download, Check, RotateCcw, Loader2, Image, Package } from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { 
@@ -12,7 +12,8 @@
 		cleanupFrames,
 		type ExtractedFrame 
 	} from '$lib/utils/gif-extractor';
-	import { parseGifFile, formatDuration, formatBytes, type GifMetadata } from '$lib/utils/gif-parser';
+	import { parseGifFile, formatDuration, type GifMetadata } from '$lib/utils/gif-parser';
+	import { formatBytes } from '@neutron/utils';
 
 	// State
 	let file = $state<File | null>(null);

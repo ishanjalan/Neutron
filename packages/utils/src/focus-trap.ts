@@ -105,3 +105,9 @@ export function focusTrap(node: HTMLElement) {
 		}
 	};
 }
+
+// Function version for use with Svelte 5 $effect
+export function createFocusTrap(container: HTMLElement): () => void {
+	trapFocus(container);
+	return releaseFocus;
+}

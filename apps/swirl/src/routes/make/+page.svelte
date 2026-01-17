@@ -3,14 +3,13 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import DropZone from '$lib/components/DropZone.svelte';
 	import CompareSlider from '$lib/components/CompareSlider.svelte';
-	import { toast } from '$lib/components/Toast.svelte';
+	import { toast } from '@neutron/ui';
 	import { Images, Settings, Download, Play, Pause, Trash2, GripVertical, Plus, Loader2, Copy, Check, Eye, RefreshCw } from 'lucide-svelte';
 	import { fade, fly, slide } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 	import encode from 'gifski-wasm';
-import { formatBytes } from '$lib/utils/gif-parser';
+import { formatBytes, copyBlobToClipboard, isClipboardWriteSupported } from '@neutron/utils';
 import { optimizeGif } from '$lib/utils/gifsicle';
-import { copyBlobToClipboard, isClipboardWriteSupported } from '$lib/utils/download';
 
 	interface Frame {
 		id: string;

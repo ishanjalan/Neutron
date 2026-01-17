@@ -3,15 +3,14 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import DropZone from '$lib/components/DropZone.svelte';
 	import CompareSlider from '$lib/components/CompareSlider.svelte';
-	import { toast } from '$lib/components/Toast.svelte';
+	import { toast } from '@neutron/ui';
 	import TimelineSlider from '$lib/components/TimelineSlider.svelte';
 	import { Film, Settings, Download, Play, Pause, RotateCcw, Eye, Copy, Check, RefreshCw } from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 	import encode from 'gifski-wasm';
 	import { extractFramesFromVideo, checkBrowserSupport } from '$lib/utils/webcodecs';
-import { formatBytes } from '$lib/utils/gif-parser';
+import { formatBytes, copyBlobToClipboard, isClipboardWriteSupported } from '@neutron/utils';
 import { optimizeGif } from '$lib/utils/gifsicle';
-import { copyBlobToClipboard, isClipboardWriteSupported } from '$lib/utils/download';
 
 	// State
 	let videoFile = $state<File | null>(null);

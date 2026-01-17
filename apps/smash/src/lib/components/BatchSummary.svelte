@@ -3,7 +3,7 @@
 	import { Check, Clock, TrendingDown, Download, X, Zap } from 'lucide-svelte';
 	import { fly, fade } from 'svelte/transition';
 	import { downloadAll } from '$lib/utils/download';
-	import AnimatedNumber from './AnimatedNumber.svelte';
+	import { AnimatedNumber } from '@neutron/ui';
 
 	interface Props {
 		onDismiss?: () => void;

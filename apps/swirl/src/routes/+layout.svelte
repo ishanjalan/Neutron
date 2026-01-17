@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import { base } from '$app/paths';
-	import Toast from '$lib/components/Toast.svelte';
+	import { Toast } from '@neutron/ui';
 
 	let { children } = $props();
 </script>

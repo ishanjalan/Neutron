@@ -2,7 +2,8 @@
 	import { videos, type VideoItem, type OutputFormat, estimateFileSize, getEffectiveDuration } from '$lib/stores/videos.svelte';
 	import { downloadVideo } from '$lib/utils/download';
 	import { reprocessVideo, getOutputFilename, getCapabilitiesSync } from '$lib/utils/compress';
-	import { formatBytes, formatDuration, formatETA, formatTimeInput, parseTimeInput } from '$lib/utils/format';
+	import { formatBytes } from '@neutron/utils';
+	import { formatDuration, formatETA, formatTimeInput, parseTimeInput } from '$lib/utils/format';
 	import {
 		Download,
 		X,
@@ -21,7 +22,7 @@
 	import { fade, scale, slide } from 'svelte/transition';
 	import VideoComparison from './VideoComparison.svelte';
 	import TrimTimeline from './TrimTimeline.svelte';
-	import { toast } from './Toast.svelte';
+	import { toast } from '@neutron/ui';
 
 	let { item }: { item: VideoItem } = $props();
 

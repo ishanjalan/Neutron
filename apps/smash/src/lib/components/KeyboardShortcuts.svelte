@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { X } from 'lucide-svelte';
 	import { fade, scale } from 'svelte/transition';
-	import { trapFocus } from '$lib/utils/focus-trap';
+	import { trapFocus } from '@neutron/utils';
 
 	interface Props {
 		show: boolean;

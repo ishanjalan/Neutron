@@ -4,7 +4,7 @@
 	import { flip } from 'svelte/animate';
 	import { GripVertical, CheckSquare, Square, Download, Trash2 } from 'lucide-svelte';
 	import { downloadAllAsZip, downloadImage } from '$lib/utils/download';
-	import { toast } from './Toast.svelte';
+	import { toast } from '@neutron/ui';
 
 	let draggedId = $state<string | null>(null);
 	let dragOverId = $state<string | null>(null);

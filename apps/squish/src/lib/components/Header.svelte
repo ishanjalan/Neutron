@@ -4,7 +4,7 @@
 	import { scale, fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import { images } from '$lib/stores/images.svelte';
-	import { toast } from './Toast.svelte';
+	import { toast } from '@neutron/ui';
 
 	const FIRST_VISIT_KEY = 'squish-first-visit-shown';
 

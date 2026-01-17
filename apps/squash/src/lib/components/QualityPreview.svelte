@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fade, scale } from 'svelte/transition';
 	import { X, Eye, Loader2 } from 'lucide-svelte';
-	import { createFocusTrap } from '$lib/utils/focus-trap';
+	import { createFocusTrap } from '@neutron/utils';
 	import { QUALITY_PRESETS, type VideoItem } from '$lib/stores/videos.svelte';
 
 	interface Props {

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { X, Image, Layers, Zap, Sparkles, Globe, Star } from 'lucide-svelte';
 	import { scale, fade } from 'svelte/transition';
-	import { focusTrap } from '$lib/utils/focus-trap';
+	import { focusTrap } from '@neutron/utils';
 
 	let { open = false, onclose }: { open: boolean; onclose: () => void } = $props();
 

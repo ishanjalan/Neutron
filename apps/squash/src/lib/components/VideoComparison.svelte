@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { X, ChevronLeft, ChevronRight } from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
-	import { createFocusTrap } from '$lib/utils/focus-trap';
+	import { createFocusTrap } from '@neutron/utils';
 
 	interface Props {
 		originalUrl: string;

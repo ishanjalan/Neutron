@@ -8,12 +8,12 @@
 	import KeyboardShortcuts from '$lib/components/KeyboardShortcuts.svelte';
 	import PerformanceMonitor from '$lib/components/PerformanceMonitor.svelte';
 	import OnboardingModal from '$lib/components/OnboardingModal.svelte';
-	import Toast, { toast } from '$lib/components/Toast.svelte';
+	import { Toast, toast } from '@neutron/ui';
 	import { videos, QUALITY_PRESETS } from '$lib/stores/videos.svelte';
 	import { Download, Trash2, Film, Shield, Gauge, Keyboard, Activity, Clipboard, Cpu, Layers, AlertTriangle, ArrowRight } from 'lucide-svelte';
 	import { downloadAllAsZip } from '$lib/utils/download';
 	import { processVideos, preloadEncoder, checkBrowserSupport } from '$lib/utils/compress';
-	import { formatBytes } from '$lib/utils/format';
+	import { formatBytes } from '@neutron/utils';
 	import { fade, fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
 

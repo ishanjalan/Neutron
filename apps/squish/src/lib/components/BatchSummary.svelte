@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { images, formatBytes } from '$lib';
 	import { downloadAllAsZip } from '$lib/utils/download';
-	import { toast } from './Toast.svelte';
-	import AnimatedNumber from './AnimatedNumber.svelte';
+	import { toast } from '@neutron/ui';
+	import { AnimatedNumber } from '@neutron/ui';
 	import { Download, Clock, Zap, HardDrive, TrendingDown, X, CheckCircle } from 'lucide-svelte';
 	import { scale, fade } from 'svelte/transition';
 

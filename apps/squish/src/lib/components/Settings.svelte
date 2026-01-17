@@ -4,7 +4,7 @@
 	import { Shield, RefreshCw, Sparkles, Sliders, ChevronDown, ChevronUp, Info, Maximize2 } from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 	import FormatGuide from './FormatGuide.svelte';
-	import ConfirmModal from './ConfirmModal.svelte';
+	import { ConfirmModal } from '@neutron/ui';
 
 	const ADVANCED_COLLAPSED_KEY = 'squish-advanced-collapsed';
 	let showFormatGuide = $state(false);

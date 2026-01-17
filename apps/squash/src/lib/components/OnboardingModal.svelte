@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fade, scale } from 'svelte/transition';
 	import { Upload, Sliders, Play, Download, X } from 'lucide-svelte';
-	import { createFocusTrap } from '$lib/utils/focus-trap';
+	import { createFocusTrap } from '@neutron/utils';
 
 	interface Props {
 		open: boolean;
