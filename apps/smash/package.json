@@ -28,6 +28,7 @@
 		"@neutron/utils": "workspace:*",
 		"@neutron/config": "workspace:*",
 		"@neslinesli93/qpdf-wasm": "^0.3.0",
+		"comlink": "^4.4.2",
 		"ghostscript-wasm-esm": "^1.0.1",
 		"jszip": "^3.10.1",
 		"pdf-lib": "^1.17.1",

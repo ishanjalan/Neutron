@@ -32,5 +32,8 @@ pnpm-debug.log*
 # Cache
 .cache/
 
-# Test coverage
+# Test coverage & results
 coverage/
+test-results/
+playwright-report/
+playwright/.cache/

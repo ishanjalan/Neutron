@@ -1,182 +1,206 @@
 /**
- * Ghostscript WASM Wrapper
+ * Ghostscript client - type-safe wrapper for the Comlink worker
  * 
- * Provides a high-level API for PDF compression using Ghostscript WASM.
- * Lazy loads the worker and WASM module on first use.
+ * @example
+ * ```ts
+ * import { createGhostscriptClient } from '$lib/utils/ghostscript';
+ * 
+ * const gs = createGhostscriptClient('/Smash');
+ * 
+ * const result = await gs.compress(pdfData, 'ebook', (progress) => {
+ *   console.log(`Progress: ${progress}%`);
+ * });
+ * 
+ * if (result.success) {
+ *   // result.data contains the compressed PDF
+ * }
+ * 
+ * // When done, terminate the worker
+ * gs.terminate();
+ * ```
  */
 
-import { base } from '$app/paths';
+import { wrap, proxy, type Remote } from 'comlink';
+import type { GhostscriptWorkerAPI, CompressionPreset, CompressionResult } from '../workers/ghostscript.comlink';
 
-let worker: Worker | null = null;
-let initialized = false;
-let initPromise: Promise<void> | null = null;
-let initializingState = false;
-let pendingRequests = new Map<string, {
-	resolve: (result: { result: ArrayBuffer; originalSize: number; compressedSize: number }) => void;
-	reject: (error: Error) => void;
-	onProgress?: (progress: number) => void;
-}>();
+export type { CompressionPreset, CompressionResult };
 
-// Callbacks for initialization state
-let onInitStartCallbacks: (() => void)[] = [];
-let onInitCompleteCallbacks: (() => void)[] = [];
+export interface GhostscriptClient {
+	/**
+	 * Compress a PDF file
+	 */
+	compress(
+		pdfData: ArrayBuffer,
+		preset: CompressionPreset,
+		onProgress?: (progress: number) => void
+	): Promise<CompressionResult>;
 
-export type CompressionPreset = 'screen' | 'ebook' | 'printer' | 'prepress';
+	/**
+	 * Check if the worker is ready
+	 */
+	isReady(): Promise<boolean>;
 
-/**
- * Register a callback for when WASM initialization starts
- */
-export function onInitStart(callback: () => void): () => void {
-	onInitStartCallbacks.push(callback);
-	return () => {
-		onInitStartCallbacks = onInitStartCallbacks.filter(cb => cb !== callback);
-	};
+	/**
+	 * Terminate the worker
+	 */
+	terminate(): void;
 }
 
 /**
- * Register a callback for when WASM initialization completes
+ * Create a Ghostscript client that manages the worker lifecycle
+ * 
+ * @param basePath - Base path for loading the WASM file (e.g., '/Smash')
  */
-export function onInitComplete(callback: () => void): () => void {
-	onInitCompleteCallbacks.push(callback);
-	return () => {
-		onInitCompleteCallbacks = onInitCompleteCallbacks.filter(cb => cb !== callback);
-	};
-}
+export function createGhostscriptClient(basePath: string): GhostscriptClient {
+	// Create the worker
+	const worker = new Worker(
+		new URL('../workers/ghostscript.comlink.ts', import.meta.url),
+		{ type: 'module' }
+	);
 
-/**
- * Check if WASM is currently being initialized
- */
-export function isWasmInitializing(): boolean {
-	return initializingState;
-}
+	// Wrap with Comlink
+	const api = wrap<GhostscriptWorkerAPI>(worker);
 
-/**
- * Initialize the Ghostscript worker
- */
-export async function initGhostscript(): Promise<void> {
-	if (initialized) return;
-	if (initPromise) return initPromise;
+	// Initialize the worker
+	let initPromise: Promise<boolean> | null = null;
 
-	// Notify callbacks that initialization is starting
-	initializingState = true;
-	onInitStartCallbacks.forEach(cb => cb());
-
-	initPromise = new Promise((resolve, reject) => {
-		try {
-			worker = new Worker(
-				new URL('../workers/ghostscript.worker.ts', import.meta.url),
-				{ type: 'module' }
-			);
-
-			const timeoutId = setTimeout(() => {
-				initializingState = false;
-				reject(new Error('Ghostscript WASM initialization timeout (30s)'));
-			}, 30000);
-
-			worker.onmessage = (event) => {
-				const data = event.data;
-
-				if (data.type === 'ready') {
-					clearTimeout(timeoutId);
-					initialized = true;
-					initializingState = false;
-					onInitCompleteCallbacks.forEach(cb => cb());
-					resolve();
-					return;
-				}
-
-				if (data.type === 'error' && data.id === 'init') {
-					clearTimeout(timeoutId);
-					initializingState = false;
-					reject(new Error(data.error || 'Failed to initialize Ghostscript'));
-					return;
-				}
-
-				// Handle compression responses
-				const request = pendingRequests.get(data.id);
-				if (!request) return;
-
-				if (data.type === 'progress') {
-					request.onProgress?.(data.progress);
-					return;
-				}
-
-				if (data.type === 'result') {
-					pendingRequests.delete(data.id);
-					if (data.success) {
-						request.resolve({
-							result: data.result,
-							originalSize: data.originalSize,
-							compressedSize: data.compressedSize
-						});
-					} else {
-						request.reject(new Error(data.error || 'Compression failed'));
-					}
-				}
-			};
-
-			worker.onerror = (error) => {
-				clearTimeout(timeoutId);
-				initializingState = false;
-				reject(new Error(`Worker error: ${error.message}`));
-			};
-
-			// Send init message with base path for WASM file location
-			worker.postMessage({ type: 'init', basePath: base });
-		} catch (error) {
-			initializingState = false;
-			reject(error);
+	async function ensureInitialized(): Promise<void> {
+		if (!initPromise) {
+			initPromise = api.init(basePath);
 		}
-	});
+		const ready = await initPromise;
+		if (!ready) {
+			throw new Error('Failed to initialize Ghostscript worker');
+		}
+	}
 
-	return initPromise;
+	return {
+		async compress(
+			pdfData: ArrayBuffer,
+			preset: CompressionPreset,
+			onProgress?: (progress: number) => void
+		): Promise<CompressionResult> {
+			await ensureInitialized();
+
+			// Wrap the progress callback with Comlink's proxy
+			const progressProxy = onProgress ? proxy(onProgress) : undefined;
+
+			return api.compress(pdfData, preset, progressProxy);
+		},
+
+		async isReady(): Promise<boolean> {
+			try {
+				await ensureInitialized();
+				return api.isReady();
+			} catch {
+				return false;
+			}
+		},
+
+		terminate(): void {
+			worker.terminate();
+		}
+	};
 }
 
 /**
- * Compress a PDF using Ghostscript WASM
+ * Singleton client for simple usage
+ * Lazily initialized on first use
+ */
+let defaultClient: GhostscriptClient | null = null;
+
+export function getGhostscriptClient(basePath: string): GhostscriptClient {
+	if (!defaultClient) {
+		defaultClient = createGhostscriptClient(basePath);
+	}
+	return defaultClient;
+}
+
+// ============================================
+// Backward-compatible API (used by pdf.ts)
+// ============================================
+
+let legacyClient: GhostscriptClient | null = null;
+let isInitializing = false;
+let isInitialized = false;
+let initCallbacks: Array<() => void> = [];
+
+/**
+ * Initialize Ghostscript (for backward compatibility)
+ */
+export async function initGhostscript(basePath: string = ''): Promise<void> {
+	if (isInitialized) return;
+	if (isInitializing) {
+		return new Promise((resolve) => {
+			initCallbacks.push(resolve);
+		});
+	}
+
+	isInitializing = true;
+	
+	try {
+		legacyClient = createGhostscriptClient(basePath || '/Smash');
+		await legacyClient.isReady();
+		isInitialized = true;
+		initCallbacks.forEach(cb => cb());
+		initCallbacks = [];
+	} finally {
+		isInitializing = false;
+	}
+}
+
+/**
+ * Check if Ghostscript is ready
+ */
+export function isGhostscriptReady(): boolean {
+	return isInitialized;
+}
+
+/**
+ * Register callback for when initialization starts
+ */
+export function onInitStart(callback: () => void): void {
+	// For UI feedback - called when init begins
+	if (isInitializing) callback();
+}
+
+/**
+ * Register callback for when initialization completes
+ */
+export function onInitComplete(callback: () => void): void {
+	if (isInitialized) {
+		callback();
+	} else {
+		initCallbacks.push(callback);
+	}
+}
+
+/**
+ * Compress PDF using Ghostscript (backward-compatible API)
  */
 export async function compressPDF(
 	pdfData: ArrayBuffer,
-	preset: CompressionPreset = 'ebook',
+	preset: CompressionPreset,
 	onProgress?: (progress: number) => void
 ): Promise<{ result: ArrayBuffer; originalSize: number; compressedSize: number }> {
-	await initGhostscript();
-
-	if (!worker) {
-		throw new Error('Ghostscript worker not initialized');
+	// Auto-initialize if needed
+	if (!legacyClient) {
+		await initGhostscript();
 	}
 
-	return new Promise((resolve, reject) => {
-		const id = crypto.randomUUID();
-
-		pendingRequests.set(id, { resolve, reject, onProgress });
-
-		// Clone the buffer to avoid detached buffer issues
-		const dataClone = pdfData.slice(0);
-		
-		worker!.postMessage(
-			{ id, pdfData: dataClone, preset },
-			[dataClone]
-		);
-	});
-}
-
-/**
- * Check if Ghostscript WASM is ready
- */
-export function isGhostscriptReady(): boolean {
-	return initialized;
-}
-
-/**
- * Terminate the Ghostscript worker
- */
-export function terminateGhostscript(): void {
-	if (worker) {
-		worker.terminate();
-		worker = null;
-		initialized = false;
-		initPromise = null;
-		pendingRequests.clear();
+	if (!legacyClient) {
+		throw new Error('Failed to initialize Ghostscript');
 	}
+
+	const result = await legacyClient.compress(pdfData, preset, onProgress);
+
+	if (!result.success || !result.data) {
+		throw new Error(result.error || 'Compression failed');
+	}
+
+	return {
+		result: result.data,
+		originalSize: result.originalSize,
+		compressedSize: result.compressedSize
+	};
 }

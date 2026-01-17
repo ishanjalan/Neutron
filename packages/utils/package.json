@@ -19,9 +19,21 @@
     "./focus-trap": {
       "types": "./src/focus-trap.ts",
       "default": "./src/focus-trap.ts"
+    },
+    "./validation": {
+      "types": "./src/validation.ts",
+      "default": "./src/validation.ts"
+    },
+    "./comlink": {
+      "types": "./src/comlink.ts",
+      "default": "./src/comlink.ts"
     }
   },
   "devDependencies": {
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "comlink": "^4.4.2",
+    "valibot": "^1.0.0"
   }
 }

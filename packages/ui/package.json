@@ -29,6 +29,10 @@
       "types": "./src/components/CompareSlider.svelte",
       "svelte": "./src/components/CompareSlider.svelte",
       "default": "./src/components/CompareSlider.svelte"
+    },
+    "./motion": {
+      "types": "./src/utils/motion.ts",
+      "default": "./src/utils/motion.ts"
     }
   },
   "peerDependencies": {
@@ -40,6 +44,7 @@
   },
   "dependencies": {
     "@neutron/utils": "workspace:*",
-    "lucide-svelte": "^0.562.0"
+    "lucide-svelte": "^0.562.0",
+    "motion": "^11.18.0"
   }
 }
