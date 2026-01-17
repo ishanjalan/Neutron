@@ -14,7 +14,8 @@
 		Rewind,
 		Images,
 		Merge,
-		Crop
+		Crop,
+		Type
 	} from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 
@@ -47,6 +48,15 @@
 			popular: true
 		},
 		{
+			id: 'text',
+			href: '/text',
+			title: 'Add Text',
+			description: 'Add meme-style captions and text overlays',
+			icon: Type,
+			gradient: 'from-yellow-500 to-amber-500',
+			popular: true
+		},
+		{
 			id: 'combine',
 			href: '/combine',
 			title: 'Combine GIFs',
@@ -74,11 +84,20 @@
 			popular: false
 		},
 		{
+			id: 'reverse',
+			href: '/reverse',
+			title: 'Reverse',
+			description: 'Play GIFs backwards or create boomerang loops',
+			icon: Rewind,
+			gradient: 'from-rose-500 to-pink-500',
+			popular: true
+		},
+		{
 			id: 'speed',
 			href: '/speed',
-			title: 'Speed & Reverse',
-			description: 'Speed up, slow down, reverse, or loop',
-			icon: Rewind,
+			title: 'Speed',
+			description: 'Speed up or slow down GIF playback',
+			icon: Gauge,
 			gradient: 'from-orange-500 to-red-500',
 			popular: false
 		},
@@ -230,7 +249,7 @@
 			<div class="glass rounded-2xl p-6" in:fade={{ delay: 600, duration: 300 }}>
 				<div class="grid grid-cols-3 gap-6 text-center">
 					<div>
-						<p class="text-2xl font-bold text-surface-100">8</p>
+						<p class="text-2xl font-bold text-surface-100">10</p>
 						<p class="text-sm text-surface-500">Tools</p>
 					</div>
 					<div>

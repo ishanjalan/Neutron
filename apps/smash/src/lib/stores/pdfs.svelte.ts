@@ -11,7 +11,8 @@ export type PDFTool =
 	| 'add-page-numbers'
 	| 'watermark'
 	| 'protect'
-	| 'unlock';
+	| 'unlock'
+	| 'ocr';
 export type ImageFormat = 'png' | 'jpg' | 'webp';
 export type CompressionPreset = 'screen' | 'ebook' | 'printer' | 'prepress';
 
@@ -67,6 +68,9 @@ export interface PDFSettings {
 	watermarkOpacity: number; // 0-100
 	// Page numbers settings
 	pageNumberPosition: 'bottom-center' | 'bottom-right' | 'top-center' | 'top-right';
+	// OCR settings
+	ocrLanguage: string;
+	ocrOutputMode: 'searchable-pdf' | 'text-only' | 'text-and-pdf';
 }
 
 // Ghostscript compression presets (real PDF compression, preserves text)
@@ -222,6 +226,15 @@ export const TOOLS = [
 		icon: 'Unlock',
 		accepts: '.pdf',
 		category: 'security'
+	},
+	// OCR
+	{ 
+		value: 'ocr' as const, 
+		label: 'OCR', 
+		desc: 'Extract text from scanned PDFs',
+		icon: 'FileSearch',
+		accepts: '.pdf',
+		category: 'convert'
 	}
 ] as const;
 
@@ -249,7 +262,9 @@ const DEFAULT_SETTINGS: PDFSettings = {
 	ownerPassword: '',
 	watermarkText: '',
 	watermarkOpacity: 30,
-	pageNumberPosition: 'bottom-center'
+	pageNumberPosition: 'bottom-center',
+	ocrLanguage: 'eng',
+	ocrOutputMode: 'searchable-pdf'
 };
 
 // Load settings from localStorage

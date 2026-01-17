@@ -18,7 +18,8 @@
 		Stamp,
 		Lock,
 		Unlock,
-		ArrowRight
+		ArrowRight,
+		FileSearch
 	} from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 
@@ -46,6 +47,14 @@
 			description: 'Extract pages or split into multiple files',
 			icon: Scissors,
 			gradient: 'from-pink-500 to-rose-500',
+			popular: true
+		},
+		{
+			href: '/ocr',
+			title: 'OCR',
+			description: 'Extract searchable text from scanned PDFs',
+			icon: FileSearch,
+			gradient: 'from-sky-500 to-cyan-500',
 			popular: true
 		},
 		{
@@ -242,7 +251,7 @@
 			<div class="glass rounded-2xl p-6" in:fade={{ delay: 600, duration: 300 }}>
 				<div class="grid grid-cols-3 gap-6 text-center">
 					<div>
-						<p class="text-2xl font-bold text-surface-100">12</p>
+						<p class="text-2xl font-bold text-surface-100">13</p>
 						<p class="text-sm text-surface-500">Tools</p>
 					</div>
 					<div>
