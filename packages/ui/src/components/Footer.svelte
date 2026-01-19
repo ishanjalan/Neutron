@@ -34,8 +34,8 @@
 			url: 'https://ishanjalan.github.io/ImageOptimser/',
 			github: 'https://github.com/ishanjalan/Neutron/tree/main/apps/squish',
 			icon: Image,
-			gradient: 'from-emerald-500 to-teal-400',
-			glow: 'shadow-emerald-500/40',
+			gradient: 'linear-gradient(to bottom right, rgb(16 185 129), rgb(20 184 166))',
+			glow: '0 0 40px rgba(16, 185, 129, 0.4)',
 			ring: 'ring-emerald-400/50',
 		},
 		{
@@ -45,8 +45,8 @@
 			url: 'https://ishanjalan.github.io/Squash/',
 			github: 'https://github.com/ishanjalan/Neutron/tree/main/apps/squash',
 			icon: Film,
-			gradient: 'from-orange-500 to-amber-400',
-			glow: 'shadow-orange-500/40',
+			gradient: 'linear-gradient(to bottom right, rgb(249 115 22), rgb(251 191 36))',
+			glow: '0 0 40px rgba(249, 115, 22, 0.4)',
 			ring: 'ring-orange-400/50',
 		},
 		{
@@ -56,8 +56,8 @@
 			url: 'https://ishanjalan.github.io/Smash/',
 			github: 'https://github.com/ishanjalan/Neutron/tree/main/apps/smash',
 			icon: FileText,
-			gradient: 'from-sky-500 to-cyan-400',
-			glow: 'shadow-sky-500/40',
+			gradient: 'linear-gradient(to bottom right, rgb(14 165 233), rgb(34 211 238))',
+			glow: '0 0 40px rgba(14, 165, 233, 0.4)',
 			ring: 'ring-sky-400/50',
 		},
 		{
@@ -67,8 +67,8 @@
 			url: 'https://ishanjalan.github.io/Swirl/',
 			github: 'https://github.com/ishanjalan/Neutron/tree/main/apps/swirl',
 			icon: Disc3,
-			gradient: 'from-fuchsia-500 to-pink-400',
-			glow: 'shadow-fuchsia-500/40',
+			gradient: 'linear-gradient(to bottom right, rgb(217 70 239), rgb(244 114 182))',
+			glow: '0 0 40px rgba(217, 70, 239, 0.4)',
 			ring: 'ring-fuchsia-400/50',
 		},
 	];
@@ -98,7 +98,8 @@
 	<!-- Dramatic background glow -->
 	<div class="pointer-events-none absolute inset-0 overflow-hidden opacity-30">
 		<div
-			class="absolute -bottom-40 left-1/4 h-96 w-96 rounded-full bg-gradient-to-t {currentAppData.gradient} opacity-20 blur-[100px]"
+			class="absolute -bottom-40 left-1/4 h-96 w-96 rounded-full opacity-20 blur-[100px]"
+			style="background: {currentAppData.gradient}"
 		></div>
 		<div
 			class="absolute -bottom-40 right-1/4 h-96 w-96 rounded-full bg-gradient-to-t from-purple-500 to-pink-500 opacity-15 blur-[100px]"
@@ -123,13 +124,15 @@
 					{#if isCurrent}
 						<!-- Current App - HERO CARD -->
 						<div
-							class="fade-in-up group relative overflow-hidden rounded-3xl bg-gradient-to-br p-[2px] shadow-2xl {app.gradient} {app.glow}"
-							style="animation-delay: {i * 100}ms"
+							class="fade-in-up group relative overflow-hidden rounded-3xl p-[2px] shadow-2xl"
+							style="background: {app.gradient}; box-shadow: {app.glow}; animation-delay: {i *
+								100}ms"
 						>
 							<!-- Glow effect -->
 							<div class="pointer-events-none absolute inset-0 opacity-50">
 								<div
-									class="absolute inset-0 bg-gradient-to-br {app.gradient} opacity-30 blur-xl"
+									class="absolute inset-0 opacity-30 blur-xl"
+									style="background: {app.gradient}"
 								></div>
 							</div>
 
@@ -139,17 +142,20 @@
 								<!-- Animated gradient background -->
 								<div class="absolute inset-0 overflow-hidden rounded-3xl">
 									<div
-										class="absolute inset-0 bg-gradient-to-br {app.gradient} animate-pulse opacity-20"
+										class="absolute inset-0 animate-pulse opacity-20"
+										style="background: {app.gradient}"
 									></div>
 								</div>
 
 								<!-- Icon with strong glow -->
 								<div class="relative">
 									<div
-										class="absolute inset-0 animate-pulse rounded-2xl bg-gradient-to-br {app.gradient} opacity-50 blur-2xl"
+										class="absolute inset-0 animate-pulse rounded-2xl opacity-50 blur-2xl"
+										style="background: {app.gradient}"
 									></div>
 									<div
-										class="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br shadow-2xl sm:h-20 sm:w-20 lg:h-24 lg:w-24 {app.gradient}"
+										class="relative flex h-16 w-16 items-center justify-center rounded-2xl shadow-2xl sm:h-20 sm:w-20 lg:h-24 lg:w-24"
+										style="background: {app.gradient}"
 									>
 										<svelte:component
 											this={app.icon}
@@ -194,7 +200,8 @@
 							>
 								<!-- Icon -->
 								<div
-									class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 transition-all duration-500 group-hover:scale-110 group-hover:bg-gradient-to-br sm:h-20 sm:w-20 lg:h-24 lg:w-24 group-hover:{app.gradient}"
+									class="hover-gradient flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 transition-all duration-500 group-hover:scale-110 sm:h-20 sm:w-20 lg:h-24 lg:w-24"
+									style="--hover-gradient: {app.gradient}"
 								>
 									<svelte:component
 										this={app.icon}
@@ -213,7 +220,7 @@
 							<div
 								class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
 							>
-								<div class="absolute inset-0 bg-gradient-to-br {app.gradient} opacity-10"></div>
+								<div class="absolute inset-0 opacity-10" style="background: {app.gradient}"></div>
 							</div>
 						</a>
 					{/if}
@@ -379,5 +386,9 @@
 
 	.fade-in-up {
 		animation: fade-in-up 0.6s ease-out backwards;
+	}
+
+	.hover-gradient:hover {
+		background: var(--hover-gradient) !important;
 	}
 </style>
