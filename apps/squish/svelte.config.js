@@ -14,8 +14,7 @@ const config = {
 			strict: true,
 		}),
 		paths: {
-			// Change 'ImageOptimser' to your GitHub repo name
-			base: process.env.NODE_ENV === 'production' ? '/ImageOptimser' : '',
+			base: process.env.NODE_ENV === 'production' ? '/Squish' : '',
 		},
 	},
 };
