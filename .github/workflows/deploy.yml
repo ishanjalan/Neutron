@@ -55,11 +55,11 @@ jobs:
 
       # ===== DEPLOY EACH APP =====
 
-      - name: Deploy Squish to ImageOptimser
+      - name: Deploy Squish
         uses: peaceiris/actions-gh-pages@v3
         with:
           personal_token: ${{ secrets.DEPLOY_TOKEN }}
-          external_repository: ishanjalan/ImageOptimser
+          external_repository: ishanjalan/Squish
           publish_branch: gh-pages
           publish_dir: ./apps/squish/build
           commit_message: 'Deploy from Neutron monorepo'
