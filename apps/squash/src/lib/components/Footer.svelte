@@ -29,7 +29,7 @@
 			<div class="grid grid-cols-4 gap-3 sm:gap-4">
 				<!-- Squish -->
 				<a
-					href="https://ishanjalan.github.io/Squish/"
+					href="https://ishanjalan.github.io/ImageOptimser/"
 					class="group relative overflow-hidden rounded-xl bg-white/5 transition-all duration-200 hover:scale-105 hover:bg-white/10"
 				>
 					<div class="flex flex-col items-center gap-2 px-3 py-5 sm:gap-3 sm:py-6">
