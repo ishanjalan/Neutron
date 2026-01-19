@@ -99,36 +99,32 @@
 				<Sparkles class="h-4 w-4 text-amber-400" />
 			</div>
 
-			<!-- App Cards Grid -->
-			<div class="mx-auto grid max-w-5xl grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
+			<!-- App Cards -->
+			<div class="flex flex-wrap items-center justify-center gap-4 md:gap-6">
 				{#each apps as app}
 					{@const isCurrent = app.id === currentApp}
 					{#if isCurrent}
 						<!-- Current App -->
 						<div
-							class="group relative overflow-hidden rounded-2xl p-[1px]"
+							class="relative overflow-hidden rounded-2xl p-[1px]"
 							style="background: {app.gradient}"
 						>
 							<div
-								class="relative flex flex-col items-center gap-3 rounded-2xl bg-black/60 px-4 py-8 backdrop-blur-sm"
+								class="relative flex w-36 flex-col items-center gap-3 rounded-2xl bg-black/60 px-4 py-6 backdrop-blur-sm md:w-40 md:py-8"
 							>
 								<!-- Icon -->
 								<div
-									class="flex h-14 w-14 items-center justify-center rounded-xl md:h-16 md:w-16"
+									class="flex h-12 w-12 items-center justify-center rounded-xl md:h-14 md:w-14"
 									style="background: {app.gradient}"
 								>
-									<svelte:component this={app.icon} class="h-7 w-7 text-white md:h-8 md:w-8" />
+									<svelte:component this={app.icon} class="h-6 w-6 text-white md:h-7 md:w-7" />
 								</div>
 
 								<!-- Name -->
-								<span class="text-sm font-bold uppercase tracking-wide text-white md:text-base"
-									>{app.name}</span
-								>
+								<span class="text-sm font-bold uppercase tracking-wide text-white">{app.name}</span>
 
 								<!-- Active Badge -->
-								<div
-									class="absolute right-2 top-2 flex h-2 w-2 items-center justify-center md:right-3 md:top-3"
-								>
+								<div class="absolute right-2 top-2 flex h-2 w-2">
 									<span
 										class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"
 									></span>
@@ -140,24 +136,24 @@
 						<!-- Other Apps -->
 						<a
 							href={app.url}
-							class="group relative overflow-hidden rounded-2xl bg-white/5 transition-all duration-300 hover:scale-[1.02] hover:bg-white/10 active:scale-95"
+							class="group relative overflow-hidden rounded-2xl bg-white/5 transition-all duration-300 hover:scale-105 hover:bg-white/10 active:scale-95"
 							title="Visit {app.name}"
 						>
-							<div class="flex flex-col items-center gap-3 px-4 py-8">
+							<div class="flex w-36 flex-col items-center gap-3 px-4 py-6 md:w-40 md:py-8">
 								<!-- Icon -->
 								<div
-									class="flex h-14 w-14 items-center justify-center rounded-xl bg-white/5 transition-all duration-300 group-hover:scale-110 md:h-16 md:w-16"
+									class="hover-bg flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 transition-all duration-300 group-hover:scale-110 md:h-14 md:w-14"
 									style="--hover-bg: {app.gradient}"
 								>
 									<svelte:component
 										this={app.icon}
-										class="h-7 w-7 text-white/40 transition-colors duration-300 group-hover:text-white md:h-8 md:w-8"
+										class="h-6 w-6 text-white/40 transition-colors duration-300 group-hover:text-white md:h-7 md:w-7"
 									/>
 								</div>
 
 								<!-- Name -->
 								<span
-									class="text-sm font-bold uppercase tracking-wide text-white/50 transition-colors duration-300 group-hover:text-white md:text-base"
+									class="text-sm font-bold uppercase tracking-wide text-white/50 transition-colors duration-300 group-hover:text-white"
 									>{app.name}</span
 								>
 							</div>
@@ -241,7 +237,7 @@
 </footer>
 
 <style>
-	.group:hover [style*='--hover-bg'] {
+	.group:hover .hover-bg {
 		background: var(--hover-bg);
 	}
 </style>
