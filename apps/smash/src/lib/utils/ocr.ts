@@ -221,8 +221,10 @@ export async function performOCR(file: File, options: OCROptions): Promise<OCRRe
 	onProgress?.(5, 'Loading PDF...');
 
 	// Load PDF with pdf.js
+	// Note: We need to clone the ArrayBuffer because pdf.js may transfer it to a worker
 	const arrayBuffer = await file.arrayBuffer();
-	const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+	const arrayBufferCopy = arrayBuffer.slice(0);
+	const pdfDoc = await pdfjsLib.getDocument({ data: arrayBufferCopy }).promise;
 	const pageCount = pdfDoc.numPages;
 
 	onProgress?.(10, `Processing ${pageCount} page(s)...`);
