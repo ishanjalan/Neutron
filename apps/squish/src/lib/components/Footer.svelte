@@ -4,9 +4,7 @@
 		Github,
 		Shield,
 		Image,
-		Film,
-		FileText,
-		Disc3,
+		Smartphone,
 		Coffee,
 		Linkedin,
 		Sparkles,
@@ -26,7 +24,7 @@
 			</div>
 
 			<!-- App Cards -->
-			<div class="grid grid-cols-4 gap-3 sm:gap-4">
+			<div class="grid grid-cols-2 gap-3 sm:gap-4">
 				<!-- Squish - Current -->
 				<div
 					class="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 p-px"
@@ -53,62 +51,22 @@
 					</div>
 				</div>
 
-				<!-- Squash -->
+				<!-- HEIC Converter -->
 				<a
-					href="https://ishanjalan.github.io/Squash/"
+					href="https://ishanjalan.github.io/HEICConverter/"
 					class="group relative overflow-hidden rounded-xl bg-white/5 transition-all duration-200 hover:scale-105 hover:bg-white/10"
 				>
 					<div class="flex flex-col items-center gap-2 px-3 py-5 sm:gap-3 sm:py-6">
 						<div
-							class="flex h-10 w-10 items-center justify-center rounded-lg bg-white/5 transition-all duration-200 group-hover:scale-110 group-hover:bg-gradient-to-br group-hover:from-orange-500 group-hover:to-amber-500 sm:h-12 sm:w-12"
+							class="flex h-10 w-10 items-center justify-center rounded-lg bg-white/5 transition-all duration-200 group-hover:scale-110 group-hover:bg-gradient-to-br group-hover:from-purple-500 group-hover:to-pink-500 sm:h-12 sm:w-12"
 						>
-							<Film
+							<Smartphone
 								class="h-5 w-5 text-white/40 transition-colors duration-200 group-hover:text-white sm:h-6 sm:w-6"
 							/>
 						</div>
 						<span
 							class="text-xs font-bold uppercase tracking-wide text-white/40 transition-colors duration-200 group-hover:text-white sm:text-sm"
-							>Squash</span
-						>
-					</div>
-				</a>
-
-				<!-- Smash -->
-				<a
-					href="https://ishanjalan.github.io/Smash/"
-					class="group relative overflow-hidden rounded-xl bg-white/5 transition-all duration-200 hover:scale-105 hover:bg-white/10"
-				>
-					<div class="flex flex-col items-center gap-2 px-3 py-5 sm:gap-3 sm:py-6">
-						<div
-							class="flex h-10 w-10 items-center justify-center rounded-lg bg-white/5 transition-all duration-200 group-hover:scale-110 group-hover:bg-gradient-to-br group-hover:from-sky-500 group-hover:to-cyan-500 sm:h-12 sm:w-12"
-						>
-							<FileText
-								class="h-5 w-5 text-white/40 transition-colors duration-200 group-hover:text-white sm:h-6 sm:w-6"
-							/>
-						</div>
-						<span
-							class="text-xs font-bold uppercase tracking-wide text-white/40 transition-colors duration-200 group-hover:text-white sm:text-sm"
-							>Smash</span
-						>
-					</div>
-				</a>
-
-				<!-- Swirl -->
-				<a
-					href="https://ishanjalan.github.io/Swirl/"
-					class="group relative overflow-hidden rounded-xl bg-white/5 transition-all duration-200 hover:scale-105 hover:bg-white/10"
-				>
-					<div class="flex flex-col items-center gap-2 px-3 py-5 sm:gap-3 sm:py-6">
-						<div
-							class="flex h-10 w-10 items-center justify-center rounded-lg bg-white/5 transition-all duration-200 group-hover:scale-110 group-hover:bg-gradient-to-br group-hover:from-fuchsia-500 group-hover:to-pink-500 sm:h-12 sm:w-12"
-						>
-							<Disc3
-								class="h-5 w-5 text-white/40 transition-colors duration-200 group-hover:text-white sm:h-6 sm:w-6"
-							/>
-						</div>
-						<span
-							class="text-xs font-bold uppercase tracking-wide text-white/40 transition-colors duration-200 group-hover:text-white sm:text-sm"
-							>Swirl</span
+							>HEIC</span
 						>
 					</div>
 				</a>
