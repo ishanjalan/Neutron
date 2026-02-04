@@ -250,7 +250,7 @@
 			>
 			• Also try
 			<a
-				href="https://ishanjalan.github.io/ImageOptimser/"
+				href="https://ishanjalan.github.io/Squish/"
 				class="text-accent-start hover:text-accent-end transition-colors hover:underline">Squish</a
 			> for image compression
 		</p>
