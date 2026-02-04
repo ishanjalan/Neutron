@@ -38,18 +38,8 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Build Squash
-        run: pnpm --filter squash build
-        env:
-          NODE_ENV: production
-
-      - name: Build Smash
-        run: pnpm --filter smash build
-        env:
-          NODE_ENV: production
-
-      - name: Build Swirl
-        run: pnpm --filter swirl build
+      - name: Build HEIC Converter
+        run: pnpm --filter heic build
         env:
           NODE_ENV: production
 
@@ -64,29 +54,11 @@ jobs:
           publish_dir: ./apps/squish/build
           commit_message: 'Deploy from Neutron monorepo'
 
-      - name: Deploy Squash
+      - name: Deploy HEIC Converter
         uses: peaceiris/actions-gh-pages@v3
         with:
           personal_token: ${{ secrets.DEPLOY_TOKEN }}
-          external_repository: ishanjalan/Squash
+          external_repository: ishanjalan/HEICConverter
           publish_branch: gh-pages
-          publish_dir: ./apps/squash/build
-          commit_message: 'Deploy from Neutron monorepo'
-
-      - name: Deploy Smash
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          personal_token: ${{ secrets.DEPLOY_TOKEN }}
-          external_repository: ishanjalan/Smash
-          publish_branch: gh-pages
-          publish_dir: ./apps/smash/build
-          commit_message: 'Deploy from Neutron monorepo'
-
-      - name: Deploy Swirl
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          personal_token: ${{ secrets.DEPLOY_TOKEN }}
-          external_repository: ishanjalan/Swirl
-          publish_branch: gh-pages
-          publish_dir: ./apps/swirl/build
+          publish_dir: ./apps/heic/build
           commit_message: 'Deploy from Neutron monorepo'
