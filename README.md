@@ -1,15 +1,31 @@
-# Neutron
+# Neutron - Privacy-First File Tools
 
-A monorepo containing four free, privacy-focused file processing tools that run entirely in your browser.
+Free, open-source file processing tools that run entirely in your browser. No uploads, no tracking, 100% private.
 
-## 🚀 Apps
+## 🌟 Featured Tool
 
-| App                       | Description                                        | Live Demo                                                 |
-| ------------------------- | -------------------------------------------------- | --------------------------------------------------------- |
-| **[Squish](apps/squish)** | Image compressor with MozJPEG, WebP, AVIF, JPEG XL | [squish.app](https://ishanjalan.github.io/ImageOptimser/) |
-| **[Squash](apps/squash)** | Video compressor using WebCodecs API               | [squash.app](https://ishanjalan.github.io/Squash/)        |
-| **[Smash](apps/smash)**   | PDF toolkit — compress, merge, split, protect, OCR | [smash.app](https://ishanjalan.github.io/Smash/)          |
-| **[Swirl](apps/swirl)**   | GIF toolkit — create, optimize, resize, crop       | [swirl.app](https://ishanjalan.github.io/Swirl/)          |
+### HEIC Converter - Unlimited iPhone Photo Conversion
+
+Convert unlimited HEIC photos to JPG, PNG, WebP, or AVIF. 100% browser-based, no file limits.
+
+**[Try HEIC Converter →](https://ishanjalan.github.io/HEICConverter/)**
+
+- ✓ Unlimited files (no 20/month limit like other tools)
+- ✓ Batch processing (thousands at once)
+- ✓ 100% private (files never uploaded)
+- ✓ Modern formats (WebP, AVIF)
+- ✓ Works offline as PWA
+
+---
+
+## 🛠️ Other Tools
+
+| App        | Description                           | Status   | Link                                                        |
+| ---------- | ------------------------------------- | -------- | ----------------------------------------------------------- |
+| **Squish** | Image compression with modern formats | Active   | [Use Squish →](https://ishanjalan.github.io/ImageOptimser/) |
+| Smash      | PDF toolkit                           | Archived | See `archive` branch                                        |
+| Squash     | Video compression                     | Archived | See `archive` branch                                        |
+| Swirl      | GIF tools                             | Archived | See `archive` branch                                        |
 
 ## ✨ Features
 
@@ -30,7 +46,6 @@ A monorepo containing four free, privacy-focused file processing tools that run 
 
 - **[Tailwind CSS v4](https://tailwindcss.com/)** — Utility-first CSS framework
 - **[Motion](https://motion.dev/)** — Smooth animations and micro-interactions
-- **[Lucide Icons](https://lucide.dev/)** — Beautiful open-source icons
 
 ### Build & Tooling
 
@@ -49,22 +64,18 @@ A monorepo containing four free, privacy-focused file processing tools that run 
 - **[Comlink](https://github.com/GoogleChromeLabs/comlink)** — Type-safe Web Worker communication
 - **WebAssembly** — Near-native performance for heavy processing
 
-| App    | Processing Libraries                                           |
-| ------ | -------------------------------------------------------------- |
-| Squish | icodec (MozJPEG, WebP, AVIF, JXL), heic2any, svgo              |
-| Squash | Mediabunny (WebCodecs), Hardware-accelerated encoding          |
-| Smash  | Ghostscript WASM, qpdf WASM, pdf-lib, pdfjs-dist, Tesseract.js |
-| Swirl  | gifsicle-wasm-browser, gifski-wasm, Mediabunny                 |
+| App            | Processing Libraries                                    |
+| -------------- | ------------------------------------------------------- |
+| HEIC Converter | heic2any (libheif WASM), icodec (JPEG, PNG, WebP, AVIF) |
+| Squish         | icodec (MozJPEG, WebP, AVIF, JXL), heic2any, svgo       |
 
 ## 📦 Project Structure
 
 ```
 neutron/
 ├── apps/
-│   ├── squish/          # Image compressor
-│   ├── squash/          # Video compressor
-│   ├── smash/           # PDF toolkit
-│   └── swirl/           # GIF toolkit
+│   ├── heic/            # HEIC Converter (featured)
+│   └── squish/          # Image compressor
 ├── packages/
 │   ├── ui/              # Shared UI components (Toast, Modal, Animations)
 │   ├── utils/           # Shared utilities (validation, formatting, Comlink)
@@ -96,10 +107,8 @@ pnpm install
 pnpm dev
 
 # Or start a specific app
+pnpm dev:heic     # http://localhost:5178
 pnpm dev:squish   # http://localhost:5176
-pnpm dev:squash   # http://localhost:5175
-pnpm dev:smash    # http://localhost:5174
-pnpm dev:swirl    # http://localhost:5177
 ```
 
 ### Testing
@@ -122,19 +131,25 @@ pnpm test:e2e:ui
 pnpm build
 
 # Build a specific app
-pnpm --filter squish build
+pnpm --filter heic build
 ```
 
 ## 🚀 Deployment
 
 The apps are automatically deployed to GitHub Pages when changes are pushed to the `main` branch.
 
-| App    | Source                        | Live URL                                                                          |
-| ------ | ----------------------------- | --------------------------------------------------------------------------------- |
-| Squish | [`apps/squish/`](apps/squish) | [ishanjalan.github.io/ImageOptimser](https://ishanjalan.github.io/ImageOptimser/) |
-| Squash | [`apps/squash/`](apps/squash) | [ishanjalan.github.io/Squash](https://ishanjalan.github.io/Squash/)               |
-| Smash  | [`apps/smash/`](apps/smash)   | [ishanjalan.github.io/Smash](https://ishanjalan.github.io/Smash/)                 |
-| Swirl  | [`apps/swirl/`](apps/swirl)   | [ishanjalan.github.io/Swirl](https://ishanjalan.github.io/Swirl/)                 |
+| App            | Source                        | Live URL                                                                          |
+| -------------- | ----------------------------- | --------------------------------------------------------------------------------- |
+| HEIC Converter | [`apps/heic/`](apps/heic)     | [ishanjalan.github.io/HEICConverter](https://ishanjalan.github.io/HEICConverter/) |
+| Squish         | [`apps/squish/`](apps/squish) | [ishanjalan.github.io/ImageOptimser](https://ishanjalan.github.io/ImageOptimser/) |
+
+## 📝 Archived Apps
+
+The following apps have been archived to focus development efforts on the HEIC converter. They remain available in the `archive` branch for reference:
+
+- **Smash** - PDF toolkit (compress, merge, split, OCR)
+- **Squash** - Video compression
+- **Swirl** - GIF tools
 
 ## 📄 License
 
@@ -145,10 +160,7 @@ MIT License — see [LICENSE](LICENSE) for details.
 Built with amazing open-source tools:
 
 - **Image Processing**: [icodec](https://github.com/nicholashollandmoore/icodec) (MozJPEG, WebP, AVIF, JXL encoders)
-- **Video Processing**: [Mediabunny](https://mediabunny.dev) (WebCodecs wrapper)
-- **PDF Processing**: [Ghostscript WASM](https://github.com/nicholashollandmoore/ghostscript-wasm), [qpdf WASM](https://github.com/nicholashollandmoore/qpdf-wasm), [pdf-lib](https://pdf-lib.js.org/)
-- **GIF Processing**: [gifsicle](https://github.com/nicholashollandmoore/gifsicle-wasm), [gifski](https://github.com/nicholashollandmoore/gifski-wasm)
-- **OCR**: [Tesseract.js](https://tesseract.projectnaptha.com/)
+- **HEIC Conversion**: [heic2any](https://github.com/alexcorvi/heic2any) (libheif WASM wrapper)
 - **Icons**: [Lucide](https://lucide.dev/)
 - **Animations**: [Motion](https://motion.dev/)
 
