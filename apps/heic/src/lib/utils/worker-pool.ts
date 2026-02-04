@@ -1,13 +1,13 @@
 // Worker Pool Manager
 // Distributes image compression jobs across multiple Web Workers
 
-import type { WorkerRequest, WorkerResponse, ImageFormat } from '$lib/workers/compress.worker';
+import type { WorkerRequest, WorkerResponse, OutputFormat } from '$lib/workers/convert.worker';
 
 export interface CompressionJob {
 	id: string;
 	imageBuffer: ArrayBuffer;
-	inputFormat: ImageFormat;
-	outputFormat: ImageFormat;
+	inputFormat: 'png';
+	outputFormat: OutputFormat;
 	quality: number;
 	lossless: boolean;
 	onProgress?: (progress: number) => void;
@@ -46,7 +46,7 @@ function getOptimalWorkerCount(): number {
 function createWorker(): Promise<PoolWorker> {
 	return new Promise((resolve, reject) => {
 		try {
-			const worker = new Worker(new URL('../workers/compress.worker.ts', import.meta.url), {
+			const worker = new Worker(new URL('../workers/convert.worker.ts', import.meta.url), {
 				type: 'module',
 			});
 
@@ -172,12 +172,10 @@ function assignJobToWorker(poolWorker: PoolWorker, job: CompressionJob): void {
 
 	const request: WorkerRequest = {
 		id: job.id,
-		type: 'compress',
+		type: 'encode',
 		imageBuffer: job.imageBuffer,
-		inputFormat: job.inputFormat,
 		outputFormat: job.outputFormat,
 		quality: job.quality,
-		lossless: job.lossless,
 	};
 
 	// Transfer the buffer to the worker for better performance
@@ -205,14 +203,15 @@ export async function queueJob(job: CompressionJob): Promise<void> {
 
 // Process an image and return a promise
 export function processImage(
-	id: string,
 	imageBuffer: ArrayBuffer,
-	inputFormat: ImageFormat,
-	outputFormat: ImageFormat,
+	inputFormat: 'png',
+	outputFormat: OutputFormat,
 	quality: number,
 	lossless: boolean,
 	onProgress?: (progress: number) => void
 ): Promise<{ result: ArrayBuffer; mimeType: string; width: number; height: number }> {
+	const id = `job_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
 	return new Promise((resolve, reject) => {
 		const job: CompressionJob = {
 			id,
