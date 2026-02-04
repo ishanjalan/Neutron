@@ -1,0 +1,33 @@
+{
+	"name": "@neutron/heic",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev --port 5178",
+		"build": "vite build",
+		"preview": "vite preview",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"lint": "eslint .",
+		"lint:fix": "eslint . --fix"
+	},
+	"dependencies": {
+		"@neutron/config": "workspace:*",
+		"@neutron/ui": "workspace:*",
+		"@neutron/utils": "workspace:*",
+		"heic2any": "^0.0.4",
+		"icodec": "^1.3.3",
+		"jszip": "^3.10.1"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-static": "^3.0.9",
+		"@sveltejs/kit": "^2.15.0",
+		"@sveltejs/vite-plugin-svelte": "^5.0.5",
+		"@tailwindcss/vite": "^4.0.13",
+		"svelte": "^5.31.0",
+		"svelte-check": "^5.1.0",
+		"typescript": "^5.8.0",
+		"vite": "^7.3.1"
+	}
+}
