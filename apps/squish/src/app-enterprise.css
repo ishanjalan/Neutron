@@ -38,6 +38,28 @@
 	--color-warning: var(--color-data-amber);
 	--color-success: var(--color-data-green);
 	--color-error: var(--color-data-red);
+
+	/* ============================================
+	   Compatibility Layer: Map old tokens → enterprise
+	   All existing components use these names
+	   ============================================ */
+
+	/* surface-* → infrastructure-* */
+	--color-surface-50: #f0f2f8;
+	--color-surface-100: #e8ecf5;
+	--color-surface-200: #d1d7e5;
+	--color-surface-300: #a5adc0;
+	--color-surface-400: #7a8396;
+	--color-surface-500: #545d70;
+	--color-surface-600: #3d4555;
+	--color-surface-700: #2a3241;
+	--color-surface-800: #1e2534;
+	--color-surface-900: #141927;
+	--color-surface-950: #0a0e1a;
+
+	/* accent-* → data-cyan / data-blue */
+	--color-accent-start: #00d9ff;
+	--color-accent-end: #0066ff;
 }
 
 /* Base - Industrial Foundation */
@@ -49,13 +71,99 @@ html {
 }
 
 body {
-	@apply bg-infrastructure-950 text-infrastructure-100;
+	@apply bg-surface-950 text-surface-100;
 	background-image: linear-gradient(0deg, rgba(0, 217, 255, 0.02) 1px, transparent 1px),
 		linear-gradient(90deg, rgba(0, 217, 255, 0.02) 1px, transparent 1px);
 	background-size: 20px 20px;
 	background-position:
 		0 0,
 		0 0;
+}
+
+/* ============================================
+   Compatibility Utility Classes
+   Components depend on these from old theme
+   ============================================ */
+
+/* Gradient text - cyan → blue */
+.gradient-text {
+	@apply from-accent-start to-accent-end bg-gradient-to-r bg-clip-text text-transparent;
+}
+
+/* Glassmorphism - Enterprise industrial style */
+.glass {
+	background: linear-gradient(135deg, rgba(30, 37, 52, 0.9) 0%, rgba(20, 25, 39, 0.9) 100%);
+	border: 1px solid rgba(0, 217, 255, 0.12);
+	box-shadow:
+		inset 0 1px 0 rgba(0, 217, 255, 0.08),
+		0 4px 20px rgba(0, 0, 0, 0.3);
+	backdrop-filter: blur(12px);
+}
+
+/* Gradient border */
+.gradient-border {
+	position: relative;
+}
+
+.gradient-border::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	padding: 1px;
+	background: linear-gradient(135deg, var(--color-data-cyan), var(--color-data-blue));
+	border-radius: inherit;
+	mask:
+		linear-gradient(#fff 0 0) content-box,
+		linear-gradient(#fff 0 0);
+	mask-composite: exclude;
+	-webkit-mask-composite: xor;
+	pointer-events: none;
+}
+
+/* Body scroll lock for modals */
+body.modal-open {
+	overflow: hidden;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+/* Enterprise pulse glow */
+@keyframes pulse-glow {
+	0%,
+	100% {
+		box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+	}
+	50% {
+		box-shadow: 0 0 40px rgba(0, 102, 255, 0.5);
+	}
+}
+
+@keyframes float {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-10px);
+	}
+}
+
+.animate-pulse-glow {
+	animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-float {
+	animation: float 3s ease-in-out infinite;
 }
 
 /* Technical Precision Typography */

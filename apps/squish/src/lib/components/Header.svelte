@@ -116,11 +116,11 @@
 			<!-- Logo -->
 			<a href="{base}/" class="group flex items-center gap-3" onclick={handleLogoClick}>
 				<div
-					class="from-accent-start to-accent-end shadow-accent-start/30 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg transition-transform group-hover:scale-110"
+					class="from-accent-start to-accent-end shadow-accent-start/30 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br shadow-lg transition-transform group-hover:scale-110"
 				>
-					<Zap class="h-5 w-5 text-white" strokeWidth={2.5} />
+					<Zap class="text-surface-950 h-5 w-5" strokeWidth={2.5} />
 				</div>
-				<span class="text-xl font-semibold tracking-tight">
+				<span class="font-mono text-lg font-bold uppercase tracking-wider">
 					<span class="gradient-text">Squish</span>
 				</span>
 			</a>
