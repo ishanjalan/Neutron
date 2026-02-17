@@ -7,6 +7,7 @@ import {
 import { optimize } from 'svgo';
 import { processImage as processImageInWorker, initPool } from './worker-pool';
 import heic2any from 'heic2any';
+import { autoSaveFile, getAutoSaveState } from './download';
 
 // Processing state
 let isProcessing = false;
@@ -550,6 +551,14 @@ async function compressImage(item: ImageItem) {
 		}
 
 		images.updateItem(item.id, updates);
+
+		// Auto-save to folder if enabled
+		if (getAutoSaveState().enabled && compressedBlob) {
+			const updatedItem = images.getItemById(item.id);
+			if (updatedItem) {
+				autoSaveFile(updatedItem, images.settings.filenameTemplate);
+			}
+		}
 	} catch (error) {
 		console.error('Compression error:', error);
 

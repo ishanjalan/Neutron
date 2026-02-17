@@ -2,6 +2,12 @@
 	import { images, type OutputFormat, type ResizeMode } from '$lib/stores/images.svelte';
 	import { reprocessAllImages } from '$lib/utils/compress';
 	import {
+		enableAutoSave,
+		disableAutoSave,
+		getAutoSaveState,
+		isFileSystemAccessSupported,
+	} from '$lib/utils/download';
+	import {
 		Shield,
 		RefreshCw,
 		Sparkles,
@@ -11,10 +17,14 @@
 		Info,
 		Maximize2,
 		FileText,
+		FolderOutput,
 	} from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 	import FormatGuide from './FormatGuide.svelte';
 	import { ConfirmModal } from '@neutron/ui';
+
+	const autoSave = getAutoSaveState();
+	const fsapiSupported = isFileSystemAccessSupported();
 
 	const ADVANCED_COLLAPSED_KEY = 'squish-advanced-collapsed';
 	let showFormatGuide = $state(false);
@@ -85,6 +95,14 @@
 
 	function handleResizeToggle() {
 		images.updateSettings({ resizeEnabled: !images.settings.resizeEnabled });
+	}
+
+	async function handleAutoSaveToggle() {
+		if (autoSave.enabled) {
+			disableAutoSave();
+		} else {
+			await enableAutoSave();
+		}
 	}
 
 	function handleResizeModeChange(mode: ResizeMode) {
@@ -408,6 +426,56 @@
 						</div>
 					{/if}
 				</div>
+
+				<!-- Auto-Save to Folder (File System Access API) -->
+				{#if fsapiSupported}
+					<div
+						class="flex items-center gap-3 rounded-xl px-4 py-3 {autoSave.enabled
+							? 'bg-data-green/10'
+							: 'bg-surface-800/30'}"
+					>
+						<button
+							onclick={handleAutoSaveToggle}
+							class="flex items-center gap-3 transition-all {autoSave.enabled
+								? 'text-data-green'
+								: 'text-surface-400 hover:text-surface-300'}"
+						>
+							<FolderOutput class="h-4 w-4" />
+							<div class="flex flex-col items-start">
+								<span class="text-sm font-medium">Auto-Save to Folder</span>
+								<span class="text-surface-500 text-[10px]">
+									{#if autoSave.enabled}
+										Saving to: {autoSave.folderName}
+										{#if autoSave.savedCount > 0}
+											&nbsp;({autoSave.savedCount} saved)
+										{/if}
+									{:else}
+										Write files directly to disk
+									{/if}
+								</span>
+							</div>
+							<div
+								class="relative ml-2 h-5 w-9 rounded-full transition-colors {autoSave.enabled
+									? 'bg-data-green'
+									: 'bg-surface-600'}"
+							>
+								<span
+									class="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform {autoSave.enabled
+										? 'translate-x-4'
+										: 'translate-x-0'}"
+								></span>
+							</div>
+						</button>
+						{#if autoSave.enabled}
+							<button
+								onclick={handleAutoSaveToggle}
+								class="text-surface-500 hover:text-surface-300 ml-auto text-xs underline"
+							>
+								Change folder
+							</button>
+						{/if}
+					</div>
+				{/if}
 
 				<!-- Filename Template -->
 				<div class="flex flex-col gap-2">
