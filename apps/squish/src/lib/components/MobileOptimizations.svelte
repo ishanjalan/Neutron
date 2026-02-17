@@ -26,19 +26,23 @@
 		}
 	}
 
-	// Detect if device is mobile
-	export const isMobile = $derived(
-		typeof window !== 'undefined' &&
+	// Detect if device is mobile (export as function, not derived)
+	export function isMobile() {
+		return (
+			typeof window !== 'undefined' &&
 			(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
 				window.innerWidth < 768)
-	);
+		);
+	}
 
-	// Detect if PWA/standalone mode
-	export const isStandalone = $derived(
-		typeof window !== 'undefined' &&
+	// Detect if PWA/standalone mode (export as function, not derived)
+	export function isStandalone() {
+		return (
+			typeof window !== 'undefined' &&
 			(window.matchMedia('(display-mode: standalone)').matches ||
 				(window.navigator as any).standalone === true)
-	);
+		);
+	}
 
 	onMount(() => {
 		// Set initial vh

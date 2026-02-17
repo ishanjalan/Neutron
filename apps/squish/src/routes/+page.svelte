@@ -6,7 +6,7 @@
 	import Settings from '$lib/components/Settings.svelte';
 	import BatchSummary from '$lib/components/BatchSummary.svelte';
 	import LiveSavingsTicker from '$lib/components/LiveSavingsTicker.svelte';
-	import HeroSection from '$lib/components/HeroSection.svelte';
+	import EnterpriseHero from '$lib/components/EnterpriseHero.svelte';
 	import MobileOptimizations from '$lib/components/MobileOptimizations.svelte';
 	import { ConfirmModal, AnimatedNumber, toast } from '@neutron/ui';
 	import { images, formatBytes } from '$lib';
@@ -331,7 +331,9 @@
 	<main class="flex-1 px-4 pb-8 pt-24 sm:px-6 sm:pb-12 sm:pt-28 lg:px-8">
 		<div class="mx-auto max-w-7xl">
 			<!-- Hero Section -->
-			<HeroSection {hasImages} />
+			{#if !hasImages}
+				<EnterpriseHero />
+			{/if}
 
 			<!-- Batch Summary (shown after all images complete) -->
 			{#if showBatchSummary}
