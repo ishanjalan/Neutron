@@ -90,9 +90,13 @@
 			isZipping = true;
 			zipProgress = 0;
 
-			await downloadAllAsZip(completedImages, (progress) => {
-				zipProgress = progress;
-			});
+			await downloadAllAsZip(
+				completedImages,
+				(progress) => {
+					zipProgress = progress;
+				},
+				images.settings.filenameTemplate
+			);
 
 			isZipping = false;
 			zipProgress = null;

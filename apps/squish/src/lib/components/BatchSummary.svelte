@@ -1,15 +1,33 @@
 <script lang="ts">
 	import { images, formatBytes } from '$lib';
-	import { downloadAllAsZip } from '$lib/utils/download';
+	import {
+		downloadAllAsZip,
+		isFileSystemAccessSupported,
+		downloadWithFileSystemAPI,
+	} from '$lib/utils/download';
 	import { toast } from '@neutron/ui';
 	import { AnimatedNumber } from '@neutron/ui';
-	import { Download, Clock, Zap, HardDrive, TrendingDown, X, CheckCircle } from 'lucide-svelte';
+	import {
+		Download,
+		Clock,
+		Zap,
+		HardDrive,
+		TrendingDown,
+		X,
+		CheckCircle,
+		FolderDown,
+	} from 'lucide-svelte';
 	import { scale, fade } from 'svelte/transition';
 
 	let { onclose }: { onclose: () => void } = $props();
 
 	const completedItems = $derived(images.items.filter((i) => i.status === 'completed'));
 	const stats = $derived(images.batchStats);
+
+	let isSavingToFolder = $state(false);
+	let savingProgress = $state('');
+
+	const fsapiSupported = $derived(isFileSystemAccessSupported());
 
 	// Calculate stats
 	const totalOriginalSize = $derived(completedItems.reduce((acc, i) => acc + i.originalSize, 0));
@@ -41,11 +59,34 @@
 
 	async function handleDownloadAll() {
 		if (completedItems.length > 0) {
-			await downloadAllAsZip(completedItems);
+			await downloadAllAsZip(completedItems, undefined, images.settings.filenameTemplate);
 			const savedFormatted = formatBytes(totalSaved);
 			toast.success(
 				`Downloaded ${completedItems.length} ${completedItems.length === 1 ? 'image' : 'images'} as ZIP (${savedFormatted} saved!)`
 			);
+		}
+	}
+
+	async function handleSaveToFolder() {
+		try {
+			isSavingToFolder = true;
+			savingProgress = 'Choosing folder...';
+
+			await downloadWithFileSystemAPI(completedItems, images.settings.filenameTemplate);
+
+			toast.success(`Saved ${completedItems.length} files to folder!`);
+			onclose();
+		} catch (error) {
+			if (error instanceof Error && error.name === 'AbortError') {
+				toast.info('Folder selection cancelled');
+			} else {
+				toast.error(
+					'Failed to save files: ' + (error instanceof Error ? error.message : 'Unknown error')
+				);
+			}
+		} finally {
+			isSavingToFolder = false;
+			savingProgress = '';
 		}
 	}
 </script>
@@ -157,15 +198,50 @@
 			</div>
 		</div>
 
-		<!-- Download Button -->
-		<div class="border-surface-700/50 flex justify-end border-t px-5 py-4">
-			<button
-				onclick={handleDownloadAll}
-				class="from-accent-start to-accent-end shadow-accent-start/30 hover:shadow-accent-start/40 flex items-center gap-2 rounded-xl bg-gradient-to-r px-5 py-2.5 text-sm font-medium text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
-			>
-				<Download class="h-5 w-5" />
-				Download All ({completedItems.length})
-			</button>
+		<!-- Download Buttons -->
+		<div class="border-surface-700/50 border-t px-5 py-4">
+			{#if fsapiSupported}
+				<!-- Chrome: Show both options -->
+				<div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+					<button
+						onclick={handleSaveToFolder}
+						disabled={isSavingToFolder}
+						class="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-500/30 transition-all hover:scale-105 hover:shadow-xl hover:shadow-blue-500/40 disabled:opacity-50"
+					>
+						<FolderDown class="h-5 w-5" />
+						{#if isSavingToFolder}
+							{savingProgress}
+						{:else}
+							Save to Folder
+						{/if}
+					</button>
+
+					<button
+						onclick={handleDownloadAll}
+						disabled={isSavingToFolder}
+						class="bg-surface-800/50 border-surface-600 hover:bg-surface-700/50 hover:border-surface-500 text-surface-200 flex items-center justify-center gap-2 rounded-xl border-2 px-5 py-2.5 text-sm font-medium transition-all disabled:opacity-50"
+					>
+						<Download class="h-5 w-5" />
+						Download ZIP
+					</button>
+				</div>
+
+				<!-- Helpful hint -->
+				<p class="text-surface-500 mt-2 text-center text-xs">
+					Save to Folder writes files directly (faster for large batches)
+				</p>
+			{:else}
+				<!-- Safari/Firefox: Show only ZIP -->
+				<div class="flex justify-end">
+					<button
+						onclick={handleDownloadAll}
+						class="from-accent-start to-accent-end shadow-accent-start/30 hover:shadow-accent-start/40 flex items-center gap-2 rounded-xl bg-gradient-to-r px-5 py-2.5 text-sm font-medium text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+					>
+						<Download class="h-5 w-5" />
+						Download All ({completedItems.length})
+					</button>
+				</div>
+			{/if}
 		</div>
 	</div>
 {/if}

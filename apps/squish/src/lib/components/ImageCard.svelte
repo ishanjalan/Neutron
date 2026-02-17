@@ -93,7 +93,7 @@
 	}
 
 	function handleDownload() {
-		downloadImage(item);
+		downloadImage(item, images.settings.filenameTemplate);
 	}
 
 	async function handleCopy() {

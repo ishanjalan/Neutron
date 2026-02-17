@@ -10,6 +10,7 @@
 		ChevronUp,
 		Info,
 		Maximize2,
+		FileText,
 	} from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 	import FormatGuide from './FormatGuide.svelte';
@@ -406,6 +407,60 @@
 							{/if}
 						</div>
 					{/if}
+				</div>
+
+				<!-- Filename Template -->
+				<div class="flex flex-col gap-2">
+					<label
+						class="text-surface-500 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider"
+					>
+						<FileText class="h-3.5 w-3.5" />
+						Output Filename
+					</label>
+					<input
+						type="text"
+						value={images.settings.filenameTemplate}
+						oninput={(e) =>
+							images.updateSettings({
+								filenameTemplate: e.currentTarget.value,
+							})}
+						class="glass text-surface-200 placeholder:text-surface-600 rounded-lg px-3 py-2 text-sm"
+						placeholder="{'{name}'}-optimized.{'{ext}'}"
+					/>
+					<p class="text-surface-500 text-xs">
+						Tokens: {'{name}'} (filename), {'{ext}'} (format)
+					</p>
+
+					<!-- Quick presets -->
+					<div class="flex flex-wrap gap-2">
+						<button
+							onclick={() =>
+								images.updateSettings({
+									filenameTemplate: '{name}-optimized.{ext}',
+								})}
+							class="glass hover:bg-surface-700/50 rounded px-2 py-1 text-xs transition-colors"
+						>
+							name-optimized.ext
+						</button>
+						<button
+							onclick={() =>
+								images.updateSettings({
+									filenameTemplate: '{name}-squished.{ext}',
+								})}
+							class="glass hover:bg-surface-700/50 rounded px-2 py-1 text-xs transition-colors"
+						>
+							name-squished.ext
+						</button>
+						<button
+							onclick={() =>
+								images.updateSettings({
+									filenameTemplate: '{name}@2x.{ext}',
+								})}
+							class="glass hover:bg-surface-700/50 rounded px-2 py-1 text-xs transition-colors"
+						>
+							name@2x.ext
+						</button>
+					</div>
 				</div>
 			</div>
 		{/if}

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { X, ZoomIn, ZoomOut, RotateCcw, Download } from 'lucide-svelte';
 	import { scale } from 'svelte/transition';
-	import type { ImageItem } from '$lib/stores/images.svelte';
+	import { images, type ImageItem } from '$lib/stores/images.svelte';
 	import { downloadImage } from '$lib/utils/download';
 
 	let {
@@ -79,7 +79,7 @@
 	}
 
 	function handleDownload() {
-		downloadImage(item);
+		downloadImage(item, images.settings.filenameTemplate);
 	}
 
 	const displayUrl = $derived(item.compressedUrl || item.originalUrl);

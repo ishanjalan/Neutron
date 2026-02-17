@@ -67,7 +67,7 @@
 				e.preventDefault();
 				const item = images.items[focusedIndex];
 				if (item && item.status === 'completed' && item.compressedBlob) {
-					downloadImage(item);
+					downloadImage(item, images.settings.filenameTemplate);
 					toast.success(`Downloaded ${item.name}`);
 				}
 				break;

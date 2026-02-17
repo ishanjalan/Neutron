@@ -47,6 +47,8 @@ export interface CompressionSettings {
 	resizeMaxWidth: number;
 	resizeMaxHeight: number;
 	maintainAspectRatio: boolean;
+	// Filename template
+	filenameTemplate: string;
 }
 
 export interface BatchStats {
@@ -96,6 +98,8 @@ function getDefaultSettings(): CompressionSettings {
 		resizeMaxWidth: 1920,
 		resizeMaxHeight: 1080,
 		maintainAspectRatio: true,
+		// Filename template
+		filenameTemplate: '{name}-optimized.{ext}',
 	};
 }
 

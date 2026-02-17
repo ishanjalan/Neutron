@@ -17,9 +17,9 @@ export function downloadBlob(blob: Blob, filename: string) {
 	URL.revokeObjectURL(url);
 }
 
-export function downloadImage(item: ImageItem) {
+export function downloadImage(item: ImageItem, template?: string) {
 	if (!item.compressedBlob) return;
-	const filename = getOutputFilename(item.name, item.outputFormat);
+	const filename = getOutputFilename(item.name, item.outputFormat, template);
 	downloadBlob(item.compressedBlob, filename);
 }
 
@@ -29,7 +29,8 @@ export interface ZipProgressCallback {
 
 export async function downloadAllAsZip(
 	items: ImageItem[],
-	onProgress?: ZipProgressCallback
+	onProgress?: ZipProgressCallback,
+	template?: string
 ): Promise<void> {
 	const zip = new JSZip();
 
@@ -38,7 +39,7 @@ export async function downloadAllAsZip(
 
 	for (const item of items) {
 		if (item.compressedBlob) {
-			let filename = getOutputFilename(item.name, item.outputFormat);
+			let filename = getOutputFilename(item.name, item.outputFormat, template);
 
 			// Handle duplicate filenames
 			const count = usedNames.get(filename) || 0;
@@ -77,7 +78,10 @@ export function isLargeBatch(items: ImageItem[]): boolean {
 }
 
 // Download files directly to a folder using File System Access API
-export async function downloadWithFileSystemAPI(items: ImageItem[]): Promise<void> {
+export async function downloadWithFileSystemAPI(
+	items: ImageItem[],
+	template?: string
+): Promise<void> {
 	if (!isFileSystemAccessSupported()) {
 		throw new Error('File System Access API not supported');
 	}
@@ -94,7 +98,7 @@ export async function downloadWithFileSystemAPI(items: ImageItem[]): Promise<voi
 
 	for (const item of items) {
 		if (item.compressedBlob) {
-			let filename = getOutputFilename(item.name, item.outputFormat);
+			let filename = getOutputFilename(item.name, item.outputFormat, template);
 
 			// Handle duplicate filenames
 			const count = usedNames.get(filename) || 0;
@@ -121,6 +125,7 @@ export async function downloadAllSmart(
 		forceFSAPI?: boolean;
 		onMethodChosen?: (method: 'zip' | 'fsapi') => void;
 		onProgress?: ZipProgressCallback;
+		template?: string;
 	}
 ): Promise<void> {
 	const validItems = items.filter((i) => i.compressedBlob);
@@ -130,12 +135,12 @@ export async function downloadAllSmart(
 	// If forcing a specific method
 	if (options?.forceZip) {
 		options.onMethodChosen?.('zip');
-		return downloadAllAsZip(validItems, options.onProgress);
+		return downloadAllAsZip(validItems, options.onProgress, options.template);
 	}
 
 	if (options?.forceFSAPI && isFileSystemAccessSupported()) {
 		options.onMethodChosen?.('fsapi');
-		return downloadWithFileSystemAPI(validItems);
+		return downloadWithFileSystemAPI(validItems, options.template);
 	}
 
 	// Auto-select based on batch size and browser support
@@ -143,11 +148,11 @@ export async function downloadAllSmart(
 
 	if (shouldUseFSAPI) {
 		options?.onMethodChosen?.('fsapi');
-		return downloadWithFileSystemAPI(validItems);
+		return downloadWithFileSystemAPI(validItems, options?.template);
 	}
 
 	options?.onMethodChosen?.('zip');
-	return downloadAllAsZip(validItems, options?.onProgress);
+	return downloadAllAsZip(validItems, options?.onProgress, options?.template);
 }
 
 // Get download info for UI display

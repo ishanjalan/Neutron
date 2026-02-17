@@ -711,11 +711,14 @@ export function getOutputExtension(format: OutputFormat): string {
 export function getOutputFilename(
 	originalName: string,
 	format: OutputFormat,
-	scale?: number
+	template?: string
 ): string {
 	const baseName = originalName.replace(/\.[^/.]+$/, '');
-	const scaleSuffix = scale && scale > 1 ? `@${scale}x` : '';
-	return `${baseName}-optimized${scaleSuffix}${getOutputExtension(format)}`;
+	const ext = getOutputExtension(format).slice(1); // Remove leading dot
+
+	const finalTemplate = template || '{name}-optimized.{ext}';
+
+	return finalTemplate.replace('{name}', baseName).replace('{ext}', ext);
 }
 
 // Re-process a single image with a new output format
