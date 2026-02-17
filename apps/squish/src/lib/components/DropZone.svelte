@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Upload, FileImage, AlertCircle, Link, Loader2, X } from 'lucide-svelte';
+	import { Upload, FileImage, AlertCircle, Link, Loader2, X, FolderOpen } from 'lucide-svelte';
 	import { images } from '$lib/stores/images.svelte';
 	import { processImages } from '$lib/utils/compress';
 	import { fade } from 'svelte/transition';
@@ -7,6 +7,7 @@
 
 	let isDragging = $state(false);
 	let fileInput: HTMLInputElement;
+	let folderInput: HTMLInputElement;
 	let errorMessage = $state<string | null>(null);
 	let errorTimeout: ReturnType<typeof setTimeout>;
 
@@ -28,6 +29,20 @@
 		'image/heic',
 		'image/heif',
 	];
+
+	// Extensions fallback for files where MIME type isn't set (common with folder uploads)
+	const validExtensions = new Set([
+		'jpg',
+		'jpeg',
+		'png',
+		'webp',
+		'avif',
+		'jxl',
+		'svg',
+		'heic',
+		'heif',
+	]);
+
 	const hasImages = $derived(images.items.length > 0);
 
 	const formats = [
@@ -46,6 +61,13 @@
 		errorTimeout = setTimeout(() => {
 			errorMessage = null;
 		}, 4000);
+	}
+
+	function isValidImageFile(file: File): boolean {
+		if (validTypes.includes(file.type)) return true;
+		// Fallback: check extension (MIME type can be empty for folder-uploaded files)
+		const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+		return validExtensions.has(ext);
 	}
 
 	function handleDragEnter(e: DragEvent) {
@@ -67,9 +89,94 @@
 		e.preventDefault();
 	}
 
+	/**
+	 * Recursively read all files from a FileSystemDirectoryEntry.
+	 */
+	function readDirectoryEntries(dirEntry: FileSystemDirectoryEntry): Promise<File[]> {
+		return new Promise((resolve) => {
+			const reader = dirEntry.createReader();
+			const allFiles: File[] = [];
+
+			function readBatch() {
+				reader.readEntries(async (entries) => {
+					if (entries.length === 0) {
+						resolve(allFiles);
+						return;
+					}
+
+					const promises = entries.map((entry) => {
+						if (entry.isFile) {
+							return new Promise<File | null>((res) => {
+								(entry as FileSystemFileEntry).file(
+									(file) => res(file),
+									() => res(null)
+								);
+							});
+						} else if (entry.isDirectory) {
+							return readDirectoryEntries(entry as FileSystemDirectoryEntry);
+						}
+						return Promise.resolve(null);
+					});
+
+					const results = await Promise.all(promises);
+					for (const result of results) {
+						if (result instanceof File) {
+							allFiles.push(result);
+						} else if (Array.isArray(result)) {
+							allFiles.push(...result);
+						}
+					}
+
+					// readEntries may not return all entries at once; keep reading
+					readBatch();
+				});
+			}
+
+			readBatch();
+		});
+	}
+
+	/**
+	 * Extract all files from DataTransfer, recursively traversing any folders.
+	 */
+	async function extractFilesFromDataTransfer(dataTransfer: DataTransfer): Promise<File[]> {
+		const items = dataTransfer.items;
+		const allFiles: File[] = [];
+		const entryPromises: Promise<File | File[] | null>[] = [];
+
+		for (let i = 0; i < items.length; i++) {
+			const entry = items[i].webkitGetAsEntry?.();
+			if (entry) {
+				if (entry.isFile) {
+					entryPromises.push(
+						new Promise<File | null>((res) => {
+							(entry as FileSystemFileEntry).file(
+								(file) => res(file),
+								() => res(null)
+							);
+						})
+					);
+				} else if (entry.isDirectory) {
+					entryPromises.push(readDirectoryEntries(entry as FileSystemDirectoryEntry));
+				}
+			}
+		}
+
+		const results = await Promise.all(entryPromises);
+		for (const result of results) {
+			if (result instanceof File) {
+				allFiles.push(result);
+			} else if (Array.isArray(result)) {
+				allFiles.push(...result);
+			}
+		}
+
+		return allFiles;
+	}
+
 	async function processFiles(files: FileList | File[]) {
 		const fileArray = Array.from(files);
-		const validFiles = fileArray.filter((f) => validTypes.includes(f.type));
+		const validFiles = fileArray.filter(isValidImageFile);
 		const skippedCount = fileArray.length - validFiles.length;
 
 		if (skippedCount > 0) {
@@ -89,9 +196,25 @@
 		e.preventDefault();
 		isDragging = false;
 
-		const files = e.dataTransfer?.files;
-		if (files && files.length > 0) {
-			await processFiles(files);
+		if (!e.dataTransfer) return;
+
+		// Use entries API to support folder drops
+		const hasEntries =
+			e.dataTransfer.items &&
+			e.dataTransfer.items.length > 0 &&
+			typeof e.dataTransfer.items[0].webkitGetAsEntry === 'function';
+
+		if (hasEntries) {
+			const allFiles = await extractFilesFromDataTransfer(e.dataTransfer);
+			if (allFiles.length > 0) {
+				await processFiles(allFiles);
+			}
+		} else {
+			// Fallback for browsers without entries API
+			const files = e.dataTransfer.files;
+			if (files && files.length > 0) {
+				await processFiles(files);
+			}
 		}
 	}
 
@@ -106,6 +229,11 @@
 
 	function openFilePicker() {
 		fileInput?.click();
+	}
+
+	function openFolderPicker(e: MouseEvent) {
+		e.stopPropagation();
+		folderInput?.click();
 	}
 
 	function handleUrlInputClick(e: MouseEvent) {
@@ -208,6 +336,17 @@
 		onchange={handleFileSelect}
 		aria-hidden="true"
 	/>
+	<!-- Hidden folder input for directory selection -->
+	<!-- @ts-ignore webkitdirectory is non-standard but widely supported -->
+	<input
+		bind:this={folderInput}
+		type="file"
+		multiple
+		webkitdirectory
+		class="hidden"
+		onchange={handleFileSelect}
+		aria-hidden="true"
+	/>
 
 	{#if hasImages}
 		<!-- Compact dropzone when images exist - minimum 44px touch target -->
@@ -229,7 +368,9 @@
 				{#if isDragging}
 					<span class="text-accent-start font-medium">Release to add more</span>
 				{:else}
-					Drop more images or <span class="text-accent-start font-medium">click to browse</span>
+					Drop images or folders, or <span class="text-accent-start font-medium"
+						>click to browse</span
+					>
 				{/if}
 			</p>
 		</div>
@@ -265,14 +406,21 @@
 				<!-- Text -->
 				{#if isDragging}
 					<p class="text-accent-start text-xl font-semibold">Release to upload</p>
-					<p class="text-accent-start/70 mt-2 text-base">Your images are ready to be optimized</p>
+					<p class="text-accent-start/70 mt-2 text-base">Drop images or entire folders</p>
 				{:else}
-					<p class="text-surface-300 text-xl font-semibold">Drop images here</p>
+					<p class="text-surface-300 text-xl font-semibold">Drop images or folders here</p>
 					<p class="text-surface-500 mt-2 text-base">
 						or <span class="text-accent-start font-medium underline-offset-2 hover:underline"
-							>click to browse</span
+							>click to browse files</span
 						>
 					</p>
+					<button
+						onclick={openFolderPicker}
+						class="text-surface-400 hover:text-accent-start mt-1 flex items-center gap-1.5 text-sm transition-colors"
+					>
+						<FolderOpen class="h-4 w-4" />
+						<span class="underline-offset-2 hover:underline">or select a folder</span>
+					</button>
 				{/if}
 
 				<!-- Supported formats -->
@@ -286,7 +434,7 @@
 					{/each}
 				</div>
 				<p class="text-surface-400 mt-5 text-sm">
-					Max file size: Unlimited • Batch upload supported • Paste from clipboard
+					Unlimited size • Folders supported • Batch upload • Paste from clipboard
 				</p>
 
 				<!-- Sample Images Demo -->
