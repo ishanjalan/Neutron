@@ -3,6 +3,7 @@
 	import { images } from '$lib/stores/images.svelte';
 	import { processImages } from '$lib/utils/compress';
 	import { fade } from 'svelte/transition';
+	import SampleImageDemo from './SampleImageDemo.svelte';
 
 	let isDragging = $state(false);
 	let fileInput: HTMLInputElement;
@@ -287,6 +288,11 @@
 				<p class="text-surface-400 mt-5 text-sm">
 					Max file size: Unlimited • Batch upload supported • Paste from clipboard
 				</p>
+
+				<!-- Sample Images Demo -->
+				<div class="mt-8">
+					<SampleImageDemo />
+				</div>
 			</div>
 		</div>
 	{/if}
