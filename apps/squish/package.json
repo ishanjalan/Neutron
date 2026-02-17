@@ -14,9 +14,13 @@
 		"lint:fix": "eslint . --fix",
 		"test": "vitest",
 		"test:ui": "vitest --ui",
-		"test:coverage": "vitest --coverage"
+		"test:coverage": "vitest --coverage",
+		"test:e2e": "playwright test",
+		"test:e2e:ui": "playwright test --ui",
+		"test:e2e:debug": "playwright test --debug"
 	},
 	"devDependencies": {
+		"@playwright/test": "^1.50.0",
 		"@sveltejs/adapter-auto": "^7.0.0",
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.49.1",
@@ -27,6 +31,7 @@
 		"@vitest/ui": "^4.0.18",
 		"happy-dom": "^20.6.1",
 		"lucide-svelte": "^0.562.0",
+		"playwright": "^1.50.0",
 		"svelte": "^5.45.6",
 		"svelte-check": "^4.3.4",
 		"tailwindcss": "^4.1.18",
