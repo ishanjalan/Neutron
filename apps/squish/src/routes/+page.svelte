@@ -5,6 +5,7 @@
 	import ImageList from '$lib/components/ImageList.svelte';
 	import Settings from '$lib/components/Settings.svelte';
 	import BatchSummary from '$lib/components/BatchSummary.svelte';
+	import LiveSavingsTicker from '$lib/components/LiveSavingsTicker.svelte';
 	import { ConfirmModal, AnimatedNumber, toast } from '@neutron/ui';
 	import { images, formatBytes } from '$lib';
 	import { processImages, cancelProcessing } from '$lib/utils/compress';
@@ -502,6 +503,9 @@
 
 	<Footer />
 </div>
+
+<!-- Live Savings Ticker (shows during/after processing) -->
+<LiveSavingsTicker />
 
 <!-- Clear All Confirmation Modal -->
 <ConfirmModal

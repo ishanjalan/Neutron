@@ -157,15 +157,18 @@
 </script>
 
 <div
-	class="glass group relative rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/10 {isFocused
+	class="glass group relative rounded-2xl transition-all duration-300 {item.status === 'processing'
+		? 'animate-pulse ring-2 ring-blue-500/30'
+		: 'hover:shadow-accent-start/10 hover:scale-[1.02] hover:shadow-2xl'} {isFocused
 		? 'ring-accent-start ring-offset-surface-900 shadow-accent-start/20 shadow-xl ring-2 ring-offset-2'
-		: ''}"
-	in:scale={{ duration: 200, start: 0.95 }}
-	out:fade={{ duration: 150 }}
+		: ''} {item.status === 'completed' ? 'hover:-translate-y-1' : ''}"
+	in:scale={{ duration: 300, start: 0.9 }}
+	out:scale={{ duration: 200, start: 1, opacity: 0 }}
 	onclick={handleCardClick}
 	onkeydown={(e) => e.key === 'Enter' && handleCardClick()}
 	role="button"
 	tabindex="-1"
+	style="transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;"
 >
 	<!-- Selection checkbox -->
 	<button
@@ -292,13 +295,18 @@
 				{#if isPositiveSavings}
 					<span
 						class="flex items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-sm font-bold text-white shadow-lg"
+						in:scale={{ duration: 400, delay: 100, start: 0 }}
 					>
-						<Check class="h-4 w-4" />
+						<Check
+							class="h-4 w-4 animate-bounce"
+							style="animation-duration: 1s; animation-iteration-count: 2;"
+						/>
 						-{savings}%
 					</span>
 				{:else}
 					<span
 						class="rounded-full bg-amber-500 px-3 py-1.5 text-sm font-bold text-white shadow-lg"
+						in:scale={{ duration: 400, delay: 100, start: 0 }}
 					>
 						+{Math.abs(savings)}%
 					</span>
@@ -340,7 +348,7 @@
 						e.stopPropagation();
 						showCompare = true;
 					}}
-					class="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-all hover:scale-110 hover:bg-white/30"
+					class="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-all hover:rotate-6 hover:scale-125 hover:bg-white/40 active:scale-95"
 					title="Compare before/after"
 				>
 					<SplitSquareHorizontal class="h-5 w-5" />
@@ -350,7 +358,7 @@
 						e.stopPropagation();
 						handleDownload();
 					}}
-					class="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-all hover:scale-110 hover:bg-white/30"
+					class="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-all hover:-translate-y-1 hover:scale-125 hover:bg-green-500/80 active:scale-95"
 					title="Download"
 				>
 					<Download class="h-5 w-5" />
@@ -361,7 +369,7 @@
 							e.stopPropagation();
 							handleCopy();
 						}}
-						class="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-all hover:scale-110 hover:bg-white/30"
+						class="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-all hover:scale-125 hover:bg-blue-500/80 active:scale-95"
 						title="Copy to clipboard"
 					>
 						<Copy class="h-5 w-5" />
