@@ -215,6 +215,7 @@ body.modal-open {
 	height: 1px;
 	background: linear-gradient(90deg, transparent 0%, var(--color-data-cyan) 50%, transparent 100%);
 	opacity: 0.3;
+	pointer-events: none;
 }
 
 /* Data Grid Visualization */

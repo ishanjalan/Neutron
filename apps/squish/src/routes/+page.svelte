@@ -444,7 +444,7 @@
 
 			<!-- Settings Panel (shown after drop zone when no images - allows pre-configuration) -->
 			{#if !hasImages}
-				<div class="mt-6" in:fade={{ duration: 200, delay: 300 }}>
+				<div id="settings-panel" class="relative z-10 mt-6" in:fade={{ duration: 200, delay: 300 }}>
 					<Settings />
 				</div>
 			{/if}

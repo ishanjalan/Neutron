@@ -27,20 +27,40 @@
 
 		return () => {};
 	});
+
+	function handleInitialize() {
+		// Scroll to the drop zone and trigger file picker
+		const dropZone = document.querySelector('[aria-label="Drop zone for image files"]');
+		if (dropZone) {
+			dropZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			// Small delay to let scroll complete, then trigger click (opens file picker)
+			setTimeout(() => {
+				(dropZone as HTMLElement).click();
+			}, 400);
+		}
+	}
+
+	function handleViewDocs() {
+		// Scroll to the settings panel
+		const settings = document.getElementById('settings-panel');
+		if (settings) {
+			settings.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		}
+	}
 </script>
 
 <!-- Enterprise Hero - Mission Control Style -->
 <div class="relative overflow-hidden py-20 sm:py-32" in:fade={{ duration: 300 }}>
-	<!-- Background: Technical Grid -->
-	<div class="data-grid absolute inset-0 opacity-40"></div>
+	<!-- Background: Technical Grid (decorative, non-interactive) -->
+	<div class="data-grid pointer-events-none absolute inset-0 opacity-40"></div>
 
-	<!-- Scan Line Effect -->
+	<!-- Scan Line Effect (decorative, non-interactive) -->
 	<div class="scan-line pointer-events-none absolute inset-0"></div>
 
-	<!-- Data Streams (vertical animated lines) -->
+	<!-- Data Streams (decorative, non-interactive) -->
 	{#each streams as delay, i}
 		<div
-			class="data-stream absolute top-0"
+			class="data-stream pointer-events-none absolute top-0"
 			style="left: {(i / streams.length) * 100}%; animation-delay: {delay * 0.1}s;"
 		></div>
 	{/each}
@@ -81,7 +101,7 @@
 				class="panel-enterprise hover:border-data-cyan group relative overflow-hidden rounded-lg p-6 transition-all"
 			>
 				<div
-					class="holographic absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
+					class="holographic pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
 				></div>
 				<div class="relative">
 					<div class="mb-2 flex items-center justify-between">
@@ -101,7 +121,7 @@
 				class="panel-enterprise hover:border-data-cyan group relative overflow-hidden rounded-lg p-6 transition-all"
 			>
 				<div
-					class="holographic absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
+					class="holographic pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
 				></div>
 				<div class="relative">
 					<div class="mb-2 flex items-center justify-between">
@@ -121,7 +141,7 @@
 				class="panel-enterprise hover:border-data-cyan group relative overflow-hidden rounded-lg p-6 transition-all"
 			>
 				<div
-					class="holographic absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
+					class="holographic pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
 				></div>
 				<div class="relative">
 					<div class="mb-2 flex items-center justify-between">
@@ -207,11 +227,11 @@
 			class="mt-16 flex flex-col items-center justify-center gap-4 sm:flex-row"
 			in:fly={{ y: 20, duration: 400, delay: 400 }}
 		>
-			<button class="btn-enterprise-primary rounded-lg">
+			<button class="btn-enterprise-primary rounded-lg" onclick={handleInitialize}>
 				<Zap class="mr-2 inline h-5 w-5" />
 				INITIALIZE SYSTEM
 			</button>
-			<button class="btn-enterprise-secondary rounded-lg">
+			<button class="btn-enterprise-secondary rounded-lg" onclick={handleViewDocs}>
 				<Activity class="mr-2 inline h-5 w-5" />
 				VIEW DOCUMENTATION
 			</button>
