@@ -1,0 +1,368 @@
+@import 'tailwindcss';
+
+/* Enterprise Theme - Industrial Data Precision */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Geist:wght@400;500;600;700&display=swap');
+
+@theme {
+	/* Typography - Technical Precision */
+	--font-sans: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+	--font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+
+	/* Enterprise Color System - Mission Critical */
+	--color-infrastructure-950: #0a0e1a; /* Deep space navy */
+	--color-infrastructure-900: #141927;
+	--color-infrastructure-800: #1e2534;
+	--color-infrastructure-700: #2a3241;
+	--color-infrastructure-600: #3d4555;
+	--color-infrastructure-500: #545d70;
+	--color-infrastructure-400: #7a8396;
+	--color-infrastructure-300: #a5adc0;
+	--color-infrastructure-200: #d1d7e5;
+	--color-infrastructure-100: #e8ecf5;
+
+	/* Data Visualization Accents */
+	--color-data-cyan: #00d9ff; /* Electric cyan - primary data */
+	--color-data-blue: #0066ff; /* Deep blue - secondary data */
+	--color-data-amber: #ffa726; /* Warning/alert amber */
+	--color-data-green: #00e676; /* Success/positive green */
+	--color-data-red: #ff1744; /* Error/critical red */
+
+	/* Metallic Effects */
+	--color-steel: #8b95a8;
+	--color-steel-light: #b0b9c9;
+	--color-steel-dark: #5a6270;
+
+	/* Functional Colors */
+	--color-accent-primary: var(--color-data-cyan);
+	--color-accent-secondary: var(--color-data-blue);
+	--color-warning: var(--color-data-amber);
+	--color-success: var(--color-data-green);
+	--color-error: var(--color-data-red);
+}
+
+/* Base - Industrial Foundation */
+html {
+	font-family: var(--font-sans);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-rendering: optimizeLegibility;
+}
+
+body {
+	@apply bg-infrastructure-950 text-infrastructure-100;
+	background-image: linear-gradient(0deg, rgba(0, 217, 255, 0.02) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(0, 217, 255, 0.02) 1px, transparent 1px);
+	background-size: 20px 20px;
+	background-position:
+		0 0,
+		0 0;
+}
+
+/* Technical Precision Typography */
+.heading-enterprise {
+	font-family: var(--font-mono);
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	text-transform: uppercase;
+	color: var(--color-infrastructure-100);
+	text-shadow: 0 0 40px rgba(0, 217, 255, 0.3);
+}
+
+.data-label {
+	font-family: var(--font-mono);
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--color-data-cyan);
+}
+
+.metric-value {
+	font-family: var(--font-mono);
+	font-size: 2.5rem;
+	font-weight: 700;
+	letter-spacing: -0.03em;
+	color: var(--color-data-cyan);
+	text-shadow: 0 0 30px rgba(0, 217, 255, 0.5);
+}
+
+/* Industrial Panel System */
+.panel-enterprise {
+	background: linear-gradient(135deg, rgba(30, 37, 52, 0.95) 0%, rgba(20, 25, 39, 0.95) 100%);
+	border: 1px solid rgba(0, 217, 255, 0.15);
+	box-shadow:
+		inset 0 1px 0 rgba(0, 217, 255, 0.1),
+		0 4px 24px rgba(0, 0, 0, 0.4),
+		0 0 40px rgba(0, 217, 255, 0.05);
+	backdrop-filter: blur(10px);
+	position: relative;
+}
+
+.panel-enterprise::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 1px;
+	background: linear-gradient(90deg, transparent 0%, var(--color-data-cyan) 50%, transparent 100%);
+	opacity: 0.3;
+}
+
+/* Data Grid Visualization */
+.data-grid {
+	background-image: linear-gradient(0deg, rgba(0, 217, 255, 0.08) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(0, 217, 255, 0.08) 1px, transparent 1px);
+	background-size: 40px 40px;
+}
+
+/* Industrial Button System */
+.btn-enterprise-primary {
+	font-family: var(--font-mono);
+	font-size: 0.875rem;
+	font-weight: 600;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	padding: 14px 32px;
+	background: linear-gradient(135deg, var(--color-data-cyan), var(--color-data-blue));
+	color: var(--color-infrastructure-950);
+	border: 1px solid var(--color-data-cyan);
+	box-shadow:
+		0 0 20px rgba(0, 217, 255, 0.3),
+		inset 0 1px 0 rgba(255, 255, 255, 0.2);
+	position: relative;
+	overflow: hidden;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-enterprise-primary::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+	transition: left 0.5s;
+}
+
+.btn-enterprise-primary:hover {
+	box-shadow:
+		0 0 40px rgba(0, 217, 255, 0.6),
+		inset 0 1px 0 rgba(255, 255, 255, 0.3);
+	transform: translateY(-1px);
+}
+
+.btn-enterprise-primary:hover::before {
+	left: 100%;
+}
+
+.btn-enterprise-secondary {
+	font-family: var(--font-mono);
+	font-size: 0.875rem;
+	font-weight: 600;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	padding: 14px 32px;
+	background: rgba(0, 217, 255, 0.05);
+	color: var(--color-data-cyan);
+	border: 2px solid var(--color-data-cyan);
+	box-shadow: inset 0 0 20px rgba(0, 217, 255, 0.1);
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-enterprise-secondary:hover {
+	background: rgba(0, 217, 255, 0.15);
+	box-shadow:
+		inset 0 0 20px rgba(0, 217, 255, 0.2),
+		0 0 20px rgba(0, 217, 255, 0.3);
+	transform: translateY(-1px);
+}
+
+/* Data Visualization Elements */
+.stat-bar {
+	position: relative;
+	height: 4px;
+	background: rgba(0, 217, 255, 0.1);
+	overflow: hidden;
+}
+
+.stat-bar::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	background: linear-gradient(90deg, var(--color-data-blue), var(--color-data-cyan));
+	box-shadow: 0 0 10px var(--color-data-cyan);
+	animation: stat-fill 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes stat-fill {
+	from {
+		width: 0;
+	}
+	to {
+		width: var(--stat-value, 100%);
+	}
+}
+
+/* Technical Scan Line Effect */
+.scan-line {
+	position: relative;
+	overflow: hidden;
+}
+
+.scan-line::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 2px;
+	background: linear-gradient(90deg, transparent, var(--color-data-cyan), transparent);
+	box-shadow: 0 0 10px var(--color-data-cyan);
+	animation: scan 3s linear infinite;
+}
+
+@keyframes scan {
+	0% {
+		transform: translateY(0);
+		opacity: 0;
+	}
+	10% {
+		opacity: 1;
+	}
+	90% {
+		opacity: 1;
+	}
+	100% {
+		transform: translateY(100vh);
+		opacity: 0;
+	}
+}
+
+/* Data Point Pulse */
+.data-point {
+	position: relative;
+}
+
+.data-point::before {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 8px;
+	height: 8px;
+	background: var(--color-data-cyan);
+	border-radius: 50%;
+	box-shadow: 0 0 10px var(--color-data-cyan);
+	animation: pulse-data 2s ease-in-out infinite;
+}
+
+@keyframes pulse-data {
+	0%,
+	100% {
+		opacity: 1;
+		transform: translate(-50%, -50%) scale(1);
+	}
+	50% {
+		opacity: 0.3;
+		transform: translate(-50%, -50%) scale(1.5);
+	}
+}
+
+/* Holographic Effect */
+.holographic {
+	position: relative;
+	background: linear-gradient(
+		135deg,
+		rgba(0, 217, 255, 0.1) 0%,
+		rgba(0, 102, 255, 0.1) 50%,
+		rgba(0, 217, 255, 0.1) 100%
+	);
+	background-size: 200% 200%;
+	animation: hologram 3s ease-in-out infinite;
+}
+
+@keyframes hologram {
+	0%,
+	100% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+}
+
+/* Technical Border */
+.tech-border {
+	position: relative;
+	padding: 2px;
+	background: linear-gradient(135deg, var(--color-data-cyan), var(--color-data-blue));
+}
+
+.tech-border > * {
+	background: var(--color-infrastructure-900);
+}
+
+/* Data Stream Animation */
+.data-stream {
+	position: absolute;
+	width: 1px;
+	height: 100%;
+	background: linear-gradient(to bottom, transparent, var(--color-data-cyan), transparent);
+	animation: stream 2s linear infinite;
+	opacity: 0.3;
+}
+
+@keyframes stream {
+	0% {
+		transform: translateY(-100%);
+	}
+	100% {
+		transform: translateY(100%);
+	}
+}
+
+/* Focus Visible - Enterprise Style */
+:focus-visible {
+	outline: 2px solid var(--color-data-cyan);
+	outline-offset: 2px;
+	box-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+}
+
+/* Scrollbar - Industrial */
+::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--color-infrastructure-900);
+	border-left: 1px solid rgba(0, 217, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+	background: linear-gradient(180deg, var(--color-data-cyan), var(--color-data-blue));
+	box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--color-data-cyan);
+	box-shadow: 0 0 10px var(--color-data-cyan);
+}
+
+/* Screen Reader Only */
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border-width: 0;
+}
