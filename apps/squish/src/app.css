@@ -179,3 +179,83 @@ body.modal-open {
 	white-space: nowrap;
 	border-width: 0;
 }
+
+/* ============================================
+   Mobile Optimizations
+   ============================================ */
+
+/* Prevent iOS zoom on input focus */
+@media screen and (max-width: 768px) {
+	input[type='text'],
+	input[type='number'],
+	input[type='search'],
+	select,
+	textarea {
+		font-size: 16px !important;
+	}
+}
+
+/* Smooth momentum scrolling on iOS */
+.mobile-scroll {
+	-webkit-overflow-scrolling: touch;
+	overflow-y: auto;
+}
+
+/* Touch-friendly tap highlight */
+@media (hover: none) and (pointer: coarse) {
+	button,
+	a,
+	[role='button'],
+	[tabindex='0'] {
+		-webkit-tap-highlight-color: rgba(16, 185, 129, 0.1);
+	}
+
+	/* Disable pull-to-refresh on certain elements */
+	.no-pull-refresh {
+		overscroll-behavior: contain;
+	}
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: env(safe-area-inset-bottom)) {
+	.safe-area-bottom {
+		padding-bottom: env(safe-area-inset-bottom);
+	}
+
+	.safe-area-top {
+		padding-top: env(safe-area-inset-top);
+	}
+}
+
+/* Mobile-first sticky positioning */
+@media (max-width: 640px) {
+	.mobile-sticky {
+		position: sticky;
+		top: 0;
+		z-index: 40;
+	}
+}
+
+/* Bottom sheet animation */
+@keyframes slide-up {
+	from {
+		transform: translateY(100%);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+.mobile-modal {
+	animation: slide-up 0.3s ease-out;
+}
+
+/* Improved mobile card spacing */
+@media (max-width: 640px) {
+	.mobile-compact {
+		padding: 0.75rem !important;
+		gap: 0.5rem !important;
+	}
+}

@@ -7,6 +7,7 @@
 	import BatchSummary from '$lib/components/BatchSummary.svelte';
 	import LiveSavingsTicker from '$lib/components/LiveSavingsTicker.svelte';
 	import HeroSection from '$lib/components/HeroSection.svelte';
+	import MobileOptimizations from '$lib/components/MobileOptimizations.svelte';
 	import { ConfirmModal, AnimatedNumber, toast } from '@neutron/ui';
 	import { images, formatBytes } from '$lib';
 	import { processImages, cancelProcessing } from '$lib/utils/compress';
@@ -314,6 +315,7 @@
 </div>
 
 <div class="flex min-h-screen flex-col">
+	<MobileOptimizations />
 	<Header />
 
 	<!-- Background decoration -->

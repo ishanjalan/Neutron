@@ -11,7 +11,7 @@
 	} from 'lucide-svelte';
 </script>
 
-<footer class="mt-16 border-t border-white/5 bg-black/30 py-12">
+<footer class="safe-area-bottom mt-16 border-t border-white/5 bg-black/30 py-12">
 	<div class="mx-auto max-w-6xl px-4 sm:px-6">
 		<!-- Header -->
 		<div class="mb-8 text-center">
