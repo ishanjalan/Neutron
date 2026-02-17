@@ -6,6 +6,7 @@
 	import Settings from '$lib/components/Settings.svelte';
 	import BatchSummary from '$lib/components/BatchSummary.svelte';
 	import LiveSavingsTicker from '$lib/components/LiveSavingsTicker.svelte';
+	import HeroSection from '$lib/components/HeroSection.svelte';
 	import { ConfirmModal, AnimatedNumber, toast } from '@neutron/ui';
 	import { images, formatBytes } from '$lib';
 	import { processImages, cancelProcessing } from '$lib/utils/compress';
@@ -328,57 +329,7 @@
 	<main class="flex-1 px-4 pb-8 pt-24 sm:px-6 sm:pb-12 sm:pt-28 lg:px-8">
 		<div class="mx-auto max-w-7xl">
 			<!-- Hero Section -->
-			{#if !hasImages}
-				<div class="mb-8 text-center sm:mb-12" in:fade={{ duration: 300 }}>
-					<div
-						class="bg-accent-start/10 text-accent-start mb-4 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium"
-					>
-						<Sparkles class="h-4 w-4" />
-						Free & Open Source
-					</div>
-					<h1 class="mb-4 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-						<span class="gradient-text">Optimize</span> your images
-						<br class="hidden sm:block" />
-						<span class="text-surface-400">in seconds</span>
-					</h1>
-					<p class="text-surface-500 mx-auto max-w-2xl text-base leading-relaxed sm:text-lg">
-						Compress JPEG, PNG, WebP, AVIF, JPEG XL, and SVG with cutting-edge codecs.
-						<span class="text-surface-300 font-medium">100% private</span>
-						— everything runs in your browser.
-					</p>
-
-					<!-- Feature Cards -->
-					<div class="mx-auto mt-10 grid max-w-4xl gap-4 sm:mt-12 sm:grid-cols-3 sm:gap-6">
-						{#each features as feature, i}
-							<div
-								class="glass group flex items-center gap-4 rounded-2xl p-5 text-left transition-all hover:scale-[1.02] sm:p-6"
-								in:fly={{ y: 20, delay: 100 * i, duration: 300 }}
-							>
-								<div
-									class="from-accent-start/20 to-accent-end/20 text-accent-start flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br"
-								>
-									<feature.icon class="h-6 w-6" />
-								</div>
-								<div>
-									<h3 class="text-surface-100 text-base font-semibold">
-										{feature.title}
-									</h3>
-									<p class="text-surface-500 mt-0.5 text-sm">{feature.description}</p>
-								</div>
-							</div>
-						{/each}
-					</div>
-
-					<!-- Scroll hint -->
-					<div
-						class="text-surface-400 mt-10 flex items-center justify-center gap-2"
-						aria-hidden="true"
-					>
-						<span class="text-sm uppercase tracking-wider">Drop images below</span>
-						<ArrowDown class="h-4 w-4 animate-bounce" />
-					</div>
-				</div>
-			{/if}
+			<HeroSection {hasImages} />
 
 			<!-- Batch Summary (shown after all images complete) -->
 			{#if showBatchSummary}
