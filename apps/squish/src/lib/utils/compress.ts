@@ -338,10 +338,14 @@ async function compressToTargetSize(
 
 async function compressImage(item: ImageItem) {
 	try {
-		// Check if aborted before starting
 		if (abortController?.signal.aborted) {
 			return;
 		}
+
+		const compressionStart = performance.now();
+		console.log(
+			`[compress] ${item.name}: Starting (${item.format} → ${item.outputFormat}, ${(item.originalSize / 1024).toFixed(1)}KB)`
+		);
 
 		images.updateItem(item.id, { status: 'processing', progress: 5 });
 
@@ -383,30 +387,45 @@ async function compressImage(item: ImageItem) {
 			});
 		} else if (item.format === 'svg' && outputFormat === 'svg') {
 			// SVG → SVG: Optimize with SVGO
+			const svgoStart = performance.now();
+			console.log(
+				`[compress] ${item.name}: Starting SVGO optimization (${(item.originalSize / 1024).toFixed(1)}KB)`
+			);
 			compressedBlob = await optimizeSvg(item.file);
-			images.updateItem(item.id, { progress: 70 });
+			console.log(
+				`[compress] ${item.name}: SVGO done in ${((performance.now() - svgoStart) / 1000).toFixed(1)}s → ${(compressedBlob.size / 1024).toFixed(1)}KB`
+			);
+			images.updateItem(item.id, { progress: 80 });
 
-			// Compute WebP at 3× dimensions for complexity comparison
-			// If optimized SVG is larger than a 3× retina WebP, it's too complex
-			const webp3xSize = await computeWebp3xSize(item.file, quality);
-			if (webp3xSize > 0 && compressedBlob.size > webp3xSize) {
-				images.updateItem(item.id, { webpAlternativeSize: webp3xSize });
-			}
+			// Compute WebP at 3× dimensions for complexity comparison (non-blocking, with timeout)
+			computeWebp3xSize(item.file, quality)
+				.then((webp3xSize) => {
+					if (webp3xSize > 0 && compressedBlob && compressedBlob.size > webp3xSize) {
+						images.updateItem(item.id, { webpAlternativeSize: webp3xSize });
+					}
+				})
+				.catch(() => {
+					/* complexity check is optional */
+				});
 			images.updateItem(item.id, { progress: 90 });
 		} else if (item.format === 'svg' && outputFormat !== 'svg') {
 			// SVG → Raster: Render at 1x and compress
 			images.updateItem(item.id, { progress: 5 });
 
-			// Render SVG to raster at 1x scale
+			const rasterStart = performance.now();
+			console.log(`[compress] ${item.name}: Rasterizing SVG at 1× scale`);
 			const { blob: pngBlob, width, height } = await renderSvgToRaster(item.file);
+			console.log(
+				`[compress] ${item.name}: Rasterized in ${((performance.now() - rasterStart) / 1000).toFixed(1)}s (${width}×${height})`
+			);
 			images.updateItem(item.id, { progress: 30 });
 
-			// Update dimensions if we didn't have them
 			if (!item.width || !item.height) {
 				images.updateItem(item.id, { width, height });
 			}
 
-			// Process through worker
+			const workerStart = performance.now();
+			console.log(`[compress] ${item.name}: Sending to worker (${outputFormat}, q=${quality})`);
 			const imageBuffer = await pngBlob.arrayBuffer();
 			const {
 				result,
@@ -424,6 +443,9 @@ async function compressImage(item: ImageItem) {
 					const scaledProgress = 30 + progress * 0.6;
 					images.updateItem(item.id, { progress: scaledProgress });
 				}
+			);
+			console.log(
+				`[compress] ${item.name}: Worker done in ${((performance.now() - workerStart) / 1000).toFixed(1)}s`
 			);
 
 			compressedBlob = new Blob([result], { type: mimeType });
@@ -526,10 +548,13 @@ async function compressImage(item: ImageItem) {
 			finalHeight = outHeight;
 		}
 
-		// Create URL for preview
 		const compressedUrl = URL.createObjectURL(compressedBlob!);
+		const totalTime = ((performance.now() - compressionStart) / 1000).toFixed(1);
+		const ratio = ((1 - compressedBlob!.size / item.originalSize) * 100).toFixed(1);
+		console.log(
+			`[compress] ${item.name}: Done in ${totalTime}s (${(item.originalSize / 1024).toFixed(1)}KB → ${(compressedBlob!.size / 1024).toFixed(1)}KB, -${ratio}%)`
+		);
 
-		// Update item
 		const updates: Partial<ImageItem> = {
 			status: 'completed',
 			progress: 100,
@@ -560,9 +585,9 @@ async function compressImage(item: ImageItem) {
 			}
 		}
 	} catch (error) {
-		console.error('Compression error:', error);
+		const errorTime = ((performance.now() - compressionStart) / 1000).toFixed(1);
+		console.error(`[compress] ${item.name}: Failed after ${errorTime}s:`, error);
 
-		// Generate specific, actionable error messages
 		let message = 'Compression failed';
 
 		if (error instanceof Error) {
@@ -584,6 +609,8 @@ async function compressImage(item: ImageItem) {
 				message = 'Unsupported image format or encoding.';
 			} else if (errorMsg.includes('network') || errorMsg.includes('fetch')) {
 				message = 'Network error loading image. Check your connection.';
+			} else if (errorMsg.includes('timed out') || errorMsg.includes('timeout')) {
+				message = 'Processing timed out. The file may be too complex.';
 			} else if (errorMsg.includes('abort')) {
 				message = 'Processing was cancelled.';
 			} else if (errorMsg.includes('worker')) {
@@ -607,20 +634,40 @@ async function compressImage(item: ImageItem) {
 async function optimizeSvg(file: File): Promise<Blob> {
 	const text = await file.text();
 
-	const result = optimize(text, {
-		multipass: true,
-		plugins: [
-			'preset-default',
-			{
-				name: 'removeAttrs',
-				params: {
-					attrs: ['data-name'],
-				},
-			},
-		],
+	// SVGO is synchronous and can hang on complex SVGs.
+	// Run with a 30s timeout; fall back to unoptimized if it takes too long.
+	const svgoPromise = new Promise<string>((resolve) => {
+		try {
+			const result = optimize(text, {
+				multipass: true,
+				plugins: [
+					'preset-default',
+					{
+						name: 'removeAttrs',
+						params: {
+							attrs: ['data-name'],
+						},
+					},
+				],
+			});
+			resolve(result.data);
+		} catch (e) {
+			console.warn('[compress] SVGO optimization failed, using original:', e);
+			resolve(text);
+		}
 	});
 
-	return new Blob([result.data], { type: 'image/svg+xml' });
+	const timeoutPromise = new Promise<string>((resolve) => {
+		setTimeout(() => {
+			console.warn(
+				`[compress] SVGO timed out after 30s on ${file.name} (${(file.size / 1024).toFixed(1)}KB), using original`
+			);
+			resolve(text);
+		}, 30_000);
+	});
+
+	const optimized = await Promise.race([svgoPromise, timeoutPromise]);
+	return new Blob([optimized], { type: 'image/svg+xml' });
 }
 
 // Render SVG to canvas at 1× scale and return as PNG blob for worker processing
@@ -630,7 +677,6 @@ async function renderSvgToRaster(
 	return renderSvgAtScale(file, 1);
 }
 
-// Render SVG at a specific scale factor and return as PNG blob
 async function renderSvgAtScale(
 	file: File,
 	scale: number
@@ -639,46 +685,55 @@ async function renderSvgAtScale(
 	const svgBlob = new Blob([text], { type: 'image/svg+xml' });
 	const url = URL.createObjectURL(svgBlob);
 
-	return new Promise((resolve, reject) => {
-		const img = new Image();
-		img.onload = () => {
-			URL.revokeObjectURL(url);
+	const renderPromise = new Promise<{ blob: Blob; width: number; height: number }>(
+		(resolve, reject) => {
+			const img = new Image();
+			img.onload = () => {
+				URL.revokeObjectURL(url);
 
-			// Get natural dimensions and apply scale
-			const baseWidth = img.naturalWidth || 800;
-			const baseHeight = img.naturalHeight || 600;
-			let width = Math.round(baseWidth * scale);
-			let height = Math.round(baseHeight * scale);
+				const baseWidth = img.naturalWidth || 800;
+				const baseHeight = img.naturalHeight || 600;
+				let width = Math.round(baseWidth * scale);
+				let height = Math.round(baseHeight * scale);
 
-			// Cap at reasonable max to avoid memory issues
-			const maxDim = 8192;
-			if (width > maxDim || height > maxDim) {
-				const capScale = maxDim / Math.max(width, height);
-				width = Math.round(width * capScale);
-				height = Math.round(height * capScale);
-			}
-
-			// Render to canvas at scaled dimensions
-			const canvas = document.createElement('canvas');
-			canvas.width = width;
-			canvas.height = height;
-			const ctx = canvas.getContext('2d')!;
-			ctx.drawImage(img, 0, 0, width, height);
-
-			canvas.toBlob((blob) => {
-				if (blob) {
-					resolve({ blob, width, height });
-				} else {
-					reject(new Error('Failed to render SVG to canvas'));
+				const maxDim = 8192;
+				if (width > maxDim || height > maxDim) {
+					const capScale = maxDim / Math.max(width, height);
+					width = Math.round(width * capScale);
+					height = Math.round(height * capScale);
 				}
-			}, 'image/png');
-		};
-		img.onerror = () => {
+
+				const canvas = document.createElement('canvas');
+				canvas.width = width;
+				canvas.height = height;
+				const ctx = canvas.getContext('2d')!;
+				ctx.drawImage(img, 0, 0, width, height);
+
+				canvas.toBlob((blob) => {
+					if (blob) {
+						resolve({ blob, width, height });
+					} else {
+						reject(new Error('Failed to render SVG to canvas'));
+					}
+				}, 'image/png');
+			};
+			img.onerror = () => {
+				URL.revokeObjectURL(url);
+				reject(new Error('Failed to load SVG for rasterization'));
+			};
+			img.src = url;
+		}
+	);
+
+	// 30s timeout for rasterization
+	const timeoutPromise = new Promise<never>((_, reject) => {
+		setTimeout(() => {
 			URL.revokeObjectURL(url);
-			reject(new Error('Failed to load SVG for rasterization'));
-		};
-		img.src = url;
+			reject(new Error(`SVG rasterization timed out after 30s (${file.name}, scale=${scale}×)`));
+		}, 30_000);
 	});
+
+	return Promise.race([renderPromise, timeoutPromise]);
 }
 
 // Compute WebP size at 3× dimensions for SVG complexity comparison
