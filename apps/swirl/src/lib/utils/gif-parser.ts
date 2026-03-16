@@ -214,20 +214,6 @@ export function formatDuration(seconds: number): string {
 }
 
 /**
- * Format file size as human-readable string
- */
-export function formatFileSize(bytes: number): string {
-	if (bytes === 0) return '0 B';
-	const k = 1024;
-	const sizes = ['B', 'KB', 'MB', 'GB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-	return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-
-// Alias for backwards compatibility
-export const formatBytes = formatFileSize;
-
-/**
  * Get a summary string of GIF metadata
  */
 export function getMetadataSummary(metadata: GifMetadata): string {

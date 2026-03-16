@@ -44,10 +44,8 @@
 		"@neutron/ui": "workspace:*",
 		"@neutron/utils": "workspace:*",
 		"@sentry/sveltekit": "^10.43.0",
-		"comlink": "^4.4.2",
 		"heic2any": "^0.0.4",
 		"icodec": "^0.6.0",
-		"jszip": "^3.10.1",
 		"svgo": "^4.0.1"
 	}
 }

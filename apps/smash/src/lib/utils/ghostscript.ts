@@ -50,26 +50,51 @@ export interface GhostscriptClient {
 	terminate(): void;
 }
 
+const WORKER_CALL_TIMEOUT_MS = 120_000; // 2 minutes max for a single Ghostscript call
+
+/** Race a promise against a timeout, rejecting if the timeout fires first */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+	let timeoutId: ReturnType<typeof setTimeout>;
+	const timeout = new Promise<never>((_, reject) => {
+		timeoutId = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+	});
+	return Promise.race([promise, timeout]).finally(() => clearTimeout(timeoutId));
+}
+
 /**
  * Create a Ghostscript client that manages the worker lifecycle
  *
  * @param basePath - Base path for loading the WASM file (e.g., '/Smash')
+ * @param onError  - Called when the worker crashes unexpectedly
  */
-export function createGhostscriptClient(basePath: string): GhostscriptClient {
-	// Create the worker
+export function createGhostscriptClient(
+	basePath: string,
+	onError?: (error: Error) => void
+): GhostscriptClient {
 	const worker = new Worker(new URL('../workers/ghostscript.comlink.ts', import.meta.url), {
 		type: 'module',
 	});
 
-	// Wrap with Comlink
 	const api = wrap<GhostscriptWorkerAPI>(worker);
 
-	// Initialize the worker
 	let initPromise: Promise<boolean> | null = null;
+	let workerHealthy = true;
+	let workerError: Error | null = null;
+
+	worker.onerror = (event) => {
+		workerHealthy = false;
+		workerError = new Error(event.message ?? 'Ghostscript worker crashed');
+		// Reset init so future callers fail fast rather than hanging
+		initPromise = null;
+		onError?.(workerError);
+	};
 
 	async function ensureInitialized(): Promise<void> {
+		if (!workerHealthy) {
+			throw workerError ?? new Error('Ghostscript worker is not healthy');
+		}
 		if (!initPromise) {
-			initPromise = api.init(basePath);
+			initPromise = withTimeout(api.init(basePath), WORKER_CALL_TIMEOUT_MS, 'Ghostscript init');
 		}
 		const ready = await initPromise;
 		if (!ready) {
@@ -85,13 +110,17 @@ export function createGhostscriptClient(basePath: string): GhostscriptClient {
 		): Promise<CompressionResult> {
 			await ensureInitialized();
 
-			// Wrap the progress callback with Comlink's proxy
 			const progressProxy = onProgress ? proxy(onProgress) : undefined;
 
-			return api.compress(pdfData, preset, progressProxy);
+			return withTimeout(
+				api.compress(pdfData, preset, progressProxy),
+				WORKER_CALL_TIMEOUT_MS,
+				'Ghostscript compress'
+			);
 		},
 
 		async isReady(): Promise<boolean> {
+			if (!workerHealthy) return false;
 			try {
 				await ensureInitialized();
 				return api.isReady();
@@ -101,6 +130,7 @@ export function createGhostscriptClient(basePath: string): GhostscriptClient {
 		},
 
 		terminate(): void {
+			workerHealthy = false;
 			worker.terminate();
 		},
 	};
@@ -112,9 +142,18 @@ export function createGhostscriptClient(basePath: string): GhostscriptClient {
  */
 let defaultClient: GhostscriptClient | null = null;
 
+let defaultClientErrorHandler: ((error: Error) => void) | undefined;
+
+export function setGhostscriptErrorHandler(handler: (error: Error) => void): void {
+	defaultClientErrorHandler = handler;
+}
+
 export function getGhostscriptClient(basePath: string): GhostscriptClient {
 	if (!defaultClient) {
-		defaultClient = createGhostscriptClient(basePath);
+		defaultClient = createGhostscriptClient(basePath, (error) => {
+			defaultClient = null; // allow re-creation next time
+			defaultClientErrorHandler?.(error);
+		});
 	}
 	return defaultClient;
 }
@@ -155,7 +194,11 @@ export async function initGhostscript(basePath: string = ''): Promise<void> {
 	isInitializing = true;
 
 	try {
-		legacyClient = createGhostscriptClient(basePath || '/Smash');
+		legacyClient = createGhostscriptClient(basePath || '/Smash', (error) => {
+			legacyClient = null;
+			isInitialized = false;
+			defaultClientErrorHandler?.(error);
+		});
 		await legacyClient.isReady();
 		isInitialized = true;
 		initCallbacks.forEach((cb) => cb());

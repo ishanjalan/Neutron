@@ -1,6 +1,5 @@
-@import 'tailwindcss';
-
 /* Theme variables - shared across all Neutron apps */
+/* NOTE: apps must @import 'tailwindcss' BEFORE @import-ing this file */
 @theme {
 	--font-sans: 'Outfit', system-ui, sans-serif;
 	--font-mono: 'JetBrains Mono', monospace;

@@ -1,42 +1,18 @@
-import JSZip from 'jszip';
 import { getOutputFilename } from './compress';
 import type { VideoItem } from '$lib/stores/videos.svelte';
+import { downloadBlob, downloadAllAsZip as downloadAllAsZipGeneric } from '@neutron/utils';
 
 export function downloadVideo(item: VideoItem) {
 	if (!item.compressedBlob) return;
-
-	const filename = getOutputFilename(item.name, item.outputFormat);
-	const url = URL.createObjectURL(item.compressedBlob);
-
-	const a = document.createElement('a');
-	a.href = url;
-	a.download = filename;
-	document.body.appendChild(a);
-	a.click();
-	document.body.removeChild(a);
-
-	URL.revokeObjectURL(url);
+	downloadBlob(item.compressedBlob, getOutputFilename(item.name, item.outputFormat));
 }
 
 export async function downloadAllAsZip(items: VideoItem[]) {
-	const zip = new JSZip();
-
-	for (const item of items) {
-		if (item.compressedBlob) {
-			const filename = getOutputFilename(item.name, item.outputFormat);
-			zip.file(filename, item.compressedBlob);
-		}
-	}
-
-	const blob = await zip.generateAsync({ type: 'blob' });
-	const url = URL.createObjectURL(blob);
-
-	const a = document.createElement('a');
-	a.href = url;
-	a.download = `squash-videos-${Date.now()}.zip`;
-	document.body.appendChild(a);
-	a.click();
-	document.body.removeChild(a);
-
-	URL.revokeObjectURL(url);
+	const files = items
+		.filter((item) => item.compressedBlob)
+		.map((item) => ({
+			name: getOutputFilename(item.name, item.outputFormat),
+			blob: item.compressedBlob!,
+		}));
+	await downloadAllAsZipGeneric(files, `squash-videos-${Date.now()}.zip`);
 }

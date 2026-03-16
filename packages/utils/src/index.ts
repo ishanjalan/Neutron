@@ -1,10 +1,16 @@
 // Re-export all utilities
 export { formatBytes, formatPercent, formatDuration } from './format';
+export { getOutputFilename } from './filename';
 export {
 	downloadBlob,
+	downloadAllAsZip,
+	downloadMultipleFiles,
+	saveFilesToDirectory,
 	isFileSystemAccessSupported,
 	isClipboardWriteSupported,
 	copyBlobToClipboard,
+	type DownloadFile,
+	type ZipProgressCallback,
 } from './download';
 export { trapFocus, releaseFocus, focusTrap, createFocusTrap } from './focus-trap';
 export { createTrackedUrl, revokeTrackedUrl, revokeAll, getTrackedUrlCount } from './blob-url';

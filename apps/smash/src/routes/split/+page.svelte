@@ -3,6 +3,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import { Toast, toast } from '@neutron/ui';
+	import { downloadBlob, downloadAllAsZip } from '@neutron/utils';
 	import { splitPDF, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
 	import {
@@ -150,14 +151,7 @@
 		if (!blob || !pdfFile) return;
 
 		const filename = getOutputFilename(pdfFile.file.name, 'split', index);
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = filename;
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
+		downloadBlob(blob, filename);
 	}
 
 	async function downloadAll() {
@@ -168,24 +162,14 @@
 			return;
 		}
 
-		const { default: JSZip } = await import('jszip');
-		const zip = new JSZip();
-
-		for (let i = 0; i < resultBlobs.length; i++) {
-			const filename = getOutputFilename(pdfFile.file.name, 'split', i);
-			zip.file(filename, resultBlobs[i]);
-		}
-
-		const blob = await zip.generateAsync({ type: 'blob' });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = `split-${pdfFile.file.name.replace('.pdf', '')}-${Date.now()}.zip`;
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
-
+		const files = resultBlobs.map((blob, i) => ({
+			name: getOutputFilename(pdfFile!.file.name, 'split', i),
+			blob,
+		}));
+		await downloadAllAsZip(
+			files,
+			`split-${pdfFile.file.name.replace('.pdf', '')}-${Date.now()}.zip`
+		);
 		toast.success(`Downloaded ${resultBlobs.length} files as ZIP`);
 	}
 

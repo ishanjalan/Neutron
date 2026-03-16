@@ -9,7 +9,6 @@
  */
 
 import { PDFDocument, rgb, StandardFonts, degrees } from 'pdf-lib';
-import * as pdfjsLib from 'pdfjs-dist';
 import { compressPDF as compressWithGS, isGhostscriptReady } from './ghostscript';
 import { encryptPDF as encryptWithQpdf, decryptPDF as decryptWithQpdf, isQpdfReady } from './qpdf';
 import {
@@ -20,9 +19,20 @@ import {
 } from '$lib/stores/pdfs.svelte';
 import { base } from '$app/paths';
 
-// Configure PDF.js worker - use local bundled file with base path
-if (typeof window !== 'undefined') {
-	pdfjsLib.GlobalWorkerOptions.workerSrc = `${base}/pdf.worker.min.mjs`;
+let pdfjsLib: typeof import('pdfjs-dist') | null = null;
+
+/**
+ * Lazy-load pdfjs-dist singleton. Configures worker and returns the library.
+ * Use this instead of static import to avoid bundling ~500KB until needed.
+ */
+export async function getPdfjs(): Promise<typeof import('pdfjs-dist')> {
+	if (!pdfjsLib) {
+		pdfjsLib = await import('pdfjs-dist');
+		if (typeof window !== 'undefined') {
+			pdfjsLib.GlobalWorkerOptions.workerSrc = `${base}/pdf.worker.min.mjs`;
+		}
+	}
+	return pdfjsLib;
 }
 
 // ============================================
@@ -228,7 +238,8 @@ interface PDFToImagesOptions {
 
 export async function pdfToImages(file: File, options: PDFToImagesOptions): Promise<Blob[]> {
 	const arrayBuffer = await file.arrayBuffer();
-	const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+	const pdfjs = await getPdfjs();
+	const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
 	const scale = options.dpi / 72;
 	const images: Blob[] = [];
 
@@ -343,7 +354,8 @@ export async function getPageCount(file: File): Promise<number> {
 
 export async function generateThumbnail(file: File): Promise<string> {
 	const arrayBuffer = await file.arrayBuffer();
-	const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+	const pdfjs = await getPdfjs();
+	const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
 	const page = await pdf.getPage(1);
 
 	const scale = 0.5;

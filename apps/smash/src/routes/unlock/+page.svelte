@@ -2,6 +2,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import { Toast, toast } from '@neutron/ui';
+	import { downloadBlob } from '@neutron/utils';
 	import { unlockPDF, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
 	import {
@@ -104,14 +105,7 @@
 	function downloadResult() {
 		if (!resultBlob || !pdfFile) return;
 		const filename = getOutputFilename(pdfFile.file.name, 'unlock');
-		const url = URL.createObjectURL(resultBlob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = filename;
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
+		downloadBlob(resultBlob, filename);
 	}
 
 	function handleDragEnter(e: DragEvent) {

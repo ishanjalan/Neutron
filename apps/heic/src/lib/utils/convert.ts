@@ -1,6 +1,6 @@
 import { filesStore, type FileItem, type OutputFormat } from '$lib/stores/files.svelte';
 import { processImage as processImageInWorker, initPool } from './worker-pool';
-import heic2any from 'heic2any';
+import { downloadBlob, downloadAllAsZip } from '@neutron/utils';
 
 // Processing state
 let isProcessing = false;
@@ -38,6 +38,7 @@ export function isCurrentlyProcessing(): boolean {
 async function convertHeicToPng(
 	file: File
 ): Promise<{ blob: Blob; width: number; height: number }> {
+	const { default: heic2any } = await import('heic2any');
 	const result = await heic2any({
 		blob: file,
 		toType: 'image/png', // Lossless intermediate format
@@ -170,23 +171,18 @@ async function processQueue(): Promise<void> {
 
 // Download a single file
 export function downloadFile(item: FileItem): void {
-	if (!item.convertedUrl || !item.convertedBlob) {
+	if (!item.convertedBlob) {
 		console.error('No converted file to download');
 		return;
 	}
 
 	const extension = item.outputFormat === 'jpeg' ? 'jpg' : item.outputFormat;
 	const baseName = item.name.replace(/\.(heic|heif)$/i, '');
-	const fileName = `${baseName}.${extension}`;
-
-	const a = document.createElement('a');
-	a.href = item.convertedUrl;
-	a.download = fileName;
-	a.click();
+	downloadBlob(item.convertedBlob, `${baseName}.${extension}`);
 }
 
 // Download all completed files as ZIP
-export async function downloadAllAsZip(): Promise<void> {
+export async function downloadAllAsZipFiles(): Promise<void> {
 	const completedFiles = filesStore.getFilesByStatus('completed');
 
 	if (completedFiles.length === 0) {
@@ -194,28 +190,13 @@ export async function downloadAllAsZip(): Promise<void> {
 		return;
 	}
 
-	// Dynamically import JSZip
-	const JSZip = (await import('jszip')).default;
-	const zip = new JSZip();
+	const files = completedFiles
+		.filter((f) => f.convertedBlob)
+		.map((f) => {
+			const extension = f.outputFormat === 'jpeg' ? 'jpg' : f.outputFormat;
+			const baseName = f.name.replace(/\.(heic|heif)$/i, '');
+			return { name: `${baseName}.${extension}`, blob: f.convertedBlob! };
+		});
 
-	for (const file of completedFiles) {
-		if (!file.convertedBlob) continue;
-
-		const extension = file.outputFormat === 'jpeg' ? 'jpg' : file.outputFormat;
-		const baseName = file.name.replace(/\.(heic|heif)$/i, '');
-		const fileName = `${baseName}.${extension}`;
-
-		zip.file(fileName, file.convertedBlob);
-	}
-
-	// Generate ZIP
-	const zipBlob = await zip.generateAsync({ type: 'blob' });
-
-	// Download
-	const url = URL.createObjectURL(zipBlob);
-	const a = document.createElement('a');
-	a.href = url;
-	a.download = `heic-converted-${Date.now()}.zip`;
-	a.click();
-	URL.revokeObjectURL(url);
+	await downloadAllAsZip(files, `heic-converted-${Date.now()}.zip`);
 }

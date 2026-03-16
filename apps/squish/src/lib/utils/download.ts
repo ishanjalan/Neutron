@@ -1,6 +1,12 @@
-import JSZip from 'jszip';
 import type { ImageItem } from '$lib/stores/images.svelte';
 import { getOutputFilename } from './compress';
+import {
+	downloadBlob,
+	downloadAllAsZip as downloadAllAsZipGeneric,
+	saveFilesToDirectory,
+	isFileSystemAccessSupported,
+	type ZipProgressCallback,
+} from '@neutron/utils';
 
 // Re-export auto-save from .svelte.ts module where $state works
 export {
@@ -10,20 +16,11 @@ export {
 	autoSaveFile,
 } from './auto-save.svelte';
 
-// Thresholds for triggering File System Access API
+// Re-export shared helpers for convenience
+export { downloadBlob, isFileSystemAccessSupported } from '@neutron/utils';
+
 const LARGE_BATCH_COUNT = 20;
 const LARGE_BATCH_SIZE_MB = 50;
-
-export function downloadBlob(blob: Blob, filename: string) {
-	const url = URL.createObjectURL(blob);
-	const a = document.createElement('a');
-	a.href = url;
-	a.download = filename;
-	document.body.appendChild(a);
-	a.click();
-	document.body.removeChild(a);
-	URL.revokeObjectURL(url);
-}
 
 export function downloadImage(item: ImageItem, template?: string) {
 	if (!item.compressedBlob) return;
@@ -31,101 +28,38 @@ export function downloadImage(item: ImageItem, template?: string) {
 	downloadBlob(item.compressedBlob, filename);
 }
 
-export interface ZipProgressCallback {
-	(progress: number): void;
-}
-
 export async function downloadAllAsZip(
 	items: ImageItem[],
 	onProgress?: ZipProgressCallback,
 	template?: string
 ): Promise<void> {
-	const zip = new JSZip();
-
-	// Track filenames to avoid duplicates
-	const usedNames = new Map<string, number>();
-
-	for (const item of items) {
-		if (item.compressedBlob) {
-			let filename = getOutputFilename(item.name, item.outputFormat, template);
-
-			// Handle duplicate filenames
-			const count = usedNames.get(filename) || 0;
-			if (count > 0) {
-				const ext = filename.lastIndexOf('.');
-				filename = `${filename.slice(0, ext)}-${count}${filename.slice(ext)}`;
-			}
-			usedNames.set(filename, count + 1);
-
-			zip.file(filename, item.compressedBlob);
-		}
-	}
-
-	const content = await zip.generateAsync(
-		{ type: 'blob' },
-		onProgress
-			? (metadata) => {
-					onProgress(metadata.percent);
-				}
-			: undefined
-	);
-	downloadBlob(content, `optimized-images-${Date.now()}.zip`);
+	const files = items
+		.filter((item) => item.compressedBlob)
+		.map((item) => ({
+			name: getOutputFilename(item.name, item.outputFormat, template),
+			blob: item.compressedBlob!,
+		}));
+	await downloadAllAsZipGeneric(files, `optimized-images-${Date.now()}.zip`, onProgress);
 }
 
-// Check if File System Access API is supported
-export function isFileSystemAccessSupported(): boolean {
-	return typeof window !== 'undefined' && 'showDirectoryPicker' in window;
-}
-
-// Check if batch is considered "large"
 export function isLargeBatch(items: ImageItem[]): boolean {
 	const totalSize = items.reduce((acc, i) => acc + (i.compressedSize || 0), 0);
-	const totalSizeMB = totalSize / (1024 * 1024);
-
-	return items.length > LARGE_BATCH_COUNT || totalSizeMB > LARGE_BATCH_SIZE_MB;
+	return items.length > LARGE_BATCH_COUNT || totalSize / (1024 * 1024) > LARGE_BATCH_SIZE_MB;
 }
 
-// Download files directly to a folder using File System Access API
 export async function downloadWithFileSystemAPI(
 	items: ImageItem[],
 	template?: string
 ): Promise<void> {
-	if (!isFileSystemAccessSupported()) {
-		throw new Error('File System Access API not supported');
-	}
-
-	// Request directory access from user
-	// @ts-expect-error - File System Access API types may not be available
-	const dirHandle: FileSystemDirectoryHandle = await window.showDirectoryPicker({
-		mode: 'readwrite',
-		startIn: 'downloads',
-	});
-
-	// Track filenames to avoid duplicates
-	const usedNames = new Map<string, number>();
-
-	for (const item of items) {
-		if (item.compressedBlob) {
-			let filename = getOutputFilename(item.name, item.outputFormat, template);
-
-			// Handle duplicate filenames
-			const count = usedNames.get(filename) || 0;
-			if (count > 0) {
-				const ext = filename.lastIndexOf('.');
-				filename = `${filename.slice(0, ext)}-${count}${filename.slice(ext)}`;
-			}
-			usedNames.set(filename, count + 1);
-
-			// Create file and write content
-			const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
-			const writable = await fileHandle.createWritable();
-			await writable.write(item.compressedBlob);
-			await writable.close();
-		}
-	}
+	const files = items
+		.filter((item) => item.compressedBlob)
+		.map((item) => ({
+			name: getOutputFilename(item.name, item.outputFormat, template),
+			blob: item.compressedBlob!,
+		}));
+	await saveFilesToDirectory(files);
 }
 
-// Smart download that chooses the best method based on batch size
 export async function downloadAllSmart(
 	items: ImageItem[],
 	options?: {
@@ -137,10 +71,8 @@ export async function downloadAllSmart(
 	}
 ): Promise<void> {
 	const validItems = items.filter((i) => i.compressedBlob);
-
 	if (validItems.length === 0) return;
 
-	// If forcing a specific method
 	if (options?.forceZip) {
 		options.onMethodChosen?.('zip');
 		return downloadAllAsZip(validItems, options.onProgress, options.template);
@@ -151,10 +83,7 @@ export async function downloadAllSmart(
 		return downloadWithFileSystemAPI(validItems, options.template);
 	}
 
-	// Auto-select based on batch size and browser support
-	const shouldUseFSAPI = isLargeBatch(validItems) && isFileSystemAccessSupported();
-
-	if (shouldUseFSAPI) {
+	if (isLargeBatch(validItems) && isFileSystemAccessSupported()) {
 		options?.onMethodChosen?.('fsapi');
 		return downloadWithFileSystemAPI(validItems, options?.template);
 	}
@@ -163,7 +92,6 @@ export async function downloadAllSmart(
 	return downloadAllAsZip(validItems, options?.onProgress, options?.template);
 }
 
-// Get download info for UI display
 export function getDownloadInfo(items: ImageItem[]): {
 	count: number;
 	totalSize: number;

@@ -1,9 +1,17 @@
 <script lang="ts">
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
-	import { terminateGhostscript } from '$lib/utils/ghostscript';
+	import { terminateGhostscript, setGhostscriptErrorHandler } from '$lib/utils/ghostscript';
+	import { Toast, toast } from '@neutron/ui';
+	import { onMount } from 'svelte';
 
 	let { children } = $props();
+
+	onMount(() => {
+		setGhostscriptErrorHandler((error) => {
+			toast.error(`PDF processing engine crashed: ${error.message}. Please reload the page.`);
+		});
+	});
 
 	function handlePageHide() {
 		terminateGhostscript();
@@ -11,6 +19,7 @@
 </script>
 
 <svelte:window onpagehide={handlePageHide} />
+<Toast />
 
 <svelte:head>
 	<link rel="icon" href={favicon} />

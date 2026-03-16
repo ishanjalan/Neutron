@@ -2,6 +2,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import { Toast, toast } from '@neutron/ui';
+	import { downloadBlob } from '@neutron/utils';
 	import { mergePDFs, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
 	import {
@@ -144,14 +145,7 @@
 	function downloadMerged() {
 		if (!mergedBlob) return;
 		const filename = getOutputFilename('merged', 'merge');
-		const url = URL.createObjectURL(mergedBlob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = filename;
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
+		downloadBlob(mergedBlob, filename);
 	}
 
 	function handleDragEnter(e: DragEvent) {

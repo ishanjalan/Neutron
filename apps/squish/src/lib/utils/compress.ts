@@ -6,8 +6,8 @@ import {
 } from '$lib/stores/images.svelte';
 import { optimize } from 'svgo';
 import { processImage as processImageInWorker, initPool } from './worker-pool';
-import heic2any from 'heic2any';
 import { autoSaveFile, getAutoSaveState } from './download';
+import { getOutputFilename as getOutputFilenameShared } from '@neutron/utils';
 
 // Processing state
 let isProcessing = false;
@@ -99,6 +99,7 @@ async function processQueue() {
 async function convertHeicToPng(
 	file: File
 ): Promise<{ blob: Blob; width: number; height: number }> {
+	const { default: heic2any } = await import('heic2any');
 	const result = await heic2any({
 		blob: file,
 		toType: 'image/png', // Lossless intermediate format
@@ -778,12 +779,10 @@ export function getOutputFilename(
 	format: OutputFormat,
 	template?: string
 ): string {
-	const baseName = originalName.replace(/\.[^/.]+$/, '');
-	const ext = getOutputExtension(format).slice(1); // Remove leading dot
-
-	const finalTemplate = template || '{name}-optimized.{ext}';
-
-	return finalTemplate.replace('{name}', baseName).replace('{ext}', ext);
+	return getOutputFilenameShared(originalName, {
+		extension: getOutputExtension(format).slice(1),
+		template: template ?? '{name}-optimized.{ext}',
+	});
 }
 
 // Re-process a single image with a new output format

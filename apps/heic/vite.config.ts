@@ -1,30 +1,6 @@
-import { sveltekit } from '@sveltejs/kit/vite';
-import tailwindcss from '@tailwindcss/vite';
-import { defineConfig } from 'vite';
+import { createViteConfig } from '@neutron/config/vite.config';
 
-export default defineConfig({
-	plugins: [tailwindcss(), sveltekit()],
-	optimizeDeps: {
-		// Exclude WASM packages from pre-bundling (they need special handling)
-		exclude: ['icodec', 'heic2any'],
-	},
-	build: {
-		target: 'esnext',
-	},
-	worker: {
-		// Use ES modules for workers (required for dynamic imports in workers)
-		format: 'es',
-		plugins: () => [
-			// Apply same plugins to workers
-			tailwindcss(),
-		],
-		rollupOptions: {
-			output: {
-				// Ensure proper chunking for workers
-				format: 'es',
-				// Don't inline WASM modules
-				inlineDynamicImports: false,
-			},
-		},
-	},
+export default createViteConfig({
+	wasmWorkers: true,
+	optimizeDepsExclude: ['icodec', 'heic2any'],
 });

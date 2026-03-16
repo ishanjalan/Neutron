@@ -6,6 +6,7 @@ import {
 	estimateCompressionTime,
 	calculateBitrateForSize,
 } from '$lib/stores/videos.svelte';
+import { getOutputFilename as getOutputFilenameShared } from '@neutron/utils';
 import {
 	isWebCodecsSupported,
 	getWebCodecsCapabilities,
@@ -236,8 +237,10 @@ export function getOutputExtension(format: OutputFormat): string {
 }
 
 export function getOutputFilename(originalName: string, format: OutputFormat): string {
-	const baseName = originalName.replace(/\.[^/.]+$/, '');
-	return `${baseName}-compressed${getOutputExtension(format)}`;
+	return getOutputFilenameShared(originalName, {
+		suffix: 'compressed',
+		extension: getOutputExtension(format).replace(/^\./, ''),
+	});
 }
 
 // Re-process a single video with new settings

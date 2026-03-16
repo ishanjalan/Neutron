@@ -2,6 +2,7 @@
 	import { videos } from '$lib/stores/videos.svelte';
 	import { getCapabilities } from '$lib/utils/compress';
 	import { onMount } from 'svelte';
+	import { formatBytes } from '@neutron/utils';
 	import { Activity, Cpu, HardDrive, Zap, Check, X as XIcon, Gpu, Server } from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 
@@ -67,14 +68,6 @@
 			ffmpegCount,
 		};
 	});
-
-	function formatBytes(bytes: number): string {
-		if (bytes === 0) return '0 B';
-		const k = 1024;
-		const sizes = ['B', 'KB', 'MB', 'GB'];
-		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-	}
 
 	function formatDuration(ms: number): string {
 		if (ms < 1000) return `${Math.round(ms)}ms`;

@@ -16,6 +16,10 @@
 			"types": "./src/format.ts",
 			"default": "./src/format.ts"
 		},
+		"./filename": {
+			"types": "./src/filename.ts",
+			"default": "./src/filename.ts"
+		},
 		"./download": {
 			"types": "./src/download.ts",
 			"default": "./src/download.ts"
@@ -39,6 +43,10 @@
 		"./worker-pool": {
 			"types": "./src/worker-pool.ts",
 			"default": "./src/worker-pool.ts"
+		},
+		"./service-worker": {
+			"types": "./src/service-worker.ts",
+			"default": "./src/service-worker.ts"
 		}
 	},
 	"devDependencies": {
@@ -46,6 +54,7 @@
 	},
 	"dependencies": {
 		"comlink": "^4.4.2",
+		"jszip": "^3.10.1",
 		"valibot": "^1.2.0"
 	}
 }

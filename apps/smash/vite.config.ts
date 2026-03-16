@@ -1,25 +1,3 @@
-import { sveltekit } from '@sveltejs/kit/vite';
-import tailwindcss from '@tailwindcss/vite';
-import { defineConfig } from 'vite';
+import { createViteConfig } from '@neutron/config/vite.config';
 
-export default defineConfig({
-	plugins: [tailwindcss(), sveltekit()],
-	server: {
-		headers: {
-			'Cross-Origin-Opener-Policy': 'same-origin',
-			'Cross-Origin-Embedder-Policy': 'require-corp',
-		},
-	},
-	preview: {
-		headers: {
-			'Cross-Origin-Opener-Policy': 'same-origin',
-			'Cross-Origin-Embedder-Policy': 'require-corp',
-		},
-	},
-	worker: {
-		format: 'es',
-	},
-	build: {
-		target: 'esnext',
-	},
-});
+export default createViteConfig({ crossOriginIsolation: true });

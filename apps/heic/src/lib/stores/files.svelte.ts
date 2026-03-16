@@ -1,3 +1,5 @@
+import { createFileStore } from '@neutron/ui';
+
 export type OutputFormat = 'jpeg' | 'png' | 'webp' | 'avif';
 export type FileStatus = 'pending' | 'processing' | 'completed' | 'error';
 
@@ -29,205 +31,152 @@ export interface BatchStats {
 	totalFiles: number;
 }
 
-const SETTINGS_KEY = 'heic-converter-settings';
+const base = createFileStore<FileItem, ConversionSettings>({
+	settingsKey: 'heic-converter-settings',
+	defaultSettings: { outputFormat: 'jpeg', quality: 90 },
+	urlFields: ['originalUrl', 'convertedUrl'],
+	idPrefix: 'file_',
+});
 
-function loadSettings(): ConversionSettings {
-	if (typeof localStorage === 'undefined') {
-		return getDefaultSettings();
-	}
-	try {
-		const saved = localStorage.getItem(SETTINGS_KEY);
-		if (saved) {
-			return { ...getDefaultSettings(), ...JSON.parse(saved) };
+let batchStats = $state<BatchStats>({ startTime: null, endTime: null, totalFiles: 0 });
+
+export const filesStore = {
+	get items() {
+		return base.items;
+	},
+	get settings() {
+		return base.settings;
+	},
+	get batchStats() {
+		return batchStats;
+	},
+
+	// Computed properties
+	get totalFiles() {
+		return base.items.length;
+	},
+	get completedFiles() {
+		return base.items.filter((item) => item.status === 'completed').length;
+	},
+	get processingFiles() {
+		return base.items.filter((item) => item.status === 'processing').length;
+	},
+	get errorFiles() {
+		return base.items.filter((item) => item.status === 'error').length;
+	},
+	get totalOriginalSize() {
+		return base.items.reduce((sum, item) => sum + item.originalSize, 0);
+	},
+	get totalConvertedSize() {
+		return base.items.reduce((sum, item) => sum + (item.convertedSize || 0), 0);
+	},
+	get averageProgress() {
+		if (base.items.length === 0) return 0;
+		return base.items.reduce((sum, item) => sum + item.progress, 0) / base.items.length;
+	},
+	get allCompleted() {
+		return base.items.length > 0 && base.items.every((item) => item.status === 'completed');
+	},
+	get hasErrors() {
+		return base.items.some((item) => item.status === 'error');
+	},
+
+	startBatch(count: number) {
+		batchStats = { startTime: Date.now(), endTime: null, totalFiles: count };
+	},
+
+	endBatch() {
+		batchStats = { ...batchStats, endTime: Date.now() };
+	},
+
+	resetBatchStats() {
+		batchStats = { startTime: null, endTime: null, totalFiles: 0 };
+	},
+
+	async addFiles(files: FileList | File[]) {
+		const validTypes = ['image/heic', 'image/heif'];
+		const newItems: FileItem[] = [];
+		const settings = base._getSettings();
+
+		for (const file of files) {
+			if (!validTypes.includes(file.type)) {
+				console.warn(`Skipping non-HEIC file: ${file.name} (${file.type})`);
+				continue;
+			}
+
+			const id = base._generateId();
+			const originalUrl = URL.createObjectURL(file);
+
+			newItems.push({
+				id,
+				file,
+				name: file.name,
+				originalSize: file.size,
+				originalUrl,
+				outputFormat: settings.outputFormat,
+				status: 'pending',
+				progress: 0,
+			});
 		}
-	} catch (e) {
-		console.warn('Failed to load settings from localStorage:', e);
-	}
-	return getDefaultSettings();
-}
 
-function saveSettings(settings: ConversionSettings) {
-	if (typeof localStorage === 'undefined') return;
-	try {
-		localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-	} catch (e) {
-		console.warn('Failed to save settings to localStorage:', e);
-	}
-}
+		base._setItems([...base._getItems(), ...newItems]);
+		return newItems.map((item) => item.id);
+	},
 
-function getDefaultSettings(): ConversionSettings {
-	return {
-		outputFormat: 'jpeg', // Most common use case: HEIC → JPEG
-		quality: 90, // High quality for photos
-	};
-}
+	removeFile(id: string) {
+		base.removeItem(id);
+	},
 
-function createFilesStore() {
-	let items = $state<FileItem[]>([]);
-	let settings = $state<ConversionSettings>(loadSettings());
-	let batchStats = $state<BatchStats>({ startTime: null, endTime: null, totalFiles: 0 });
+	clearAll() {
+		base.clearAll();
+		this.resetBatchStats();
+	},
 
-	function generateId(): string {
-		return `file_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-	}
+	updateFile(id: string, updates: Partial<FileItem>) {
+		base.updateItem(id, updates);
+	},
 
-	return {
-		get items() {
-			return items;
-		},
-		get settings() {
-			return settings;
-		},
-		get batchStats() {
-			return batchStats;
-		},
+	setFileProgress(id: string, progress: number) {
+		base.updateItem(id, { progress });
+	},
 
-		// Computed properties
-		get totalFiles() {
-			return items.length;
-		},
-		get completedFiles() {
-			return items.filter((item) => item.status === 'completed').length;
-		},
-		get processingFiles() {
-			return items.filter((item) => item.status === 'processing').length;
-		},
-		get errorFiles() {
-			return items.filter((item) => item.status === 'error').length;
-		},
-		get totalOriginalSize() {
-			return items.reduce((sum, item) => sum + item.originalSize, 0);
-		},
-		get totalConvertedSize() {
-			return items.reduce((sum, item) => sum + (item.convertedSize || 0), 0);
-		},
-		get averageProgress() {
-			if (items.length === 0) return 0;
-			return items.reduce((sum, item) => sum + item.progress, 0) / items.length;
-		},
-		get allCompleted() {
-			return items.length > 0 && items.every((item) => item.status === 'completed');
-		},
-		get hasErrors() {
-			return items.some((item) => item.status === 'error');
-		},
+	setFileStatus(id: string, status: FileStatus, error?: string) {
+		base.updateItem(id, { status, error });
+	},
 
-		startBatch(count: number) {
-			batchStats = { startTime: Date.now(), endTime: null, totalFiles: count };
-		},
+	setFileConverted(id: string, blob: Blob, width?: number, height?: number) {
+		const url = URL.createObjectURL(blob);
+		base.updateItem(id, {
+			convertedBlob: blob,
+			convertedUrl: url,
+			convertedSize: blob.size,
+			status: 'completed',
+			progress: 100,
+			width,
+			height,
+		});
+	},
 
-		endBatch() {
-			batchStats = { ...batchStats, endTime: Date.now() };
-		},
+	updateSettings(newSettings: Partial<ConversionSettings>) {
+		base.updateSettings(newSettings);
 
-		resetBatchStats() {
-			batchStats = { startTime: null, endTime: null, totalFiles: 0 };
-		},
-
-		async addFiles(files: FileList | File[]) {
-			const validTypes = ['image/heic', 'image/heif'];
-			const newItems: FileItem[] = [];
-
-			for (const file of files) {
-				// Only accept HEIC/HEIF files
-				if (!validTypes.includes(file.type)) {
-					console.warn(`Skipping non-HEIC file: ${file.name} (${file.type})`);
-					continue;
-				}
-
-				const id = generateId();
-				const originalUrl = URL.createObjectURL(file);
-
-				newItems.push({
-					id,
-					file,
-					name: file.name,
-					originalSize: file.size,
-					originalUrl,
-					outputFormat: settings.outputFormat,
-					status: 'pending',
-					progress: 0,
-				});
-			}
-
-			items = [...items, ...newItems];
-			return newItems.map((item) => item.id);
-		},
-
-		removeFile(id: string) {
-			const item = items.find((i) => i.id === id);
-			if (item) {
-				// Revoke object URLs to prevent memory leaks
-				URL.revokeObjectURL(item.originalUrl);
-				if (item.convertedUrl) {
-					URL.revokeObjectURL(item.convertedUrl);
-				}
-			}
-			items = items.filter((i) => i.id !== id);
-		},
-
-		clearAll() {
-			// Revoke all object URLs
-			items.forEach((item) => {
-				URL.revokeObjectURL(item.originalUrl);
-				if (item.convertedUrl) {
-					URL.revokeObjectURL(item.convertedUrl);
-				}
-			});
-			items = [];
-			this.resetBatchStats();
-		},
-
-		updateFile(id: string, updates: Partial<FileItem>) {
-			const index = items.findIndex((i) => i.id === id);
-			if (index !== -1) {
-				items[index] = { ...items[index], ...updates };
-			}
-		},
-
-		setFileProgress(id: string, progress: number) {
-			this.updateFile(id, { progress });
-		},
-
-		setFileStatus(id: string, status: FileStatus, error?: string) {
-			this.updateFile(id, { status, error });
-		},
-
-		setFileConverted(id: string, blob: Blob, width?: number, height?: number) {
-			const url = URL.createObjectURL(blob);
-			this.updateFile(id, {
-				convertedBlob: blob,
-				convertedUrl: url,
-				convertedSize: blob.size,
-				status: 'completed',
-				progress: 100,
-				width,
-				height,
-			});
-		},
-
-		updateSettings(newSettings: Partial<ConversionSettings>) {
-			settings = { ...settings, ...newSettings };
-			saveSettings(settings);
-
-			// Update output format for all pending files
-			items = items.map((item) => {
+		// Update output format for all pending files
+		const items = base._getItems();
+		base._setItems(
+			items.map((item) => {
 				if (item.status === 'pending' && newSettings.outputFormat) {
 					return { ...item, outputFormat: newSettings.outputFormat };
 				}
 				return item;
-			});
-		},
+			})
+		);
+	},
 
-		getFile(id: string): FileItem | undefined {
-			return items.find((item) => item.id === id);
-		},
+	getFile(id: string): FileItem | undefined {
+		return base.getItemById(id);
+	},
 
-		// Get files by status
-		getFilesByStatus(status: FileStatus): FileItem[] {
-			return items.filter((item) => item.status === status);
-		},
-	};
-}
-
-export const filesStore = createFilesStore();
+	getFilesByStatus(status: FileStatus): FileItem[] {
+		return base.items.filter((item) => item.status === status);
+	},
+};

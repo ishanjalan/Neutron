@@ -4,11 +4,10 @@
 	import DropZone from '$lib/components/DropZone.svelte';
 	import DraggableVideoList from '$lib/components/DraggableVideoList.svelte';
 	import AdvancedSettings from '$lib/components/AdvancedSettings.svelte';
-	import ConfirmModal from '$lib/components/ConfirmModal.svelte';
 	import KeyboardShortcuts from '$lib/components/KeyboardShortcuts.svelte';
 	import PerformanceMonitor from '$lib/components/PerformanceMonitor.svelte';
 	import OnboardingModal from '$lib/components/OnboardingModal.svelte';
-	import { Toast, toast } from '@neutron/ui';
+	import { Toast, toast, ConfirmModal } from '@neutron/ui';
 	import { videos, QUALITY_PRESETS } from '$lib/stores/videos.svelte';
 	import {
 		Download,
@@ -300,7 +299,7 @@
 
 					<!-- Drop Zone - Primary action above the fold -->
 					<div class="mx-auto mb-10 max-w-3xl">
-						<DropZone />
+						<DropZone onfiles={(files) => videos.addFiles(files)} />
 					</div>
 
 					<!-- Clipboard hint -->
@@ -445,7 +444,7 @@
 
 			<!-- Drop Zone (only shown when videos exist, as it's in hero otherwise) -->
 			{#if hasVideos}
-				<DropZone />
+				<DropZone compact onfiles={(files) => videos.addFiles(files)} />
 			{/if}
 
 			<!-- Video List -->

@@ -1,3 +1,5 @@
+import { createFileStore } from '@neutron/ui';
+
 // GIF State Management Store
 // Manages GIF files and processing state across the application
 
@@ -55,21 +57,17 @@ const defaultSettings: GifSettings = {
 	boomerang: false,
 };
 
-// Create reactive state
-let items = $state<GifItem[]>([]);
-let settings = $state<GifSettings>({ ...defaultSettings });
+const base = createFileStore<GifItem, GifSettings>({
+	defaultSettings: { ...defaultSettings },
+	urlFields: ['originalUrl', 'compressedUrl'],
+	idPrefix: 'gif-',
+});
 
-// Generate unique ID
-function generateId(): string {
-	return `gif-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-}
-
-// Add GIF files
 function addFiles(files: File[]): string[] {
 	const ids: string[] = [];
 
 	for (const file of files) {
-		const id = generateId();
+		const id = base._generateId();
 		const url = URL.createObjectURL(file);
 
 		const item: GifItem = {
@@ -82,67 +80,25 @@ function addFiles(files: File[]): string[] {
 			progress: 0,
 		};
 
-		items = [...items, item];
+		base._setItems([...base._getItems(), item]);
 		ids.push(id);
 	}
 
 	return ids;
 }
 
-// Get item by ID
-function getItemById(id: string): GifItem | undefined {
-	return items.find((item) => item.id === id);
-}
-
-// Update item
-function updateItem(id: string, updates: Partial<GifItem>) {
-	items = items.map((item) => (item.id === id ? { ...item, ...updates } : item));
-}
-
-// Remove item
-function removeItem(id: string) {
-	const item = items.find((i) => i.id === id);
-	if (item) {
-		URL.revokeObjectURL(item.originalUrl);
-		if (item.compressedUrl) {
-			URL.revokeObjectURL(item.compressedUrl);
-		}
-	}
-	items = items.filter((item) => item.id !== id);
-}
-
-// Clear all items
-function clearAll() {
-	items.forEach((item) => {
-		URL.revokeObjectURL(item.originalUrl);
-		if (item.compressedUrl) {
-			URL.revokeObjectURL(item.compressedUrl);
-		}
-	});
-	items = [];
-}
-
-// Reset settings to defaults
 function resetSettings() {
-	settings = { ...defaultSettings };
+	base._setSettings({ ...defaultSettings });
 }
 
-// Update settings
-function updateSettings(updates: Partial<GifSettings>) {
-	settings = { ...settings, ...updates };
-}
-
-// Get pending items
 function getPendingItems(): GifItem[] {
-	return items.filter((item) => item.status === 'pending');
+	return base.items.filter((item) => item.status === 'pending');
 }
 
-// Get completed items
 function getCompletedItems(): GifItem[] {
-	return items.filter((item) => item.status === 'completed');
+	return base.items.filter((item) => item.status === 'completed');
 }
 
-// Calculate total savings
 function getTotalSavings(): { original: number; compressed: number; percentage: number } {
 	const completed = getCompletedItems();
 	const original = completed.reduce((sum, item) => sum + item.originalSize, 0);
@@ -152,22 +108,21 @@ function getTotalSavings(): { original: number; compressed: number; percentage: 
 	return { original, compressed, percentage };
 }
 
-// Export the store
 export const gifs = {
 	get items() {
-		return items;
+		return base.items;
 	},
 	get settings() {
-		return settings;
+		return base.settings;
 	},
 
 	addFiles,
-	getItemById,
-	updateItem,
-	removeItem,
-	clearAll,
+	getItemById: base.getItemById.bind(base),
+	updateItem: base.updateItem.bind(base),
+	removeItem: base.removeItem.bind(base),
+	clearAll: base.clearAll.bind(base),
 	resetSettings,
-	updateSettings,
+	updateSettings: base.updateSettings.bind(base),
 	getPendingItems,
 	getCompletedItems,
 	getTotalSavings,

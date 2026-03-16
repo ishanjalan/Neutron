@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { X, ChevronLeft, ChevronRight } from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
-	import { createFocusTrap } from '@neutron/utils';
+	import { createFocusTrap, formatBytes } from '@neutron/utils';
 
 	interface Props {
 		originalUrl: string;
@@ -27,14 +27,6 @@
 	});
 
 	const savings = $derived(Math.round((1 - compressedSize / originalSize) * 100));
-
-	function formatBytes(bytes: number): string {
-		if (bytes === 0) return '0 B';
-		const k = 1024;
-		const sizes = ['B', 'KB', 'MB', 'GB'];
-		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-	}
 
 	function handleMouseDown(e: MouseEvent) {
 		isDragging = true;

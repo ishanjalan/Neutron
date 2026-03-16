@@ -4,7 +4,7 @@ export {
 	processFiles,
 	cancelProcessing,
 	downloadFile,
-	downloadAllAsZip,
+	downloadAllAsZipFiles as downloadAllAsZip,
 	isCurrentlyProcessing,
 } from './utils/convert';
 export { terminatePool } from './utils/worker-pool';

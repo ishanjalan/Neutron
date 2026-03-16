@@ -2,6 +2,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import { Toast, toast } from '@neutron/ui';
+	import { downloadBlob, downloadAllAsZip } from '@neutron/utils';
 	import { pdfToImages, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
 	import {
@@ -112,33 +113,16 @@
 		if (!blob || !pdfFile) return;
 		const baseName = getOutputFilename(pdfFile.file.name, 'pdf-to-images', index);
 		const filename = `${baseName}.${imageFormat}`;
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = filename;
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
+		downloadBlob(blob, filename);
 	}
 
 	async function downloadAll() {
 		if (resultBlobs.length === 0 || !pdfFile) return;
-		const { default: JSZip } = await import('jszip');
-		const zip = new JSZip();
-		for (let i = 0; i < resultBlobs.length; i++) {
-			const baseName = getOutputFilename(pdfFile.file.name, 'pdf-to-images', i);
-			zip.file(`${baseName}.${imageFormat}`, resultBlobs[i]);
-		}
-		const blob = await zip.generateAsync({ type: 'blob' });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = `${pdfFile.file.name.replace('.pdf', '')}-images.zip`;
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
+		const files = resultBlobs.map((blob, i) => {
+			const baseName = getOutputFilename(pdfFile!.file.name, 'pdf-to-images', i);
+			return { name: `${baseName}.${imageFormat}`, blob };
+		});
+		await downloadAllAsZip(files, `${pdfFile.file.name.replace('.pdf', '')}-images.zip`);
 		toast.success(`Downloaded ${resultBlobs.length} images as ZIP`);
 	}
 

@@ -32,6 +32,9 @@ pnpm-debug.log*
 # Cache
 .cache/
 
+# Bundle analysis
+stats.html
+
 # Test coverage & results
 coverage/
 test-results/

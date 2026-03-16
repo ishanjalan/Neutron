@@ -2,6 +2,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import { Toast, toast } from '@neutron/ui';
+	import { downloadBlob } from '@neutron/utils';
 	import {
 		performOCR,
 		LANGUAGE_OPTIONS,
@@ -165,27 +166,16 @@
 
 	function downloadSearchablePdf(pdfFile: PDFFile) {
 		if (!pdfFile.ocrResult?.searchablePdf) return;
-		const url = URL.createObjectURL(pdfFile.ocrResult.searchablePdf);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = pdfFile.file.name.replace('.pdf', '-searchable.pdf');
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
+		downloadBlob(
+			pdfFile.ocrResult.searchablePdf,
+			pdfFile.file.name.replace('.pdf', '-searchable.pdf')
+		);
 	}
 
 	function downloadText(pdfFile: PDFFile) {
 		if (!pdfFile.ocrResult?.text) return;
 		const blob = new Blob([pdfFile.ocrResult.text], { type: 'text/plain' });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = pdfFile.file.name.replace('.pdf', '-text.txt');
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
+		downloadBlob(blob, pdfFile.file.name.replace('.pdf', '-text.txt'));
 	}
 
 	function handleDragOver(e: DragEvent) {

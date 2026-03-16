@@ -9,9 +9,13 @@ export {
 	type ToastOptions,
 } from './components/Toast.svelte';
 export { default as ConfirmModal } from './components/ConfirmModal.svelte';
+export { default as Tooltip } from './components/Tooltip.svelte';
+export { default as DropZone, type FormatBadge } from './components/DropZone.svelte';
+export { default as ErrorPage } from './components/ErrorPage.svelte';
 export { default as AnimatedNumber } from './components/AnimatedNumber.svelte';
 export { default as CompareSlider } from './components/CompareSlider.svelte';
 export { default as Footer } from './components/Footer.svelte';
+export { default as AppHeader } from './components/Header.svelte';
 
 // Motion animation utilities
 export {
@@ -44,3 +48,9 @@ export {
 	stagger,
 	spring,
 } from './utils/motion';
+
+export {
+	createFileStore,
+	type BaseFileItem,
+	type FileStoreOptions,
+} from './utils/store-factory.svelte';

@@ -1,4 +1,6 @@
 /* eslint-disable */
+export { formatBytes } from '@neutron/utils';
+
 export type PDFStatus = 'pending' | 'processing' | 'completed' | 'error';
 export type PDFTool =
 	| 'compress'
@@ -442,15 +444,6 @@ function createPDFStore() {
 }
 
 export const pdfs = createPDFStore();
-
-// Utility: Format bytes
-export function formatBytes(bytes: number): string {
-	if (bytes === 0) return '0 B';
-	const k = 1024;
-	const sizes = ['B', 'KB', 'MB', 'GB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-	return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
 
 // Utility: Parse page range string (e.g., "1-5, 8, 10-12")
 export function parsePageRange(rangeStr: string, maxPages: number): number[] {

@@ -5,6 +5,18 @@
 	"type": "module",
 	"exports": {
 		"./tailwind/base.css": "./tailwind/base.css",
-		"./typescript/base.json": "./typescript/base.json"
+		"./typescript/base.json": "./typescript/base.json",
+		"./svelte.config.js": "./svelte.config.js",
+		"./vite.config": {
+			"types": "./vite.config.ts",
+			"default": "./vite.config.ts"
+		}
+	},
+	"devDependencies": {
+		"@sveltejs/kit": "^2.55.0",
+		"@sveltejs/vite-plugin-svelte": "^7.0.0",
+		"@tailwindcss/vite": "^4.2.1",
+		"rollup-plugin-visualizer": "^7.0.1",
+		"vite": "^8.0.0"
 	}
 }

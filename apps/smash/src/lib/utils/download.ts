@@ -1,25 +1,18 @@
-import JSZip from 'jszip';
 import type { PDFItem } from '$lib/stores/pdfs.svelte';
 import { getOutputFilename } from './pdf';
+import {
+	downloadBlob,
+	downloadAllAsZip as downloadAllAsZipGeneric,
+	downloadMultipleFiles as downloadMultipleFilesGeneric,
+} from '@neutron/utils';
 
 export function downloadPDF(item: PDFItem) {
 	if (!item.processedBlob) return;
-
-	const filename = getOutputFilename(item.name, 'compress');
-	const url = URL.createObjectURL(item.processedBlob);
-
-	const a = document.createElement('a');
-	a.href = url;
-	a.download = filename;
-	document.body.appendChild(a);
-	a.click();
-	document.body.removeChild(a);
-
-	URL.revokeObjectURL(url);
+	downloadBlob(item.processedBlob, getOutputFilename(item.name, 'compress'));
 }
 
 /**
- * Download all completed items - single file direct download, multiple files as ZIP
+ * Download all completed items -- single file direct download, multiple files as ZIP
  */
 export async function downloadAll(items: PDFItem[], tool: string) {
 	const completedItems = items.filter(
@@ -28,19 +21,10 @@ export async function downloadAll(items: PDFItem[], tool: string) {
 
 	if (completedItems.length === 0) return;
 
-	// Single item - direct download
 	if (completedItems.length === 1) {
 		const item = completedItems[0];
 		if (item.processedBlob) {
-			const filename = getOutputFilename(item.name, tool);
-			const url = URL.createObjectURL(item.processedBlob);
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = filename;
-			document.body.appendChild(a);
-			a.click();
-			document.body.removeChild(a);
-			URL.revokeObjectURL(url);
+			downloadBlob(item.processedBlob, getOutputFilename(item.name, tool));
 		} else if (item.processedBlobs) {
 			await downloadMultipleFiles(
 				item.processedBlobs,
@@ -51,69 +35,30 @@ export async function downloadAll(items: PDFItem[], tool: string) {
 		return;
 	}
 
-	// Multiple items - download as ZIP
 	await downloadAllAsZip(completedItems, tool);
 }
 
 export async function downloadAllAsZip(items: PDFItem[], tool: string) {
-	const zip = new JSZip();
+	const files: { name: string; blob: Blob }[] = [];
 
 	for (const item of items) {
 		if (item.processedBlob) {
-			const filename = getOutputFilename(item.name, tool);
-			zip.file(filename, item.processedBlob);
+			files.push({ name: getOutputFilename(item.name, tool), blob: item.processedBlob });
 		}
-
-		// Handle multiple outputs (split, pdf-to-images)
 		if (item.processedBlobs) {
 			const extension = tool === 'pdf-to-images' ? '.png' : '.pdf';
 			for (let i = 0; i < item.processedBlobs.length; i++) {
-				const filename = getOutputFilename(item.name, tool, i) + extension;
-				zip.file(filename, item.processedBlobs[i]);
+				files.push({
+					name: getOutputFilename(item.name, tool, i) + extension,
+					blob: item.processedBlobs[i],
+				});
 			}
 		}
 	}
 
-	const blob = await zip.generateAsync({ type: 'blob' });
-	const url = URL.createObjectURL(blob);
-
-	const a = document.createElement('a');
-	a.href = url;
-	a.download = `smash-${tool}-${Date.now()}.zip`;
-	document.body.appendChild(a);
-	a.click();
-	document.body.removeChild(a);
-
-	URL.revokeObjectURL(url);
+	await downloadAllAsZipGeneric(files, `smash-${tool}-${Date.now()}.zip`);
 }
 
 export async function downloadMultipleFiles(blobs: Blob[], baseName: string, extension: string) {
-	if (blobs.length === 1) {
-		// Single file - direct download
-		const url = URL.createObjectURL(blobs[0]);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = `${baseName}${extension}`;
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
-	} else {
-		// Multiple files - zip them
-		const zip = new JSZip();
-		for (let i = 0; i < blobs.length; i++) {
-			zip.file(`${baseName}-${i + 1}${extension}`, blobs[i]);
-		}
-
-		const zipBlob = await zip.generateAsync({ type: 'blob' });
-		const url = URL.createObjectURL(zipBlob);
-
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = `${baseName}.zip`;
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
-	}
+	await downloadMultipleFilesGeneric(blobs, baseName, extension);
 }

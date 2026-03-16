@@ -29,7 +29,7 @@
 	} from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 	import { onMount } from 'svelte';
-	import InfoTooltip from './InfoTooltip.svelte';
+	import { Tooltip } from '@neutron/ui';
 
 	// Check codec availability (hardware support required for some)
 	let av1Available = $state(false);
@@ -383,7 +383,7 @@
 					<div class="mb-3 flex items-center gap-2">
 						<Maximize class="text-surface-400 h-4 w-4" />
 						<span class="text-surface-300 text-sm font-medium">Resolution</span>
-						<InfoTooltip
+						<Tooltip
 							content="Downscaling reduces file size significantly. 1080p is usually sufficient for most uses. Higher resolutions are best for archival or professional work."
 						/>
 					</div>
@@ -410,7 +410,7 @@
 					<div class="mb-3 flex items-center gap-2">
 						<Volume2 class="text-surface-400 h-4 w-4" />
 						<span class="text-surface-300 text-sm font-medium">Audio Codec</span>
-						<InfoTooltip
+						<Tooltip
 							content="AAC is most compatible with all devices. Opus offers better quality at lower bitrates. Keep Original skips re-encoding for fastest processing."
 						/>
 					</div>
@@ -456,7 +456,7 @@
 					<div class="mb-3 flex items-center gap-2">
 						<Zap class="text-surface-400 h-4 w-4" />
 						<span class="text-surface-300 text-sm font-medium">Encoding Speed</span>
-						<InfoTooltip
+						<Tooltip
 							content="Faster encoding produces larger files. Slower encoding achieves better compression at the same quality level. Use 'Quality' for final exports."
 						/>
 					</div>

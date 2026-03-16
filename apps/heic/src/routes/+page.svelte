@@ -2,6 +2,7 @@
 	import { filesStore, processFiles, downloadFile, downloadAllAsZip, terminatePool } from '$lib';
 	import type { OutputFormat } from '$lib/stores/files.svelte';
 	import { formatBytes } from '@neutron/utils/format';
+	import { DropZone } from '@neutron/ui';
 
 	function handlePageHide() {
 		terminatePool();
@@ -9,7 +10,6 @@
 	}
 
 	let fileInput: HTMLInputElement;
-	let isDragging = $state(false);
 
 	const outputFormats: { value: OutputFormat; label: string; desc: string }[] = [
 		{ value: 'jpeg', label: 'JPG', desc: 'Best for photos, universal compatibility' },
@@ -21,29 +21,11 @@
 	function handleFileSelect(event: Event) {
 		const target = event.target as HTMLInputElement;
 		if (target.files && target.files.length > 0) {
-			addFiles(target.files);
+			addFiles(Array.from(target.files));
 		}
 	}
 
-	function handleDrop(event: DragEvent) {
-		event.preventDefault();
-		isDragging = false;
-
-		if (event.dataTransfer?.files) {
-			addFiles(event.dataTransfer.files);
-		}
-	}
-
-	function handleDragOver(event: DragEvent) {
-		event.preventDefault();
-		isDragging = true;
-	}
-
-	function handleDragLeave() {
-		isDragging = false;
-	}
-
-	async function addFiles(files: FileList) {
+	async function addFiles(files: FileList | File[]) {
 		const ids = await filesStore.addFiles(files);
 		if (ids.length > 0) {
 			await processFiles(ids);
@@ -117,36 +99,15 @@
 
 	<!-- Drop Zone -->
 	{#if filesStore.items.length === 0}
-		<div
-			class="glass hover:border-surface-600 cursor-pointer rounded-2xl border-2 border-dashed p-12 text-center transition-all sm:p-16 {isDragging
-				? 'border-accent-start bg-accent-start/5 scale-[1.02]'
-				: 'border-surface-700'}"
-			ondrop={handleDrop}
-			ondragover={handleDragOver}
-			ondragleave={handleDragLeave}
-			role="button"
-			tabindex="0"
-			onclick={() => fileInput.click()}
-			onkeydown={(e) => e.key === 'Enter' && fileInput.click()}
-		>
-			<div class="mb-6 text-6xl sm:text-7xl">📱</div>
-			<h3 class="text-surface-100 mb-3 text-2xl font-semibold sm:text-3xl">Drop HEIC files here</h3>
-			<p class="text-surface-400 mb-8 text-base sm:text-lg">or click to browse</p>
-			<button
-				type="button"
-				class="from-accent-start to-accent-end shadow-accent-start/30 hover:shadow-accent-start/40 rounded-xl bg-gradient-to-r px-8 py-3 font-semibold shadow-lg transition-all hover:scale-105 hover:shadow-xl sm:px-10 sm:py-4 sm:text-lg"
-			>
-				Select Files
-			</button>
-		</div>
-
-		<input
-			bind:this={fileInput}
-			type="file"
+		<DropZone
 			accept=".heic,.heif,image/heic,image/heif"
-			multiple
-			onchange={handleFileSelect}
-			class="hidden"
+			onfiles={(files) => addFiles(files)}
+			formatBadges={[
+				{ name: 'HEIC', color: 'from-pink-500 to-rose-500' },
+				{ name: 'HEIF', color: 'from-orange-500 to-amber-500' },
+			]}
+			title="Drop HEIC files here"
+			subtitle="click to browse"
 		/>
 	{/if}
 

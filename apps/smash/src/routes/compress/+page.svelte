@@ -2,6 +2,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import { Toast, toast } from '@neutron/ui';
+	import { downloadBlob, downloadAllAsZip } from '@neutron/utils';
 	import { compressPDF, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
 	import {
@@ -195,14 +196,7 @@
 	function downloadFile(pdfFile: PDFFile) {
 		if (!pdfFile.compressedBlob) return;
 		const filename = getOutputFilename(pdfFile.file.name, 'compress');
-		const url = URL.createObjectURL(pdfFile.compressedBlob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = filename;
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
+		downloadBlob(pdfFile.compressedBlob, filename);
 	}
 
 	async function downloadAll() {
@@ -212,26 +206,13 @@
 		if (completed.length === 1) {
 			downloadFile(completed[0]);
 		} else {
-			const { default: JSZip } = await import('jszip');
-			const zip = new JSZip();
-
-			for (const file of completed) {
-				if (file.compressedBlob) {
-					const filename = getOutputFilename(file.file.name, 'compress');
-					zip.file(filename, file.compressedBlob);
-				}
-			}
-
-			const blob = await zip.generateAsync({ type: 'blob' });
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = `compressed-pdfs-${Date.now()}.zip`;
-			document.body.appendChild(a);
-			a.click();
-			document.body.removeChild(a);
-			URL.revokeObjectURL(url);
-
+			const zipFiles = completed
+				.filter((f) => f.compressedBlob)
+				.map((f) => ({
+					name: getOutputFilename(f.file.name, 'compress'),
+					blob: f.compressedBlob!,
+				}));
+			await downloadAllAsZip(zipFiles, `compressed-pdfs-${Date.now()}.zip`);
 			toast.success(`Downloaded ${completed.length} PDFs as ZIP`);
 		}
 	}
