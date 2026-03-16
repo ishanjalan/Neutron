@@ -306,12 +306,10 @@ function parseGifFrameData(
  * Download a single frame as PNG
  */
 export function downloadFrame(frame: ExtractedFrame, baseName: string): void {
-	const a = document.createElement('a');
-	a.href = frame.url;
-	a.download = `${baseName}_frame_${String(frame.index + 1).padStart(3, '0')}.png`;
-	document.body.appendChild(a);
-	a.click();
-	document.body.removeChild(a);
+	const fileName = `${baseName}_frame_${String(frame.index + 1).padStart(3, '0')}.png`;
+	import('@neutron/utils/download').then(({ downloadBlob }) => {
+		downloadBlob(frame.blob, fileName);
+	});
 }
 
 /**
@@ -322,30 +320,20 @@ export async function downloadFramesAsZip(
 	baseName: string,
 	onProgress?: (progress: ExtractionProgress) => void
 ): Promise<void> {
-	const JSZip = (await import('jszip')).default;
-	const zip = new JSZip();
+	const { downloadAllAsZip } = await import('@neutron/utils/download');
 
-	for (let i = 0; i < frames.length; i++) {
-		const frame = frames[i];
-		const fileName = `${baseName}_frame_${String(frame.index + 1).padStart(3, '0')}.png`;
-		zip.file(fileName, frame.blob);
+	const files = frames.map((frame, i) => ({
+		name: `${baseName}_frame_${String(frame.index + 1).padStart(3, '0')}.png`,
+		blob: frame.blob,
+	}));
 
+	await downloadAllAsZip(files, `${baseName}_frames.zip`, (percent) => {
 		onProgress?.({
-			current: i + 1,
-			total: frames.length,
-			percentage: Math.round(((i + 1) / frames.length) * 100),
+			current: Math.round((percent / 100) * files.length),
+			total: files.length,
+			percentage: Math.round(percent),
 		});
-	}
-
-	const content = await zip.generateAsync({ type: 'blob' });
-
-	const a = document.createElement('a');
-	a.href = URL.createObjectURL(content);
-	a.download = `${baseName}_frames.zip`;
-	document.body.appendChild(a);
-	a.click();
-	document.body.removeChild(a);
-	URL.revokeObjectURL(a.href);
+	});
 }
 
 /**
