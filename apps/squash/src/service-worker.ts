@@ -70,9 +70,14 @@ self.addEventListener('fetch', (event) => {
 
 	// Same-origin requests
 	if (url.origin === self.location.origin) {
-		// App shell (documents, scripts, styles, fonts, images) - Cache First
+		// HTML documents - Network First so deploys are picked up immediately
+		if (event.request.destination === 'document') {
+			event.respondWith(networkFirst(event.request, CACHE_NAME));
+			return;
+		}
+
+		// Immutable build assets (content-hashed JS, CSS, fonts, images) - Cache First
 		if (
-			event.request.destination === 'document' ||
 			event.request.destination === 'script' ||
 			event.request.destination === 'style' ||
 			event.request.destination === 'font' ||
