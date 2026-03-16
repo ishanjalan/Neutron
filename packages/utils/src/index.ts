@@ -7,6 +7,14 @@ export {
 	copyBlobToClipboard,
 } from './download';
 export { trapFocus, releaseFocus, focusTrap, createFocusTrap } from './focus-trap';
+export { createTrackedUrl, revokeTrackedUrl, revokeAll, getTrackedUrlCount } from './blob-url';
+export {
+	createWorkerPool,
+	type WorkerPoolJob,
+	type WorkerPoolConfig,
+	type WorkerPoolInstance,
+	type PoolStatus,
+} from './worker-pool';
 
 // Validation utilities (Valibot)
 export {

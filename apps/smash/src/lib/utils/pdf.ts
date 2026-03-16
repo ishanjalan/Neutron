@@ -245,7 +245,15 @@ export async function pdfToImages(file: File, options: PDFToImagesOptions): Prom
 
 		const mimeType = options.format === 'jpg' ? 'image/jpeg' : `image/${options.format}`;
 		const blob = await new Promise<Blob>((resolve) => {
-			canvas.toBlob((blob) => resolve(blob!), mimeType, options.quality / 100);
+			canvas.toBlob(
+				(blob) => {
+					canvas.width = 0;
+					canvas.height = 0;
+					resolve(blob!);
+				},
+				mimeType,
+				options.quality / 100
+			);
 		});
 
 		images.push(blob);
@@ -280,7 +288,11 @@ export async function imagesToPDF(
 			const ctx = canvas.getContext('2d')!;
 			ctx.drawImage(img, 0, 0);
 			const pngBlob = await new Promise<Blob>((resolve) => {
-				canvas.toBlob((blob) => resolve(blob!), 'image/png');
+				canvas.toBlob((blob) => {
+					canvas.width = 0;
+					canvas.height = 0;
+					resolve(blob!);
+				}, 'image/png');
 			});
 			const pngBuffer = await pngBlob.arrayBuffer();
 			image = await pdf.embedPng(pngBuffer);
@@ -306,9 +318,16 @@ export async function imagesToPDF(
 function loadImage(file: File): Promise<HTMLImageElement> {
 	return new Promise((resolve, reject) => {
 		const img = new Image();
-		img.onload = () => resolve(img);
-		img.onerror = reject;
-		img.src = URL.createObjectURL(file);
+		const url = URL.createObjectURL(file);
+		img.onload = () => {
+			URL.revokeObjectURL(url);
+			resolve(img);
+		};
+		img.onerror = () => {
+			URL.revokeObjectURL(url);
+			reject(new Error('Failed to load image'));
+		};
+		img.src = url;
 	});
 }
 
@@ -337,7 +356,10 @@ export async function generateThumbnail(file: File): Promise<string> {
 
 	await page.render({ canvasContext: ctx, viewport }).promise;
 
-	return canvas.toDataURL('image/jpeg', 0.7);
+	const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+	canvas.width = 0;
+	canvas.height = 0;
+	return dataUrl;
 }
 
 interface RotateOptions {

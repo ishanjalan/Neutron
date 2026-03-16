@@ -128,6 +128,8 @@ async function renderPageToImage(
 	}).promise;
 
 	const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	canvas.width = 0;
+	canvas.height = 0;
 
 	return {
 		imageData,
@@ -147,13 +149,17 @@ async function ocrPage(worker: Tesseract.Worker, imageData: ImageData): Promise<
 	const ctx = canvas.getContext('2d')!;
 	ctx.putImageData(imageData, 0, 0);
 
-	const result = await worker.recognize(canvas);
+	const result = await worker.recognize(canvas, {}, { blocks: true });
+	canvas.width = 0;
+	canvas.height = 0;
 
-	const words = result.data.words.map((word) => ({
-		text: word.text,
-		bbox: word.bbox,
-		confidence: word.confidence,
-	}));
+	const words = result.data.blocks
+		.flatMap((b) => b.paragraphs.flatMap((p) => p.lines.flatMap((l) => l.words)))
+		.map((word) => ({
+			text: word.text,
+			bbox: word.bbox,
+			confidence: word.confidence,
+		}));
 
 	return {
 		text: result.data.text,

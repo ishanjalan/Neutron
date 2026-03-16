@@ -57,6 +57,8 @@
 				if (ctx) {
 					await page.render({ canvasContext: ctx, viewport }).promise;
 					const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+					canvas.width = 0;
+					canvas.height = 0;
 					thumbnails = [...thumbnails, { pageNum: i, dataUrl }];
 				}
 			}

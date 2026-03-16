@@ -271,16 +271,21 @@ async function getVideoMetadata(
 		video.onloadedmetadata = () => {
 			URL.revokeObjectURL(url);
 			const bitrate = (file.size * 8) / video.duration; // bits per second
-			resolve({
+			const metadata = {
 				width: video.videoWidth,
 				height: video.videoHeight,
 				duration: video.duration,
 				bitrate,
-			});
+			};
+			video.src = '';
+			video.load();
+			resolve(metadata);
 		};
 
 		video.onerror = () => {
 			URL.revokeObjectURL(url);
+			video.src = '';
+			video.load();
 			reject(new Error('Failed to load video metadata'));
 		};
 

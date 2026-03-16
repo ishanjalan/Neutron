@@ -1,9 +1,16 @@
 <script lang="ts">
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
+	import { terminateGhostscript } from '$lib/utils/ghostscript';
 
 	let { children } = $props();
+
+	function handlePageHide() {
+		terminateGhostscript();
+	}
 </script>
+
+<svelte:window onpagehide={handlePageHide} />
 
 <svelte:head>
 	<link rel="icon" href={favicon} />

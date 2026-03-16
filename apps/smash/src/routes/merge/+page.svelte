@@ -16,6 +16,7 @@
 	} from 'lucide-svelte';
 	import { fade, fly, slide } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
+	import { onDestroy } from 'svelte';
 
 	interface PDFFile {
 		id: string;
@@ -38,6 +39,17 @@
 	const hasFiles = $derived(files.length > 0);
 	const totalPages = $derived(files.reduce((sum, f) => sum + (f.pageCount || 0), 0));
 	const totalSize = $derived(files.reduce((sum, f) => sum + f.file.size, 0));
+
+	function revokeMergedUrl() {
+		if (mergedUrl) {
+			URL.revokeObjectURL(mergedUrl);
+			mergedUrl = null;
+		}
+	}
+
+	onDestroy(() => {
+		revokeMergedUrl();
+	});
 
 	function generateId(): string {
 		return `pdf-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -75,8 +87,8 @@
 		}
 
 		files = [...files, ...newPdfFiles];
+		revokeMergedUrl();
 		mergedBlob = null;
-		mergedUrl = null;
 		toast.success(`Added ${pdfFiles.length} PDF(s)`);
 	}
 
@@ -84,8 +96,8 @@
 		const file = files.find((f) => f.id === id);
 		if (file) URL.revokeObjectURL(file.originalUrl);
 		files = files.filter((f) => f.id !== id).map((f, i) => ({ ...f, order: i }));
+		revokeMergedUrl();
 		mergedBlob = null;
-		mergedUrl = null;
 	}
 
 	function moveFile(id: string, direction: 'up' | 'down') {
@@ -99,8 +111,8 @@
 			[newFiles[index], newFiles[index + 1]] = [newFiles[index + 1], newFiles[index]];
 			files = newFiles.map((f, i) => ({ ...f, order: i }));
 		}
+		revokeMergedUrl();
 		mergedBlob = null;
-		mergedUrl = null;
 	}
 
 	async function handleMerge() {
@@ -209,8 +221,8 @@
 
 	function handleItemDragEnd() {
 		draggedItem = null;
+		revokeMergedUrl();
 		mergedBlob = null;
-		mergedUrl = null;
 	}
 </script>
 

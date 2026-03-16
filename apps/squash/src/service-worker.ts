@@ -43,13 +43,9 @@ self.addEventListener('activate', (event) => {
 			// Get all cache keys
 			const keys = await caches.keys();
 
-			// Delete old caches (keep current app cache and runtime cache)
 			await Promise.all(
 				keys
-					.filter(
-						(key) =>
-							key !== CACHE_NAME && key !== RUNTIME_CACHE_NAME && !key.startsWith('squash-cache-') // Keep versioned caches during transition
-					)
+					.filter((key) => key !== CACHE_NAME && key !== RUNTIME_CACHE_NAME)
 					.map((key) => caches.delete(key))
 			);
 

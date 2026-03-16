@@ -32,11 +32,21 @@
 	let imageDPI = $state(150);
 	let imageQuality = $state(90);
 	let resultBlobs = $state<Blob[]>([]);
+	let resultBlobUrls = $state<string[]>([]);
 	let progress = $state(0);
 	let fileInput: HTMLInputElement;
 	let isDragging = $state(false);
 
 	const hasFile = $derived(pdfFile !== null);
+
+	$effect(() => {
+		const blobs = resultBlobs;
+		const urls = blobs.map((b) => URL.createObjectURL(b));
+		resultBlobUrls = urls;
+		return () => {
+			for (const url of urls) URL.revokeObjectURL(url);
+		};
+	});
 
 	function generateId(): string {
 		return `pdf-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -280,7 +290,7 @@
 											class="bg-surface-800 group relative overflow-hidden rounded-lg"
 										>
 											<img
-												src={URL.createObjectURL(blob)}
+												src={resultBlobUrls[i] ?? ''}
 												alt="Page {i + 1}"
 												class="aspect-[3/4] w-full object-cover"
 											/>

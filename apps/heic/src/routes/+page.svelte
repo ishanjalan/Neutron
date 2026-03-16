@@ -1,7 +1,12 @@
 <script lang="ts">
-	import { filesStore, processFiles, downloadFile, downloadAllAsZip } from '$lib';
+	import { filesStore, processFiles, downloadFile, downloadAllAsZip, terminatePool } from '$lib';
 	import type { OutputFormat } from '$lib/stores/files.svelte';
 	import { formatBytes } from '@neutron/utils/format';
+
+	function handlePageHide() {
+		terminatePool();
+		filesStore.clearAll();
+	}
 
 	let fileInput: HTMLInputElement;
 	let isDragging = $state(false);
@@ -55,6 +60,8 @@
 	}
 </script>
 
+<svelte:window onpagehide={handlePageHide} />
+
 <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
 	<!-- Header -->
 	<header class="mb-12 text-center sm:mb-16">
@@ -73,7 +80,7 @@
 	<div class="glass mb-8 rounded-2xl p-6 sm:p-8">
 		<h2 class="text-surface-100 mb-6 text-lg font-semibold sm:text-xl">Output Format</h2>
 		<div class="mb-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
-			{#each outputFormats as format}
+			{#each outputFormats as format (format.value)}
 				<button
 					type="button"
 					class="group rounded-xl border-2 p-4 transition-all hover:scale-[1.02] sm:p-5 {filesStore

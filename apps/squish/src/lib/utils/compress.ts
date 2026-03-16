@@ -73,19 +73,16 @@ async function processQueue() {
 	// Initialize worker pool once
 	await initPool();
 
-	// Process all items in parallel using the worker pool
-	const processingPromises: Promise<void>[] = [];
+	const CONCURRENCY = Math.min(4, navigator.hardwareConcurrency || 4);
 
 	while (queue.length > 0) {
-		const id = queue.shift()!;
-		const item = images.getItemById(id);
-		if (item && item.status === 'pending') {
-			processingPromises.push(compressImage(item));
-		}
+		const batch = queue.splice(0, CONCURRENCY);
+		const promises = batch.map((id) => {
+			const item = images.getItemById(id);
+			return item && item.status === 'pending' ? compressImage(item) : Promise.resolve();
+		});
+		await Promise.all(promises);
 	}
-
-	// Wait for all current batch to complete
-	await Promise.all(processingPromises);
 
 	isProcessing = false;
 
@@ -199,6 +196,8 @@ async function resizeImageBlob(
 				ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
 				canvas.toBlob((resizedBlob) => {
+					canvas.width = 0;
+					canvas.height = 0;
 					if (resizedBlob) {
 						resolve({ blob: resizedBlob, width: targetWidth, height: targetHeight });
 					} else {
@@ -710,6 +709,8 @@ async function renderSvgAtScale(
 				ctx.drawImage(img, 0, 0, width, height);
 
 				canvas.toBlob((blob) => {
+					canvas.width = 0;
+					canvas.height = 0;
 					if (blob) {
 						resolve({ blob, width, height });
 					} else {

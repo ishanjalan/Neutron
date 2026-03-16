@@ -31,6 +31,14 @@
 		"./comlink": {
 			"types": "./src/comlink.ts",
 			"default": "./src/comlink.ts"
+		},
+		"./blob-url": {
+			"types": "./src/blob-url.ts",
+			"default": "./src/blob-url.ts"
+		},
+		"./worker-pool": {
+			"types": "./src/worker-pool.ts",
+			"default": "./src/worker-pool.ts"
 		}
 	},
 	"devDependencies": {

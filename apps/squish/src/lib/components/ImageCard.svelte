@@ -173,7 +173,7 @@
 	<!-- Selection checkbox -->
 	<button
 		onclick={handleSelectionToggle}
-		class="absolute -left-2 -top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full shadow-lg transition-all {isSelected
+		class="absolute -top-2 -left-2 z-10 flex h-7 w-7 items-center justify-center rounded-full shadow-lg transition-all {isSelected
 			? 'bg-accent-start text-white opacity-100'
 			: 'bg-surface-700 text-surface-500'} {showSelectionMode || isSelected
 			? 'opacity-100'
@@ -190,7 +190,7 @@
 	<!-- Remove button -->
 	<button
 		onclick={handleRemove}
-		class="bg-surface-700 text-surface-500 absolute -right-2 -top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full opacity-0 shadow-lg transition-all hover:bg-red-500 hover:text-white group-hover:opacity-100"
+		class="bg-surface-700 text-surface-500 absolute -top-2 -right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full opacity-0 shadow-lg transition-all group-hover:opacity-100 hover:bg-red-500 hover:text-white"
 		aria-label="Remove image"
 	>
 		<X class="h-4 w-4" />
@@ -223,7 +223,7 @@
 	>
 		{#if item.compressedUrl || canDisplayOriginal}
 			<img
-				src={item.compressedUrl || item.originalUrl}
+				src={item.thumbnailUrl || item.compressedUrl || item.originalUrl}
 				alt={item.name}
 				class="pointer-events-none h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
 				draggable="false"
@@ -291,7 +291,7 @@
 
 		<!-- Savings badge overlay -->
 		{#if item.status === 'completed'}
-			<div class="pointer-events-none absolute right-3 top-3">
+			<div class="pointer-events-none absolute top-3 right-3">
 				{#if isPositiveSavings}
 					<span
 						class="flex items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-sm font-bold text-white shadow-lg"
@@ -320,11 +320,11 @@
 
 			<!-- Hover info at bottom -->
 			<div
-				class="pointer-events-none absolute bottom-0 left-0 right-0 p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+				class="pointer-events-none absolute right-0 bottom-0 left-0 p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
 			>
 				<div class="flex items-end justify-between">
 					<div class="space-y-1">
-						<div class="text-[10px] font-medium uppercase tracking-wide text-white/70">
+						<div class="text-[10px] font-medium tracking-wide text-white/70 uppercase">
 							Original
 						</div>
 						<div class="font-mono text-xs text-white">
@@ -348,7 +348,7 @@
 						e.stopPropagation();
 						showCompare = true;
 					}}
-					class="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-all hover:rotate-6 hover:scale-125 hover:bg-white/40 active:scale-95"
+					class="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-all hover:scale-125 hover:rotate-6 hover:bg-white/40 active:scale-95"
 					title="Compare before/after"
 				>
 					<SplitSquareHorizontal class="h-5 w-5" />
@@ -448,7 +448,7 @@
 					<div class="relative">
 						<button
 							onclick={() => (showFormatMenu = !showFormatMenu)}
-							class="flex items-center gap-1.5 rounded-lg bg-gradient-to-r {getCurrentFormatColor()} px-2.5 py-1 text-xs font-bold uppercase text-white transition-all hover:opacity-90"
+							class="flex items-center gap-1.5 rounded-lg bg-gradient-to-r {getCurrentFormatColor()} px-2.5 py-1 text-xs font-bold text-white uppercase transition-all hover:opacity-90"
 						>
 							{item.outputFormat}
 							<ChevronDown class="h-3.5 w-3.5" />
@@ -465,7 +465,7 @@
 								in:scale={{ duration: 150, start: 0.95 }}
 								out:fade={{ duration: 100 }}
 							>
-								{#each outputOptions as format}
+								{#each outputOptions as format (format.value)}
 									<button
 										onclick={() => handleFormatChange(format.value)}
 										class="hover:bg-surface-700 flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm transition-colors {item.outputFormat ===

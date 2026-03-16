@@ -255,6 +255,8 @@
 				frameDurations.push(frame.delay);
 			}
 
+			canvas.width = 0;
+			canvas.height = 0;
 			progressStage = 'Encoding GIF with gifski...';
 			progress = 55;
 

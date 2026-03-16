@@ -155,7 +155,12 @@ export async function extractFramesFromVideo(
 				progress: Math.round(((i + 1) / totalFrames) * 100),
 			});
 		}
+
+		canvas.width = 0;
+		canvas.height = 0;
 	} finally {
+		video.src = '';
+		video.load();
 		URL.revokeObjectURL(videoUrl);
 	}
 

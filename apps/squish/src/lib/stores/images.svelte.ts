@@ -1,3 +1,5 @@
+import { SvelteSet } from 'svelte/reactivity';
+
 export type ImageFormat = 'jpeg' | 'png' | 'webp' | 'avif' | 'jxl' | 'svg' | 'heic';
 export type OutputFormat = 'jpeg' | 'png' | 'webp' | 'avif' | 'jxl' | 'svg'; // HEIC is input-only
 export type ImageStatus = 'pending' | 'processing' | 'completed' | 'error';
@@ -11,6 +13,7 @@ export interface ImageItem {
 	originalUrl: string;
 	compressedUrl?: string;
 	compressedBlob?: Blob;
+	thumbnailUrl?: string;
 	format: ImageFormat;
 	outputFormat: OutputFormat;
 	status: ImageStatus;
@@ -18,14 +21,11 @@ export interface ImageItem {
 	error?: string;
 	width?: number;
 	height?: number;
-	// For SVG: tracks WebP alternative size for "complex SVG" warning
 	webpAlternativeSize?: number;
-	// Target size mode: tracking info
 	targetSizeAttempt?: number;
 	targetSizeMaxAttempts?: number;
 	achievedQuality?: number;
 	targetSizeWarning?: string;
-	// Resize info
 	resizedWidth?: number;
 	resizedHeight?: number;
 }
@@ -103,7 +103,47 @@ function getDefaultSettings(): CompressionSettings {
 	};
 }
 
-// Extract dimensions from an image file (doesn't work for HEIC in most browsers)
+const THUMB_MAX = 400;
+
+async function generateThumbnail(file: File): Promise<string | undefined> {
+	if (file.type === 'image/heic' || file.type === 'image/heif') return undefined;
+	if (file.type === 'image/svg+xml') return undefined;
+
+	return new Promise((resolve) => {
+		const img = new Image();
+		const url = URL.createObjectURL(file);
+		img.onload = () => {
+			URL.revokeObjectURL(url);
+			const scale = Math.min(1, THUMB_MAX / Math.max(img.naturalWidth, img.naturalHeight));
+			const w = Math.round(img.naturalWidth * scale);
+			const h = Math.round(img.naturalHeight * scale);
+			const canvas = document.createElement('canvas');
+			canvas.width = w;
+			canvas.height = h;
+			const ctx = canvas.getContext('2d')!;
+			ctx.drawImage(img, 0, 0, w, h);
+			canvas.toBlob(
+				(blob) => {
+					canvas.width = 0;
+					canvas.height = 0;
+					if (blob) {
+						resolve(URL.createObjectURL(blob));
+					} else {
+						resolve(undefined);
+					}
+				},
+				'image/jpeg',
+				0.7
+			);
+		};
+		img.onerror = () => {
+			URL.revokeObjectURL(url);
+			resolve(undefined);
+		};
+		img.src = url;
+	});
+}
+
 async function getImageDimensions(file: File): Promise<{ width: number; height: number } | null> {
 	// HEIC can't be loaded directly in most browsers
 	if (file.type === 'image/heic' || file.type === 'image/heif') {
@@ -225,12 +265,15 @@ function createImagesStore() {
 					console.warn('Failed to get dimensions for', file.name);
 				}
 
+				const thumbnailUrl = await generateThumbnail(file);
+
 				newItems.push({
 					id: generateId(),
 					file,
 					name: file.name,
 					originalSize: file.size,
 					originalUrl: URL.createObjectURL(file),
+					thumbnailUrl,
 					format,
 					outputFormat,
 					status: 'pending',
@@ -253,11 +296,12 @@ function createImagesStore() {
 			if (item) {
 				URL.revokeObjectURL(item.originalUrl);
 				if (item.compressedUrl) URL.revokeObjectURL(item.compressedUrl);
+				if (item.thumbnailUrl) URL.revokeObjectURL(item.thumbnailUrl);
 			}
 			items = items.filter((i) => i.id !== id);
 			// Remove from selection if selected
 			if (selectedIds.has(id)) {
-				const newSet = new Set(selectedIds);
+				const newSet = new SvelteSet(selectedIds);
 				newSet.delete(id);
 				selectedIds = newSet;
 			}
@@ -267,6 +311,7 @@ function createImagesStore() {
 			items.forEach((item) => {
 				URL.revokeObjectURL(item.originalUrl);
 				if (item.compressedUrl) URL.revokeObjectURL(item.compressedUrl);
+				if (item.thumbnailUrl) URL.revokeObjectURL(item.thumbnailUrl);
 			});
 			items = [];
 			selectedIds = new Set();
@@ -334,7 +379,7 @@ function createImagesStore() {
 
 		// Selection methods
 		toggleSelection(id: string) {
-			const newSet = new Set(selectedIds);
+			const newSet = new SvelteSet(selectedIds);
 			if (newSet.has(id)) {
 				newSet.delete(id);
 			} else {
@@ -364,6 +409,7 @@ function createImagesStore() {
 			toRemove.forEach((item) => {
 				URL.revokeObjectURL(item.originalUrl);
 				if (item.compressedUrl) URL.revokeObjectURL(item.compressedUrl);
+				if (item.thumbnailUrl) URL.revokeObjectURL(item.thumbnailUrl);
 			});
 			items = items.filter((i) => !selectedIds.has(i.id));
 			selectedIds = new Set();

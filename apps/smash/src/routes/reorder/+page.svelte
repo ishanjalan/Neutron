@@ -67,6 +67,8 @@
 			const ctx = canvas.getContext('2d')!;
 			await page.render({ canvasContext: ctx, viewport }).promise;
 			pages.push({ pageNum: i, thumbnail: canvas.toDataURL('image/jpeg', 0.6) });
+			canvas.width = 0;
+			canvas.height = 0;
 		}
 
 		return pages;

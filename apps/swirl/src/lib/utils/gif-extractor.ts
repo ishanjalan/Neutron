@@ -73,8 +73,11 @@ async function extractWithImageDecoder(
 		// Convert to blob
 		const blob = await new Promise<Blob>((resolve, reject) => {
 			canvas.toBlob((b) => {
-				if (b) resolve(b);
-				else reject(new Error('Failed to create blob'));
+				if (b) {
+					canvas.width = 0;
+					canvas.height = 0;
+					resolve(b);
+				} else reject(new Error('Failed to create blob'));
 			}, 'image/png');
 		});
 
@@ -199,6 +202,8 @@ async function extractWithCanvas(
 		});
 	}
 
+	canvas.width = 0;
+	canvas.height = 0;
 	URL.revokeObjectURL(imageUrl);
 
 	return frames;

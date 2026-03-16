@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import { fade, scale } from 'svelte/transition';
 	import { X, Eye, Loader2 } from 'lucide-svelte';
 	import { createFocusTrap } from '@neutron/utils';
@@ -16,6 +17,14 @@
 	let originalFrame = $state<string | null>(null);
 	let isLoading = $state(true);
 	let error = $state<string | null>(null);
+	let videoRef = $state<HTMLVideoElement | null>(null);
+
+	onDestroy(() => {
+		if (videoRef) {
+			videoRef.src = '';
+			videoRef.load();
+		}
+	});
 
 	// Focus trap
 	$effect(() => {
@@ -35,7 +44,14 @@
 			isLoading = true;
 			error = null;
 
+			if (videoRef) {
+				videoRef.src = '';
+				videoRef.load();
+				videoRef = null;
+			}
+
 			const video = document.createElement('video');
+			videoRef = video;
 			video.src = item.originalUrl;
 			video.crossOrigin = 'anonymous';
 			video.muted = true;
@@ -62,9 +78,16 @@
 			ctx.drawImage(video, 0, 0);
 
 			originalFrame = canvas.toDataURL('image/jpeg', 0.95);
+			canvas.width = 0;
+			canvas.height = 0;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to extract frame';
 		} finally {
+			if (videoRef) {
+				videoRef.src = '';
+				videoRef.load();
+				videoRef = null;
+			}
 			isLoading = false;
 		}
 	}

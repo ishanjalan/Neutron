@@ -262,7 +262,10 @@ export async function getPreviewFrame(
 	frames.forEach((f) => URL.revokeObjectURL(f.url));
 
 	// Return data URL
-	return canvas.toDataURL('image/png');
+	const dataUrl = canvas.toDataURL('image/png');
+	canvas.width = 0;
+	canvas.height = 0;
+	return dataUrl;
 }
 
 /**

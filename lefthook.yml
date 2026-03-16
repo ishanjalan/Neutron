@@ -1,0 +1,12 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: lint
+      run: pnpm exec eslint --fix {staged_files}
+      glob: '*.{js,ts,svelte}'
+    - name: format-code
+      run: pnpm exec prettier --write {staged_files}
+      glob: '*.{js,ts,svelte}'
+    - name: format-assets
+      run: pnpm exec prettier --write {staged_files}
+      glob: '*.{json,md,css,html,yaml,yml}'

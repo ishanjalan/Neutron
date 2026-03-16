@@ -11,6 +11,7 @@
 	import { ConfirmModal, AnimatedNumber, toast } from '@neutron/ui';
 	import { images, formatBytes } from '$lib';
 	import { processImages, cancelProcessing } from '$lib/utils/compress';
+	import { terminatePool } from '$lib/utils/worker-pool';
 	import {
 		Download,
 		Trash2,
@@ -275,13 +276,15 @@
 		}
 	}
 
-	// Unsaved work warning
 	function handleBeforeUnload(e: BeforeUnloadEvent) {
-		if (hasUndownloaded) {
+		if (processingCount > 0) {
 			e.preventDefault();
-			// Modern browsers ignore custom messages but still show a generic one
-			return "You have optimized images that haven't been downloaded. Are you sure you want to leave?";
 		}
+	}
+
+	function handlePageHide() {
+		terminatePool();
+		images.clearAll();
 	}
 
 	const features = [
@@ -307,6 +310,7 @@
 	onkeydown={handleKeydown}
 	onpaste={handlePaste}
 	onbeforeunload={handleBeforeUnload}
+	onpagehide={handlePageHide}
 />
 
 <!-- Screen reader status announcements -->
@@ -321,14 +325,14 @@
 	<!-- Background decoration -->
 	<div class="fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
 		<div
-			class="from-data-cyan/5 to-data-blue/5 absolute -right-1/4 -top-1/2 h-[800px] w-[800px] rounded-full bg-gradient-to-br blur-3xl"
+			class="from-data-cyan/5 to-data-blue/5 absolute -top-1/2 -right-1/4 h-[800px] w-[800px] rounded-full bg-gradient-to-br blur-3xl"
 		></div>
 		<div
 			class="from-data-blue/5 to-data-cyan/5 absolute -bottom-1/2 -left-1/4 h-[600px] w-[600px] rounded-full bg-gradient-to-tr blur-3xl"
 		></div>
 	</div>
 
-	<main class="flex-1 px-4 pb-8 pt-24 sm:px-6 sm:pb-12 sm:pt-28 lg:px-8">
+	<main class="flex-1 px-4 pt-24 pb-8 sm:px-6 sm:pt-28 sm:pb-12 lg:px-8">
 		<div class="mx-auto max-w-7xl">
 			<!-- Hero Section -->
 			{#if !hasImages}

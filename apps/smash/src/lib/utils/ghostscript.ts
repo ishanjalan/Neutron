@@ -119,6 +119,19 @@ export function getGhostscriptClient(basePath: string): GhostscriptClient {
 	return defaultClient;
 }
 
+export function terminateGhostscript(): void {
+	if (defaultClient) {
+		defaultClient.terminate();
+		defaultClient = null;
+	}
+	if (legacyClient) {
+		legacyClient.terminate();
+		legacyClient = null;
+		isInitialized = false;
+		isInitializing = false;
+	}
+}
+
 // ============================================
 // Backward-compatible API (used by pdf.ts)
 // ============================================

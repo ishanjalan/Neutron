@@ -7,3 +7,4 @@ export {
 	downloadAllAsZip,
 	isCurrentlyProcessing,
 } from './utils/convert';
+export { terminatePool } from './utils/worker-pool';

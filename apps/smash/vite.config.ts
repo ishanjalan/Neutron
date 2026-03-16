@@ -6,7 +6,6 @@ export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
 	server: {
 		headers: {
-			// Required for FFmpeg.wasm SharedArrayBuffer support
 			'Cross-Origin-Opener-Policy': 'same-origin',
 			'Cross-Origin-Embedder-Policy': 'require-corp',
 		},
@@ -16,9 +15,6 @@ export default defineConfig({
 			'Cross-Origin-Opener-Policy': 'same-origin',
 			'Cross-Origin-Embedder-Policy': 'require-corp',
 		},
-	},
-	optimizeDeps: {
-		exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util'],
 	},
 	worker: {
 		format: 'es',

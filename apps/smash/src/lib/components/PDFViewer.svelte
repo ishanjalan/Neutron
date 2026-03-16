@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { SvelteSet } from 'svelte/reactivity';
+	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import { pdfs, formatBytes, type PDFItem } from '$lib/stores/pdfs.svelte';
 	import * as pdfjsLib from 'pdfjs-dist';
 	import {
@@ -49,7 +49,7 @@
 		Math.min((thumbnailPage + 1) * THUMBNAILS_PER_PAGE, totalPages)
 	);
 
-	// Page data - only store loaded thumbnails
+	const THUMBNAIL_CACHE_MAX = 50;
 	let thumbnailCache = $state<Map<number, string>>(new Map());
 	let currentPageCanvas = $state<string | null>(null);
 	let pageWidth = $state(0);
@@ -135,7 +135,16 @@
 			if (ctx) {
 				await page.render({ canvasContext: ctx, viewport }).promise;
 				const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-				thumbnailCache = new Map([...thumbnailCache, [pageNum, dataUrl]]);
+				canvas.width = 0;
+				canvas.height = 0;
+				const updated = new SvelteMap(thumbnailCache);
+				updated.delete(pageNum);
+				updated.set(pageNum, dataUrl);
+				if (updated.size > THUMBNAIL_CACHE_MAX) {
+					const oldest = updated.keys().next().value!;
+					updated.delete(oldest);
+				}
+				thumbnailCache = updated;
 				return dataUrl;
 			}
 		} catch (err) {
@@ -177,6 +186,8 @@
 			if (ctx) {
 				await page.render({ canvasContext: ctx, viewport }).promise;
 				currentPageCanvas = canvas.toDataURL('image/png');
+				canvas.width = 0;
+				canvas.height = 0;
 			}
 		} catch (err) {
 			console.error(`Failed to render page ${pageNum}:`, err);

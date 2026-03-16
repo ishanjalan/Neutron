@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { formatTimeInput } from '$lib/utils/format';
 
 	interface Props {
@@ -14,7 +14,15 @@
 
 	let containerRef: HTMLDivElement | undefined = $state(undefined);
 	let thumbnails = $state<string[]>([]);
+	let videoRef = $state<HTMLVideoElement | null>(null);
 	let isDraggingStart = $state(false);
+
+	onDestroy(() => {
+		if (videoRef) {
+			videoRef.src = '';
+			videoRef.load();
+		}
+	});
 	let isDraggingEnd = $state(false);
 	let previewTime = $state<number | null>(null);
 	let previewPosition = $state(0);
@@ -36,6 +44,7 @@
 	onMount(async () => {
 		try {
 			const video = document.createElement('video');
+			videoRef = video;
 			video.src = videoUrl;
 			video.crossOrigin = 'anonymous';
 			video.muted = true;
@@ -68,10 +77,17 @@
 				frames.push(canvas.toDataURL('image/jpeg', 0.5));
 			}
 
+			canvas.width = 0;
+			canvas.height = 0;
 			thumbnails = frames;
 		} catch (e) {
 			console.warn('Could not generate thumbnails:', e);
 		} finally {
+			if (videoRef) {
+				videoRef.src = '';
+				videoRef.load();
+				videoRef = null;
+			}
 			isGeneratingThumbnails = false;
 		}
 	});
