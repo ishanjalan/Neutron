@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@source "../../../packages/ui/src";
 @import '@neutron/config/tailwind/base.css';
 
 /* App-specific accent: Green/Cyan for image compression */

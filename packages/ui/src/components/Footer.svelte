@@ -39,7 +39,7 @@
 		<!-- Neutron Suite Header -->
 		<div class="mb-10 text-center">
 			<div
-				class="mb-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-white/50"
+				class="mb-6 inline-flex items-center gap-2 text-xs font-semibold tracking-wider text-white/50 uppercase"
 			>
 				<Sparkles class="h-3.5 w-3.5 text-amber-400" />
 				<span>The Neutron Suite</span>
@@ -66,12 +66,12 @@
 								>
 									<Icon class="h-5 w-5 text-white sm:h-6 sm:w-6" />
 								</div>
-								<span class="text-xs font-bold uppercase tracking-wide text-white sm:text-sm"
+								<span class="text-xs font-bold tracking-wide text-white uppercase sm:text-sm"
 									>{app.name}</span
 								>
 								<!-- Active indicator -->
 								<div
-									class="absolute right-1.5 top-1.5 flex h-1.5 w-1.5 sm:right-2 sm:top-2 sm:h-2 sm:w-2"
+									class="absolute top-1.5 right-1.5 flex h-1.5 w-1.5 sm:top-2 sm:right-2 sm:h-2 sm:w-2"
 								>
 									<span
 										class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"
@@ -97,7 +97,7 @@
 									/>
 								</div>
 								<span
-									class="text-xs font-bold uppercase tracking-wide text-white/40 transition-colors duration-200 group-hover:text-white sm:text-sm"
+									class="text-xs font-bold tracking-wide text-white/40 uppercase transition-colors duration-200 group-hover:text-white sm:text-sm"
 									>{app.name}</span
 								>
 							</div>
@@ -153,7 +153,7 @@
 					class="group inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500/15 to-orange-500/15 px-4 py-2 text-xs font-medium text-amber-400 ring-1 ring-amber-500/30 transition-all duration-200 hover:from-amber-500/25 hover:to-orange-500/25 sm:text-sm"
 				>
 					<Coffee
-						class="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-12 group-hover:scale-110"
+						class="h-3.5 w-3.5 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-12"
 					/>
 					<span>Buy me a coffee</span>
 				</a>

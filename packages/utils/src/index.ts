@@ -52,9 +52,4 @@ export {
 
 export type { PDFSettings, CompressionSettings, ImageSettings, GIFSettings } from './validation';
 
-export {
-	NEUTRON_APPS,
-	NEUTRON_APPS_LIST,
-	type AppId,
-	type NeutronApp,
-} from './apps';
+export { NEUTRON_APPS, NEUTRON_APPS_LIST, type AppId, type NeutronApp } from './apps';

@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import '@neutron/config/tailwind/base.css';
+@source "../../../packages/ui/src";
 
 /* App-specific accent: Sky/Cyan for PDFs + surface-500 override for WCAG AA */
 @theme {

@@ -15,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       squish: ${{ steps.filter.outputs.squish }}
-      heic:   ${{ steps.filter.outputs.heic }}
-      smash:  ${{ steps.filter.outputs.smash }}
+      heic: ${{ steps.filter.outputs.heic }}
+      smash: ${{ steps.filter.outputs.smash }}
       squash: ${{ steps.filter.outputs.squash }}
-      swirl:  ${{ steps.filter.outputs.swirl }}
+      swirl: ${{ steps.filter.outputs.swirl }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3

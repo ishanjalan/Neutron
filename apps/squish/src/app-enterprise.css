@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@source "../../../packages/ui/src";
 
 /* Enterprise Theme - Industrial Data Precision */
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Geist:wght@400;500;600;700&display=swap');
