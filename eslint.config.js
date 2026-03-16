@@ -33,13 +33,15 @@ export default [
 	// Svelte config
 	...svelte.configs['flat/recommended'],
 
-	// Svelte + TypeScript parser config
+	// Svelte + TypeScript parser config (include .svelte.ts for Svelte 5 runes)
 	{
-		files: ['**/*.svelte'],
+		files: ['**/*.svelte', '**/*.svelte.ts'],
 		languageOptions: {
 			parser: svelteParser,
 			parserOptions: {
 				parser: ts.parser,
+				projectService: true,
+				extraFileExtensions: ['.svelte', '.svelte.ts'],
 			},
 		},
 	},

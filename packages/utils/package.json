@@ -38,6 +38,6 @@
 	},
 	"dependencies": {
 		"comlink": "^4.4.2",
-		"valibot": "^1.0.0"
+		"valibot": "^1.2.0"
 	}
 }
