@@ -10,56 +10,93 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  # ── Detect which apps need rebuilding ─────────────────────────────────────
+  changes:
     runs-on: ubuntu-latest
-
+    outputs:
+      squish: ${{ steps.filter.outputs.squish }}
+      heic:   ${{ steps.filter.outputs.heic }}
+      smash:  ${{ steps.filter.outputs.smash }}
+      squash: ${{ steps.filter.outputs.squash }}
+      swirl:  ${{ steps.filter.outputs.swirl }}
     steps:
-      - name: Checkout monorepo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            shared: &shared
+              - 'packages/**'
+              - 'pnpm-lock.yaml'
+              - 'package.json'
+            squish:
+              - *shared
+              - 'apps/squish/**'
+            heic:
+              - *shared
+              - 'apps/heic/**'
+            smash:
+              - *shared
+              - 'apps/smash/**'
+            squash:
+              - *shared
+              - 'apps/squash/**'
+            swirl:
+              - *shared
+              - 'apps/swirl/**'
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+  # ── Shared setup (only runs if any app changed) ───────────────────────────
+  setup:
+    needs: changes
+    if: >
+      needs.changes.outputs.squish == 'true' ||
+      needs.changes.outputs.heic   == 'true' ||
+      needs.changes.outputs.smash  == 'true' ||
+      needs.changes.outputs.squash == 'true' ||
+      needs.changes.outputs.swirl  == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'pnpm'
+      - run: pnpm install
+      - uses: actions/cache/save@v4
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: deps-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
-      - name: Install dependencies
-        run: pnpm install
+  # ── Per-app build + deploy jobs ───────────────────────────────────────────
 
-      # ===== BUILD ALL APPS =====
-
-      - name: Build Squish
-        run: pnpm --filter squish build
+  squish:
+    needs: [changes, setup]
+    if: needs.changes.outputs.squish == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: deps-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: deps-${{ runner.os }}-
+      - run: pnpm install
+      - run: pnpm --filter squish build
         env:
           NODE_ENV: production
-
-      - name: Build HEIC Converter
-        run: pnpm --filter heic build
-        env:
-          NODE_ENV: production
-
-      - name: Build Smash
-        run: pnpm --filter smash build
-        env:
-          NODE_ENV: production
-
-      - name: Build Squash
-        run: pnpm --filter squash build
-        env:
-          NODE_ENV: production
-
-      - name: Build Swirl
-        run: pnpm --filter swirl build
-        env:
-          NODE_ENV: production
-
-      # ===== DEPLOY EACH APP =====
-
-      - name: Deploy Squish
-        uses: peaceiris/actions-gh-pages@v4
+      - uses: peaceiris/actions-gh-pages@v4
         with:
           personal_token: ${{ secrets.DEPLOY_TOKEN }}
           external_repository: ishanjalan/Squish
@@ -67,8 +104,30 @@ jobs:
           publish_dir: ./apps/squish/build
           commit_message: 'Deploy from Neutron monorepo'
 
-      - name: Deploy HEIC Converter
-        uses: peaceiris/actions-gh-pages@v4
+  heic:
+    needs: [changes, setup]
+    if: needs.changes.outputs.heic == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: deps-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: deps-${{ runner.os }}-
+      - run: pnpm install
+      - run: pnpm --filter @neutron/heic build
+        env:
+          NODE_ENV: production
+      - uses: peaceiris/actions-gh-pages@v4
         with:
           personal_token: ${{ secrets.DEPLOY_TOKEN }}
           external_repository: ishanjalan/HEICConverter
@@ -76,8 +135,30 @@ jobs:
           publish_dir: ./apps/heic/build
           commit_message: 'Deploy from Neutron monorepo'
 
-      - name: Deploy Smash
-        uses: peaceiris/actions-gh-pages@v4
+  smash:
+    needs: [changes, setup]
+    if: needs.changes.outputs.smash == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: deps-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: deps-${{ runner.os }}-
+      - run: pnpm install
+      - run: pnpm --filter smash build
+        env:
+          NODE_ENV: production
+      - uses: peaceiris/actions-gh-pages@v4
         with:
           personal_token: ${{ secrets.DEPLOY_TOKEN }}
           external_repository: ishanjalan/Smash
@@ -85,8 +166,30 @@ jobs:
           publish_dir: ./apps/smash/build
           commit_message: 'Deploy from Neutron monorepo'
 
-      - name: Deploy Squash
-        uses: peaceiris/actions-gh-pages@v4
+  squash:
+    needs: [changes, setup]
+    if: needs.changes.outputs.squash == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: deps-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: deps-${{ runner.os }}-
+      - run: pnpm install
+      - run: pnpm --filter squash build
+        env:
+          NODE_ENV: production
+      - uses: peaceiris/actions-gh-pages@v4
         with:
           personal_token: ${{ secrets.DEPLOY_TOKEN }}
           external_repository: ishanjalan/Squash
@@ -94,8 +197,30 @@ jobs:
           publish_dir: ./apps/squash/build
           commit_message: 'Deploy from Neutron monorepo'
 
-      - name: Deploy Swirl
-        uses: peaceiris/actions-gh-pages@v4
+  swirl:
+    needs: [changes, setup]
+    if: needs.changes.outputs.swirl == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: deps-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: deps-${{ runner.os }}-
+      - run: pnpm install
+      - run: pnpm --filter swirl build
+        env:
+          NODE_ENV: production
+      - uses: peaceiris/actions-gh-pages@v4
         with:
           personal_token: ${{ secrets.DEPLOY_TOKEN }}
           external_repository: ishanjalan/Swirl
