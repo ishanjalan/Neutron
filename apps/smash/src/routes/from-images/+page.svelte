@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import Footer from '$lib/components/Footer.svelte';
+	import { Footer } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
 	import { downloadBlob } from '@neutron/utils';
 	import { imagesToPDF, getOutputFilename } from '$lib/utils/pdf';
@@ -295,6 +295,6 @@
 			{/if}
 		</div>
 	</main>
-	<Footer />
+	<Footer currentApp="smash" />
 </div>
 <Toast />

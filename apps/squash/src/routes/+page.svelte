@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import Footer from '$lib/components/Footer.svelte';
+	import { Footer } from '@neutron/ui';
 	import DropZone from '$lib/components/DropZone.svelte';
 	import DraggableVideoList from '$lib/components/DraggableVideoList.svelte';
 	import AdvancedSettings from '$lib/components/AdvancedSettings.svelte';
@@ -454,7 +454,7 @@
 		</div>
 	</main>
 
-	<Footer />
+	<Footer currentApp="squash" />
 </div>
 
 <!-- Clear All Confirmation Modal -->

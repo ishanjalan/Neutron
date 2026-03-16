@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import Footer from '$lib/components/Footer.svelte';
+	import { Footer } from '@neutron/ui';
 	import DropZone from '$lib/components/DropZone.svelte';
 	import ImageList from '$lib/components/ImageList.svelte';
 	import Settings from '$lib/components/Settings.svelte';
@@ -460,7 +460,7 @@
 		</div>
 	</main>
 
-	<Footer />
+	<Footer currentApp="squish" />
 </div>
 
 <!-- Live Savings Ticker (shows during/after processing) -->

@@ -2,7 +2,7 @@
 	import { filesStore, processFiles, downloadFile, downloadAllAsZip, terminatePool } from '$lib';
 	import type { OutputFormat } from '$lib/stores/files.svelte';
 	import { formatBytes } from '@neutron/utils/format';
-	import { DropZone } from '@neutron/ui';
+	import { DropZone, Footer } from '@neutron/ui';
 
 	function handlePageHide() {
 		terminatePool();
@@ -209,24 +209,5 @@
 		/>
 	{/if}
 
-	<!-- Footer -->
-	<footer class="text-surface-500 mt-16 text-center text-sm sm:mt-20 sm:text-base">
-		<p class="mb-2">
-			Part of <a
-				href="https://github.com/ishanjalan/Neutron"
-				class="text-accent-start hover:text-accent-end transition-colors hover:underline">Neutron</a
-			>
-			• Also try
-			<a
-				href="https://ishanjalan.github.io/Squish/"
-				class="text-accent-start hover:text-accent-end transition-colors hover:underline">Squish</a
-			> for image compression
-		</p>
-		<p class="text-surface-600">
-			Built with SvelteKit • 100% open source on <a
-				href="https://github.com/ishanjalan/Neutron"
-				class="text-accent-start hover:text-accent-end transition-colors hover:underline">GitHub</a
-			>
-		</p>
-	</footer>
+	<Footer currentApp="heic" />
 </div>

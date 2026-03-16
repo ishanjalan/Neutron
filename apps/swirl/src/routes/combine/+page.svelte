@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import Footer from '$lib/components/Footer.svelte';
+	import { Footer } from '@neutron/ui';
 	import DropZone from '$lib/components/DropZone.svelte';
 	import CompareSlider from '$lib/components/CompareSlider.svelte';
 	import { toast } from '@neutron/ui';
@@ -575,7 +575,7 @@
 		</div>
 	</main>
 
-	<Footer />
+	<Footer currentApp="swirl" />
 </div>
 
 <!-- Comparison Modal -->

@@ -10,63 +10,28 @@
 		Coffee,
 		Linkedin,
 		Sparkles,
+		Layers,
 	} from 'lucide-svelte';
+	import { NEUTRON_APPS_LIST, type AppId } from '@neutron/utils/apps';
 
-	type AppName = 'squish' | 'squash' | 'smash' | 'swirl';
-
-	interface App {
-		id: AppName;
-		name: string;
-		url: string;
-		github: string;
-		icon: typeof Image;
-		gradient: string;
-	}
-
-	const apps: App[] = [
-		{
-			id: 'squish',
-			name: 'Squish',
-			url: 'https://ishanjalan.github.io/ImageOptimser/',
-			github: 'https://github.com/ishanjalan/Neutron/tree/main/apps/squish',
-			icon: Image,
-			gradient: 'linear-gradient(135deg, rgb(16 185 129), rgb(20 184 166))',
-		},
-		{
-			id: 'squash',
-			name: 'Squash',
-			url: 'https://ishanjalan.github.io/Squash/',
-			github: 'https://github.com/ishanjalan/Neutron/tree/main/apps/squash',
-			icon: Film,
-			gradient: 'linear-gradient(135deg, rgb(249 115 22), rgb(251 191 36))',
-		},
-		{
-			id: 'smash',
-			name: 'Smash',
-			url: 'https://ishanjalan.github.io/Smash/',
-			github: 'https://github.com/ishanjalan/Neutron/tree/main/apps/smash',
-			icon: FileText,
-			gradient: 'linear-gradient(135deg, rgb(14 165 233), rgb(34 211 238))',
-		},
-		{
-			id: 'swirl',
-			name: 'Swirl',
-			url: 'https://ishanjalan.github.io/Swirl/',
-			github: 'https://github.com/ishanjalan/Neutron/tree/main/apps/swirl',
-			icon: Disc3,
-			gradient: 'linear-gradient(135deg, rgb(217 70 239), rgb(244 114 182))',
-		},
-	];
+	// Map app IDs to Lucide icons (can't store component refs in the data module)
+	const APP_ICONS: Record<AppId, typeof Image> = {
+		squish: Image,
+		squash: Film,
+		smash: FileText,
+		swirl: Disc3,
+		heic: Layers,
+	};
 
 	let {
 		currentApp,
 		privacyText = 'Your files never leave your device',
 	}: {
-		currentApp: AppName;
+		currentApp: AppId;
 		privacyText?: string;
 	} = $props();
 
-	const currentAppData = $derived(apps.find((app) => app.id === currentApp)!);
+	const currentAppData = $derived(NEUTRON_APPS_LIST.find((app) => app.id === currentApp)!);
 </script>
 
 <footer class="relative mt-16 border-t border-white/5 bg-black/30 backdrop-blur-sm">
@@ -81,12 +46,13 @@
 				<Sparkles class="h-3.5 w-3.5 text-amber-400" />
 			</div>
 
-			<!-- App Cards - Always 4 columns -->
-			<div class="grid grid-cols-4 gap-3 sm:gap-4">
-				{#each apps as app}
+			<!-- App Cards -->
+			<div class="grid grid-cols-5 gap-3 sm:gap-4">
+				{#each NEUTRON_APPS_LIST as app (app.id)}
 					{@const isCurrent = app.id === currentApp}
+					{@const Icon = APP_ICONS[app.id]}
 					{#if isCurrent}
-						<!-- Current App -->
+						<!-- Current App (non-linked) -->
 						<div
 							class="relative overflow-hidden rounded-xl p-px"
 							style="background: {app.gradient}"
@@ -94,20 +60,16 @@
 							<div
 								class="relative flex flex-col items-center gap-2 rounded-xl bg-black/70 px-3 py-5 backdrop-blur-sm sm:gap-3 sm:py-6"
 							>
-								<!-- Icon -->
 								<div
 									class="flex h-10 w-10 items-center justify-center rounded-lg sm:h-12 sm:w-12"
 									style="background: {app.gradient}"
 								>
-									<svelte:component this={app.icon} class="h-5 w-5 text-white sm:h-6 sm:w-6" />
+									<Icon class="h-5 w-5 text-white sm:h-6 sm:w-6" />
 								</div>
-
-								<!-- Name -->
 								<span class="text-xs font-bold uppercase tracking-wide text-white sm:text-sm"
 									>{app.name}</span
 								>
-
-								<!-- Active Badge -->
+								<!-- Active indicator -->
 								<div
 									class="absolute right-1.5 top-1.5 flex h-1.5 w-1.5 sm:right-2 sm:top-2 sm:h-2 sm:w-2"
 								>
@@ -126,25 +88,20 @@
 							title="Visit {app.name}"
 						>
 							<div class="flex flex-col items-center gap-2 px-3 py-5 sm:gap-3 sm:py-6">
-								<!-- Icon -->
 								<div
 									class="hover-bg flex h-10 w-10 items-center justify-center rounded-lg bg-white/5 transition-all duration-200 group-hover:scale-110 sm:h-12 sm:w-12"
 									style="--hover-bg: {app.gradient}"
 								>
-									<svelte:component
-										this={app.icon}
+									<Icon
 										class="h-5 w-5 text-white/40 transition-colors duration-200 group-hover:text-white sm:h-6 sm:w-6"
 									/>
 								</div>
-
-								<!-- Name -->
 								<span
 									class="text-xs font-bold uppercase tracking-wide text-white/40 transition-colors duration-200 group-hover:text-white sm:text-sm"
 									>{app.name}</span
 								>
 							</div>
-
-							<!-- Hover overlay -->
+							<!-- Hover gradient overlay -->
 							<div
 								class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
 							>

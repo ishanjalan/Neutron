@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import Footer from '$lib/components/Footer.svelte';
+	import { Footer } from '@neutron/ui';
 	import DropZone from '$lib/components/DropZone.svelte';
 	import { toast } from '@neutron/ui';
 	import {
@@ -663,5 +663,5 @@
 		</div>
 	</main>
 
-	<Footer />
+	<Footer currentApp="swirl" />
 </div>

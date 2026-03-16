@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import Footer from '$lib/components/Footer.svelte';
+	import { Footer } from '@neutron/ui';
 	import DropZone from '$lib/components/DropZone.svelte';
 	import { toast } from '@neutron/ui';
 	import { Layers, Download, Check, RotateCcw, Loader2, Image, Package } from 'lucide-svelte';
@@ -351,5 +351,5 @@
 		</div>
 	</main>
 
-	<Footer />
+	<Footer currentApp="swirl" />
 </div>

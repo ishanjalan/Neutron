@@ -6,7 +6,7 @@
 
 	let { children } = $props();
 
-	const siteUrl = 'https://ishanjalan.github.io/ImageOptimser';
+	const siteUrl = 'https://ishanjalan.github.io/Squish';
 	const ogImage = `${siteUrl}/og-image.svg`;
 </script>
 

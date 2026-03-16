@@ -47,6 +47,10 @@
 		"./service-worker": {
 			"types": "./src/service-worker.ts",
 			"default": "./src/service-worker.ts"
+		},
+		"./apps": {
+			"types": "./src/apps.ts",
+			"default": "./src/apps.ts"
 		}
 	},
 	"devDependencies": {

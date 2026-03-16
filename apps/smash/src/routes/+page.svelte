@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import Header from '$lib/components/Header.svelte';
-	import Footer from '$lib/components/Footer.svelte';
+	import { Footer } from '@neutron/ui';
 	import {
 		Shield,
 		Zap,
@@ -275,5 +275,5 @@
 		</div>
 	</main>
 
-	<Footer />
+	<Footer currentApp="smash" />
 </div>
