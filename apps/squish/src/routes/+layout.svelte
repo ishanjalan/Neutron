@@ -1,8 +1,7 @@
 <script lang="ts">
-	import '../app-enterprise.css';
+	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { Toast } from '@neutron/ui';
-	import { base } from '$app/paths';
 
 	let { children } = $props();
 
@@ -12,27 +11,27 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<title>Squish - Enterprise Image Optimization Infrastructure</title>
+	<title>Squish - Image Optimizer</title>
 
 	<!-- Open Graph -->
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content={siteUrl} />
-	<meta property="og:title" content="Squish - Enterprise Image Optimization Infrastructure" />
+	<meta property="og:title" content="Squish - Image Optimizer" />
 	<meta
 		property="og:description"
-		content="Mission-critical image compression for organizations. Zero-latency processing, 100% private, industrial-grade reliability. WASM-powered batch optimization."
+		content="Compress JPEG, PNG, WebP, AVIF, and SVG files instantly in your browser. 100% private — your images never leave your device."
 	/>
 	<meta property="og:image" content={ogImage} />
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
-	<meta property="og:site_name" content="Squish Enterprise" />
+	<meta property="og:site_name" content="Squish" />
 
 	<!-- Twitter Card -->
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content="Squish - Free Image Optimizer" />
+	<meta name="twitter:title" content="Squish - Image Optimizer" />
 	<meta
 		name="twitter:description"
-		content="Compress JPEG, PNG, WebP, AVIF, and SVG files instantly in your browser. 100% private - your images never leave your device."
+		content="Compress JPEG, PNG, WebP, AVIF, and SVG files instantly in your browser. 100% private — your images never leave your device."
 	/>
 	<meta name="twitter:image" content={ogImage} />
 

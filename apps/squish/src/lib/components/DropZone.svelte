@@ -3,7 +3,6 @@
 	import { images } from '$lib/stores/images.svelte';
 	import { processImages } from '$lib/utils/compress';
 	import { fade } from 'svelte/transition';
-	import SampleImageDemo from './SampleImageDemo.svelte';
 
 	let isDragging = $state(false);
 	let fileInput: HTMLInputElement;
@@ -391,7 +390,7 @@
 				<!-- Icon -->
 				<div
 					class="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl transition-all duration-300 {isDragging
-						? 'bg-accent-start/20 rotate-3 scale-110'
+						? 'bg-accent-start/20 scale-110 rotate-3'
 						: 'bg-surface-800 group-hover:bg-accent-start/10 group-hover:scale-105'}"
 				>
 					{#if isDragging}
@@ -425,7 +424,7 @@
 
 				<!-- Supported formats -->
 				<div class="mt-6 flex flex-wrap items-center justify-center gap-2">
-					{#each formats as format}
+					{#each formats as format (format.name)}
 						<span
 							class="rounded-lg bg-gradient-to-r {format.color} px-3 py-1 text-xs font-semibold text-white shadow-sm transition-transform hover:scale-105"
 						>
@@ -436,11 +435,6 @@
 				<p class="text-surface-400 mt-5 text-sm">
 					Unlimited size • Folders supported • Batch upload • Paste from clipboard
 				</p>
-
-				<!-- Sample Images Demo -->
-				<div class="mt-8">
-					<SampleImageDemo />
-				</div>
 			</div>
 		</div>
 	{/if}
@@ -456,13 +450,13 @@
 			{#if showUrlInput}
 				<div class="flex w-full max-w-md items-center gap-2" transition:fade={{ duration: 150 }}>
 					<div class="relative flex-1">
-						<Link class="text-surface-400 absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+						<Link class="text-surface-400 absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
 						<input
 							bind:this={urlInputRef}
 							bind:value={urlValue}
 							type="url"
 							placeholder="https://example.com/image.jpg"
-							class="bg-surface-800 border-surface-700 text-surface-100 placeholder:text-surface-500 focus:border-accent-start focus:ring-accent-start w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-1"
+							class="bg-surface-800 border-surface-700 text-surface-100 placeholder:text-surface-500 focus:border-accent-start focus:ring-accent-start w-full rounded-xl border py-2.5 pr-4 pl-10 text-sm focus:ring-1 focus:outline-none"
 							onkeydown={handleUrlKeydown}
 							disabled={isLoadingUrl}
 						/>

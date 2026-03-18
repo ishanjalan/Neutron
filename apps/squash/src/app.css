@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 @import '@neutron/config/tailwind/base.css';
-@source "../../../packages/ui/src";
+@source '../../../packages/ui/src';
 
 /* App-specific accent: Orange/Amber for video compression */
 @theme {

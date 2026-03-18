@@ -83,19 +83,20 @@
 
 {#if toasts.length > 0}
 	<div
-		class="fixed bottom-4 right-4 z-[100] flex max-w-sm flex-col gap-2"
+		class="fixed right-4 bottom-4 z-[100] flex max-w-sm flex-col gap-2"
 		role="region"
 		aria-label="Notifications"
 		aria-live="polite"
 	>
 		{#each toasts as t (t.id)}
+			{@const Icon = icons[t.type]}
 			<div
 				class="glass flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg {styles[t.type]}"
 				in:fly={{ x: 100, duration: 200 }}
 				out:fade={{ duration: 150 }}
 				role="alert"
 			>
-				<svelte:component this={icons[t.type]} class="h-5 w-5 flex-shrink-0" />
+				<Icon class="h-5 w-5 flex-shrink-0" />
 				<p class="text-surface-100 flex-1 text-sm font-medium">
 					{t.message}
 				</p>

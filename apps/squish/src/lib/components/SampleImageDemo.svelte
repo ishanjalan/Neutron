@@ -123,7 +123,8 @@
 	</div>
 
 	<div class="grid gap-3 sm:grid-cols-3">
-		{#each samples as sample}
+		{#each samples as sample (sample.id)}
+			{@const SampleIcon = sample.icon}
 			<button
 				onclick={() => handleSampleClick(sample.id)}
 				class="glass hover:shadow-accent-start/10 group relative overflow-hidden rounded-xl p-4 text-left transition-all hover:scale-105 hover:shadow-xl active:scale-95"
@@ -132,7 +133,7 @@
 				<div
 					class="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br {sample.gradient} shadow-lg"
 				>
-					<svelte:component this={sample.icon} class="h-6 w-6 text-white" />
+					<SampleIcon class="h-6 w-6 text-white" />
 				</div>
 
 				<!-- Info -->

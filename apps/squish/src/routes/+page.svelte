@@ -6,24 +6,14 @@
 	import Settings from '$lib/components/Settings.svelte';
 	import BatchSummary from '$lib/components/BatchSummary.svelte';
 	import LiveSavingsTicker from '$lib/components/LiveSavingsTicker.svelte';
-	import EnterpriseHero from '$lib/components/EnterpriseHero.svelte';
 	import MobileOptimizations from '$lib/components/MobileOptimizations.svelte';
 	import { ConfirmModal, AnimatedNumber, toast } from '@neutron/ui';
 	import { images, formatBytes } from '$lib';
 	import { processImages, cancelProcessing } from '$lib/utils/compress';
 	import { terminatePool } from '$lib/utils/worker-pool';
-	import {
-		Download,
-		Trash2,
-		Sparkles,
-		Zap,
-		Shield,
-		Gauge,
-		ArrowDown,
-		XCircle,
-	} from 'lucide-svelte';
+	import { Download, Trash2, Sparkles, XCircle } from 'lucide-svelte';
 	import { downloadAllAsZip } from '$lib/utils/download';
-	import { fade, fly } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 	import type { ImageItem } from '$lib/stores/images.svelte';
 
 	let showClearConfirm = $state(false);
@@ -286,24 +276,6 @@
 		terminatePool();
 		images.clearAll();
 	}
-
-	const features = [
-		{
-			icon: Zap,
-			title: 'Lightning Fast',
-			description: 'WASM-powered codecs for instant compression',
-		},
-		{
-			icon: Shield,
-			title: '100% Private',
-			description: 'Files never leave your device',
-		},
-		{
-			icon: Gauge,
-			title: 'Pro Codecs',
-			description: 'MozJPEG, WebP, AVIF, JPEG XL & more',
-		},
-	];
 </script>
 
 <svelte:window
@@ -322,21 +294,16 @@
 	<MobileOptimizations />
 	<Header />
 
-	<!-- Background decoration -->
-	<div class="fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
-		<div
-			class="from-data-cyan/5 to-data-blue/5 absolute -top-1/2 -right-1/4 h-[800px] w-[800px] rounded-full bg-gradient-to-br blur-3xl"
-		></div>
-		<div
-			class="from-data-blue/5 to-data-cyan/5 absolute -bottom-1/2 -left-1/4 h-[600px] w-[600px] rounded-full bg-gradient-to-tr blur-3xl"
-		></div>
-	</div>
-
 	<main class="flex-1 px-4 pt-24 pb-8 sm:px-6 sm:pt-28 sm:pb-12 lg:px-8">
 		<div class="mx-auto max-w-7xl">
-			<!-- Hero Section -->
+			<!-- Clean empty state -->
 			{#if !hasImages}
-				<EnterpriseHero />
+				<div class="mb-8 text-center">
+					<h1 class="gradient-text mb-2 text-3xl font-bold">Compress Images</h1>
+					<p class="text-surface-400 text-sm">
+						Drop images below. JPEG, PNG, WebP, AVIF, SVG, HEIC — processed in your browser.
+					</p>
+				</div>
 			{/if}
 
 			<!-- Batch Summary (shown after all images complete) -->
@@ -399,7 +366,6 @@
 								disabled={isZipping}
 								class="from-accent-start to-accent-end shadow-accent-start/30 hover:shadow-accent-start/40 relative flex items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r px-5 py-2.5 text-sm font-medium text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl disabled:cursor-wait disabled:opacity-80"
 							>
-								<!-- Progress bar overlay -->
 								{#if isZipping && zipProgress !== null}
 									<div
 										class="absolute inset-0 bg-white/20 transition-all duration-150"
@@ -438,24 +404,20 @@
 				</div>
 			{/if}
 
-			<!-- Settings Panel (shown before drop zone when images exist) -->
-			{#if hasImages}
-				<Settings />
-			{/if}
+			<!-- Settings -->
+			<Settings />
 
-			<!-- Drop Zone -->
-			<DropZone />
-
-			<!-- Settings Panel (shown after drop zone when no images - allows pre-configuration) -->
+			<!-- Empty state: DropZone is primary -->
 			{#if !hasImages}
-				<div id="settings-panel" class="relative z-10 mt-6" in:fade={{ duration: 200, delay: 300 }}>
-					<Settings />
-				</div>
+				<DropZone />
 			{/if}
 
-			<!-- Image List -->
+			<!-- Image list -->
 			{#if hasImages}
 				<ImageList />
+
+				<!-- DropZone below list for adding more images -->
+				<DropZone />
 			{/if}
 		</div>
 	</main>

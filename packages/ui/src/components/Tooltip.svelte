@@ -29,19 +29,15 @@
 	};
 </script>
 
-<!-- svelte-ignore a11y_no_noninteractive_tabindex a11y_no_static_element_interactions -->
-<span
-	class="relative inline-flex items-center"
-	onmouseenter={() => (showTooltip = true)}
-	onmouseleave={() => (showTooltip = false)}
-	onfocus={() => (showTooltip = true)}
-	onblur={() => (showTooltip = false)}
-	tabindex="0"
->
+<span class="relative inline-flex items-center">
 	<button
 		type="button"
 		class="text-surface-500 hover:text-surface-300 p-0.5 transition-colors"
 		aria-label="More info"
+		onmouseenter={() => (showTooltip = true)}
+		onmouseleave={() => (showTooltip = false)}
+		onfocus={() => (showTooltip = true)}
+		onblur={() => (showTooltip = false)}
 	>
 		{#if icon}
 			{@render icon()}

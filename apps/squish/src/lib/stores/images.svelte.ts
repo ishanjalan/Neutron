@@ -1,4 +1,5 @@
 import { SvelteSet } from 'svelte/reactivity';
+import { toast } from '@neutron/ui';
 
 export type ImageFormat = 'jpeg' | 'png' | 'webp' | 'avif' | 'jxl' | 'svg' | 'heic';
 export type OutputFormat = 'jpeg' | 'png' | 'webp' | 'avif' | 'jxl' | 'svg'; // HEIC is input-only
@@ -216,7 +217,79 @@ function createImagesStore() {
 			batchStats = { startTime: null, endTime: null, totalImages: 0 };
 		},
 
+		suggestSettings(
+			newItems: ImageItem[]
+		): { suggested: Partial<CompressionSettings>; reasons: string[] } | null {
+			if (newItems.length === 0) return null;
+
+			const suggested: Partial<CompressionSettings> = {};
+			const reasons: string[] = [];
+
+			// Quality based on median file size
+			const sizes = newItems.map((i) => i.originalSize).sort((a, b) => a - b);
+			const medianSize = sizes[Math.floor(sizes.length / 2)];
+
+			if (medianSize > 10 * 1024 * 1024) {
+				suggested.quality = 60;
+				reasons.push('quality 60 (large files)');
+			} else if (medianSize > 2 * 1024 * 1024) {
+				suggested.quality = 70;
+				reasons.push('quality 70');
+			} else if (medianSize < 100 * 1024) {
+				suggested.quality = 95;
+				reasons.push('quality 95 (already small)');
+			}
+			// 100KB–2MB stays at default 80
+
+			// Format based on input content
+			const formats = newItems.map((i) => i.format);
+			const uniqueFormats = new Set(formats);
+			const allSvg = uniqueFormats.size === 1 && uniqueFormats.has('svg');
+			const allJpeg = uniqueFormats.size === 1 && uniqueFormats.has('jpeg');
+			const allPng = uniqueFormats.size === 1 && uniqueFormats.has('png');
+			const hasHeic = uniqueFormats.has('heic');
+
+			if (allSvg) {
+				suggested.outputFormat = 'same';
+				reasons.push('keeping SVG');
+			} else if (allJpeg) {
+				suggested.outputFormat = 'same';
+				reasons.push('keeping JPEG');
+			} else if (allPng) {
+				suggested.outputFormat = 'webp';
+				reasons.push('WebP for PNG inputs');
+			} else if (hasHeic) {
+				suggested.outputFormat = 'webp';
+				reasons.push('WebP for HEIC');
+			}
+
+			// Auto-resize for oversized images
+			const maxDim = Math.max(
+				...newItems.filter((i) => i.width && i.height).flatMap((i) => [i.width!, i.height!]),
+				0
+			);
+
+			if (maxDim > 8000) {
+				suggested.resizeEnabled = true;
+				suggested.resizeMode = 'fit';
+				suggested.resizeMaxWidth = 4096;
+				suggested.resizeMaxHeight = 4096;
+				reasons.push('resize to 4096px (very large images)');
+			} else if (maxDim > 4096) {
+				suggested.resizeEnabled = true;
+				suggested.resizeMode = 'fit';
+				suggested.resizeMaxWidth = 2048;
+				suggested.resizeMaxHeight = 2048;
+				reasons.push('resize to 2048px');
+			}
+
+			if (reasons.length === 0) return null;
+			return { suggested, reasons };
+		},
+
 		async addFiles(files: FileList | File[]) {
+			const wasEmpty = items.length === 0;
+
 			const validTypes = [
 				'image/jpeg',
 				'image/jpg',
@@ -236,23 +309,16 @@ function createImagesStore() {
 
 				const format = getFormatFromMime(file.type);
 
-				// Determine output format:
-				// - SVG defaults to SVG if 'same', but can now be converted to raster
-				// - HEIC must be converted (can't output HEIC), default to WebP
-				// - Others follow user setting
 				let outputFormat: OutputFormat;
 				if (format === 'svg') {
-					// SVG: use 'svg' if 'same', otherwise use the user's chosen format
 					outputFormat = settings.outputFormat === 'same' ? 'svg' : settings.outputFormat;
 				} else if (format === 'heic') {
-					// HEIC is input-only, always convert to user's preferred format (or WebP if 'same')
 					outputFormat = settings.outputFormat === 'same' ? 'webp' : settings.outputFormat;
 				} else {
 					outputFormat =
 						settings.outputFormat === 'same' ? (format as OutputFormat) : settings.outputFormat;
 				}
 
-				// Get dimensions asynchronously (returns null for HEIC)
 				let width: number | undefined;
 				let height: number | undefined;
 				try {
@@ -261,7 +327,7 @@ function createImagesStore() {
 						width = dims.width;
 						height = dims.height;
 					}
-				} catch (e) {
+				} catch {
 					console.warn('Failed to get dimensions for', file.name);
 				}
 
@@ -284,6 +350,35 @@ function createImagesStore() {
 			}
 
 			items = [...items, ...newItems];
+
+			// Suggest smart defaults on first batch only
+			if (wasEmpty && newItems.length > 0) {
+				const result = this.suggestSettings(newItems);
+				if (result) {
+					this.updateSettings(result.suggested);
+
+					// Re-apply output format to the just-added items
+					if (result.suggested.outputFormat !== undefined) {
+						items = items.map((item) => {
+							if (item.status !== 'pending') return item;
+							const fmt = result.suggested.outputFormat!;
+							if (item.format === 'svg' && fmt === 'same') {
+								return { ...item, outputFormat: 'svg' as OutputFormat };
+							}
+							if (item.format === 'heic' && fmt === 'same') {
+								return { ...item, outputFormat: 'webp' as OutputFormat };
+							}
+							return {
+								...item,
+								outputFormat: fmt === 'same' ? (item.format as OutputFormat) : fmt,
+							};
+						});
+					}
+
+					toast.info(`Settings adjusted: ${result.reasons.join(', ')}`);
+				}
+			}
+
 			return newItems;
 		},
 
