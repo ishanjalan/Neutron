@@ -1,5 +1,6 @@
 import { SvelteSet } from 'svelte/reactivity';
 import { toast } from '@neutron/ui';
+import { detectSvgEmbeddedRaster } from '$lib/utils/svg-analyze';
 
 export type ImageFormat = 'jpeg' | 'png' | 'webp' | 'avif' | 'jxl' | 'svg' | 'heic';
 export type OutputFormat = 'jpeg' | 'png' | 'webp' | 'avif' | 'jxl' | 'svg'; // HEIC is input-only
@@ -23,6 +24,8 @@ export interface ImageItem {
 	width?: number;
 	height?: number;
 	webpAlternativeSize?: number;
+	svgEmbeddedRaster?: boolean;
+	svgAnalysisComplete?: boolean;
 	targetSizeAttempt?: number;
 	targetSizeMaxAttempts?: number;
 	achievedQuality?: number;
@@ -248,8 +251,12 @@ function createImagesStore() {
 			const allJpeg = uniqueFormats.size === 1 && uniqueFormats.has('jpeg');
 			const allPng = uniqueFormats.size === 1 && uniqueFormats.has('png');
 			const hasHeic = uniqueFormats.has('heic');
+			const hasSvgEmbeddedRaster = newItems.some((i) => i.svgEmbeddedRaster);
 
-			if (allSvg) {
+			if (allSvg && hasSvgEmbeddedRaster) {
+				suggested.outputFormat = 'webp';
+				reasons.push('WebP — SVG contains embedded bitmap images');
+			} else if (allSvg) {
 				suggested.outputFormat = 'same';
 				reasons.push('keeping SVG');
 			} else if (allJpeg) {
@@ -319,34 +326,45 @@ function createImagesStore() {
 						settings.outputFormat === 'same' ? (format as OutputFormat) : settings.outputFormat;
 				}
 
-				let width: number | undefined;
-				let height: number | undefined;
-				try {
-					const dims = await getImageDimensions(file);
-					if (dims) {
-						width = dims.width;
-						height = dims.height;
-					}
-				} catch {
-					console.warn('Failed to get dimensions for', file.name);
+			let width: number | undefined;
+			let height: number | undefined;
+			try {
+				const dims = await getImageDimensions(file);
+				if (dims) {
+					width = dims.width;
+					height = dims.height;
 				}
+			} catch {
+				console.warn('Failed to get dimensions for', file.name);
+			}
 
-				const thumbnailUrl = await generateThumbnail(file);
+			const thumbnailUrl = await generateThumbnail(file);
 
-				newItems.push({
-					id: generateId(),
-					file,
-					name: file.name,
-					originalSize: file.size,
-					originalUrl: URL.createObjectURL(file),
-					thumbnailUrl,
-					format,
-					outputFormat,
-					status: 'pending',
-					progress: 0,
-					width,
-					height,
-				});
+			// Detect embedded bitmaps in SVG files (e.g. Figma exports that wrap rasters in SVG)
+			let svgEmbeddedRaster: boolean | undefined;
+			if (format === 'svg') {
+				svgEmbeddedRaster = await detectSvgEmbeddedRaster(file);
+				// Override output format: embedded-raster SVGs should default to WebP
+				if (svgEmbeddedRaster && settings.outputFormat === 'same') {
+					outputFormat = 'webp';
+				}
+			}
+
+			newItems.push({
+				id: generateId(),
+				file,
+				name: file.name,
+				originalSize: file.size,
+				originalUrl: URL.createObjectURL(file),
+				thumbnailUrl,
+				format,
+				outputFormat,
+				status: 'pending',
+				progress: 0,
+				width,
+				height,
+				svgEmbeddedRaster,
+			});
 			}
 
 			items = [...items, ...newItems];
@@ -357,25 +375,29 @@ function createImagesStore() {
 				if (result) {
 					this.updateSettings(result.suggested);
 
-					// Re-apply output format to the just-added items
-					if (result.suggested.outputFormat !== undefined) {
-						items = items.map((item) => {
-							if (item.status !== 'pending') return item;
-							const fmt = result.suggested.outputFormat!;
-							if (item.format === 'svg' && fmt === 'same') {
-								return { ...item, outputFormat: 'svg' as OutputFormat };
-							}
-							if (item.format === 'heic' && fmt === 'same') {
-								return { ...item, outputFormat: 'webp' as OutputFormat };
-							}
-							return {
-								...item,
-								outputFormat: fmt === 'same' ? (item.format as OutputFormat) : fmt,
-							};
-						});
-					}
+				// Re-apply output format to the just-added items
+				if (result.suggested.outputFormat !== undefined) {
+					items = items.map((item) => {
+						if (item.status !== 'pending') return item;
+						const fmt = result.suggested.outputFormat!;
+						// Embedded-raster SVGs always get WebP regardless of suggested format
+						if (item.format === 'svg' && item.svgEmbeddedRaster) {
+							return { ...item, outputFormat: 'webp' as OutputFormat };
+						}
+						if (item.format === 'svg' && fmt === 'same') {
+							return { ...item, outputFormat: 'svg' as OutputFormat };
+						}
+						if (item.format === 'heic' && fmt === 'same') {
+							return { ...item, outputFormat: 'webp' as OutputFormat };
+						}
+						return {
+							...item,
+							outputFormat: fmt === 'same' ? (item.format as OutputFormat) : fmt,
+						};
+					});
+				}
 
-					toast.info(`Settings adjusted: ${result.reasons.join(', ')}`);
+				toast.info(`Settings adjusted: ${result.reasons.join(', ')}`);
 				}
 			}
 
@@ -437,6 +459,10 @@ function createImagesStore() {
 					if (item.status === 'pending') {
 						// HEIC can't use 'same' - default to WebP
 						if (item.format === 'heic' && newSettings.outputFormat === 'same') {
+							return { ...item, outputFormat: 'webp' as OutputFormat };
+						}
+						// Embedded-raster SVGs stay as WebP regardless of global setting
+						if (item.format === 'svg' && item.svgEmbeddedRaster) {
 							return { ...item, outputFormat: 'webp' as OutputFormat };
 						}
 						// SVG: use 'svg' if 'same', otherwise convert

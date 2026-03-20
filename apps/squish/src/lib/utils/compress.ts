@@ -397,16 +397,19 @@ async function compressImage(item: ImageItem) {
 			);
 			images.updateItem(item.id, { progress: 80 });
 
-			// Compute WebP at 3× dimensions for complexity comparison (non-blocking, with timeout)
-			computeWebp3xSize(item.file, quality)
-				.then((webp3xSize) => {
-					if (webp3xSize > 0 && compressedBlob && compressedBlob.size > webp3xSize) {
-						images.updateItem(item.id, { webpAlternativeSize: webp3xSize });
-					}
-				})
-				.catch(() => {
-					/* complexity check is optional */
-				});
+		// Compute WebP at 3× dimensions for complexity comparison (non-blocking, with timeout)
+		computeWebp3xSize(item.file, quality)
+			.then((webp3xSize) => {
+				if (webp3xSize > 0 && compressedBlob && compressedBlob.size > webp3xSize) {
+					images.updateItem(item.id, { webpAlternativeSize: webp3xSize, svgAnalysisComplete: true });
+				} else {
+					images.updateItem(item.id, { svgAnalysisComplete: true });
+				}
+			})
+			.catch(() => {
+				/* complexity check is optional — still mark complete so positive tip can show */
+				images.updateItem(item.id, { svgAnalysisComplete: true });
+			});
 			images.updateItem(item.id, { progress: 90 });
 		} else if (item.format === 'svg' && outputFormat !== 'svg') {
 			// SVG → Raster: Render at 1x and compress
@@ -804,6 +807,7 @@ export async function reprocessImage(id: string, newFormat: OutputFormat) {
 		compressedUrl: undefined,
 		compressedBlob: undefined,
 		webpAlternativeSize: undefined,
+		svgAnalysisComplete: undefined,
 	});
 
 	// Initialize worker pool if needed
