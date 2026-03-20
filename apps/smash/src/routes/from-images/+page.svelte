@@ -152,7 +152,13 @@
 	}
 </script>
 
-<svelte:head><title>Images to PDF - Smash</title></svelte:head>
+<svelte:head>
+	<title>Images to PDF — Smash</title>
+	<meta name="description" content="Create a PDF from JPG, PNG, or WebP images. Free, private, browser-based." />
+	<meta property="og:title" content="Images to PDF — Smash" />
+	<meta property="og:description" content="Create a PDF from JPG, PNG, or WebP images. Free, private, browser-based." />
+	<link rel="canonical" href="https://ishanjalan.github.io/Smash/from-images" />
+</svelte:head>
 
 <div class="flex min-h-screen flex-col">
 	<Header />

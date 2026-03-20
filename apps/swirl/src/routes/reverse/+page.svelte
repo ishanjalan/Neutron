@@ -255,7 +255,11 @@
 </script>
 
 <svelte:head>
-	<title>Reverse GIF - Swirl</title>
+	<title>Reverse GIF — Swirl</title>
+	<meta name="description" content="Reverse a GIF or create a boomerang loop effect. Free, browser-based." />
+	<meta property="og:title" content="Reverse GIF — Swirl" />
+	<meta property="og:description" content="Reverse a GIF or create a boomerang loop effect. Free, browser-based." />
+	<link rel="canonical" href="https://ishanjalan.github.io/Swirl/reverse" />
 </svelte:head>
 
 <div class="flex min-h-screen flex-col">

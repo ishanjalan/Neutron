@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import { pdfs, formatBytes, type PDFItem } from '$lib/stores/pdfs.svelte';
-	import * as pdfjsLib from 'pdfjs-dist';
+	import type * as pdfjsLib from 'pdfjs-dist';
+	import { getPdfjs } from '$lib/utils/pdf';
 	import {
 		ZoomIn,
 		ZoomOut,
@@ -16,6 +17,8 @@
 		ChevronsLeft,
 		ChevronsRight,
 		Sidebar,
+		Maximize2,
+		AlignCenter,
 	} from 'lucide-svelte';
 	import { onMount, onDestroy, tick } from 'svelte';
 	import { fly } from 'svelte/transition';
@@ -54,6 +57,8 @@
 	let currentPageCanvas = $state<string | null>(null);
 	let pageWidth = $state(0);
 	let pageHeight = $state(0);
+	let naturalPageWidth = $state(0);
+	let naturalPageHeight = $state(0);
 
 	// Track which thumbnails are currently loading
 	let loadingThumbnails = new SvelteSet<number>();
@@ -61,8 +66,14 @@
 	// PDF document reference
 	let pdfDoc: pdfjsLib.PDFDocumentProxy | null = null;
 
+	// Active render task — cancelled before starting a new one (fix race condition)
+	let activeRenderTask: pdfjsLib.RenderTask | null = null;
+
 	// Sidebar scroll container ref
 	let sidebarScrollContainer: HTMLDivElement | null = null;
+
+	// Main content container ref (for fit-width/fit-page)
+	let mainContentRef: HTMLDivElement | null = null;
 
 	// Tool-specific behavior
 	const isPageSelectionTool = $derived(
@@ -72,8 +83,8 @@
 		['split', 'delete-pages', 'rotate'].includes(pdfs.settings.tool)
 	);
 
-	// Pages to display in current view
-	const visiblePages = $derived(() => {
+	// Pages to display in current view — use $derived.by for proper memoization
+	const visiblePages = $derived.by(() => {
 		const pages: number[] = [];
 		for (let i = thumbnailStartPage; i <= thumbnailEndPage; i++) {
 			pages.push(i);
@@ -81,8 +92,8 @@
 		return pages;
 	});
 
-	// All pages for sidebar
-	const allPages = $derived(() => {
+	// All pages for sidebar — use $derived.by for proper memoization
+	const allPages = $derived.by(() => {
 		const pages: number[] = [];
 		for (let i = 1; i <= totalPages; i++) {
 			pages.push(i);
@@ -96,15 +107,15 @@
 
 		try {
 			const arrayBuffer = await item.file.arrayBuffer();
-			pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+			// Use getPdfjs() to get a properly configured instance with worker set up
+			const pdfjs = await getPdfjs();
+			pdfDoc = await pdfjs.getDocument({ data: arrayBuffer }).promise;
 			totalPages = pdfDoc.numPages;
 
 			// Update item with page count
 			pdfs.updateItem(item.id, { pageCount: totalPages });
 
-			// Load first page preview
-			await renderPage(1);
-
+			// Do NOT call renderPage here — the $effect will fire when pdfDoc changes
 			// Pre-load initial thumbnails for sidebar
 			loadThumbnailRange(1, Math.min(THUMBNAIL_BATCH_SIZE, totalPages));
 		} catch (err) {
@@ -133,7 +144,7 @@
 			const ctx = canvas.getContext('2d');
 
 			if (ctx) {
-				await page.render({ canvasContext: ctx, viewport }).promise;
+				await page.render({ canvasContext: ctx, viewport, canvas }).promise;
 				const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
 				canvas.width = 0;
 				canvas.height = 0;
@@ -170,10 +181,19 @@
 	async function renderPage(pageNum: number) {
 		if (!pdfDoc || pageNum < 1 || pageNum > totalPages) return;
 
+		// Cancel any in-progress render to avoid race conditions
+		activeRenderTask?.cancel();
+		activeRenderTask = null;
+
 		try {
 			const page = await pdfDoc.getPage(pageNum);
 			const scale = zoom * 1.5;
 			const viewport = page.getViewport({ scale });
+
+			// Capture natural page dimensions (at scale=1) for fit-width/fit-page
+			const naturalViewport = page.getViewport({ scale: 1 });
+			naturalPageWidth = naturalViewport.width;
+			naturalPageHeight = naturalViewport.height;
 
 			pageWidth = viewport.width;
 			pageHeight = viewport.height;
@@ -184,8 +204,18 @@
 			const ctx = canvas.getContext('2d');
 
 			if (ctx) {
-				await page.render({ canvasContext: ctx, viewport }).promise;
-				currentPageCanvas = canvas.toDataURL('image/png');
+				const renderTask = page.render({ canvasContext: ctx, viewport, canvas });
+				activeRenderTask = renderTask;
+				try {
+					await renderTask.promise;
+				} catch (e: unknown) {
+					// Ignore cancellation errors — this is expected when navigating quickly
+					if (e instanceof Error && e.name === 'RenderingCancelledException') return;
+					throw e;
+				}
+				activeRenderTask = null;
+				// Use JPEG for main viewer — PNG is lossless but memory-heavy for large pages
+				currentPageCanvas = canvas.toDataURL('image/jpeg', 0.92);
 				canvas.width = 0;
 				canvas.height = 0;
 			}
@@ -197,7 +227,7 @@
 	function goToPage(pageNum: number) {
 		if (pageNum >= 1 && pageNum <= totalPages) {
 			currentPage = pageNum;
-			renderPage(pageNum);
+			// Do NOT call renderPage directly — the $effect tracks currentPage and will fire
 
 			// Load nearby thumbnails for sidebar
 			loadThumbnailRange(Math.max(1, pageNum - 10), Math.min(totalPages, pageNum + 10));
@@ -223,8 +253,11 @@
 		const scrollTop = container.scrollTop;
 		const clientHeight = container.clientHeight;
 
+		// Read actual thumbnail height rather than hardcoding 160px
+		const thumbnailEl = container.querySelector('[data-page]');
+		const thumbnailHeight = thumbnailEl?.getBoundingClientRect().height ?? 160;
+
 		// Calculate which pages are currently visible
-		const thumbnailHeight = 160; // approximate height of each thumbnail item
 		const startPage = Math.floor(scrollTop / thumbnailHeight) + 1;
 		const endPage = Math.min(
 			totalPages,
@@ -249,12 +282,29 @@
 
 	function zoomIn() {
 		zoom = Math.min(zoom + 0.25, 3);
-		renderPage(currentPage);
+		// Do NOT call renderPage — the $effect tracks zoom and will fire
 	}
 
 	function zoomOut() {
 		zoom = Math.max(zoom - 0.25, 0.5);
-		renderPage(currentPage);
+		// Do NOT call renderPage — the $effect tracks zoom and will fire
+	}
+
+	function fitWidth() {
+		if (!mainContentRef || !naturalPageWidth) return;
+		// Account for padding (p-4 = 16px each side = 32px total)
+		const containerWidth = mainContentRef.clientWidth - 32;
+		// naturalPageWidth * zoom * 1.5 = rendered width, solve for zoom:
+		zoom = Math.max(0.5, Math.min(3, containerWidth / (naturalPageWidth * 1.5)));
+	}
+
+	function fitPage() {
+		if (!mainContentRef || !naturalPageWidth || !naturalPageHeight) return;
+		const containerWidth = mainContentRef.clientWidth - 32;
+		const containerHeight = mainContentRef.clientHeight - 32;
+		const scaleW = containerWidth / (naturalPageWidth * 1.5);
+		const scaleH = containerHeight / (naturalPageHeight * 1.5);
+		zoom = Math.max(0.5, Math.min(3, Math.min(scaleW, scaleH)));
 	}
 
 	function togglePageSelection(pageNum: number) {
@@ -328,11 +378,14 @@
 	});
 
 	onDestroy(() => {
+		activeRenderTask?.cancel();
 		pdfDoc?.destroy();
 	});
 
+	// Sole trigger for page renders — tracks pdfDoc, zoom, AND currentPage
+	// This prevents double-renders since we never call renderPage() directly elsewhere
 	$effect(() => {
-		if (pdfDoc && zoom) {
+		if (pdfDoc && zoom && currentPage) {
 			renderPage(currentPage);
 		}
 	});
@@ -433,6 +486,24 @@
 				<ZoomIn class="h-4 w-4" />
 			</button>
 
+			<!-- Fit-width and fit-page buttons -->
+			<button
+				onclick={fitWidth}
+				disabled={!naturalPageWidth}
+				class="text-surface-400 hover:text-surface-200 hover:bg-surface-700 rounded-lg p-1.5 transition-colors disabled:opacity-30"
+				title="Fit width"
+			>
+				<AlignCenter class="h-4 w-4" />
+			</button>
+			<button
+				onclick={fitPage}
+				disabled={!naturalPageWidth}
+				class="text-surface-400 hover:text-surface-200 hover:bg-surface-700 rounded-lg p-1.5 transition-colors disabled:opacity-30"
+				title="Fit page"
+			>
+				<Maximize2 class="h-4 w-4" />
+			</button>
+
 			<div class="bg-surface-700 mx-2 h-5 w-px"></div>
 
 			<button
@@ -502,7 +573,7 @@
 					class="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-2 py-3"
 				>
 					<div class="flex flex-col items-center gap-3">
-						{#each allPages() as pageNum (pageNum)}
+						{#each allPages as pageNum (pageNum)}
 							{@const thumb = thumbnailCache.get(pageNum)}
 							<button
 								data-page={pageNum}
@@ -556,7 +627,7 @@
 		{/if}
 
 		<!-- Main view -->
-		<div class="bg-surface-950 flex-1 overflow-auto p-4">
+		<div bind:this={mainContentRef} class="bg-surface-950 flex-1 overflow-auto p-4">
 			{#if isLoading}
 				<div class="flex h-full items-center justify-center">
 					<div class="text-surface-500 flex flex-col items-center gap-3">
@@ -649,7 +720,7 @@
 					<div
 						class="grid grid-cols-4 gap-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10"
 					>
-						{#each visiblePages() as pageNum (pageNum)}
+						{#each visiblePages as pageNum (pageNum)}
 							{@const thumb = thumbnailCache.get(pageNum)}
 							<button
 								onclick={() => {

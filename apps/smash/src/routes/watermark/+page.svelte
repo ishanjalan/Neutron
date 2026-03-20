@@ -135,7 +135,13 @@
 	}
 </script>
 
-<svelte:head><title>Add Watermark - Smash</title></svelte:head>
+<svelte:head>
+	<title>Watermark PDF — Smash</title>
+	<meta name="description" content="Add a custom text watermark to every PDF page. Free, browser-based." />
+	<meta property="og:title" content="Watermark PDF — Smash" />
+	<meta property="og:description" content="Add a custom text watermark to every PDF page. Free, browser-based." />
+	<link rel="canonical" href="https://ishanjalan.github.io/Smash/watermark" />
+</svelte:head>
 
 <div class="flex min-h-screen flex-col">
 	<Header />

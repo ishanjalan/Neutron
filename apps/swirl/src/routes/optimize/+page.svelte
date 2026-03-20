@@ -298,7 +298,11 @@
 </script>
 
 <svelte:head>
-	<title>Optimize GIF - Swirl</title>
+	<title>Optimize GIF — Swirl</title>
+	<meta name="description" content="Compress GIFs for Discord, Twitter, Slack, or WhatsApp with one-click size targets. Free." />
+	<meta property="og:title" content="Optimize GIF — Swirl" />
+	<meta property="og:description" content="Compress GIFs for Discord, Twitter, Slack, or WhatsApp with one-click size targets. Free." />
+	<link rel="canonical" href="https://ishanjalan.github.io/Swirl/optimize" />
 </svelte:head>
 
 <div class="flex min-h-screen flex-col">

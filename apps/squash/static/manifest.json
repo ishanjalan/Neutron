@@ -1,7 +1,7 @@
 {
 	"name": "Squash - Video Compressor",
 	"short_name": "Squash",
-	"description": "A blazing-fast, privacy-first video compressor that runs entirely in your browser. Compress and convert videos with FFmpeg — no uploads, no servers, no compromises.",
+	"description": "A blazing-fast, privacy-first video compressor that runs entirely in your browser. Compress and convert videos using WebCodecs — no uploads, no servers, no compromises.",
 	"start_url": "/",
 	"display": "standalone",
 	"background_color": "#09090b",

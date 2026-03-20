@@ -204,7 +204,11 @@
 </script>
 
 <svelte:head>
-	<title>OCR - Extract Text from PDFs - Smash</title>
+	<title>OCR PDF — Smash</title>
+	<meta name="description" content="Extract searchable text from scanned PDFs using Tesseract. Supports 100+ languages. Free and private." />
+	<meta property="og:title" content="OCR PDF — Smash" />
+	<meta property="og:description" content="Extract searchable text from scanned PDFs using Tesseract. Supports 100+ languages. Free and private." />
+	<link rel="canonical" href="https://ishanjalan.github.io/Smash/ocr" />
 </svelte:head>
 
 <div class="bg-surface-950 text-surface-200 flex min-h-screen flex-col">

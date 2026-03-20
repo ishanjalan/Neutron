@@ -137,7 +137,13 @@
 	}
 </script>
 
-<svelte:head><title>Protect PDF - Smash</title></svelte:head>
+<svelte:head>
+	<title>Protect PDF — Smash</title>
+	<meta name="description" content="Encrypt a PDF with AES-256 password protection. Free, private, no upload." />
+	<meta property="og:title" content="Protect PDF — Smash" />
+	<meta property="og:description" content="Encrypt a PDF with AES-256 password protection. Free, private, no upload." />
+	<link rel="canonical" href="https://ishanjalan.github.io/Smash/protect" />
+</svelte:head>
 
 <div class="flex min-h-screen flex-col">
 	<Header />

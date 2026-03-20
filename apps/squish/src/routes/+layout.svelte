@@ -38,6 +38,19 @@
 	<!-- Additional SEO -->
 	<meta name="robots" content="index, follow" />
 	<link rel="canonical" href={siteUrl} />
+
+	<!-- JSON-LD -->
+	<script type="application/ld+json">{JSON.stringify({
+		"@context": "https://schema.org",
+		"@type": "SoftwareApplication",
+		"name": "Squish - Image Optimizer",
+		"operatingSystem": "Web",
+		"applicationCategory": "UtilityApplication",
+		"offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+		"description": "Compress JPEG, PNG, WebP, AVIF, JPEG XL, SVG, GIF and HEIC images in your browser. 100% private.",
+		"url": "https://ishanjalan.github.io/ImageOptimser/",
+		"author": { "@type": "Person", "name": "Ishan Jalan", "url": "https://github.com/ishanjalan" }
+	})}</script>
 </svelte:head>
 
 {@render children()}

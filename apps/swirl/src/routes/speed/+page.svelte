@@ -290,7 +290,11 @@
 </script>
 
 <svelte:head>
-	<title>Speed & Reverse - Swirl</title>
+	<title>Change GIF Speed — Swirl</title>
+	<meta name="description" content="Speed up or slow down any animated GIF. Free, private, browser-based." />
+	<meta property="og:title" content="Change GIF Speed — Swirl" />
+	<meta property="og:description" content="Speed up or slow down any animated GIF. Free, private, browser-based." />
+	<link rel="canonical" href="https://ishanjalan.github.io/Swirl/speed" />
 </svelte:head>
 
 <div class="flex min-h-screen flex-col">

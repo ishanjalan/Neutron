@@ -218,7 +218,11 @@
 </script>
 
 <svelte:head>
-	<title>Split PDF - Smash</title>
+	<title>Split PDF — Smash</title>
+	<meta name="description" content="Extract specific pages from a PDF with a visual page picker. Free and private." />
+	<meta property="og:title" content="Split PDF — Smash" />
+	<meta property="og:description" content="Extract specific pages from a PDF with a visual page picker. Free and private." />
+	<link rel="canonical" href="https://ishanjalan.github.io/Smash/split" />
 </svelte:head>
 
 <div class="flex min-h-screen flex-col">

@@ -141,7 +141,13 @@
 	}
 </script>
 
-<svelte:head><title>Unlock PDF - Smash</title></svelte:head>
+<svelte:head>
+	<title>Unlock PDF — Smash</title>
+	<meta name="description" content="Remove password protection from a PDF. Free, browser-based." />
+	<meta property="og:title" content="Unlock PDF — Smash" />
+	<meta property="og:description" content="Remove password protection from a PDF. Free, browser-based." />
+	<link rel="canonical" href="https://ishanjalan.github.io/Smash/unlock" />
+</svelte:head>
 
 <div class="flex min-h-screen flex-col">
 	<Header />

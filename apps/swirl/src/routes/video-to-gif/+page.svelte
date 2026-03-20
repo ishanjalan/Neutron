@@ -265,7 +265,11 @@
 </script>
 
 <svelte:head>
-	<title>Video to GIF - Swirl</title>
+	<title>Video to GIF — Swirl</title>
+	<meta name="description" content="Convert MP4, WebM, or MOV to GIF. Control FPS, size, and quality. Free, browser-based." />
+	<meta property="og:title" content="Video to GIF — Swirl" />
+	<meta property="og:description" content="Convert MP4, WebM, or MOV to GIF. Control FPS, size, and quality. Free, browser-based." />
+	<link rel="canonical" href="https://ishanjalan.github.io/Swirl/video-to-gif" />
 </svelte:head>
 
 <div class="flex min-h-screen flex-col">

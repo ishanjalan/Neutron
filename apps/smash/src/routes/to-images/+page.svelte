@@ -159,7 +159,13 @@
 	}
 </script>
 
-<svelte:head><title>PDF to Images - Smash</title></svelte:head>
+<svelte:head>
+	<title>PDF to Images — Smash</title>
+	<meta name="description" content="Convert PDF pages to PNG, JPG, or WebP at up to 300 DPI. Free and private." />
+	<meta property="og:title" content="PDF to Images — Smash" />
+	<meta property="og:description" content="Convert PDF pages to PNG, JPG, or WebP at up to 300 DPI. Free and private." />
+	<link rel="canonical" href="https://ishanjalan.github.io/Smash/to-images" />
+</svelte:head>
 
 <div class="flex min-h-screen flex-col">
 	<Header />

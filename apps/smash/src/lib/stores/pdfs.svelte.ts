@@ -250,6 +250,9 @@ export const TOOL_CATEGORIES = [
 	{ id: 'security', label: 'Security' },
 ] as const;
 
+// Large file threshold — files above this size show a warning
+export const LARGE_FILE_THRESHOLD_BYTES = 50 * 1024 * 1024; // 50 MB
+
 // Default settings
 const DEFAULT_SETTINGS: PDFSettings = {
 	tool: 'compress',
@@ -297,6 +300,8 @@ function saveSettings(settings: PDFSettings) {
 function createPDFStore() {
 	let items = $state<PDFItem[]>([]);
 	let settings = $state<PDFSettings>(loadSettings());
+	// Files queued for addition pending large-file confirmation
+	let pendingLargeFiles = $state<File[]>([]);
 
 	return {
 		get items() {
@@ -305,11 +310,17 @@ function createPDFStore() {
 		get settings() {
 			return settings;
 		},
+		get pendingLargeFiles() {
+			return pendingLargeFiles;
+		},
 
 		// Add files (web mode - File objects)
-		async addFiles(files: FileList | File[]) {
+		// Returns large files (>50MB) that need user confirmation before adding.
+		// Call confirmLargeFiles() after the user accepts the warning.
+		async addFiles(files: FileList | File[]): Promise<File[]> {
 			const fileArray = Array.from(files);
 			const currentTool = settings.tool;
+			const largeFiles: File[] = [];
 
 			for (const file of fileArray) {
 				const isPDF = file.type === 'application/pdf';
@@ -318,6 +329,12 @@ function createPDFStore() {
 				// Validate file type based on current tool
 				if (currentTool === 'images-to-pdf' && !isImage) continue;
 				if (currentTool !== 'images-to-pdf' && !isPDF) continue;
+
+				// Queue large files for confirmation rather than adding immediately
+				if (file.size > LARGE_FILE_THRESHOLD_BYTES) {
+					largeFiles.push(file);
+					continue;
+				}
 
 				const item: PDFItem = {
 					id: crypto.randomUUID(),
@@ -333,6 +350,39 @@ function createPDFStore() {
 
 				items = [...items, item];
 			}
+
+			if (largeFiles.length > 0) {
+				pendingLargeFiles = largeFiles;
+			}
+
+			return largeFiles;
+		},
+
+		// Add large files after user confirmation
+		confirmLargeFiles() {
+			const currentTool = settings.tool;
+			for (const file of pendingLargeFiles) {
+				const isPDF = file.type === 'application/pdf';
+				const isImage = file.type.startsWith('image/');
+				const item: PDFItem = {
+					id: crypto.randomUUID(),
+					file,
+					name: file.name,
+					originalSize: file.size,
+					originalUrl: URL.createObjectURL(file),
+					status: 'pending',
+					progress: 0,
+					order: items.length,
+					isImage,
+				};
+				items = [...items, item];
+			}
+			pendingLargeFiles = [];
+		},
+
+		// Dismiss the large file warning without adding them
+		dismissLargeFiles() {
+			pendingLargeFiles = [];
 		},
 
 		// Add files from paths (desktop/Tauri mode)

@@ -259,7 +259,11 @@
 </script>
 
 <svelte:head>
-	<title>Combine GIFs - Swirl</title>
+	<title>Combine GIFs — Swirl</title>
+	<meta name="description" content="Merge multiple GIFs into a single animation. Free, private, browser-based." />
+	<meta property="og:title" content="Combine GIFs — Swirl" />
+	<meta property="og:description" content="Merge multiple GIFs into a single animation. Free, private, browser-based." />
+	<link rel="canonical" href="https://ishanjalan.github.io/Swirl/combine" />
 </svelte:head>
 
 <div class="flex min-h-screen flex-col">

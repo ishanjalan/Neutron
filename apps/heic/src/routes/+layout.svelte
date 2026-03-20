@@ -4,6 +4,9 @@
 
 	let { children } = $props();
 
+	const siteUrl = 'https://ishanjalan.github.io/HEICConverter';
+	const ogImage = `${siteUrl}/og-image.svg`;
+
 	onMount(() => {
 		// Hide loader once app is loaded
 		const loader = document.getElementById('app-loader');
@@ -13,6 +16,44 @@
 		}
 	});
 </script>
+
+<svelte:head>
+	<title>HEIC Converter — Free iPhone Photo Converter</title>
+	<meta name="description" content="Convert unlimited HEIC/HEIF photos to JPG, PNG, WebP, or AVIF instantly in your browser. 100% private — files never leave your device." />
+
+	<!-- Open Graph -->
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content={siteUrl} />
+	<meta property="og:title" content="HEIC Converter — Free iPhone Photo Converter" />
+	<meta property="og:description" content="Convert unlimited HEIC/HEIF photos to JPG, PNG, WebP, or AVIF instantly in your browser. 100% private — files never leave your device." />
+	<meta property="og:image" content={ogImage} />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
+	<meta property="og:site_name" content="HEIC Converter" />
+
+	<!-- Twitter Card -->
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="HEIC Converter — Free iPhone Photo Converter" />
+	<meta name="twitter:description" content="Convert unlimited HEIC/HEIF photos to JPG, PNG, WebP, or AVIF instantly in your browser. 100% private — files never leave your device." />
+	<meta name="twitter:image" content={ogImage} />
+
+	<!-- SEO -->
+	<meta name="robots" content="index, follow" />
+	<link rel="canonical" href={siteUrl} />
+
+	<!-- JSON-LD -->
+	<script type="application/ld+json">{JSON.stringify({
+		"@context": "https://schema.org",
+		"@type": "SoftwareApplication",
+		"name": "HEIC Converter",
+		"operatingSystem": "Web",
+		"applicationCategory": "UtilityApplication",
+		"offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+		"description": "Convert unlimited HEIC/HEIF photos to JPG, PNG, WebP, or AVIF instantly in your browser. 100% private — files never leave your device.",
+		"url": "https://ishanjalan.github.io/HEICConverter",
+		"author": { "@type": "Person", "name": "Ishan Jalan", "url": "https://github.com/ishanjalan" }
+	})}</script>
+</svelte:head>
 
 <div class="bg-surface-950 text-surface-100 relative min-h-screen">
 	<!-- Background decoration -->

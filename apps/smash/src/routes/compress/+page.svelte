@@ -263,7 +263,11 @@
 </script>
 
 <svelte:head>
-	<title>Compress PDF - Smash</title>
+	<title>Compress PDF — Smash</title>
+	<meta name="description" content="Reduce PDF file size by 50–90% in your browser using Ghostscript WASM. Free, private, no upload required." />
+	<meta property="og:title" content="Compress PDF — Smash" />
+	<meta property="og:description" content="Reduce PDF file size by 50–90% in your browser using Ghostscript WASM. Free, private, no upload required." />
+	<link rel="canonical" href="https://ishanjalan.github.io/Smash/compress" />
 </svelte:head>
 
 <div class="flex min-h-screen flex-col">

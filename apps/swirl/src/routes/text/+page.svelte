@@ -315,7 +315,11 @@
 </script>
 
 <svelte:head>
-	<title>Add Text to GIF - Swirl</title>
+	<title>Add Text to GIF — Swirl</title>
+	<meta name="description" content="Add captions or meme-style text overlays to any GIF. Free, browser-based." />
+	<meta property="og:title" content="Add Text to GIF — Swirl" />
+	<meta property="og:description" content="Add captions or meme-style text overlays to any GIF. Free, browser-based." />
+	<link rel="canonical" href="https://ishanjalan.github.io/Swirl/text" />
 </svelte:head>
 
 <div class="flex min-h-screen flex-col">

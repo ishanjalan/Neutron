@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { SvelteSet } from 'svelte/reactivity';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { GripVertical, Check, X } from 'lucide-svelte';
-	import { generateThumbnail, getPageCount } from '$lib/utils/pdf';
-	import * as pdfjsLib from 'pdfjs-dist';
+	import { getPdfjs } from '$lib/utils/pdf';
 
 	interface Props {
 		file: File;
@@ -21,6 +20,9 @@
 		selectionMode = 'multiple',
 	}: Props = $props();
 
+	// Parallel batch size — render 4 thumbnails at a time to balance speed vs memory
+	const BATCH_SIZE = 4;
+
 	let thumbnails = $state<Array<{ pageNum: number; dataUrl: string }>>([]);
 	let pageCount = $state(0);
 	let isLoading = $state(true);
@@ -28,45 +30,95 @@
 	let selection = $derived.by(() => new SvelteSet(selectedPages));
 	let pageOrder = $state<number[]>([]);
 
+	// O(1) thumbnail lookup map — avoids O(n²) find() in the template
+	const thumbnailMap = $derived.by(() => new Map(thumbnails.map((t) => [t.pageNum, t])));
+
+	// Abort flag — set to true on unmount to stop in-progress renders
+	let aborted = false;
+
 	// Dragging state for reorder mode
 	let draggedIndex = $state<number | null>(null);
 	let dragOverIndex = $state<number | null>(null);
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	async function renderThumbnailForPage(
+		pdf: any,
+		pageNum: number
+	): Promise<{ pageNum: number; dataUrl: string } | null> {
+		if (aborted) return null;
+		try {
+			const page = await pdf.getPage(pageNum);
+			if (aborted) return null;
+
+			const viewport = page.getViewport({ scale: 0.3 });
+			const canvas = document.createElement('canvas');
+			canvas.width = viewport.width;
+			canvas.height = viewport.height;
+			const ctx = canvas.getContext('2d');
+			if (!ctx) return null;
+
+			await page.render({ canvasContext: ctx, viewport, canvas }).promise;
+			if (aborted) {
+				canvas.width = 0;
+				canvas.height = 0;
+				return null;
+			}
+
+			const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+			canvas.width = 0;
+			canvas.height = 0;
+			return { pageNum, dataUrl };
+		} catch (err) {
+			console.error(`Failed to render thumbnail for page ${pageNum}:`, err);
+			return null;
+		}
+	}
 
 	async function loadThumbnails() {
 		isLoading = true;
 		error = null;
 		thumbnails = [];
+		aborted = false;
 
 		try {
 			const arrayBuffer = await file.arrayBuffer();
-			const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+			if (aborted) return;
+
+			const pdfjs = await getPdfjs();
+			if (aborted) return;
+
+			const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+			if (aborted) return;
+
 			pageCount = pdf.numPages;
 			pageOrder = Array.from({ length: pageCount }, (_, i) => i + 1);
 
-			// Generate thumbnails for each page
-			const scale = 0.3;
-			for (let i = 1; i <= pageCount; i++) {
-				const page = await pdf.getPage(i);
-				const viewport = page.getViewport({ scale });
+			// Render thumbnails in parallel batches to avoid sequential slowness
+			// and prevent memory spikes from all-at-once rendering
+			for (let i = 1; i <= pageCount; i += BATCH_SIZE) {
+				if (aborted) break;
 
-				const canvas = document.createElement('canvas');
-				canvas.width = viewport.width;
-				canvas.height = viewport.height;
-				const ctx = canvas.getContext('2d');
+				const batchNums = Array.from(
+					{ length: Math.min(BATCH_SIZE, pageCount - i + 1) },
+					(_, k) => i + k
+				);
 
-				if (ctx) {
-					await page.render({ canvasContext: ctx, viewport }).promise;
-					const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-					canvas.width = 0;
-					canvas.height = 0;
-					thumbnails = [...thumbnails, { pageNum: i, dataUrl }];
-				}
+				const results = await Promise.all(
+					batchNums.map((n) => renderThumbnailForPage(pdf, n))
+				);
+
+				if (aborted) break;
+
+				const valid = results.filter((r): r is { pageNum: number; dataUrl: string } => r !== null);
+				thumbnails = [...thumbnails, ...valid];
 			}
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to load thumbnails';
-			console.error('Thumbnail error:', err);
+			if (!aborted) {
+				error = err instanceof Error ? err.message : 'Failed to load thumbnails';
+				console.error('Thumbnail error:', err);
+			}
 		} finally {
-			isLoading = false;
+			if (!aborted) isLoading = false;
 		}
 	}
 
@@ -82,8 +134,7 @@
 			}
 			newSelection.add(pageNum);
 		}
-		selection = newSelection;
-		onSelectionChange?.(Array.from(selection).sort((a, b) => a - b));
+		onSelectionChange?.(Array.from(newSelection).sort((a, b) => a - b));
 	}
 
 	function selectAll() {
@@ -122,6 +173,10 @@
 		draggedIndex = null;
 		dragOverIndex = null;
 	}
+
+	onDestroy(() => {
+		aborted = true;
+	});
 
 	$effect(() => {
 		loadThumbnails();
@@ -171,7 +226,7 @@
 						d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 					/>
 				</svg>
-				<span>Loading pages...</span>
+				<span>Loading pages{thumbnails.length > 0 ? ` (${thumbnails.length}/${pageCount})` : ''}...</span>
 			</div>
 		</div>
 	{/if}
@@ -183,11 +238,11 @@
 		</div>
 	{/if}
 
-	<!-- Thumbnails grid -->
-	{#if !isLoading && !error && thumbnails.length > 0}
+	<!-- Thumbnails grid — show progressively as batches complete -->
+	{#if thumbnails.length > 0}
 		<div class="grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8">
 			{#each selectionMode === 'reorder' ? pageOrder : thumbnails.map((t) => t.pageNum) as pageNum, index (pageNum)}
-				{@const thumb = thumbnails.find((t) => t.pageNum === pageNum)}
+				{@const thumb = thumbnailMap.get(pageNum)}
 				{#if thumb}
 					<button
 						class="group relative aspect-[3/4] overflow-hidden rounded-lg border-2 transition-all

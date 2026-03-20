@@ -306,7 +306,11 @@
 </script>
 
 <svelte:head>
-	<title>Resize GIF - Swirl</title>
+	<title>Resize GIF — Swirl</title>
+	<meta name="description" content="Resize a GIF to exact dimensions or a percentage. Free, browser-based." />
+	<meta property="og:title" content="Resize GIF — Swirl" />
+	<meta property="og:description" content="Resize a GIF to exact dimensions or a percentage. Free, browser-based." />
+	<link rel="canonical" href="https://ishanjalan.github.io/Swirl/resize" />
 </svelte:head>
 
 <div class="flex min-h-screen flex-col">
