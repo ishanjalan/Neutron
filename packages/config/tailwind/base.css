@@ -56,7 +56,7 @@ body {
 	.glass {
 		background-color: rgb(255 255 255 / 0.75);
 		border-color: rgb(212 212 216 / 0.5);
-		backdrop-filter: blur(24px);
+		backdrop-filter: blur(12px);
 	}
 }
 
@@ -132,7 +132,17 @@ textarea:focus-visible {
 
 /* Glassmorphism - Dark mode only */
 .glass {
-	@apply bg-surface-900/70 border-surface-700/30 border backdrop-blur-xl;
+	@apply bg-surface-900/80 border-surface-700/30 border backdrop-blur-md;
+}
+
+/* Flat surface card — for cards that don't need blur */
+.surface-card {
+	@apply bg-surface-800 border border-surface-700 rounded-2xl;
+}
+
+/* Reusable accent status dot */
+.accent-dot {
+	@apply h-2 w-2 rounded-full bg-accent-start flex-shrink-0;
 }
 
 /* Body scroll lock for modals */

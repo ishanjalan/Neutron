@@ -40,7 +40,7 @@
 	let draggedIndex = $state<number | null>(null);
 	let dragOverIndex = $state<number | null>(null);
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	 
 	async function renderThumbnailForPage(
 		pdf: any,
 		pageNum: number
@@ -103,9 +103,7 @@
 					(_, k) => i + k
 				);
 
-				const results = await Promise.all(
-					batchNums.map((n) => renderThumbnailForPage(pdf, n))
-				);
+				const results = await Promise.all(batchNums.map((n) => renderThumbnailForPage(pdf, n)));
 
 				if (aborted) break;
 
@@ -226,7 +224,11 @@
 						d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 					/>
 				</svg>
-				<span>Loading pages{thumbnails.length > 0 ? ` (${thumbnails.length}/${pageCount})` : ''}...</span>
+				<span
+					>Loading pages{thumbnails.length > 0
+						? ` (${thumbnails.length}/${pageCount})`
+						: ''}...</span
+				>
 			</div>
 		</div>
 	{/if}

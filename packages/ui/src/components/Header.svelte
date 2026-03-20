@@ -98,7 +98,7 @@
 <header class="fixed top-0 right-0 left-0 z-50 px-4 py-4 sm:px-6 lg:px-8">
 	<div class="mx-auto max-w-7xl">
 		<nav
-			class="glass flex items-center justify-between rounded-2xl px-4 py-3 shadow-lg shadow-black/5 sm:px-6"
+			class="bg-surface-950/80 border-surface-800/50 flex items-center justify-between rounded-2xl border px-4 py-3 shadow-lg shadow-black/20 backdrop-blur-md sm:px-6"
 		>
 			<!-- Logo -->
 			<a href={homeHref} class="group flex items-center gap-3" onclick={handleLogoClick}>
@@ -123,9 +123,9 @@
 								{@const active = isLinkActive(link.href)}
 								<a
 									href={link.href}
-									class="rounded-lg px-3 py-2 text-sm font-medium transition-colors {active
-										? 'text-accent-start bg-accent-start/10'
-										: 'text-surface-400 hover:text-surface-100 hover:bg-surface-800'}"
+									class="px-3 py-2 text-sm font-medium transition-colors {active
+										? 'text-accent-start font-semibold border-b-2 border-accent-start rounded-none'
+										: 'text-surface-400 hover:text-surface-100 hover:bg-surface-800 rounded-lg'}"
 								>
 									{link.label}
 								</a>
@@ -139,9 +139,9 @@
 							{@const active = isLinkActive(link.href)}
 							<a
 								href={link.href}
-								class="rounded-lg px-3 py-2 text-sm font-medium transition-colors {active
-									? 'text-accent-start bg-accent-start/10'
-									: 'text-surface-400 hover:text-surface-100 hover:bg-surface-800'}"
+								class="px-3 py-2 text-sm font-medium transition-colors {active
+									? 'text-accent-start font-semibold border-b-2 border-accent-start rounded-none'
+									: 'text-surface-400 hover:text-surface-100 hover:bg-surface-800 rounded-lg'}"
 							>
 								{link.label}
 							</a>
@@ -226,7 +226,7 @@
 									href={link.href}
 									onclick={closeMobileMenu}
 									class="block rounded-xl px-3 py-2.5 text-sm font-medium transition-colors {active
-										? 'text-accent-start bg-accent-start/10'
+										? 'text-accent-start font-semibold'
 										: 'text-surface-300 hover:text-surface-100 hover:bg-surface-800'}"
 								>
 									{link.label}
@@ -243,7 +243,7 @@
 							href={link.href}
 							onclick={closeMobileMenu}
 							class="block rounded-xl px-3 py-2.5 text-sm font-medium transition-colors {active
-								? 'text-accent-start bg-accent-start/10'
+								? 'text-accent-start font-semibold'
 								: 'text-surface-300 hover:text-surface-100 hover:bg-surface-800'}"
 						>
 							{link.label}

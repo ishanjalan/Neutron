@@ -29,15 +29,15 @@
 }
 
 .animate-blob {
-	animation: blob 20s ease-in-out infinite;
-}
-
-.animate-blob-slow {
 	animation: blob 25s ease-in-out infinite;
 }
 
-.animate-blob-slower {
+.animate-blob-slow {
 	animation: blob 30s ease-in-out infinite;
+}
+
+.animate-blob-slower {
+	animation: blob 35s ease-in-out infinite;
 }
 
 /* Background gradient blobs */
@@ -53,7 +53,7 @@
 	position: absolute;
 	border-radius: 50%;
 	filter: blur(80px);
-	opacity: 0.4;
+	opacity: 0.25;
 }
 
 .bg-blob-1 {

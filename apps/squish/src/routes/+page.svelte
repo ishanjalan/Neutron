@@ -326,9 +326,9 @@
 			<!-- Clean empty state -->
 			{#if !hasImages}
 				<div class="mb-8 text-center">
-					<h1 class="gradient-text mb-2 text-3xl font-bold">Compress Images</h1>
+					<h1 class="gradient-text mb-2 text-3xl font-bold">Compress images. Instantly.</h1>
 					<p class="text-surface-400 text-sm">
-						Drop images below. JPEG, PNG, WebP, AVIF, SVG, HEIC — processed in your browser.
+						JPEG, PNG, WebP, AVIF, SVG, HEIC — all processed locally in your browser.
 					</p>
 				</div>
 			{/if}

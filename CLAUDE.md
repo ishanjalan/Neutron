@@ -130,7 +130,7 @@ The base CSS defines a `surface-50`→`surface-950` scale (light↔dark), accent
 
 | App    | Key libs                                                                         | `vite.config` flags                                            |
 | ------ | -------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| heic   | ⚠️ deprecated — redirects to squish `/heic`. Not deployed in CI.                |                                                                |
+| heic   | ⚠️ deprecated — redirects to squish `/heic`. Not deployed in CI.                 |                                                                |
 | squish | icodec, heic2any, svgo, @sentry/sveltekit                                        | `wasmWorkers`, `optimizeDepsExclude: ['icodec']`               |
 | smash  | ghostscript-wasm-esm, @neslinesli93/qpdf-wasm, pdf-lib, pdfjs-dist, tesseract.js | `crossOriginIsolation`                                         |
 | squash | mediabunny, WebCodecs API, idb                                                   | `crossOriginIsolation`                                         |

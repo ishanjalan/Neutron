@@ -12,7 +12,7 @@ Free, open-source file processing tools that run entirely in your browser. No up
 | App                             | Description                                                        | Live URL                                                                          |
 | ------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
 | **[HEIC Converter](apps/heic)** | Convert iPhone HEIC/HEIF photos to JPG, PNG, WebP, AVIF            | [ishanjalan.github.io/HEICConverter](https://ishanjalan.github.io/HEICConverter/) |
-| **[Squish](apps/squish)**       | Compress JPEG, PNG, WebP, AVIF, JXL, SVG, GIF, HEIC images         | [ishanjalan.github.io/Squish](https://ishanjalan.github.io/Squish/) |
+| **[Squish](apps/squish)**       | Compress JPEG, PNG, WebP, AVIF, JXL, SVG, GIF, HEIC images         | [ishanjalan.github.io/Squish](https://ishanjalan.github.io/Squish/)               |
 | **[Smash](apps/smash)**         | Full PDF toolkit — compress, merge, split, OCR, protect, and more  | [ishanjalan.github.io/Smash](https://ishanjalan.github.io/Smash/)                 |
 | **[Squash](apps/squash)**       | Compress MP4, WebM, MOV videos using WebCodecs in the browser      | [ishanjalan.github.io/Squash](https://ishanjalan.github.io/Squash/)               |
 | **[Swirl](apps/swirl)**         | GIF tools — convert, optimize, resize, reverse, add text, and more | [ishanjalan.github.io/Swirl](https://ishanjalan.github.io/Swirl/)                 |
@@ -168,7 +168,7 @@ The apps are automatically deployed to GitHub Pages when changes are pushed to t
 | App            | Source                        | Live URL                                                                          |
 | -------------- | ----------------------------- | --------------------------------------------------------------------------------- |
 | HEIC Converter | [`apps/heic/`](apps/heic)     | [ishanjalan.github.io/HEICConverter](https://ishanjalan.github.io/HEICConverter/) |
-| Squish         | [`apps/squish/`](apps/squish) | [ishanjalan.github.io/Squish](https://ishanjalan.github.io/Squish/) |
+| Squish         | [`apps/squish/`](apps/squish) | [ishanjalan.github.io/Squish](https://ishanjalan.github.io/Squish/)               |
 | Smash          | [`apps/smash/`](apps/smash)   | [ishanjalan.github.io/Smash](https://ishanjalan.github.io/Smash/)                 |
 | Squash         | [`apps/squash/`](apps/squash) | [ishanjalan.github.io/Squash](https://ishanjalan.github.io/Squash/)               |
 | Swirl          | [`apps/swirl/`](apps/swirl)   | [ishanjalan.github.io/Swirl](https://ishanjalan.github.io/Swirl/)                 |
