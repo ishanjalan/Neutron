@@ -10,7 +10,7 @@
 	} from '$lib/stores/pdfs.svelte';
 	import { processFiles } from '$lib/utils/pdf';
 	import { isGhostscriptReady, onInitStart, onInitComplete } from '$lib/utils/ghostscript';
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import {
 		Minimize2,
 		Layers,
@@ -119,21 +119,13 @@
 	});
 
 	// WASM loading state callbacks
-	let unsubStart: (() => void) | undefined;
-	let unsubComplete: (() => void) | undefined;
-
 	onMount(() => {
-		unsubStart = onInitStart(() => {
+		onInitStart(() => {
 			isLoadingWasm = true;
 		});
-		unsubComplete = onInitComplete(() => {
+		onInitComplete(() => {
 			isLoadingWasm = false;
 		});
-	});
-
-	onDestroy(() => {
-		unsubStart?.();
-		unsubComplete?.();
 	});
 
 	// Tool-specific requirements

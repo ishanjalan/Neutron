@@ -123,6 +123,7 @@ async function renderPageToImage(
 	const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
 
 	await page.render({
+		canvas,
 		canvasContext: ctx,
 		viewport,
 	}).promise;
@@ -153,7 +154,7 @@ async function ocrPage(worker: Tesseract.Worker, imageData: ImageData): Promise<
 	canvas.width = 0;
 	canvas.height = 0;
 
-	const words = result.data.blocks
+	const words = (result.data.blocks ?? [])
 		.flatMap((b) => b.paragraphs.flatMap((p) => p.lines.flatMap((l) => l.words)))
 		.map((word) => ({
 			text: word.text,
@@ -209,7 +210,7 @@ async function createSearchablePdf(
 	}
 
 	const pdfBytes = await pdfDoc.save();
-	return new Blob([pdfBytes], { type: 'application/pdf' });
+	return new Blob([pdfBytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' });
 }
 
 /**

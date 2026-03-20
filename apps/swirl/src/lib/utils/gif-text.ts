@@ -180,30 +180,23 @@ export async function addTextToGif(
 	onProgress?.(75, 'Encoding GIF...');
 
 	// Encode to GIF using gifski-wasm
-	const { GIFEncoder, quantize, applyPalette } = await import('gifski-wasm');
+	const encode = (await import('gifski-wasm')).default;
 
 	const width = frames[0].width;
 	const height = frames[0].height;
 
-	const encoder = new GIFEncoder();
+	// gifski encode expects RGBA Uint8Array frames and per-frame durations in ms
+	const outputBytes = await encode({
+		frames: processedFrames.map((imgData) => new Uint8Array(imgData.data.buffer)),
+		width,
+		height,
+		frameDurations: delays,
+		quality: 80,
+	});
 
-	for (let i = 0; i < processedFrames.length; i++) {
-		const imageData = processedFrames[i];
-		const delay = delays[i];
+	onProgress?.(95, 'Finalizing...');
 
-		// Quantize to 256 colors
-		const palette = quantize(imageData.data, 256);
-		const indexedPixels = applyPalette(imageData.data, palette);
-
-		// Add frame (delay is in ms, gifski wants centiseconds)
-		encoder.addFrame(indexedPixels, width, height, palette, Math.max(1, Math.round(delay / 10)));
-
-		const progress = 75 + ((i + 1) / processedFrames.length) * 20;
-		onProgress?.(progress, `Encoding frame ${i + 1}/${processedFrames.length}`);
-	}
-
-	const outputBytes = encoder.finish();
-	const result = new Blob([outputBytes], { type: 'image/gif' });
+	const result = new Blob([outputBytes as unknown as Uint8Array<ArrayBuffer>], { type: 'image/gif' });
 
 	// Cleanup extracted frames
 	frames.forEach((f) => URL.revokeObjectURL(f.url));

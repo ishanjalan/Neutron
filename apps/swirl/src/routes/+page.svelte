@@ -2,16 +2,7 @@
 	import { resolve } from '$app/paths';
 	import Header from '$lib/components/Header.svelte';
 	import { Footer } from '@neutron/ui';
-	import {
-		Film,
-		Gauge,
-		Maximize2,
-		ArrowRight,
-		Rewind,
-		Images,
-		Crop,
-		Type,
-	} from 'lucide-svelte';
+	import { Film, Gauge, Maximize2, ArrowRight, Rewind, Images, Crop, Type } from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
 
 	const tools = [
@@ -144,7 +135,7 @@
 			<div class="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
 				{#each tools as tool (tool.id)}
 					<a
-						href={resolve(tool.href)}
+						href={resolve(tool.href as any)}
 						class="surface-card group hover:border-surface-600 relative p-5 transition-all duration-200 hover:scale-[1.005]"
 						in:fade={{ duration: 150 }}
 					>

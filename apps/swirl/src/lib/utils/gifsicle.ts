@@ -70,7 +70,7 @@ async function runGifsicle(
 
 	// Convert Uint8Arrays to Blobs
 	const inputFiles = inputs.map(({ data, name }) => ({
-		file: new Blob([data], { type: 'image/gif' }),
+		file: new Blob([data as unknown as Uint8Array<ArrayBuffer>], { type: 'image/gif' }),
 		name,
 	}));
 

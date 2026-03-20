@@ -16,7 +16,8 @@
  * ```
  */
 
-import { animate, stagger, spring, type AnimationOptions } from 'motion';
+import { animate, stagger } from 'motion';
+import type { AnimationOptions } from 'motion';
 
 // ============================================
 // Utility Functions
@@ -56,7 +57,7 @@ export function fadeIn(
 	return safeAnimate(
 		selector,
 		{ opacity: [0, 1] },
-		{ duration: 0.3, easing: 'ease-out', ...options }
+		{ duration: 0.3, ease: 'easeOut', ...options }
 	);
 }
 
@@ -70,7 +71,7 @@ export function fadeOut(
 	return safeAnimate(
 		selector,
 		{ opacity: [1, 0] },
-		{ duration: 0.2, easing: 'ease-in', ...options }
+		{ duration: 0.2, ease: 'easeIn', ...options }
 	);
 }
 
@@ -85,7 +86,7 @@ export function slideUp(
 	return safeAnimate(
 		selector,
 		{ opacity: [0, 1], y: [distance, 0] },
-		{ duration: 0.4, easing: 'ease-out', ...animOptions }
+		{ duration: 0.4, ease: 'easeOut', ...animOptions }
 	);
 }
 
@@ -100,7 +101,7 @@ export function slideDown(
 	return safeAnimate(
 		selector,
 		{ opacity: [0, 1], y: [-distance, 0] },
-		{ duration: 0.4, easing: 'ease-out', ...animOptions }
+		{ duration: 0.4, ease: 'easeOut', ...animOptions }
 	);
 }
 
@@ -114,7 +115,7 @@ export function scaleIn(
 	return safeAnimate(
 		selector,
 		{ opacity: [0, 1], scale: [0.95, 1] },
-		{ duration: 0.2, easing: 'ease-out', ...options }
+		{ duration: 0.2, ease: 'easeOut', ...options }
 	);
 }
 
@@ -128,7 +129,7 @@ export function scaleOut(
 	return safeAnimate(
 		selector,
 		{ opacity: [1, 0], scale: [1, 0.95] },
-		{ duration: 0.15, easing: 'ease-in', ...options }
+		{ duration: 0.15, ease: 'easeIn', ...options }
 	);
 }
 
@@ -143,7 +144,7 @@ export function staggerChildren(
 	const { staggerDelay = 0.05, ...animOptions } = options || {};
 	return safeAnimate(selector, keyframes, {
 		duration: 0.4,
-		easing: 'ease-out',
+		ease: 'easeOut',
 		delay: stagger(staggerDelay),
 		...animOptions,
 	});
@@ -156,7 +157,7 @@ export function pulse(selector: string | Element | Element[], options?: Partial<
 	return safeAnimate(
 		selector,
 		{ scale: [1, 1.05, 1] },
-		{ duration: 0.3, easing: 'ease-in-out', ...options }
+		{ duration: 0.3, ease: 'easeInOut', ...options }
 	);
 }
 
@@ -167,7 +168,7 @@ export function shake(selector: string | Element | Element[], options?: Partial<
 	return safeAnimate(
 		selector,
 		{ x: [0, -10, 10, -10, 10, 0] },
-		{ duration: 0.4, easing: 'ease-in-out', ...options }
+		{ duration: 0.4, ease: 'easeInOut', ...options }
 	);
 }
 
@@ -183,7 +184,9 @@ export function bounce(
 		{ y: [0, -15, 0] },
 		{
 			duration: 0.5,
-			easing: spring({ stiffness: 300, damping: 10 }),
+			type: 'spring',
+			stiffness: 300,
+			damping: 10,
 			...options,
 		}
 	);
@@ -204,7 +207,7 @@ export function animateProgress(
 	return safeAnimate(
 		selector,
 		{ width: `${Math.min(100, Math.max(0, progress))}%` },
-		{ duration: 0.3, easing: 'ease-out', ...options }
+		{ duration: 0.3, ease: 'easeOut', ...options }
 	);
 }
 
@@ -217,7 +220,7 @@ export function animateCounter(
 	to: number,
 	options?: { duration?: number; format?: (n: number) => string }
 ) {
-	const { duration = 1, format = (n) => Math.round(n).toString() } = options || {};
+	const { duration = 1, format = (n: number) => Math.round(n).toString() } = options || {};
 
 	if (prefersReducedMotion()) {
 		element.textContent = format(to);
@@ -257,9 +260,9 @@ export async function animateRemove(
 	if (prefersReducedMotion()) return;
 
 	await animate(
-		element,
+		element as HTMLElement,
 		{ opacity: [1, 0], scale: [1, 0.8], height: ['auto', '0px'] },
-		{ duration: 0.25, easing: 'ease-in', ...options }
+		{ duration: 0.25, ease: 'easeIn', ...options }
 	).finished;
 }
 
@@ -270,7 +273,7 @@ export function animateAdd(element: Element, options?: Partial<AnimationOptions>
 	return safeAnimate(
 		element,
 		{ opacity: [0, 1], scale: [0.8, 1] },
-		{ duration: 0.25, easing: 'ease-out', ...options }
+		{ duration: 0.25, ease: 'easeOut', ...options }
 	);
 }
 
@@ -285,7 +288,7 @@ export function animateReorder(
 	return safeAnimate(
 		element,
 		{ y: [deltaY, 0] },
-		{ duration: 0.3, easing: spring({ stiffness: 400, damping: 25 }), ...options }
+		{ duration: 0.3, type: 'spring', stiffness: 400, damping: 25, ...options }
 	);
 }
 
@@ -329,4 +332,5 @@ export function animateHero(containerSelector: string = '.hero') {
 }
 
 // Re-export motion primitives for advanced usage
-export { animate, stagger, spring } from 'motion';
+export { animate, stagger } from 'motion';
+export { spring } from 'motion';

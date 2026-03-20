@@ -152,14 +152,15 @@ const api = {
 			onProgress?.(100);
 
 			// Transfer the buffer for zero-copy performance
+			const outputBuffer = outputData.buffer as ArrayBuffer;
 			return transfer(
 				{
 					success: true,
-					data: outputData.buffer,
+					data: outputBuffer,
 					originalSize: pdfData.byteLength,
 					compressedSize: outputData.byteLength,
 				},
-				[outputData.buffer]
+				[outputBuffer]
 			);
 		} catch (error) {
 			return {

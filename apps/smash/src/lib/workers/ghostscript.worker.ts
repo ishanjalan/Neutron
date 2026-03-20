@@ -140,7 +140,7 @@ async function compressPDF(request: CompressRequest): Promise<void> {
 		};
 
 		// Transfer the buffer for better performance
-		self.postMessage(response, [outputData.buffer]);
+		self.postMessage(response, { transfer: [outputData.buffer as ArrayBuffer] });
 	} catch (error) {
 		const response: CompressResponse = {
 			id,

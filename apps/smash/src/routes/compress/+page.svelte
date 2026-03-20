@@ -489,7 +489,7 @@
 										? 'bg-accent-start ring-accent-start/50 text-white ring-2'
 										: 'bg-surface-800 text-surface-400 hover:text-surface-200 hover:bg-surface-700'}"
 								>
-									{#if preset.recommended}
+									{#if (preset as any).recommended}
 										<div
 											class="absolute -top-1.5 -right-1.5 rounded-full bg-green-500 px-1.5 py-0.5 text-[10px] font-bold text-white"
 										>

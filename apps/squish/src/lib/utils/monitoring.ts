@@ -122,18 +122,6 @@ export function addBreadcrumb(message: string, category: string, data?: Record<s
 }
 
 /**
- * Start a performance transaction
- */
-export function startTransaction(name: string, op: string) {
-	if (!isInitialized) return null;
-
-	return Sentry.startTransaction({
-		name,
-		op,
-	});
-}
-
-/**
  * Performance measurement utilities
  */
 export class PerformanceMonitor {

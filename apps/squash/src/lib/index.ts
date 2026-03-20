@@ -27,14 +27,14 @@ export {
 	checkBrowserSupport,
 } from './utils/compress';
 export { downloadVideo, downloadAllAsZip } from './utils/download';
+export { formatBytes } from '@neutron/utils';
 export {
-	formatBytes,
 	formatDuration,
 	formatETA,
 	formatTimeInput,
 	parseTimeInput,
 } from './utils/format';
-export { createFocusTrap, trapFocus, releaseFocus, focusTrap } from './utils/focus-trap';
+export { createFocusTrap, trapFocus, releaseFocus, focusTrap } from '@neutron/utils/focus-trap';
 export {
 	storeVideo,
 	getVideoBlob,

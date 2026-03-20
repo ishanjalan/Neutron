@@ -129,7 +129,7 @@ describe('gifs store', () => {
 
 		it('calculates savings correctly', () => {
 			const [id] = gifs.addFiles([
-				new File(new Uint8Array(10000), 'big.gif', { type: 'image/gif' }),
+				new File([new Uint8Array(10000)], 'big.gif', { type: 'image/gif' }),
 			]);
 			// Manually set originalSize since createObjectURL is mocked
 			gifs.updateItem(id, {

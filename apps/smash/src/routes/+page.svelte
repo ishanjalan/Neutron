@@ -151,7 +151,7 @@
 			<div class="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
 				{#each tools as tool (tool.href)}
 					<a
-						href={resolve(tool.href)}
+						href={resolve(tool.href as any)}
 						class="surface-card group hover:border-surface-600 relative p-5 text-left transition-all duration-200 hover:scale-[1.005]"
 						in:fade={{ duration: 150 }}
 					>

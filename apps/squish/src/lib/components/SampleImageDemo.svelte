@@ -112,7 +112,7 @@
 		const file = await loadSampleImage(sampleId);
 		const newItems = await images.addFiles([file]);
 		if (newItems.length > 0) {
-			await processImages(newItems);
+			await processImages(newItems.map((i) => i.id));
 		}
 	}
 </script>

@@ -277,7 +277,7 @@
 				progress = 80;
 
 				const { result } = await optimizeGif(
-					gifBuffer.buffer,
+					gifBuffer.buffer as ArrayBuffer,
 					{ lossy: lossyLevel, colors: 256 },
 					(p) => {
 						progress = 80 + Math.round(p * 0.15);
@@ -290,7 +290,7 @@
 			progress = 98;
 
 			// Create blob
-			const blob = new Blob([finalBuffer], { type: 'image/gif' });
+			const blob = new Blob([finalBuffer as unknown as Uint8Array<ArrayBuffer>], { type: 'image/gif' });
 			resultBlob = blob;
 			resultUrl = URL.createObjectURL(blob);
 			resultSize = blob.size;

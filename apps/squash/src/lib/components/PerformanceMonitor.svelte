@@ -14,7 +14,6 @@
 	let { open, onclose }: Props = $props();
 
 	interface Capabilities {
-		sharedArrayBuffer: boolean;
 		hardwareConcurrency: number;
 		deviceMemory: number;
 		webCodecs: {
@@ -24,8 +23,6 @@
 			supportedAudioCodecs: string[];
 			maxResolution: { width: number; height: number };
 		};
-		ffmpegLoaded: boolean;
-		ffmpegMultiThreaded: boolean;
 	}
 
 	let capabilities = $state<Capabilities | null>(null);
@@ -53,10 +50,6 @@
 		const avgSavings =
 			totalOriginal > 0 ? Math.round((1 - totalCompressed / totalOriginal) * 100) : 0;
 
-		// Encoder usage breakdown
-		const webCodecsCount = completed.filter((i) => i.encoderUsed === 'webcodecs').length;
-		const ffmpegCount = completed.filter((i) => i.encoderUsed === 'ffmpeg').length;
-
 		return {
 			totalProcessed: completed.length,
 			totalOriginal,
@@ -64,8 +57,6 @@
 			totalSaved: totalOriginal - totalCompressed,
 			avgCompressionTime,
 			avgSavings,
-			webCodecsCount,
-			ffmpegCount,
 		};
 	});
 
@@ -167,32 +158,8 @@
 							<Server class="h-4 w-4 text-orange-400" />
 							<span class="text-surface-200 text-sm font-medium">FFmpeg.wasm</span>
 						</div>
-						{#if capabilities.ffmpegLoaded}
-							<span class="flex items-center gap-1 text-xs font-medium text-green-400">
-								<Check class="h-3 w-3" />
-								Loaded
-							</span>
-						{:else if videos.ffmpegLoading}
-							<span class="text-xs text-amber-400">Loading...</span>
-						{:else}
-							<span class="text-surface-500 text-xs">Not loaded</span>
-						{/if}
+						<span class="text-surface-500 text-xs">On demand</span>
 					</div>
-
-					{#if capabilities.ffmpegLoaded}
-						<div class="space-y-1.5 text-xs">
-							<div class="flex items-center justify-between">
-								<span class="text-surface-400">Threading</span>
-								<span class="text-surface-200">
-									{capabilities.ffmpegMultiThreaded ? 'Multi-threaded' : 'Single-threaded'}
-								</span>
-							</div>
-							<div class="flex items-center justify-between">
-								<span class="text-surface-400">Codecs</span>
-								<span class="text-surface-200">H.264, VP9, AV1, AAC, Opus</span>
-							</div>
-						</div>
-					{/if}
 				</div>
 			</div>
 
@@ -221,7 +188,7 @@
 							<Zap class="text-surface-500 h-4 w-4" />
 							SharedArrayBuffer
 						</div>
-						{#if capabilities.sharedArrayBuffer}
+						{#if typeof SharedArrayBuffer !== 'undefined'}
 							<span class="flex items-center gap-1 text-xs text-green-400">
 								<Check class="h-3 w-3" />
 								Yes
@@ -262,33 +229,7 @@
 								>{formatDuration(stats().avgCompressionTime)}</span
 							>
 						</div>
-						<!-- Encoder Usage Breakdown -->
-						{#if stats().webCodecsCount > 0 || stats().ffmpegCount > 0}
-							<div class="border-surface-700/50 mt-2 border-t pt-2">
-								<div class="text-surface-400 mb-2 text-xs tracking-wider uppercase">
-									Encoder Usage
-								</div>
-								<div class="flex gap-3">
-									{#if stats().webCodecsCount > 0}
-										<div
-											class="flex items-center gap-1.5 rounded-md border border-purple-500/20 bg-purple-500/10 px-2 py-1"
-										>
-											<Gpu class="h-3 w-3 text-purple-400" />
-											<span class="text-xs text-purple-300">{stats().webCodecsCount} GPU</span>
-										</div>
-									{/if}
-									{#if stats().ffmpegCount > 0}
-										<div
-											class="flex items-center gap-1.5 rounded-md border border-orange-500/20 bg-orange-500/10 px-2 py-1"
-										>
-											<Server class="h-3 w-3 text-orange-400" />
-											<span class="text-xs text-orange-300">{stats().ffmpegCount} Software</span>
-										</div>
-									{/if}
-								</div>
-							</div>
 						{/if}
-					{/if}
 				</div>
 			</div>
 

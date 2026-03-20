@@ -71,7 +71,7 @@
 	$effect(() => {
 		if (showTrimUI && item.duration) {
 			trimStartInput = formatTimeInput(item.trimStart || 0);
-			trimEndInput = formatTimeInput(item.trimEnd ?? item.duration);
+			trimEndInput = formatTimeInput(item.trimEnd ?? item.duration ?? 0);
 		}
 	});
 
@@ -327,11 +327,11 @@
 						videoUrl={item.originalUrl}
 						duration={item.duration}
 						trimStart={item.trimStart || 0}
-						trimEnd={item.trimEnd ?? item.duration}
+						trimEnd={item.trimEnd ?? item.duration ?? 0}
 						onchange={(start, end) => {
 							videos.updateItem(item.id, {
 								trimStart: start > 0 ? start : undefined,
-								trimEnd: end < item.duration ? end : undefined,
+								trimEnd: end < (item.duration ?? Infinity) ? end : undefined,
 							});
 						}}
 					/>

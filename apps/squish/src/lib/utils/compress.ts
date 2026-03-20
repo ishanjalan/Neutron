@@ -333,12 +333,12 @@ async function compressToTargetSize(
 }
 
 async function compressImage(item: ImageItem) {
+	const compressionStart = performance.now();
 	try {
 		if (abortController?.signal.aborted) {
 			return;
 		}
 
-		const compressionStart = performance.now();
 		console.log(
 			`[compress] ${item.name}: Starting (${item.format} → ${item.outputFormat}, ${(item.originalSize / 1024).toFixed(1)}KB)`
 		);

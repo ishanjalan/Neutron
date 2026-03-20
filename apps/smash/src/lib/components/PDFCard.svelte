@@ -2,7 +2,6 @@
 	import { pdfs, formatBytes, type PDFItem } from '$lib/stores/pdfs.svelte';
 	import { downloadFile, getOutputFilename, processFiles } from '$lib/utils/pdf';
 	import { downloadMultipleFiles } from '$lib/utils/download';
-	import { CompareSlider } from '@neutron/ui';
 	import {
 		X,
 		Download,
@@ -22,10 +21,9 @@
 		item: PDFItem;
 		index: number;
 		canReorder?: boolean;
-		showCompare?: boolean;
 	}
 
-	let { item, index, canReorder = false, showCompare = false }: Props = $props();
+	let { item, index, canReorder = false }: Props = $props();
 
 	const savings = $derived(
 		item.processedSize ? Math.round((1 - item.processedSize / item.originalSize) * 100) : 0
@@ -199,12 +197,7 @@
 			</div>
 		{:else if item.status === 'completed'}
 			<div class="space-y-3">
-				<!-- Size comparison -->
-				{#if showCompare && item.processedSize && pdfs.settings.tool === 'compress'}
-					<CompareSlider originalSize={item.originalSize} newSize={item.processedSize} label="" />
-				{/if}
-
-				<div class="flex items-center justify-between">
+<div class="flex items-center justify-between">
 					{#if item.processedBlobs}
 						<span class="text-surface-400 text-xs">
 							{item.processedBlobs.length} files

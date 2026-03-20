@@ -66,7 +66,7 @@
 			canvas.width = viewport.width;
 			canvas.height = viewport.height;
 			const ctx = canvas.getContext('2d')!;
-			await page.render({ canvasContext: ctx, viewport }).promise;
+			await page.render({ canvas, canvasContext: ctx, viewport }).promise;
 			pages.push({ pageNum: i, thumbnail: canvas.toDataURL('image/jpeg', 0.6) });
 			canvas.width = 0;
 			canvas.height = 0;

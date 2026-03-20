@@ -82,7 +82,7 @@ export async function compressPDF(file: File, options: CompressOptions): Promise
 	try {
 		onProgress?.(5);
 		const { result } = await compressWithGS(arrayBuffer, preset, onProgress);
-		return new Blob([result], { type: 'application/pdf' });
+		return new Blob([result as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' });
 	} catch (e) {
 		console.warn('Ghostscript WASM compression failed, falling back to pdf-lib:', e);
 	}
@@ -130,7 +130,7 @@ async function compressPDFWithPdfLib(file: File, options: CompressOptions): Prom
 
 	onProgress?.(100);
 
-	return new Blob([pdfBytes], { type: 'application/pdf' });
+	return new Blob([pdfBytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' });
 }
 
 // ============================================
@@ -153,7 +153,7 @@ export async function mergePDFs(
 	}
 
 	const pdfBytes = await mergedPdf.save();
-	return new Blob([pdfBytes], { type: 'application/pdf' });
+	return new Blob([pdfBytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' });
 }
 
 // ============================================
@@ -184,7 +184,7 @@ export async function splitPDF(file: File, options: SplitOptions): Promise<Blob[
 		const pages = await newPdf.copyPages(pdf, pageIndices);
 		pages.forEach((page) => newPdf.addPage(page));
 		const bytes = await newPdf.save();
-		results.push(new Blob([bytes], { type: 'application/pdf' }));
+		results.push(new Blob([bytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' }));
 		options.onProgress?.(100);
 	} else if (options.mode === 'extract' && options.pages) {
 		const newPdf = await PDFDocument.create();
@@ -193,7 +193,7 @@ export async function splitPDF(file: File, options: SplitOptions): Promise<Blob[
 		const pages = await newPdf.copyPages(pdf, pageIndices);
 		pages.forEach((page) => newPdf.addPage(page));
 		const bytes = await newPdf.save();
-		results.push(new Blob([bytes], { type: 'application/pdf' }));
+		results.push(new Blob([bytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' }));
 		options.onProgress?.(100);
 	} else if (options.mode === 'every-n' && options.everyN) {
 		const n = options.everyN;
@@ -205,7 +205,7 @@ export async function splitPDF(file: File, options: SplitOptions): Promise<Blob[
 			const pages = await newPdf.copyPages(pdf, pageIndices);
 			pages.forEach((page) => newPdf.addPage(page));
 			const bytes = await newPdf.save();
-			results.push(new Blob([bytes], { type: 'application/pdf' }));
+			results.push(new Blob([bytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' }));
 
 			options.onProgress?.(Math.round((endPage / totalPages) * 100));
 		}
@@ -241,7 +241,7 @@ export async function pdfToImages(file: File, options: PDFToImagesOptions): Prom
 		canvas.height = viewport.height;
 		const ctx = canvas.getContext('2d')!;
 
-		await page.render({ canvasContext: ctx, viewport }).promise;
+		await page.render({ canvas, canvasContext: ctx, viewport }).promise;
 
 		const mimeType = options.format === 'jpg' ? 'image/jpeg' : `image/${options.format}`;
 		const blob = await new Promise<Blob>((resolve) => {
@@ -312,7 +312,7 @@ export async function imagesToPDF(
 	}
 
 	const pdfBytes = await pdf.save();
-	return new Blob([pdfBytes], { type: 'application/pdf' });
+	return new Blob([pdfBytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' });
 }
 
 function loadImage(file: File): Promise<HTMLImageElement> {
@@ -355,7 +355,7 @@ export async function generateThumbnail(file: File): Promise<string> {
 	canvas.height = viewport.height;
 	const ctx = canvas.getContext('2d')!;
 
-	await page.render({ canvasContext: ctx, viewport }).promise;
+	await page.render({ canvas, canvasContext: ctx, viewport }).promise;
 
 	const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
 	canvas.width = 0;
@@ -386,7 +386,7 @@ export async function rotatePDF(file: File, options: RotateOptions): Promise<Blo
 	}
 
 	const pdfBytes = await pdf.save();
-	return new Blob([pdfBytes], { type: 'application/pdf' });
+	return new Blob([pdfBytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' });
 }
 
 interface DeletePagesOptions {
@@ -409,7 +409,7 @@ export async function deletePages(file: File, options: DeletePagesOptions): Prom
 	}
 
 	const pdfBytes = await pdf.save();
-	return new Blob([pdfBytes], { type: 'application/pdf' });
+	return new Blob([pdfBytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' });
 }
 
 interface ReorderOptions {
@@ -432,7 +432,7 @@ export async function reorderPages(file: File, options: ReorderOptions): Promise
 	}
 
 	const pdfBytes = await newPdf.save();
-	return new Blob([pdfBytes], { type: 'application/pdf' });
+	return new Blob([pdfBytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' });
 }
 
 // ============================================
@@ -470,11 +470,11 @@ export async function protectPDF(file: File, options: ProtectOptions): Promise<B
 			contentAccessibility: true,
 			documentAssembly: false,
 		},
-	});
+	} as any);
 
 	onProgress?.(100);
 
-	return new Blob([pdfBytes], { type: 'application/pdf' });
+	return new Blob([pdfBytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' });
 }
 
 interface UnlockOptions {
@@ -505,7 +505,7 @@ export async function unlockPDF(file: File, options: UnlockOptions): Promise<Blo
 
 	onProgress?.(100);
 
-	return new Blob([pdfBytes], { type: 'application/pdf' });
+	return new Blob([pdfBytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' });
 }
 
 // ============================================
