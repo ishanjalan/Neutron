@@ -53,7 +53,7 @@
 			"applicationCategory": "UtilityApplication",
 			"offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
 			"description": "Compress and convert HEIC, JPEG, PNG, WebP, AVIF, JPEG XL, SVG and GIF images in your browser. 100% private.",
-			"url": "https://ishanjalan.github.io/ImageOptimser/",
+			"url": "https://ishanjalan.github.io/Squish/",
 			"author": {
 				"@type": "Person",
 				"name": "Ishan Jalan",

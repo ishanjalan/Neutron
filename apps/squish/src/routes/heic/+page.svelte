@@ -5,7 +5,7 @@
 	import { images } from '$lib/stores/images.svelte';
 	import { Footer } from '@neutron/ui';
 
-	const siteUrl = 'https://ishanjalan.github.io/ImageOptimser';
+	const siteUrl = 'https://ishanjalan.github.io/Squish';
 
 	// Once files are dropped and added to the store, navigate to the main tool
 	$effect(() => {

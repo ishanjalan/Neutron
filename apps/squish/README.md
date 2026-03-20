@@ -2,7 +2,7 @@
 
 Compress JPEG, PNG, WebP, AVIF, JPEG XL, SVG, GIF, and HEIC images using best-in-class WASM codecs. All processing runs locally in your browser — no uploads, no limits, 100% private.
 
-🔗 **Live**: [ishanjalan.github.io/ImageOptimser](https://ishanjalan.github.io/ImageOptimser/)
+🔗 **Live**: [ishanjalan.github.io/Squish](https://ishanjalan.github.io/Squish/)
 
 ## ✨ Features
 

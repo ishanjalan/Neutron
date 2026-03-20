@@ -3,7 +3,7 @@
 
 	let { children } = $props();
 
-	const squishHeicUrl = 'https://ishanjalan.github.io/ImageOptimser/heic';
+	const squishHeicUrl = 'https://ishanjalan.github.io/Squish/heic';
 </script>
 
 <svelte:head>

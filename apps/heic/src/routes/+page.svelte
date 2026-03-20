@@ -1,5 +1,5 @@
 <script lang="ts">
-	const squishHeicUrl = 'https://ishanjalan.github.io/ImageOptimser/heic';
+	const squishHeicUrl = 'https://ishanjalan.github.io/Squish/heic';
 
 	// Instant JS redirect for browsers that support it
 	if (typeof window !== 'undefined') {
