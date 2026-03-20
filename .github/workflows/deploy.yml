@@ -124,7 +124,7 @@ jobs:
           key: deps-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: deps-${{ runner.os }}-
       - run: pnpm install
-      - run: pnpm --filter @neutron/heic build
+      - run: pnpm --filter heic build
         env:
           NODE_ENV: production
       - uses: peaceiris/actions-gh-pages@v4
