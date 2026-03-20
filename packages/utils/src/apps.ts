@@ -6,7 +6,7 @@
  * All Footers, layouts, and cross-app links should import from here.
  */
 
-export type AppId = 'squish' | 'squash' | 'smash' | 'swirl' | 'heic';
+export type AppId = 'squish' | 'squash' | 'smash' | 'swirl';
 
 export interface NeutronApp {
 	id: AppId;
@@ -64,15 +64,6 @@ export const NEUTRON_APPS: Record<AppId, NeutronApp> = {
 		description: 'GIF tools',
 		gradient: 'linear-gradient(135deg, rgb(217 70 239), rgb(244 114 182))',
 	},
-	heic: {
-		id: 'heic',
-		name: 'HEIC',
-		basePath: '/HEICConverter',
-		url: `${PAGES_BASE}/HEICConverter/`,
-		github: `https://github.com/${GITHUB_OWNER}/${REPO}/tree/main/apps/heic`,
-		description: 'HEIC converter',
-		gradient: 'linear-gradient(135deg, rgb(99 102 241), rgb(168 85 247))',
-	},
 };
 
 /** Ordered list of all apps for display in Footers and nav */
@@ -81,5 +72,4 @@ export const NEUTRON_APPS_LIST: NeutronApp[] = [
 	NEUTRON_APPS.squash,
 	NEUTRON_APPS.smash,
 	NEUTRON_APPS.swirl,
-	NEUTRON_APPS.heic,
 ];

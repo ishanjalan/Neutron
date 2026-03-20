@@ -10,7 +10,6 @@
 		Coffee,
 		Linkedin,
 		Sparkles,
-		Layers,
 	} from 'lucide-svelte';
 	import { NEUTRON_APPS_LIST, type AppId } from '@neutron/utils/apps';
 
@@ -20,7 +19,6 @@
 		squash: Film,
 		smash: FileText,
 		swirl: Disc3,
-		heic: Layers,
 	};
 
 	let {
@@ -47,7 +45,7 @@
 			</div>
 
 			<!-- App Cards -->
-			<div class="grid grid-cols-5 gap-3 sm:gap-4">
+			<div class="grid grid-cols-4 gap-3 sm:gap-4">
 				{#each NEUTRON_APPS_LIST as app (app.id)}
 					{@const isCurrent = app.id === currentApp}
 					{@const Icon = APP_ICONS[app.id]}
