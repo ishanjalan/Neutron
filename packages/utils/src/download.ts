@@ -1,4 +1,4 @@
-import JSZip from 'jszip';
+import { zipSync } from 'fflate';
 
 export interface DownloadFile {
 	name: string;
@@ -7,6 +7,20 @@ export interface DownloadFile {
 
 export interface ZipProgressCallback {
 	(percent: number): void;
+}
+
+async function blobToUint8Array(blob: Blob): Promise<Uint8Array> {
+	return new Uint8Array(await blob.arrayBuffer());
+}
+
+function deduplicateName(name: string, usedNames: Map<string, number>): string {
+	const count = usedNames.get(name) || 0;
+	usedNames.set(name, count + 1);
+	if (count === 0) return name;
+	const ext = name.lastIndexOf('.');
+	return ext >= 0
+		? `${name.slice(0, ext)}-${count}${name.slice(ext)}`
+		: `${name}-${count}`;
 }
 
 /**
@@ -31,28 +45,19 @@ export async function downloadAllAsZip(
 	zipName: string,
 	onProgress?: ZipProgressCallback
 ): Promise<void> {
-	const zip = new JSZip();
-
+	const entries: Record<string, Uint8Array> = {};
 	const usedNames = new Map<string, number>();
-	for (const file of files) {
-		let filename = file.name;
-		const count = usedNames.get(filename) || 0;
-		if (count > 0) {
-			const ext = filename.lastIndexOf('.');
-			filename =
-				ext >= 0
-					? `${filename.slice(0, ext)}-${count}${filename.slice(ext)}`
-					: `${filename}-${count}`;
-		}
-		usedNames.set(file.name, count + 1);
-		zip.file(filename, file.blob);
+
+	for (let i = 0; i < files.length; i++) {
+		const file = files[i];
+		const filename = deduplicateName(file.name, usedNames);
+		entries[filename] = await blobToUint8Array(file.blob);
+		onProgress?.(((i + 1) / files.length) * 90);
 	}
 
-	const content = await zip.generateAsync(
-		{ type: 'blob' },
-		onProgress ? (meta) => onProgress(meta.percent) : undefined
-	);
-	downloadBlob(content, zipName);
+	const zipped = zipSync(entries, { level: 6 });
+	onProgress?.(100);
+	downloadBlob(new Blob([zipped.buffer as ArrayBuffer], { type: 'application/zip' }), zipName);
 }
 
 /**
@@ -69,12 +74,12 @@ export async function downloadMultipleFiles(
 		return;
 	}
 
-	const zip = new JSZip();
+	const entries: Record<string, Uint8Array> = {};
 	for (let i = 0; i < blobs.length; i++) {
-		zip.file(`${baseName}-${i + 1}${extension}`, blobs[i]);
+		entries[`${baseName}-${i + 1}${extension}`] = await blobToUint8Array(blobs[i]);
 	}
-	const zipBlob = await zip.generateAsync({ type: 'blob' });
-	downloadBlob(zipBlob, `${baseName}.zip`);
+	const zipped = zipSync(entries, { level: 6 });
+	downloadBlob(new Blob([zipped.buffer as ArrayBuffer], { type: 'application/zip' }), `${baseName}.zip`);
 }
 
 /**
