@@ -12,8 +12,16 @@
 			color: 'from-cyan-500 to-blue-500',
 			bestFor: 'Icons, logos, simple illustrations',
 			type: 'Vector',
-			pros: ['Scales to any size without quality loss', 'Tiny for simple shapes', 'Style with CSS (colors, animations)', 'One file for all screen densities'],
-			cons: ['Complex artwork = large files, heavy to render', 'Design-tool exports may secretly embed bitmaps'],
+			pros: [
+				'Scales to any size without quality loss',
+				'Tiny for simple shapes',
+				'Style with CSS (colors, animations)',
+				'One file for all screen densities',
+			],
+			cons: [
+				'Complex artwork = large files, heavy to render',
+				'Design-tool exports may secretly embed bitmaps',
+			],
 			support: '100%',
 		},
 		{
@@ -109,7 +117,7 @@
 			<!-- Close button -->
 			<button
 				onclick={onclose}
-				class="text-surface-400 hover:bg-surface-800 absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg transition-colors"
+				class="text-surface-400 hover:bg-surface-800 absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-lg transition-colors"
 				aria-label="Close"
 			>
 				<X class="h-5 w-5" />
@@ -127,32 +135,46 @@
 				<div class="grid gap-3 sm:grid-cols-2">
 					<div class="space-y-1">
 						<div class="flex items-center gap-2">
-							<span class="rounded bg-cyan-500/20 px-1.5 py-0.5 text-xs font-semibold text-cyan-400">Vector</span>
+							<span class="rounded bg-cyan-500/20 px-1.5 py-0.5 text-xs font-semibold text-cyan-400"
+								>Vector</span
+							>
 							<span class="text-surface-300 text-xs font-medium">SVG</span>
 						</div>
 						<p class="text-surface-400 text-xs leading-relaxed">
-							Math-based drawing instructions. Infinite scale — sharp at any size or zoom. One file covers 1×, 2×, and 4× displays. Best for <strong class="text-surface-300">simple, geometric graphics</strong>.
+							Math-based drawing instructions. Infinite scale — sharp at any size or zoom. One file
+							covers 1×, 2×, and 4× displays. Best for <strong class="text-surface-300"
+								>simple, geometric graphics</strong
+							>.
 						</p>
 					</div>
 					<div class="space-y-1">
 						<div class="flex items-center gap-2">
-							<span class="rounded bg-green-500/20 px-1.5 py-0.5 text-xs font-semibold text-green-400">Raster</span>
+							<span
+								class="rounded bg-green-500/20 px-1.5 py-0.5 text-xs font-semibold text-green-400"
+								>Raster</span
+							>
 							<span class="text-surface-300 text-xs font-medium">WebP, PNG, JPEG…</span>
 						</div>
 						<p class="text-surface-400 text-xs leading-relaxed">
-							A grid of pixels at a fixed resolution. Efficient for <strong class="text-surface-300">photos and complex artwork</strong> — millions of color variations that would take pages of SVG markup.
+							A grid of pixels at a fixed resolution. Efficient for <strong class="text-surface-300"
+								>photos and complex artwork</strong
+							> — millions of color variations that would take pages of SVG markup.
 						</p>
 					</div>
 				</div>
 				<div class="border-surface-700 mt-3 space-y-1.5 border-t pt-3 text-xs">
 					<p class="text-surface-400">
-						<strong class="text-surface-300">Keep SVG for:</strong> logos, icons, UI elements, simple illustrations — where you need infinite scale or CSS styling.
+						<strong class="text-surface-300">Keep SVG for:</strong> logos, icons, UI elements, simple
+						illustrations — where you need infinite scale or CSS styling.
 					</p>
 					<p class="text-surface-400">
-						<strong class="text-surface-300">Use WebP for:</strong> photos, complex gradients, and any graphic that's heavier as SVG than as a sharp bitmap. Squish will flag these automatically.
+						<strong class="text-surface-300">Use WebP for:</strong> photos, complex gradients, and any
+						graphic that's heavier as SVG than as a sharp bitmap. Squish will flag these automatically.
 					</p>
 					<p class="text-amber-400/80">
-						<strong class="text-amber-400">Design tool tip:</strong> Exporting a frame as SVG in Figma or Sketch can still embed bitmap images inside it — you get the file size of a PNG with none of the vector benefits. Squish detects this and suggests WebP instead.
+						<strong class="text-amber-400">Design tool tip:</strong> Exporting a frame as SVG in Figma
+						or Sketch can still embed bitmap images inside it — you get the file size of a PNG with none
+						of the vector benefits. Squish detects this and suggests WebP instead.
 					</p>
 					<p class="text-surface-500">
 						When Squish converts SVG → WebP, it rasterizes at the SVG's declared pixel dimensions.
@@ -173,7 +195,10 @@
 							<div>
 								<div class="flex items-center gap-2">
 									<h3 class="text-surface-100 font-semibold">{format.name}</h3>
-									<span class="text-surface-500 rounded text-[10px] font-medium uppercase tracking-wide">{format.type}</span>
+									<span
+										class="text-surface-500 rounded text-[10px] font-medium tracking-wide uppercase"
+										>{format.type}</span
+									>
 								</div>
 								<div class="text-surface-500 flex items-center gap-1 text-xs">
 									<Globe class="h-3 w-3" />
@@ -218,8 +243,8 @@
 					<strong class="text-accent-start">Recommendation:</strong> Use <strong>WebP</strong> for
 					most web images — it offers the best balance of quality, file size, and compatibility. Use
 					<strong>AVIF</strong>
-					for maximum compression, or <strong>JPEG XL</strong> for best quality when targeting Safari
-					or progressive enhancement. Keep <strong>SVG</strong> for icons, logos, and simple graphics.
+					for maximum compression, or <strong>JPEG XL</strong> for best quality when targeting
+					Safari or progressive enhancement. Keep <strong>SVG</strong> for icons, logos, and simple graphics.
 				</p>
 			</div>
 		</div>

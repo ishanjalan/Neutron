@@ -488,21 +488,23 @@
 								in:scale={{ duration: 150, start: 0.95 }}
 								out:fade={{ duration: 100 }}
 							>
-							{#each outputOptions as format (format.value)}
-								<button
-									onclick={() => handleFormatChange(format.value)}
-									class="hover:bg-surface-700 flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm transition-colors {item.outputFormat ===
-									format.value
-										? 'bg-surface-700/50'
-										: ''}"
-								>
-									<span class="h-2.5 w-2.5 flex-shrink-0 rounded-full bg-gradient-to-r {format.color}"></span>
-									<span class="text-surface-300 font-medium">{format.label}</span>
-									{#if 'hint' in format && format.hint}
-										<span class="text-surface-600 ml-auto text-[10px]">{format.hint}</span>
-									{/if}
-								</button>
-							{/each}
+								{#each outputOptions as format (format.value)}
+									<button
+										onclick={() => handleFormatChange(format.value)}
+										class="hover:bg-surface-700 flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm transition-colors {item.outputFormat ===
+										format.value
+											? 'bg-surface-700/50'
+											: ''}"
+									>
+										<span
+											class="h-2.5 w-2.5 flex-shrink-0 rounded-full bg-gradient-to-r {format.color}"
+										></span>
+										<span class="text-surface-300 font-medium">{format.label}</span>
+										{#if 'hint' in format && format.hint}
+											<span class="text-surface-600 ml-auto text-[10px]">{format.hint}</span>
+										{/if}
+									</button>
+								{/each}
 							</div>
 						{/if}
 					</div>
@@ -539,87 +541,92 @@
 				</div>
 			</div>
 
-		<!-- Embedded-raster SVG callout (Figma-style exports) -->
-		{#if showEmbeddedRasterCallout}
-			<div class="mt-3 rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-400">
-				<div class="flex items-start gap-2">
-					<AlertCircle class="mt-0.5 h-4 w-4 flex-shrink-0" />
-					<div class="min-w-0 flex-1">
-						<p class="font-semibold">This SVG wraps a bitmap image.</p>
-						<p class="text-amber-400/80">WebP is smaller and cleaner for display.</p>
-						<div class="mt-2 flex items-center gap-2">
-							<button
-								onclick={() => handleFormatChange('webp')}
-								class="rounded-md bg-amber-500/20 px-2.5 py-1 font-semibold text-amber-300 transition-colors hover:bg-amber-500/30"
-							>
-								Convert to WebP
-							</button>
-							<button
-								onclick={() => (showEmbeddedRasterWhy = !showEmbeddedRasterWhy)}
-								class="text-amber-500/70 hover:text-amber-400"
-							>
-								{showEmbeddedRasterWhy ? 'Hide' : 'Why?'}
-							</button>
+			<!-- Embedded-raster SVG callout (Figma-style exports) -->
+			{#if showEmbeddedRasterCallout}
+				<div class="mt-3 rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-400">
+					<div class="flex items-start gap-2">
+						<AlertCircle class="mt-0.5 h-4 w-4 flex-shrink-0" />
+						<div class="min-w-0 flex-1">
+							<p class="font-semibold">This SVG wraps a bitmap image.</p>
+							<p class="text-amber-400/80">WebP is smaller and cleaner for display.</p>
+							<div class="mt-2 flex items-center gap-2">
+								<button
+									onclick={() => handleFormatChange('webp')}
+									class="rounded-md bg-amber-500/20 px-2.5 py-1 font-semibold text-amber-300 transition-colors hover:bg-amber-500/30"
+								>
+									Convert to WebP
+								</button>
+								<button
+									onclick={() => (showEmbeddedRasterWhy = !showEmbeddedRasterWhy)}
+									class="text-amber-500/70 hover:text-amber-400"
+								>
+									{showEmbeddedRasterWhy ? 'Hide' : 'Why?'}
+								</button>
+							</div>
+							{#if showEmbeddedRasterWhy}
+								<p class="mt-2 leading-relaxed text-amber-400/70">
+									Design tools like Figma sometimes export raster frames as SVG, embedding
+									base64-encoded images inside the file. You get the overhead of SVG markup with
+									none of the vector benefits — no infinite scaling, no CSS styling. Export as PNG
+									or WebP from your tool, or convert here.
+								</p>
+							{/if}
 						</div>
-						{#if showEmbeddedRasterWhy}
-							<p class="mt-2 leading-relaxed text-amber-400/70">
-								Design tools like Figma sometimes export raster frames as SVG, embedding
-								base64-encoded images inside the file. You get the overhead of SVG markup with none
-								of the vector benefits — no infinite scaling, no CSS styling. Export as PNG or WebP
-								from your tool, or convert here.
-							</p>
-						{/if}
 					</div>
 				</div>
-			</div>
-		{/if}
+			{/if}
 
-		<!-- Complex pure-vector SVG callout -->
-		{#if showWebpSuggestion}
-			<div class="mt-3 rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-400">
-				<div class="flex items-start gap-2">
-					<AlertCircle class="mt-0.5 h-4 w-4 flex-shrink-0" />
-					<div class="min-w-0 flex-1">
-						<p class="font-semibold">This SVG is heavy for the web.</p>
-						<p class="text-amber-400/80">
-							A sharp WebP is <strong>{formatBytes(item.webpAlternativeSize!)}</strong> —
-							{Math.round((1 - item.webpAlternativeSize! / item.compressedSize!) * 100)}% smaller.
-						</p>
-						<div class="mt-2 flex items-center gap-2">
-							<button
-								onclick={() => handleFormatChange('webp')}
-								class="rounded-md bg-amber-500/20 px-2.5 py-1 font-semibold text-amber-300 transition-colors hover:bg-amber-500/30"
-							>
-								Convert to WebP
-							</button>
-							<button
-								onclick={() => (showComplexSvgWhy = !showComplexSvgWhy)}
-								class="text-amber-500/70 hover:text-amber-400"
-							>
-								{showComplexSvgWhy ? 'Hide' : 'Why?'}
-							</button>
-						</div>
-						{#if showComplexSvgWhy}
-							<p class="mt-2 leading-relaxed text-amber-400/70">
-								SVG stores drawing instructions — many paths and points mean a large file that's slow
-								to parse. A <strong class="text-amber-300">bitmap (WebP)</strong> at display size is
-								often smaller for complex artwork.
-								<strong class="text-amber-300">Vector (SVG)</strong> scales cleanly and can be styled
-								with CSS — keep it for logos, icons, and simple graphics.
+			<!-- Complex pure-vector SVG callout -->
+			{#if showWebpSuggestion}
+				<div class="mt-3 rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-400">
+					<div class="flex items-start gap-2">
+						<AlertCircle class="mt-0.5 h-4 w-4 flex-shrink-0" />
+						<div class="min-w-0 flex-1">
+							<p class="font-semibold">This SVG is heavy for the web.</p>
+							<p class="text-amber-400/80">
+								A sharp WebP is <strong>{formatBytes(item.webpAlternativeSize!)}</strong> —
+								{Math.round((1 - item.webpAlternativeSize! / item.compressedSize!) * 100)}% smaller.
 							</p>
-						{/if}
+							<div class="mt-2 flex items-center gap-2">
+								<button
+									onclick={() => handleFormatChange('webp')}
+									class="rounded-md bg-amber-500/20 px-2.5 py-1 font-semibold text-amber-300 transition-colors hover:bg-amber-500/30"
+								>
+									Convert to WebP
+								</button>
+								<button
+									onclick={() => (showComplexSvgWhy = !showComplexSvgWhy)}
+									class="text-amber-500/70 hover:text-amber-400"
+								>
+									{showComplexSvgWhy ? 'Hide' : 'Why?'}
+								</button>
+							</div>
+							{#if showComplexSvgWhy}
+								<p class="mt-2 leading-relaxed text-amber-400/70">
+									SVG stores drawing instructions — many paths and points mean a large file that's
+									slow to parse. A <strong class="text-amber-300">bitmap (WebP)</strong> at display
+									size is often smaller for complex artwork.
+									<strong class="text-amber-300">Vector (SVG)</strong> scales cleanly and can be styled
+									with CSS — keep it for logos, icons, and simple graphics.
+								</p>
+							{/if}
+						</div>
 					</div>
 				</div>
-			</div>
-		{/if}
+			{/if}
 
-		<!-- Good SVG tip -->
-		{#if showGoodSvgTip}
-			<div class="mt-3 flex items-center gap-2 rounded-lg bg-green-500/10 px-3 py-2 text-xs text-green-400">
-				<Check class="h-4 w-4 flex-shrink-0" />
-				<span><strong>Good SVG for the web</strong> — stays sharp at any size and beats a high-DPI bitmap on file size.</span>
-			</div>
-		{/if}
+			<!-- Good SVG tip -->
+			{#if showGoodSvgTip}
+				<div
+					class="mt-3 flex items-center gap-2 rounded-lg bg-green-500/10 px-3 py-2 text-xs text-green-400"
+				>
+					<Check class="h-4 w-4 flex-shrink-0" />
+					<span
+						><strong>Good SVG for the web</strong> — stays sharp at any size and beats a high-DPI bitmap
+						on file size.</span
+					>
+				</div>
+			{/if}
 
 			<!-- Resize info -->
 			{#if item.resizedWidth && item.resizedHeight && item.width && item.height}

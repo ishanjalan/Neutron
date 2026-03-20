@@ -326,45 +326,45 @@ function createImagesStore() {
 						settings.outputFormat === 'same' ? (format as OutputFormat) : settings.outputFormat;
 				}
 
-			let width: number | undefined;
-			let height: number | undefined;
-			try {
-				const dims = await getImageDimensions(file);
-				if (dims) {
-					width = dims.width;
-					height = dims.height;
+				let width: number | undefined;
+				let height: number | undefined;
+				try {
+					const dims = await getImageDimensions(file);
+					if (dims) {
+						width = dims.width;
+						height = dims.height;
+					}
+				} catch {
+					console.warn('Failed to get dimensions for', file.name);
 				}
-			} catch {
-				console.warn('Failed to get dimensions for', file.name);
-			}
 
-			const thumbnailUrl = await generateThumbnail(file);
+				const thumbnailUrl = await generateThumbnail(file);
 
-			// Detect embedded bitmaps in SVG files (e.g. Figma exports that wrap rasters in SVG)
-			let svgEmbeddedRaster: boolean | undefined;
-			if (format === 'svg') {
-				svgEmbeddedRaster = await detectSvgEmbeddedRaster(file);
-				// Override output format: embedded-raster SVGs should default to WebP
-				if (svgEmbeddedRaster && settings.outputFormat === 'same') {
-					outputFormat = 'webp';
+				// Detect embedded bitmaps in SVG files (e.g. Figma exports that wrap rasters in SVG)
+				let svgEmbeddedRaster: boolean | undefined;
+				if (format === 'svg') {
+					svgEmbeddedRaster = await detectSvgEmbeddedRaster(file);
+					// Override output format: embedded-raster SVGs should default to WebP
+					if (svgEmbeddedRaster && settings.outputFormat === 'same') {
+						outputFormat = 'webp';
+					}
 				}
-			}
 
-			newItems.push({
-				id: generateId(),
-				file,
-				name: file.name,
-				originalSize: file.size,
-				originalUrl: URL.createObjectURL(file),
-				thumbnailUrl,
-				format,
-				outputFormat,
-				status: 'pending',
-				progress: 0,
-				width,
-				height,
-				svgEmbeddedRaster,
-			});
+				newItems.push({
+					id: generateId(),
+					file,
+					name: file.name,
+					originalSize: file.size,
+					originalUrl: URL.createObjectURL(file),
+					thumbnailUrl,
+					format,
+					outputFormat,
+					status: 'pending',
+					progress: 0,
+					width,
+					height,
+					svgEmbeddedRaster,
+				});
 			}
 
 			items = [...items, ...newItems];
@@ -375,29 +375,29 @@ function createImagesStore() {
 				if (result) {
 					this.updateSettings(result.suggested);
 
-				// Re-apply output format to the just-added items
-				if (result.suggested.outputFormat !== undefined) {
-					items = items.map((item) => {
-						if (item.status !== 'pending') return item;
-						const fmt = result.suggested.outputFormat!;
-						// Embedded-raster SVGs always get WebP regardless of suggested format
-						if (item.format === 'svg' && item.svgEmbeddedRaster) {
-							return { ...item, outputFormat: 'webp' as OutputFormat };
-						}
-						if (item.format === 'svg' && fmt === 'same') {
-							return { ...item, outputFormat: 'svg' as OutputFormat };
-						}
-						if (item.format === 'heic' && fmt === 'same') {
-							return { ...item, outputFormat: 'webp' as OutputFormat };
-						}
-						return {
-							...item,
-							outputFormat: fmt === 'same' ? (item.format as OutputFormat) : fmt,
-						};
-					});
-				}
+					// Re-apply output format to the just-added items
+					if (result.suggested.outputFormat !== undefined) {
+						items = items.map((item) => {
+							if (item.status !== 'pending') return item;
+							const fmt = result.suggested.outputFormat!;
+							// Embedded-raster SVGs always get WebP regardless of suggested format
+							if (item.format === 'svg' && item.svgEmbeddedRaster) {
+								return { ...item, outputFormat: 'webp' as OutputFormat };
+							}
+							if (item.format === 'svg' && fmt === 'same') {
+								return { ...item, outputFormat: 'svg' as OutputFormat };
+							}
+							if (item.format === 'heic' && fmt === 'same') {
+								return { ...item, outputFormat: 'webp' as OutputFormat };
+							}
+							return {
+								...item,
+								outputFormat: fmt === 'same' ? (item.format as OutputFormat) : fmt,
+							};
+						});
+					}
 
-				toast.info(`Settings adjusted: ${result.reasons.join(', ')}`);
+					toast.info(`Settings adjusted: ${result.reasons.join(', ')}`);
 				}
 			}
 
