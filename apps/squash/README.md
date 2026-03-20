@@ -1,49 +1,48 @@
-# Squash - Video Compressor
+# Squash — Free Browser-Based Video Compressor
 
-GPU-accelerated video compression powered by WebCodecs. Compress videos at warp speed with hardware encoding — all running locally in your browser.
+Compress MP4, WebM, and MOV videos using the browser's native WebCodecs API. Hardware-accelerated where available, no FFmpeg, no uploads — 100% private.
 
-🔗 **Live Demo**: [ishanjalan.github.io/Squash](https://ishanjalan.github.io/Squash/)
+🔗 **Live**: [ishanjalan.github.io/Squash](https://ishanjalan.github.io/Squash/)
 
 ## ✨ Features
 
-- **GPU Accelerated** — Up to 100x faster with hardware encoding
-- **Pro Codecs** — H.264, H.265/HEVC, VP9, AV1, AAC, Opus
-- **Quality Presets** — Tiny, Web, Social, High, Lossless
-- **Resolution Control** — Downscale to 360p-4K
-- **Audio Options** — Bitrate, codec, or strip audio
-- **Two-Pass Encoding** — Better quality at target file sizes
-- **Batch Processing** — Compress multiple videos at once
-- **Trim Support** — Set start/end times before compression
+- **WebCodecs-powered** — Uses native browser video encoding, not FFmpeg WASM
+- **Hardware acceleration** — GPU encoding where the browser supports it
+- **Pro codecs** — H.264, H.265/HEVC, VP9, AV1 for video; AAC, Opus for audio
+- **Quality presets** — Tiny, Web, Social, High, Lossless
+- **Resolution control** — Downscale to 360p, 480p, 720p, 1080p, or 4K
+- **Audio options** — Adjust bitrate, codec, or strip audio entirely
+- **Batch processing** — Compress multiple videos at once
+- **Trim support** — Set start/end times before compressing
+
+## 🖥️ Browser Support
+
+Squash uses the WebCodecs API, which requires a modern browser:
+
+- ✅ Chrome 94+
+- ✅ Edge 94+
+- ✅ Safari 16.4+
+- ❌ Firefox (WebCodecs encoding not yet supported)
 
 ## 🏗️ Tech Stack
 
 ### Core
 
 - **Svelte 5** — Runes reactivity system
-- **SvelteKit** — Static adapter for PWA
+- **SvelteKit** — Static adapter, deployed to GitHub Pages
 - **TypeScript** — Type-safe development
 - **Tailwind CSS v4** — Utility-first styling
 
 ### Video Processing
 
-- **[Mediabunny](https://mediabunny.dev)** — Lightweight WebCodecs wrapper
-- **WebCodecs API** — Native browser video encoding/decoding
-- **Hardware Acceleration** — GPU-powered encoding when available
+- **[WebCodecs API](https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API)** — Native browser video encoding/decoding
+- **[Mediabunny](https://mediabunny.dev)** — Lightweight WebCodecs abstraction layer for muxing/demuxing
+- **Hardware encoding** — GPU-accelerated where supported by the browser and OS
 
 ### Utilities
 
 - **[Comlink](https://github.com/GoogleChromeLabs/comlink)** — Type-safe Web Worker communication
-- **[idb](https://github.com/nicholashollandmoore/idb)** — IndexedDB for large file handling
 - **[JSZip](https://stuk.github.io/jszip/)** — Batch download as ZIP
-
-## 🖥️ Browser Support
-
-WebCodecs requires modern browsers with hardware encoding support:
-
-- ✅ Chrome 94+
-- ✅ Edge 94+
-- ✅ Safari 16.4+
-- ❌ Firefox (WebCodecs not supported yet)
 
 ## 🛠️ Development
 

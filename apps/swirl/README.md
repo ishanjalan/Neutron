@@ -1,53 +1,52 @@
-# Swirl - GIF Toolkit
+# Swirl — Free Browser-Based GIF Tools
 
-Create, convert, and optimize GIFs with professional tools. Video to GIF, frame editing, optimization for Discord/Slack/Twitter — all running locally in your browser.
+Create, convert, and optimize GIFs with 10 independent tools. Video to GIF, frame editing, one-click optimization for Discord/Slack/Twitter — all powered by gifsicle and gifski WASM, running locally in your browser.
 
-🔗 **Live Demo**: [ishanjalan.github.io/Swirl](https://ishanjalan.github.io/Swirl/)
+🔗 **Live**: [ishanjalan.github.io/Swirl](https://ishanjalan.github.io/Swirl/)
 
-## ✨ Features
+## ✨ Tools
 
-| Tool             | Description                              |
-| ---------------- | ---------------------------------------- |
-| **Video to GIF** | Convert any video to animated GIF        |
-| **GIF Maker**    | Create GIFs from image sequences         |
-| **Optimize**     | Shrink GIFs for Discord, Slack, Twitter  |
-| **Add Text**     | Meme-style captions and overlays         |
-| **Combine**      | Merge multiple GIFs into one             |
-| **Resize**       | Perfect for emojis and stickers          |
-| **Crop**         | Visual cropping with drag handles        |
-| **Reverse**      | Play backwards or create boomerang loops |
-| **Speed**        | Speed up or slow down playback           |
-| **Split Frames** | Export every frame as PNG                |
+| Tool | URL | Description |
+|------|-----|-------------|
+| **Video to GIF** | [/video-to-gif](https://ishanjalan.github.io/Swirl/video-to-gif) | Convert MP4, WebM, or MOV to GIF with FPS and quality control |
+| **GIF Maker** | [/make](https://ishanjalan.github.io/Swirl/make) | Create an animated GIF from a sequence of images |
+| **Optimize GIF** | [/optimize](https://ishanjalan.github.io/Swirl/optimize) | Compress GIFs with one-click presets for Discord, Twitter, Slack, WhatsApp |
+| **Add Text** | [/text](https://ishanjalan.github.io/Swirl/text) | Add captions or meme-style text overlays |
+| **Combine GIFs** | [/combine](https://ishanjalan.github.io/Swirl/combine) | Merge multiple GIFs into a single animation |
+| **Resize GIF** | [/resize](https://ishanjalan.github.io/Swirl/resize) | Resize to exact dimensions or a percentage |
+| **Crop GIF** | [/crop](https://ishanjalan.github.io/Swirl/crop) | Crop with a visual drag handle |
+| **Reverse GIF** | [/reverse](https://ishanjalan.github.io/Swirl/reverse) | Play backwards or create a boomerang loop |
+| **Change Speed** | [/speed](https://ishanjalan.github.io/Swirl/speed) | Speed up or slow down any animated GIF |
+| **Split to Frames** | [/split](https://ishanjalan.github.io/Swirl/split) | Export every frame as individual PNG images |
 
-### Platform Presets
+### Platform Size Presets
 
-One-click optimization for:
+One-click optimization targets:
 
-- 💬 **Discord** — 10MB limit
-- 𝕏 **Twitter** — 15MB limit
-- 💼 **Slack** — 1MB limit
-- 📱 **WhatsApp** — 16MB limit
+- 💬 **Discord** — 10 MB limit
+- 𝕏 **Twitter / X** — 15 MB limit
+- 💼 **Slack** — 1 MB limit
+- 📱 **WhatsApp** — 16 MB limit
 
 ## 🏗️ Tech Stack
 
 ### Core
 
 - **Svelte 5** — Runes reactivity system
-- **SvelteKit** — Static adapter for PWA
+- **SvelteKit** — Static adapter with full prerendering, deployed to GitHub Pages
 - **TypeScript** — Type-safe development
 - **Tailwind CSS v4** — Utility-first styling
 
 ### GIF Processing
 
-- **[gifsicle-wasm-browser](https://github.com/nicholashollandmoore/gifsicle-wasm)** — GIF optimization and manipulation
-- **[gifski-wasm](https://github.com/nicholashollandmoore/gifski-wasm)** — High-quality GIF encoding
-- **[Mediabunny](https://mediabunny.dev)** — Video frame extraction via WebCodecs
+- **[gifsicle-wasm-browser](https://github.com/nicholasgasior/gifsicle-wasm)** — GIF optimization, resize, crop, reverse, speed, combine, split
+- **[gifski-wasm](https://github.com/nicholasgasior/gifski-wasm)** — High-quality GIF encoding for video-to-GIF conversion
+- **[Mediabunny](https://mediabunny.dev)** — WebCodecs-based video frame extraction
 
 ### Utilities
 
 - **[Comlink](https://github.com/GoogleChromeLabs/comlink)** — Type-safe Web Worker communication
-- **[idb](https://github.com/nicholashollandmoore/idb)** — IndexedDB for large file handling
-- **[JSZip](https://stuk.github.io/jszip/)** — Batch download as ZIP
+- **[JSZip](https://stuk.github.io/jszip/)** — Batch frame download as ZIP
 
 ## 🛠️ Development
 
@@ -67,7 +66,7 @@ The app will be available at `http://localhost:5177`
 pnpm build
 ```
 
-Output is generated in the `build/` directory, ready for static hosting.
+Each of the 10 tool routes is prerendered to its own `index.html` at build time, enabling direct indexing by search engines.
 
 ## 🔒 Privacy
 

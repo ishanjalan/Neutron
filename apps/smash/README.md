@@ -1,43 +1,43 @@
-# Smash - PDF Toolkit
+# Smash — Free Browser-Based PDF Tools
 
-A comprehensive PDF toolkit that runs entirely in your browser. Compress, merge, split, protect, unlock, rotate, and convert PDFs with professional-grade tools.
+A complete PDF toolkit with 13 independent tools — compress, merge, split, rotate, OCR, protect, and more. Powered by Ghostscript WASM and qpdf. All processing runs locally in your browser — no uploads, no limits, 100% private.
 
-🔗 **Live Demo**: [ishanjalan.github.io/Smash](https://ishanjalan.github.io/Smash/)
+🔗 **Live**: [ishanjalan.github.io/Smash](https://ishanjalan.github.io/Smash/)
 
-## ✨ Features
+## ✨ Tools
 
-| Tool             | Description                                   |
-| ---------------- | --------------------------------------------- |
-| **Compress**     | Reduce file size 50-90% with Ghostscript WASM |
-| **Merge**        | Combine multiple PDFs into one                |
-| **Split**        | Extract pages or split into multiple files    |
-| **Protect**      | Add AES-256 password encryption               |
-| **Unlock**       | Remove password protection                    |
-| **Rotate**       | Rotate pages 90°, 180°, or 270°               |
-| **Delete**       | Remove unwanted pages                         |
-| **Reorder**      | Drag and drop to rearrange                    |
-| **PDF → Images** | Convert to PNG, JPG, or WebP                  |
-| **Images → PDF** | Create PDF from images                        |
-| **Page Numbers** | Add numbering to documents                    |
-| **Watermark**    | Add text watermarks                           |
-| **OCR**          | Extract searchable text from scanned PDFs     |
+| Tool | URL | Description |
+|------|-----|-------------|
+| **Compress PDF** | [/compress](https://ishanjalan.github.io/Smash/compress) | Reduce file size 50–90% with Ghostscript WASM |
+| **Merge PDFs** | [/merge](https://ishanjalan.github.io/Smash/merge) | Combine multiple PDFs, drag to reorder |
+| **Split PDF** | [/split](https://ishanjalan.github.io/Smash/split) | Extract pages with a visual page picker |
+| **Rotate PDF** | [/rotate](https://ishanjalan.github.io/Smash/rotate) | Rotate pages 90°, 180°, or 270° |
+| **Delete Pages** | [/delete](https://ishanjalan.github.io/Smash/delete) | Remove unwanted pages |
+| **Reorder Pages** | [/reorder](https://ishanjalan.github.io/Smash/reorder) | Drag and drop to rearrange pages |
+| **PDF to Images** | [/to-images](https://ishanjalan.github.io/Smash/to-images) | Export pages as PNG, JPG, or WebP (up to 300 DPI) |
+| **Images to PDF** | [/from-images](https://ishanjalan.github.io/Smash/from-images) | Create a PDF from JPG, PNG, or WebP images |
+| **Add Page Numbers** | [/page-numbers](https://ishanjalan.github.io/Smash/page-numbers) | Add page numbers with position and format control |
+| **Watermark PDF** | [/watermark](https://ishanjalan.github.io/Smash/watermark) | Add a custom text watermark to every page |
+| **Protect PDF** | [/protect](https://ishanjalan.github.io/Smash/protect) | Encrypt with AES-256 password protection |
+| **Unlock PDF** | [/unlock](https://ishanjalan.github.io/Smash/unlock) | Remove password protection |
+| **OCR PDF** | [/ocr](https://ishanjalan.github.io/Smash/ocr) | Extract searchable text from scanned PDFs (100+ languages) |
 
 ## 🏗️ Tech Stack
 
 ### Core
 
 - **Svelte 5** — Runes reactivity system
-- **SvelteKit** — Static adapter for PWA
+- **SvelteKit** — Static adapter with full prerendering, deployed to GitHub Pages
 - **TypeScript** — Type-safe development
 - **Tailwind CSS v4** — Utility-first styling
 
 ### PDF Processing
 
-- **[Ghostscript WASM](https://github.com/nicholashollandmoore/ghostscript-wasm)** — Professional PDF compression (50-90% reduction)
-- **[qpdf WASM](https://github.com/nicholashollandmoore/qpdf-wasm)** — AES-256 encryption/decryption
-- **[pdf-lib](https://pdf-lib.js.org/)** — PDF manipulation (merge, split, rotate, etc.)
-- **[pdfjs-dist](https://mozilla.github.io/pdf.js/)** — PDF rendering for previews
-- **[Tesseract.js](https://tesseract.projectnaptha.com/)** — OCR text extraction
+- **[Ghostscript WASM](https://github.com/nicholasgasior/ghostscript-wasm)** — Professional PDF compression (50–90% size reduction)
+- **[qpdf WASM](https://github.com/nicholasgasior/qpdf-wasm)** — AES-256 encryption and decryption
+- **[pdf-lib](https://pdf-lib.js.org/)** — PDF manipulation (merge, split, rotate, reorder, watermark, page numbers)
+- **[pdfjs-dist](https://mozilla.github.io/pdf.js/)** — PDF rendering for visual page previews
+- **[Tesseract.js](https://tesseract.projectnaptha.com/)** — OCR text extraction (100+ language support)
 
 ### Utilities
 
@@ -62,7 +62,7 @@ The app will be available at `http://localhost:5174`
 pnpm build
 ```
 
-Output is generated in the `build/` directory, ready for static hosting.
+Each of the 13 tool routes is prerendered to its own `index.html` at build time, enabling direct indexing by search engines.
 
 ## 🔒 Privacy
 
