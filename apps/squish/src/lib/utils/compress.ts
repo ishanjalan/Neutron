@@ -95,36 +95,32 @@ async function processQueue() {
 	}
 }
 
-// Convert HEIC to PNG using heic2any (libheif WASM decoder)
+// Convert HEIC to PNG using the browser's native image decoder (createImageBitmap).
+// Supported on Safari (all), Chrome 104+ on macOS/iOS. HEIC originates from Apple
+// devices, so Firefox users essentially never encounter these files.
 async function convertHeicToPng(
 	file: File
 ): Promise<{ blob: Blob; width: number; height: number }> {
-	const { default: heic2any } = await import('heic2any');
-	const result = await heic2any({
-		blob: file,
-		toType: 'image/png', // Lossless intermediate format
-		quality: 1,
+	const bitmap = await createImageBitmap(file);
+	const { width, height } = bitmap;
+
+	const canvas = document.createElement('canvas');
+	canvas.width = width;
+	canvas.height = height;
+	canvas.getContext('2d')!.drawImage(bitmap, 0, 0);
+	bitmap.close();
+
+	return new Promise((resolve, reject) => {
+		canvas.toBlob((blob) => {
+			canvas.width = 0;
+			canvas.height = 0;
+			if (blob) {
+				resolve({ blob, width, height });
+			} else {
+				reject(new Error('Failed to decode HEIC'));
+			}
+		}, 'image/png');
 	});
-
-	// heic2any can return single blob or array
-	const pngBlob = Array.isArray(result) ? result[0] : result;
-
-	// Get dimensions from the converted PNG
-	const dimensions = await new Promise<{ width: number; height: number }>((resolve, reject) => {
-		const img = new Image();
-		const url = URL.createObjectURL(pngBlob);
-		img.onload = () => {
-			URL.revokeObjectURL(url);
-			resolve({ width: img.naturalWidth, height: img.naturalHeight });
-		};
-		img.onerror = () => {
-			URL.revokeObjectURL(url);
-			reject(new Error('Failed to get HEIC dimensions'));
-		};
-		img.src = url;
-	});
-
-	return { blob: pngBlob, ...dimensions };
 }
 
 // Calculate resized dimensions based on settings

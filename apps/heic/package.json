@@ -18,7 +18,6 @@
 		"@neutron/config": "workspace:*",
 		"@neutron/ui": "workspace:*",
 		"@neutron/utils": "workspace:*",
-		"heic2any": "^0.0.4",
 		"icodec": "^0.6.0"
 	},
 	"devDependencies": {

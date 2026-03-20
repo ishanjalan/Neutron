@@ -137,12 +137,12 @@ textarea:focus-visible {
 
 /* Flat surface card — for cards that don't need blur */
 .surface-card {
-	@apply bg-surface-800 border border-surface-700 rounded-2xl;
+	@apply bg-surface-800 border-surface-700 rounded-2xl border;
 }
 
 /* Reusable accent status dot */
 .accent-dot {
-	@apply h-2 w-2 rounded-full bg-accent-start flex-shrink-0;
+	@apply bg-accent-start h-2 w-2 flex-shrink-0 rounded-full;
 }
 
 /* Body scroll lock for modals */

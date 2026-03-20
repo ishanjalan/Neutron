@@ -40,7 +40,6 @@
 	let draggedIndex = $state<number | null>(null);
 	let dragOverIndex = $state<number | null>(null);
 
-	 
 	async function renderThumbnailForPage(
 		pdf: any,
 		pageNum: number

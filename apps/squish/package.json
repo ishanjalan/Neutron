@@ -44,7 +44,6 @@
 		"@neutron/ui": "workspace:*",
 		"@neutron/utils": "workspace:*",
 		"@sentry/sveltekit": "^10.45.0",
-		"heic2any": "^0.0.4",
 		"icodec": "^0.6.0",
 		"svgo": "^4.0.1"
 	}

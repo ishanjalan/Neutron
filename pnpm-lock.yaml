@@ -80,9 +80,6 @@ importers:
       '@neutron/utils':
         specifier: workspace:*
         version: link:../../packages/utils
-      heic2any:
-        specifier: ^0.0.4
-        version: 0.0.4
       icodec:
         specifier: ^0.6.0
         version: 0.6.0
@@ -284,9 +281,6 @@ importers:
       '@sentry/sveltekit':
         specifier: ^10.45.0
         version: 10.45.0(@sveltejs/kit@2.55.0(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@7.0.0(svelte@5.54.0)(vite@8.0.1(@types/node@25.5.0)(esbuild@0.27.4)(jiti@2.6.1)(yaml@2.8.2)))(svelte@5.54.0)(typescript@5.9.3)(vite@8.0.1(@types/node@25.5.0)(esbuild@0.27.4)(jiti@2.6.1)(yaml@2.8.2)))(rollup@4.59.0)(svelte@5.54.0)(vite@8.0.1(@types/node@25.5.0)(esbuild@0.27.4)(jiti@2.6.1)(yaml@2.8.2))
-      heic2any:
-        specifier: ^0.0.4
-        version: 0.0.4
       icodec:
         specifier: ^0.6.0
         version: 0.6.0
@@ -2387,9 +2381,6 @@ packages:
   has-flag@4.0.0:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
     engines: {node: '>=8'}
-
-  heic2any@0.0.4:
-    resolution: {integrity: sha512-3lLnZiDELfabVH87htnRolZ2iehX9zwpRyGNz22GKXIu0fznlblf0/ftppXKNqS26dqFSeqfIBhAmAj/uSp0cA==}
 
   html-encoding-sniffer@6.0.0:
     resolution: {integrity: sha512-CV9TW3Y3f8/wT0BRFc1/KAVQ3TUHiXmaAb6VW9vtiMFf7SLoMd1PdAc4W3KFOFETBJUb90KatHqlsZMWV+R9Gg==}
@@ -5360,8 +5351,6 @@ snapshots:
       - utf-8-validate
 
   has-flag@4.0.0: {}
-
-  heic2any@0.0.4: {}
 
   html-encoding-sniffer@6.0.0:
     dependencies:

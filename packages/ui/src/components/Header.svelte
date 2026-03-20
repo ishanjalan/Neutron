@@ -124,7 +124,7 @@
 								<a
 									href={link.href}
 									class="px-3 py-2 text-sm font-medium transition-colors {active
-										? 'text-accent-start font-semibold border-b-2 border-accent-start rounded-none'
+										? 'text-accent-start border-accent-start rounded-none border-b-2 font-semibold'
 										: 'text-surface-400 hover:text-surface-100 hover:bg-surface-800 rounded-lg'}"
 								>
 									{link.label}
@@ -140,7 +140,7 @@
 							<a
 								href={link.href}
 								class="px-3 py-2 text-sm font-medium transition-colors {active
-									? 'text-accent-start font-semibold border-b-2 border-accent-start rounded-none'
+									? 'text-accent-start border-accent-start rounded-none border-b-2 font-semibold'
 									: 'text-surface-400 hover:text-surface-100 hover:bg-surface-800 rounded-lg'}"
 							>
 								{link.label}

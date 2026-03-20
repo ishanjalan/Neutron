@@ -165,7 +165,7 @@
 				{#each tools as tool (tool.id)}
 					<a
 						href={resolve(tool.href)}
-						class="surface-card group relative p-5 transition-all duration-200 hover:scale-[1.005] hover:border-surface-600"
+						class="surface-card group hover:border-surface-600 relative p-5 transition-all duration-200 hover:scale-[1.005]"
 						in:fade={{ duration: 150 }}
 					>
 						<!-- Popular badge -->

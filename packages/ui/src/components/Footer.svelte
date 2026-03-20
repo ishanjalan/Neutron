@@ -21,7 +21,8 @@
 				{@const isCurrent = app.id === currentApp}
 				{#if isCurrent}
 					<span class="flex items-center gap-2 text-sm font-semibold text-white">
-						<span class="h-2 w-2 flex-shrink-0 rounded-full" style="background: {app.gradient}"></span>
+						<span class="h-2 w-2 flex-shrink-0 rounded-full" style="background: {app.gradient}"
+						></span>
 						{app.name}
 					</span>
 				{:else}
@@ -41,7 +42,9 @@
 		<div class="my-5 h-px bg-white/5"></div>
 
 		<!-- Bottom section -->
-		<div class="flex flex-col items-center gap-4 text-xs text-white/40 sm:flex-row sm:justify-between">
+		<div
+			class="flex flex-col items-center gap-4 text-xs text-white/40 sm:flex-row sm:justify-between"
+		>
 			<!-- Privacy badge -->
 			<div class="flex items-center gap-1.5">
 				<Shield class="h-3.5 w-3.5" strokeWidth={1.5} />
