@@ -11,6 +11,11 @@
 	let focusedIndex = $state<number | null>(null);
 	let listRef: HTMLDivElement;
 
+	const isTouchDevice = $derived(
+		typeof window !== 'undefined' &&
+			window.matchMedia('(hover: none) and (pointer: coarse)').matches
+	);
+
 	const selectedCount = $derived(images.selectedIds.size);
 	const hasSelection = $derived(selectedCount > 0);
 	const allSelected = $derived(selectedCount === images.items.length && images.items.length > 0);
@@ -238,18 +243,18 @@
 				? 'ring-accent-start ring-offset-surface-900 rounded-2xl ring-2 ring-offset-2'
 				: ''}"
 			animate:flip={{ duration: 200 }}
-			draggable="true"
-			ondragstart={(e) => handleDragStart(e, item.id)}
-			ondragend={handleDragEnd}
-			ondragover={(e) => handleDragOver(e, item.id)}
-			ondragleave={handleDragLeave}
-			ondrop={(e) => handleDrop(e, item.id)}
+			draggable={!isTouchDevice}
+			ondragstart={!isTouchDevice ? (e) => handleDragStart(e, item.id) : undefined}
+			ondragend={!isTouchDevice ? handleDragEnd : undefined}
+			ondragover={!isTouchDevice ? (e) => handleDragOver(e, item.id) : undefined}
+			ondragleave={!isTouchDevice ? handleDragLeave : undefined}
+			ondrop={!isTouchDevice ? (e) => handleDrop(e, item.id) : undefined}
 			role="gridcell"
 			tabindex="-1"
 		>
 			<!-- Drag handle indicator -->
 			<div
-				class="pointer-events-none absolute left-3 top-3 z-10 flex h-8 w-8 cursor-grab items-center justify-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur-sm transition-opacity active:cursor-grabbing group-hover:opacity-100"
+				class="pointer-events-none absolute top-3 left-3 z-10 flex h-8 w-8 cursor-grab items-center justify-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100 active:cursor-grabbing"
 			>
 				<GripVertical class="h-4 w-4" />
 			</div>
@@ -265,7 +270,7 @@
 
 {#if images.items.length > 1}
 	<p class="text-surface-400 mt-6 text-center text-sm">
-		Drag to reorder • Arrow keys to navigate • Enter to download • Delete to remove • Space to
-		select
+		{#if !isTouchDevice}Drag to reorder •{/if} Arrow keys to navigate • Enter to download • Delete to
+		remove • Space to select
 	</p>
 {/if}

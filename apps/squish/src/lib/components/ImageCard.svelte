@@ -37,6 +37,7 @@
 	let showFormatMenu = $state(false);
 	let showCompare = $state(false);
 	let showPreview = $state(false);
+	let justDownloaded = $state(false);
 
 	const isSelected = $derived(images.isSelected(item.id));
 
@@ -117,6 +118,10 @@
 
 	function handleDownload() {
 		downloadImage(item, images.settings.filenameTemplate);
+		justDownloaded = true;
+		setTimeout(() => {
+			justDownloaded = false;
+		}, 1500);
 	}
 
 	async function handleCopy() {
@@ -381,10 +386,16 @@
 						e.stopPropagation();
 						handleDownload();
 					}}
-					class="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-all hover:-translate-y-1 hover:scale-125 hover:bg-green-500/80 active:scale-95"
-					title="Download"
+					class="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-sm transition-all hover:-translate-y-1 hover:scale-125 active:scale-95 {justDownloaded
+						? 'bg-green-500/80 text-white'
+						: 'bg-white/20 text-white hover:bg-green-500/80'}"
+					title={justDownloaded ? 'Downloaded!' : 'Download'}
 				>
-					<Download class="h-5 w-5" />
+					{#if justDownloaded}
+						<Check class="h-5 w-5" />
+					{:else}
+						<Download class="h-5 w-5" />
+					{/if}
 				</button>
 				{#if canCopyToClipboard}
 					<button
@@ -532,11 +543,17 @@
 					{/if}
 					<button
 						onclick={handleDownload}
-						class="from-accent-start to-accent-end flex h-8 items-center gap-1.5 rounded-lg bg-gradient-to-r px-2.5 text-sm font-medium text-white transition-all hover:opacity-90 hover:shadow-md"
-						aria-label="Download"
-						title="Download"
+						class="flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-white transition-all hover:opacity-90 hover:shadow-md {justDownloaded
+							? 'bg-green-500'
+							: 'from-accent-start to-accent-end bg-gradient-to-r'}"
+						aria-label={justDownloaded ? 'Downloaded!' : 'Download'}
+						title={justDownloaded ? 'Downloaded!' : 'Download'}
 					>
-						<Download class="h-4 w-4" />
+						{#if justDownloaded}
+							<Check class="h-4 w-4" />
+						{:else}
+							<Download class="h-4 w-4" />
+						{/if}
 					</button>
 				</div>
 			</div>

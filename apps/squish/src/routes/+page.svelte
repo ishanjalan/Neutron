@@ -9,9 +9,9 @@
 	import MobileOptimizations from '$lib/components/MobileOptimizations.svelte';
 	import { ConfirmModal, AnimatedNumber, toast } from '@neutron/ui';
 	import { images, formatBytes } from '$lib';
-	import { processImages, cancelProcessing } from '$lib/utils/compress';
+	import { processImages, cancelProcessing, reprocessImage } from '$lib/utils/compress';
 	import { terminatePool } from '$lib/utils/worker-pool';
-	import { Download, Trash2, Sparkles, XCircle } from 'lucide-svelte';
+	import { Download, Trash2, Sparkles, XCircle, RotateCcw } from 'lucide-svelte';
 	import { downloadAllAsZip } from '$lib/utils/download';
 	import { fade } from 'svelte/transition';
 	import type { ImageItem } from '$lib/stores/images.svelte';
@@ -168,6 +168,17 @@
 		toast.info(`Cancelled processing of ${count} image${count !== 1 ? 's' : ''}`);
 	}
 
+	async function retryAllFailed() {
+		const failedItems = images.items.filter((i) => i.status === 'error');
+		if (failedItems.length === 0) return;
+		toast.info(
+			`Retrying ${failedItems.length} failed image${failedItems.length !== 1 ? 's' : ''}…`
+		);
+		for (const item of failedItems) {
+			await reprocessImage(item.id, item.outputFormat);
+		}
+	}
+
 	// Keyboard shortcuts
 	function handleKeydown(e: KeyboardEvent) {
 		if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'd') {
@@ -294,6 +305,22 @@
 	<MobileOptimizations />
 	<Header />
 
+	<!-- Batch progress bar — thin strip under header during processing -->
+	{#if processingCount > 0 && images.items.length > 0}
+		<div
+			class="fixed top-0 right-0 left-0 z-50 h-1 overflow-hidden"
+			in:fade={{ duration: 100 }}
+			out:fade={{ duration: 200 }}
+		>
+			<div class="h-full w-full bg-black/20">
+				<div
+					class="from-accent-start to-accent-end h-full bg-gradient-to-r transition-all duration-500 ease-out"
+					style="width: {Math.round((completedCount / images.items.length) * 100)}%"
+				></div>
+			</div>
+		</div>
+	{/if}
+
 	<main class="flex-1 px-4 pt-24 pb-8 sm:px-6 sm:pt-28 sm:pb-12 lg:px-8">
 		<div class="mx-auto max-w-7xl">
 			<!-- Clean empty state -->
@@ -358,6 +385,16 @@
 							>
 								<XCircle class="h-5 w-5" aria-hidden="true" />
 								<span class="hidden sm:inline">Cancel</span>
+							</button>
+						{/if}
+						{#if errorCount >= 2}
+							<button
+								onclick={retryAllFailed}
+								class="flex items-center gap-2 rounded-xl bg-red-500/10 px-5 py-2.5 text-sm font-medium text-red-400 transition-all hover:bg-red-500/20"
+							>
+								<RotateCcw class="h-5 w-5" aria-hidden="true" />
+								<span class="hidden sm:inline">Retry Failed ({errorCount})</span>
+								<span class="sm:hidden">{errorCount}</span>
 							</button>
 						{/if}
 						{#if completedCount > 0}

@@ -29,15 +29,18 @@
 	const ADVANCED_COLLAPSED_KEY = 'squish-advanced-collapsed';
 	let showFormatGuide = $state(false);
 	let showReoptimizeConfirm = $state(false);
+	let formatNudgeDismissed = $state(false);
 
 	// Check if we're in preview mode (no images yet)
 	const isPreviewMode = $derived(images.items.length === 0);
 
-	// Load collapsed state from localStorage
-	let showAdvanced = $state(true);
+	// Load collapsed state from localStorage — default to collapsed for new users
+	let showAdvanced = $state(false);
 	if (typeof localStorage !== 'undefined') {
 		const saved = localStorage.getItem(ADVANCED_COLLAPSED_KEY);
-		showAdvanced = saved !== 'true';
+		if (saved !== null) {
+			showAdvanced = saved !== 'true';
+		}
 	}
 
 	const formats: { value: 'same' | OutputFormat; label: string; title?: string }[] = [
@@ -156,7 +159,7 @@
 		{#if isPreviewMode}
 			<div class="text-surface-400 -mb-1 flex items-center gap-2">
 				<Sliders class="h-4 w-4" />
-				<span class="text-xs font-medium uppercase tracking-wider"
+				<span class="text-xs font-medium tracking-wider uppercase"
 					>Pre-configure compression settings</span
 				>
 			</div>
@@ -166,11 +169,11 @@
 		<div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
 			<!-- Quality Section -->
 			<div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-				<span class="text-surface-500 text-xs font-semibold uppercase tracking-wider">Quality</span>
+				<span class="text-surface-500 text-xs font-semibold tracking-wider uppercase">Quality</span>
 
 				{#if !isLossless}
 					<div class="bg-surface-800/50 flex items-center gap-1 rounded-xl p-1">
-						{#each presets as preset}
+						{#each presets as preset (preset.value)}
 							<button
 								onclick={() => handlePresetClick(preset.value)}
 								class="relative flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all {images
@@ -183,7 +186,7 @@
 								<span>{preset.label}</span>
 								{#if preset.recommended && images.settings.quality !== preset.value}
 									<span
-										class="bg-accent-start absolute -right-1 -top-1 h-2 w-2 animate-pulse rounded-full"
+										class="bg-accent-start absolute -top-1 -right-1 h-2 w-2 animate-pulse rounded-full"
 									></span>
 								{/if}
 							</button>
@@ -208,19 +211,33 @@
 			<!-- Format Section -->
 			<div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
 				<div class="flex items-center gap-1.5">
-					<span class="text-surface-500 text-xs font-semibold uppercase tracking-wider">Format</span
+					<span class="text-surface-500 text-xs font-semibold tracking-wider uppercase">Format</span
 					>
 					<button
-						onclick={() => (showFormatGuide = true)}
+						onclick={() => {
+							showFormatGuide = true;
+							formatNudgeDismissed = true;
+						}}
 						class="text-surface-400 hover:text-accent-start hover:bg-accent-start/10 flex h-5 w-5 items-center justify-center rounded-full transition-colors"
 						title="Format guide"
 						aria-label="Open format guide"
 					>
 						<Info class="h-3.5 w-3.5" />
 					</button>
+					{#if !isPreviewMode && !formatNudgeDismissed}
+						<button
+							onclick={() => {
+								showFormatGuide = true;
+								formatNudgeDismissed = true;
+							}}
+							class="text-accent-start hover:text-accent-end text-xs underline underline-offset-2 transition-colors"
+						>
+							Not sure?
+						</button>
+					{/if}
 				</div>
 				<div class="bg-surface-800/50 flex flex-wrap gap-1 rounded-xl p-1">
-					{#each formats as format}
+					{#each formats as format (format.value)}
 						<button
 							onclick={() => handleFormatChange(format.value)}
 							class="rounded-lg px-3 py-2.5 text-sm font-medium transition-all {images.settings
@@ -247,7 +264,7 @@
 				{:else}
 					<ChevronDown class="h-4 w-4" />
 				{/if}
-				<span class="uppercase tracking-wider">Advanced Options</span>
+				<span class="tracking-wider uppercase">Advanced Options</span>
 				{#if !showAdvanced}
 					<span class="text-surface-500 hidden sm:inline">
 						({images.settings.stripMetadata ? 'Metadata stripped' : 'Metadata kept'}{isLossless
@@ -298,7 +315,7 @@
 							: 'bg-surface-600'}"
 					>
 						<span
-							class="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform {images
+							class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform {images
 								.settings.stripMetadata
 								? 'translate-x-4'
 								: 'translate-x-0'}"
@@ -329,7 +346,7 @@
 							: 'bg-surface-600'}"
 					>
 						<span
-							class="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform {isLossless
+							class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform {isLossless
 								? 'translate-x-4'
 								: 'translate-x-0'}"
 						></span>
@@ -359,7 +376,7 @@
 								: 'bg-surface-600'}"
 						>
 							<span
-								class="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform {resizeEnabled
+								class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform {resizeEnabled
 									? 'translate-x-4'
 									: 'translate-x-0'}"
 							></span>
@@ -460,7 +477,7 @@
 									: 'bg-surface-600'}"
 							>
 								<span
-									class="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform {autoSave.enabled
+									class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform {autoSave.enabled
 										? 'translate-x-4'
 										: 'translate-x-0'}"
 								></span>
@@ -480,7 +497,7 @@
 				<!-- Filename Template -->
 				<div class="flex flex-col gap-2">
 					<label
-						class="text-surface-500 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider"
+						class="text-surface-500 flex items-center gap-2 text-xs font-semibold tracking-wider uppercase"
 					>
 						<FileText class="h-3.5 w-3.5" />
 						Output Filename

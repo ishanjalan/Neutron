@@ -83,6 +83,17 @@
 					Quality: <span class="text-accent-start font-semibold"
 						>{filesStore.settings.quality}%</span
 					>
+					<span class="text-surface-500 ml-2 text-xs font-normal">
+						{#if filesStore.settings.quality >= 90}
+							&middot; Archival &mdash; near lossless, largest files
+						{:else if filesStore.settings.quality >= 75}
+							&middot; Balanced &mdash; good quality, smaller files
+						{:else if filesStore.settings.quality >= 50}
+							&middot; Compact &mdash; small files, visible reduction
+						{:else}
+							&middot; Aggressive &mdash; very small, lower quality
+						{/if}
+					</span>
 				</label>
 				<input
 					id="quality"
@@ -93,6 +104,10 @@
 					oninput={handleQualityChange}
 					class="accent-accent-start w-full"
 				/>
+				<div class="text-surface-600 mt-1 flex justify-between text-xs">
+					<span>Smaller files</span>
+					<span>Better quality</span>
+				</div>
 			</div>
 		{/if}
 	</div>

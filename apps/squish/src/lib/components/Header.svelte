@@ -28,10 +28,17 @@
 		typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 	const modKey = isMac ? '⌘' : 'Ctrl';
 
-	const shortcuts = [
+	const globalShortcuts = [
 		{ keys: `${modKey}+Shift+D`, action: 'Download all as ZIP' },
 		{ keys: `${modKey}+V`, action: 'Paste image from clipboard' },
 		{ keys: 'Escape', action: 'Clear all images' },
+	];
+
+	const gridShortcuts = [
+		{ keys: '← → ↑ ↓', action: 'Navigate images' },
+		{ keys: 'Enter', action: 'Download focused image' },
+		{ keys: 'Delete', action: 'Remove focused image' },
+		{ keys: 'Space', action: 'Select / deselect image' },
 	];
 
 	function handleClickOutside(e: MouseEvent) {
@@ -168,7 +175,7 @@
 
 		{#if showShortcuts}
 			<div
-				class="bg-surface-800 absolute top-full right-0 mt-2 w-64 rounded-xl p-4 shadow-xl ring-1 ring-white/10"
+				class="bg-surface-800 absolute top-full right-0 mt-2 w-72 rounded-xl p-4 shadow-xl ring-1 ring-white/10"
 				transition:scale={{ duration: 150, start: 0.95 }}
 				role="tooltip"
 			>
@@ -176,9 +183,23 @@
 					<Command class="text-accent-start h-4 w-4" />
 					Keyboard Shortcuts
 				</h3>
+				<p class="text-surface-500 mb-1.5 text-xs font-semibold tracking-wider uppercase">Global</p>
+				<ul class="mb-3 space-y-2">
+					{#each globalShortcuts as shortcut (shortcut.action)}
+						<li class="flex items-center justify-between gap-4 text-sm">
+							<span class="text-surface-400">{shortcut.action}</span>
+							<kbd class="bg-surface-700 text-surface-300 rounded px-2 py-0.5 font-mono text-xs">
+								{shortcut.keys}
+							</kbd>
+						</li>
+					{/each}
+				</ul>
+				<p class="text-surface-500 mb-1.5 text-xs font-semibold tracking-wider uppercase">
+					Image Grid
+				</p>
 				<ul class="space-y-2">
-					{#each shortcuts as shortcut (shortcut.action)}
-						<li class="flex items-center justify-between text-sm">
+					{#each gridShortcuts as shortcut (shortcut.action)}
+						<li class="flex items-center justify-between gap-4 text-sm">
 							<span class="text-surface-400">{shortcut.action}</span>
 							<kbd class="bg-surface-700 text-surface-300 rounded px-2 py-0.5 font-mono text-xs">
 								{shortcut.keys}
