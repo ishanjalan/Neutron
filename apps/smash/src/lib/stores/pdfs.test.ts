@@ -34,9 +34,9 @@ describe('pdfs store', () => {
 		});
 
 		it('persists settings to localStorage', () => {
-			pdfs.updateSettings({ watermarkText: 'DRAFT' });
+			pdfs.updateSettings({ compressionPreset: 'printer' });
 			const saved = JSON.parse(localStorage.getItem('smash-settings') ?? '{}');
-			expect(saved.watermarkText).toBe('DRAFT');
+			expect(saved.compressionPreset).toBe('printer');
 		});
 	});
 

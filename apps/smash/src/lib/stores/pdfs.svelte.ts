@@ -11,8 +11,6 @@ export type PDFTool =
 	| 'reorder'
 	| 'pdf-to-images'
 	| 'images-to-pdf'
-	| 'add-page-numbers'
-	| 'watermark'
 	| 'protect'
 	| 'unlock'
 	| 'ocr';
@@ -66,11 +64,6 @@ export interface PDFSettings {
 	// Protection settings
 	userPassword: string;
 	ownerPassword: string;
-	// Watermark settings
-	watermarkText: string;
-	watermarkOpacity: number; // 0-100
-	// Page numbers settings
-	pageNumberPosition: 'bottom-center' | 'bottom-right' | 'top-center' | 'top-right';
 	// OCR settings
 	ocrLanguage: string;
 	ocrOutputMode: 'searchable-pdf' | 'text-only' | 'text-and-pdf';
@@ -196,23 +189,6 @@ export const TOOLS = [
 		accepts: '.jpg,.jpeg,.png,.webp',
 		category: 'convert',
 	},
-	// Editing
-	{
-		value: 'add-page-numbers' as const,
-		label: 'Page Numbers',
-		desc: 'Add page numbers to PDF',
-		icon: 'Hash',
-		accepts: '.pdf',
-		category: 'edit',
-	},
-	{
-		value: 'watermark' as const,
-		label: 'Watermark',
-		desc: 'Add text watermark',
-		icon: 'Stamp',
-		accepts: '.pdf',
-		category: 'edit',
-	},
 	// Security
 	{
 		value: 'protect' as const,
@@ -246,7 +222,6 @@ export const TOOL_CATEGORIES = [
 	{ id: 'core', label: 'Core Tools' },
 	{ id: 'pages', label: 'Page Tools' },
 	{ id: 'convert', label: 'Convert' },
-	{ id: 'edit', label: 'Edit' },
 	{ id: 'security', label: 'Security' },
 ] as const;
 
@@ -266,9 +241,6 @@ const DEFAULT_SETTINGS: PDFSettings = {
 	rotationAngle: 90,
 	userPassword: '',
 	ownerPassword: '',
-	watermarkText: '',
-	watermarkOpacity: 30,
-	pageNumberPosition: 'bottom-center',
 	ocrLanguage: 'eng',
 	ocrOutputMode: 'searchable-pdf',
 };

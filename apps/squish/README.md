@@ -32,7 +32,6 @@ Compress JPEG, PNG, WebP, AVIF, JPEG XL, SVG, GIF, and HEIC images using best-in
   - libwebp — WebP encoding
   - libaom (AV1) — AVIF encoding
   - libjxl — JPEG XL encoding
-- **[heic2any](https://github.com/alexcorvi/heic2any)** — HEIC/HEIF input support
 - **[SVGO](https://github.com/svg/svgo)** — SVG optimization and minification
 
 ### Utilities

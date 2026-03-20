@@ -109,7 +109,7 @@
 	}
 
 	// Tools that need settings to be configured before processing
-	const toolsNeedingConfig = ['protect', 'unlock', 'watermark', 'split', 'delete-pages'];
+	const toolsNeedingConfig = ['protect', 'unlock', 'split', 'delete-pages'];
 
 	// Auto-expand settings when a tool that needs configuration is selected
 	$effect(() => {
@@ -200,10 +200,6 @@
 				return 'Reorder';
 			case 'pdf-to-images':
 				return 'Convert';
-			case 'add-page-numbers':
-				return 'Add Numbers';
-			case 'watermark':
-				return 'Add Watermark';
 			case 'protect':
 				return 'Protect';
 			case 'unlock':
@@ -536,61 +532,6 @@
 				</div>
 			{/if}
 
-			<!-- Page Numbers Settings -->
-			{#if pdfs.settings.tool === 'add-page-numbers'}
-				<div class="space-y-2">
-					<span class="text-surface-300 text-sm font-medium">Position</span>
-					<div class="grid grid-cols-2 gap-2">
-						{#each [{ value: 'bottom-center', label: 'Bottom Center' }, { value: 'bottom-right', label: 'Bottom Right' }, { value: 'top-center', label: 'Top Center' }, { value: 'top-right', label: 'Top Right' }] as pos (pos.value)}
-							<button
-								onclick={() => pdfs.updateSettings({ pageNumberPosition: pos.value as any })}
-								class="rounded-lg px-3 py-2 text-sm transition-all {pdfs.settings
-									.pageNumberPosition === pos.value
-									? 'bg-accent-start text-white'
-									: 'bg-surface-800 text-surface-400 hover:text-surface-200'}"
-							>
-								{pos.label}
-							</button>
-						{/each}
-					</div>
-				</div>
-			{/if}
-
-			<!-- Watermark Settings -->
-			{#if pdfs.settings.tool === 'watermark'}
-				<div class="space-y-3">
-					<div class="space-y-2">
-						<label for="watermark-text" class="text-surface-300 text-sm font-medium"
-							>Watermark Text</label
-						>
-						<input
-							id="watermark-text"
-							type="text"
-							placeholder="Enter watermark text"
-							value={pdfs.settings.watermarkText}
-							oninput={(e) => pdfs.updateSettings({ watermarkText: e.currentTarget.value })}
-							class="bg-surface-800 border-surface-700 text-surface-200 focus:border-accent-start w-full rounded-lg border px-3 py-2 text-sm focus:outline-none"
-						/>
-					</div>
-					<div class="space-y-2">
-						<label for="watermark-opacity" class="text-surface-300 text-sm font-medium">
-							Opacity: {pdfs.settings.watermarkOpacity}%
-						</label>
-						<input
-							id="watermark-opacity"
-							type="range"
-							min="5"
-							max="100"
-							step="5"
-							value={pdfs.settings.watermarkOpacity}
-							oninput={(e) =>
-								pdfs.updateSettings({ watermarkOpacity: parseInt(e.currentTarget.value) })}
-							class="accent-accent-start w-full"
-						/>
-					</div>
-				</div>
-			{/if}
-
 			<!-- Password Protection Settings -->
 			{#if pdfs.settings.tool === 'protect'}
 				<div class="space-y-3">
@@ -723,10 +664,6 @@
 						{:else if pdfs.settings.tool === 'images-to-pdf'}
 							Images will be added as full pages in the order shown. Drag to reorder before creating
 							PDF.
-						{:else if pdfs.settings.tool === 'add-page-numbers'}
-							Add page numbers to every page. Numbers start from 1.
-						{:else if pdfs.settings.tool === 'watermark'}
-							Add a diagonal text watermark across all pages. Adjust opacity as needed.
 						{:else if pdfs.settings.tool === 'protect'}
 							Add password protection using AES-128 encryption. You'll need this password to open
 							the PDF.

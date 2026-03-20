@@ -1,6 +1,6 @@
 # Smash — Free Browser-Based PDF Tools
 
-A complete PDF toolkit with 13 independent tools — compress, merge, split, rotate, OCR, protect, and more. Powered by Ghostscript WASM. All processing runs locally in your browser — no uploads, no limits, 100% private.
+A complete PDF toolkit with 11 independent tools — compress, merge, split, rotate, OCR, protect, and more. Powered by Ghostscript WASM. All processing runs locally in your browser — no uploads, no limits, 100% private.
 
 🔗 **Live**: [ishanjalan.github.io/Smash](https://ishanjalan.github.io/Smash/)
 
@@ -16,8 +16,6 @@ A complete PDF toolkit with 13 independent tools — compress, merge, split, rot
 | **Reorder Pages**    | [/reorder](https://ishanjalan.github.io/Smash/reorder)           | Drag and drop to rearrange pages                           |
 | **PDF to Images**    | [/to-images](https://ishanjalan.github.io/Smash/to-images)       | Export pages as PNG, JPG, or WebP (up to 300 DPI)          |
 | **Images to PDF**    | [/from-images](https://ishanjalan.github.io/Smash/from-images)   | Create a PDF from JPG, PNG, or WebP images                 |
-| **Add Page Numbers** | [/page-numbers](https://ishanjalan.github.io/Smash/page-numbers) | Add page numbers with position and format control          |
-| **Watermark PDF**    | [/watermark](https://ishanjalan.github.io/Smash/watermark)       | Add a custom text watermark to every page                  |
 | **Protect PDF**      | [/protect](https://ishanjalan.github.io/Smash/protect)           | Encrypt with AES-128 password protection                   |
 | **Unlock PDF**       | [/unlock](https://ishanjalan.github.io/Smash/unlock)             | Remove password protection                                 |
 | **OCR PDF**          | [/ocr](https://ishanjalan.github.io/Smash/ocr)                   | Extract searchable text from scanned PDFs (100+ languages) |
@@ -61,7 +59,7 @@ The app will be available at `http://localhost:5174`
 pnpm build
 ```
 
-Each of the 13 tool routes is prerendered to its own `index.html` at build time, enabling direct indexing by search engines.
+Each of the 11 tool routes is prerendered to its own `index.html` at build time, enabling direct indexing by search engines.
 
 ## 🔒 Privacy
 

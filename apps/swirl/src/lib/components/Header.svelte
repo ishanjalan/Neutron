@@ -19,12 +19,7 @@
 				{ href: `${base}/resize`, label: 'Resize' },
 				{ href: `${base}/crop`, label: 'Crop' },
 				{ href: `${base}/speed`, label: 'Speed' },
-				{ href: `${base}/combine`, label: 'Combine' },
 			],
-		},
-		{
-			label: 'Extract',
-			links: [{ href: `${base}/split`, label: 'Split Frames' }],
 		},
 	];
 </script>

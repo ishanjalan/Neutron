@@ -7,7 +7,7 @@
  * All processing happens locally in the browser - files never leave your device.
  */
 
-import { PDFDocument, rgb, StandardFonts, degrees } from '@cantoo/pdf-lib';
+import { PDFDocument, degrees } from '@cantoo/pdf-lib';
 import { compressPDF as compressWithGS, isGhostscriptReady } from './ghostscript';
 import {
 	pdfs,
@@ -436,110 +436,6 @@ export async function reorderPages(file: File, options: ReorderOptions): Promise
 }
 
 // ============================================
-// PAGE NUMBERS & WATERMARK (pdf-lib)
-// ============================================
-
-interface PageNumberOptions {
-	position: 'bottom-center' | 'bottom-right' | 'top-center' | 'top-right';
-	startNumber?: number;
-	format?: string;
-	onProgress?: (progress: number) => void;
-}
-
-export async function addPageNumbers(file: File, options: PageNumberOptions): Promise<Blob> {
-	const arrayBuffer = await file.arrayBuffer();
-	const pdf = await PDFDocument.load(arrayBuffer);
-	const font = await pdf.embedFont(StandardFonts.Helvetica);
-	const fontSize = 10;
-	const { startNumber = 1, format = '{n}', position } = options;
-
-	const pages = pdf.getPages();
-
-	for (let i = 0; i < pages.length; i++) {
-		const page = pages[i];
-		const { width, height } = page.getSize();
-		const pageNum = startNumber + i;
-		const text = format.replace('{n}', pageNum.toString());
-		const textWidth = font.widthOfTextAtSize(text, fontSize);
-
-		let x: number, y: number;
-
-		switch (position) {
-			case 'bottom-center':
-				x = (width - textWidth) / 2;
-				y = 30;
-				break;
-			case 'bottom-right':
-				x = width - textWidth - 40;
-				y = 30;
-				break;
-			case 'top-center':
-				x = (width - textWidth) / 2;
-				y = height - 30;
-				break;
-			case 'top-right':
-				x = width - textWidth - 40;
-				y = height - 30;
-				break;
-		}
-
-		page.drawText(text, {
-			x,
-			y,
-			size: fontSize,
-			font,
-			color: rgb(0.3, 0.3, 0.3),
-		});
-
-		options.onProgress?.(Math.round(((i + 1) / pages.length) * 100));
-	}
-
-	const pdfBytes = await pdf.save();
-	return new Blob([pdfBytes], { type: 'application/pdf' });
-}
-
-interface WatermarkOptions {
-	text: string;
-	opacity: number;
-	fontSize?: number;
-	angle?: number;
-	onProgress?: (progress: number) => void;
-}
-
-export async function addWatermark(file: File, options: WatermarkOptions): Promise<Blob> {
-	const arrayBuffer = await file.arrayBuffer();
-	const pdf = await PDFDocument.load(arrayBuffer);
-	const font = await pdf.embedFont(StandardFonts.HelveticaBold);
-	const { text, opacity, fontSize = 60, angle = -45 } = options;
-
-	const pages = pdf.getPages();
-
-	for (let i = 0; i < pages.length; i++) {
-		const page = pages[i];
-		const { width, height } = page.getSize();
-		const textWidth = font.widthOfTextAtSize(text, fontSize);
-
-		const x = (width - textWidth) / 2;
-		const y = height / 2;
-
-		page.drawText(text, {
-			x,
-			y,
-			size: fontSize,
-			font,
-			color: rgb(0.7, 0.7, 0.7),
-			opacity: opacity / 100,
-			rotate: degrees(angle),
-		});
-
-		options.onProgress?.(Math.round(((i + 1) / pages.length) * 100));
-	}
-
-	const pdfBytes = await pdf.save();
-	return new Blob([pdfBytes], { type: 'application/pdf' });
-}
-
-// ============================================
 // PASSWORD PROTECTION (pdf-lib AES-128)
 // ============================================
 
@@ -860,21 +756,6 @@ async function processItem(item: PDFItem) {
 				});
 				break;
 
-			case 'add-page-numbers':
-				result = await addPageNumbers(item.file, {
-					position: settings.pageNumberPosition,
-					onProgress: (p) => pdfs.updateItem(item.id, { progress: p }),
-				});
-				break;
-
-			case 'watermark':
-				result = await addWatermark(item.file, {
-					text: settings.watermarkText || 'WATERMARK',
-					opacity: settings.watermarkOpacity,
-					onProgress: (p) => pdfs.updateItem(item.id, { progress: p }),
-				});
-				break;
-
 			case 'protect':
 				pdfs.updateItem(item.id, { progressStage: 'Encrypting...' });
 				result = await protectPDF(item.file, {
@@ -1043,10 +924,6 @@ export function getOutputFilename(originalName: string, tool: string, index?: nu
 			return index !== undefined ? `${baseName}-page${index + 1}` : baseName;
 		case 'images-to-pdf':
 			return `images-${Date.now()}.pdf`;
-		case 'add-page-numbers':
-			return `${baseName}-numbered.pdf`;
-		case 'watermark':
-			return `${baseName}-watermarked.pdf`;
 		case 'protect':
 			return `${baseName}-protected.pdf`;
 		case 'unlock':

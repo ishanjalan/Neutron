@@ -6,11 +6,9 @@
 		Film,
 		Gauge,
 		Maximize2,
-		Layers,
 		ArrowRight,
 		Rewind,
 		Images,
-		Merge,
 		Crop,
 		Type,
 	} from 'lucide-svelte';
@@ -54,15 +52,6 @@
 			popular: true,
 		},
 		{
-			id: 'combine',
-			href: '/combine',
-			title: 'Combine GIFs',
-			description: 'Merge multiple GIFs into one seamless animation',
-			icon: Merge,
-			gradient: 'from-cyan-500 to-blue-500',
-			popular: false,
-		},
-		{
 			id: 'resize',
 			href: '/resize',
 			title: 'Resize',
@@ -96,15 +85,6 @@
 			description: 'Speed up or slow down GIF playback',
 			icon: Gauge,
 			gradient: 'from-orange-500 to-red-500',
-			popular: false,
-		},
-		{
-			id: 'split',
-			href: '/split',
-			title: 'Split Frames',
-			description: 'Export every frame as PNG',
-			icon: Layers,
-			gradient: 'from-emerald-500 to-teal-500',
 			popular: false,
 		},
 	];

@@ -1,6 +1,6 @@
 # Swirl — Free Browser-Based GIF Tools
 
-Create, convert, and optimize GIFs with 10 independent tools. Video to GIF, frame editing, one-click optimization for Discord/Slack/Twitter — all powered by gifsicle and gifski WASM, running locally in your browser.
+Create, convert, and optimize GIFs with 8 independent tools. Video to GIF, frame editing, one-click optimization for Discord/Slack/Twitter — all powered by gifsicle and gifski WASM, running locally in your browser.
 
 🔗 **Live**: [ishanjalan.github.io/Swirl](https://ishanjalan.github.io/Swirl/)
 
@@ -12,12 +12,10 @@ Create, convert, and optimize GIFs with 10 independent tools. Video to GIF, fram
 | **GIF Maker**       | [/make](https://ishanjalan.github.io/Swirl/make)                 | Create an animated GIF from a sequence of images                           |
 | **Optimize GIF**    | [/optimize](https://ishanjalan.github.io/Swirl/optimize)         | Compress GIFs with one-click presets for Discord, Twitter, Slack, WhatsApp |
 | **Add Text**        | [/text](https://ishanjalan.github.io/Swirl/text)                 | Add captions or meme-style text overlays                                   |
-| **Combine GIFs**    | [/combine](https://ishanjalan.github.io/Swirl/combine)           | Merge multiple GIFs into a single animation                                |
 | **Resize GIF**      | [/resize](https://ishanjalan.github.io/Swirl/resize)             | Resize to exact dimensions or a percentage                                 |
 | **Crop GIF**        | [/crop](https://ishanjalan.github.io/Swirl/crop)                 | Crop with a visual drag handle                                             |
 | **Reverse GIF**     | [/reverse](https://ishanjalan.github.io/Swirl/reverse)           | Play backwards or create a boomerang loop                                  |
 | **Change Speed**    | [/speed](https://ishanjalan.github.io/Swirl/speed)               | Speed up or slow down any animated GIF                                     |
-| **Split to Frames** | [/split](https://ishanjalan.github.io/Swirl/split)               | Export every frame as individual PNG images                                |
 
 ### Platform Size Presets
 
@@ -39,7 +37,7 @@ One-click optimization targets:
 
 ### GIF Processing
 
-- **[gifsicle-wasm-browser](https://github.com/nicholasgasior/gifsicle-wasm)** — GIF optimization, resize, crop, reverse, speed, combine, split
+- **[gifsicle-wasm-browser](https://github.com/nicholasgasior/gifsicle-wasm)** — GIF optimization, resize, crop, reverse, speed
 - **[gifski-wasm](https://github.com/nicholasgasior/gifski-wasm)** — High-quality GIF encoding for video-to-GIF conversion
 - **[Mediabunny](https://mediabunny.dev)** — WebCodecs-based video frame extraction
 
@@ -66,7 +64,7 @@ The app will be available at `http://localhost:5177`
 pnpm build
 ```
 
-Each of the 10 tool routes is prerendered to its own `index.html` at build time, enabling direct indexing by search engines.
+Each of the 8 tool routes is prerendered to its own `index.html` at build time, enabling direct indexing by search engines.
 
 ## 🔒 Privacy
 
