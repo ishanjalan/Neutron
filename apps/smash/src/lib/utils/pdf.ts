@@ -8,7 +8,7 @@
  * All processing happens locally in the browser - files never leave your device.
  */
 
-import { PDFDocument, rgb, StandardFonts, degrees } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts, degrees } from '@cantoo/pdf-lib';
 import { compressPDF as compressWithGS, isGhostscriptReady } from './ghostscript';
 import { encryptPDF as encryptWithQpdf, decryptPDF as decryptWithQpdf, isQpdfReady } from './qpdf';
 import {
