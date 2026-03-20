@@ -597,9 +597,9 @@
 					<!-- Encryption info -->
 					<div class="text-surface-400 flex items-center gap-2 text-xs">
 						<Lock class="h-3.5 w-3.5 text-green-400" />
-						<span>Uses AES-256 encryption</span>
+						<span>Uses AES-128 encryption</span>
 						<Tooltip
-							text="AES-256 is the same military-grade encryption used by banks and governments. It's virtually impossible to crack without the password."
+							text="AES-128 is strong symmetric encryption — the same standard used by most web browsers and document applications. Your PDF cannot be opened without the password."
 						/>
 					</div>
 					<div class="space-y-2">
@@ -728,7 +728,7 @@
 						{:else if pdfs.settings.tool === 'watermark'}
 							Add a diagonal text watermark across all pages. Adjust opacity as needed.
 						{:else if pdfs.settings.tool === 'protect'}
-							Add password protection using AES-256 encryption. You'll need this password to open
+							Add password protection using AES-128 encryption. You'll need this password to open
 							the PDF.
 						{:else if pdfs.settings.tool === 'unlock'}
 							Remove password protection from a PDF. You'll need to know the current password.

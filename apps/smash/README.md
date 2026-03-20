@@ -1,6 +1,6 @@
 # Smash — Free Browser-Based PDF Tools
 
-A complete PDF toolkit with 13 independent tools — compress, merge, split, rotate, OCR, protect, and more. Powered by Ghostscript WASM and qpdf. All processing runs locally in your browser — no uploads, no limits, 100% private.
+A complete PDF toolkit with 13 independent tools — compress, merge, split, rotate, OCR, protect, and more. Powered by Ghostscript WASM. All processing runs locally in your browser — no uploads, no limits, 100% private.
 
 🔗 **Live**: [ishanjalan.github.io/Smash](https://ishanjalan.github.io/Smash/)
 
@@ -18,7 +18,7 @@ A complete PDF toolkit with 13 independent tools — compress, merge, split, rot
 | **Images to PDF**    | [/from-images](https://ishanjalan.github.io/Smash/from-images)   | Create a PDF from JPG, PNG, or WebP images                 |
 | **Add Page Numbers** | [/page-numbers](https://ishanjalan.github.io/Smash/page-numbers) | Add page numbers with position and format control          |
 | **Watermark PDF**    | [/watermark](https://ishanjalan.github.io/Smash/watermark)       | Add a custom text watermark to every page                  |
-| **Protect PDF**      | [/protect](https://ishanjalan.github.io/Smash/protect)           | Encrypt with AES-256 password protection                   |
+| **Protect PDF**      | [/protect](https://ishanjalan.github.io/Smash/protect)           | Encrypt with AES-128 password protection                   |
 | **Unlock PDF**       | [/unlock](https://ishanjalan.github.io/Smash/unlock)             | Remove password protection                                 |
 | **OCR PDF**          | [/ocr](https://ishanjalan.github.io/Smash/ocr)                   | Extract searchable text from scanned PDFs (100+ languages) |
 
@@ -34,8 +34,7 @@ A complete PDF toolkit with 13 independent tools — compress, merge, split, rot
 ### PDF Processing
 
 - **[Ghostscript WASM](https://github.com/nicholasgasior/ghostscript-wasm)** — Professional PDF compression (50–90% size reduction)
-- **[qpdf WASM](https://github.com/nicholasgasior/qpdf-wasm)** — AES-256 encryption and decryption
-- **[pdf-lib](https://pdf-lib.js.org/)** — PDF manipulation (merge, split, rotate, reorder, watermark, page numbers)
+- **[pdf-lib](https://pdf-lib.js.org/)** — PDF manipulation and AES-128 encryption (merge, split, rotate, protect, reorder, watermark, page numbers)
 - **[pdfjs-dist](https://mozilla.github.io/pdf.js/)** — PDF rendering for visual page previews
 - **[Tesseract.js](https://tesseract.projectnaptha.com/)** — OCR text extraction (100+ language support)
 

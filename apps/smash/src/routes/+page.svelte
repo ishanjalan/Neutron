@@ -57,7 +57,7 @@
 		{
 			href: '/protect',
 			title: 'Protect PDF',
-			description: 'Add AES-256 password encryption',
+			description: 'Add AES-128 password encryption',
 			icon: Lock,
 			gradient: 'from-green-500 to-emerald-500',
 			popular: false,
