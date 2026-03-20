@@ -9,13 +9,13 @@ Free, open-source file processing tools that run entirely in your browser. No up
 
 ## 🛠️ Tools
 
-| App | Description | Live URL |
-|-----|-------------|----------|
-| **[HEIC Converter](apps/heic)** | Convert iPhone HEIC/HEIF photos to JPG, PNG, WebP, AVIF | [ishanjalan.github.io/HEICConverter](https://ishanjalan.github.io/HEICConverter/) |
-| **[Squish](apps/squish)** | Compress JPEG, PNG, WebP, AVIF, JXL, SVG, GIF, HEIC images | [ishanjalan.github.io/ImageOptimser](https://ishanjalan.github.io/ImageOptimser/) |
-| **[Smash](apps/smash)** | Full PDF toolkit — compress, merge, split, OCR, protect, and more | [ishanjalan.github.io/Smash](https://ishanjalan.github.io/Smash/) |
-| **[Squash](apps/squash)** | Compress MP4, WebM, MOV videos using WebCodecs in the browser | [ishanjalan.github.io/Squash](https://ishanjalan.github.io/Squash/) |
-| **[Swirl](apps/swirl)** | GIF tools — convert, optimize, resize, reverse, add text, and more | [ishanjalan.github.io/Swirl](https://ishanjalan.github.io/Swirl/) |
+| App                             | Description                                                        | Live URL                                                                          |
+| ------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| **[HEIC Converter](apps/heic)** | Convert iPhone HEIC/HEIF photos to JPG, PNG, WebP, AVIF            | [ishanjalan.github.io/HEICConverter](https://ishanjalan.github.io/HEICConverter/) |
+| **[Squish](apps/squish)**       | Compress JPEG, PNG, WebP, AVIF, JXL, SVG, GIF, HEIC images         | [ishanjalan.github.io/ImageOptimser](https://ishanjalan.github.io/ImageOptimser/) |
+| **[Smash](apps/smash)**         | Full PDF toolkit — compress, merge, split, OCR, protect, and more  | [ishanjalan.github.io/Smash](https://ishanjalan.github.io/Smash/)                 |
+| **[Squash](apps/squash)**       | Compress MP4, WebM, MOV videos using WebCodecs in the browser      | [ishanjalan.github.io/Squash](https://ishanjalan.github.io/Squash/)               |
+| **[Swirl](apps/swirl)**         | GIF tools — convert, optimize, resize, reverse, add text, and more | [ishanjalan.github.io/Swirl](https://ishanjalan.github.io/Swirl/)                 |
 
 ---
 
@@ -72,13 +72,13 @@ Free, open-source file processing tools that run entirely in your browser. No up
 - **[Comlink](https://github.com/GoogleChromeLabs/comlink)** — Type-safe Web Worker communication
 - **WebAssembly** — Near-native performance for heavy processing
 
-| App | Processing Libraries |
-|-----|----------------------|
-| HEIC Converter | heic2any (libheif WASM), icodec (JPEG, PNG, WebP, AVIF) |
-| Squish | icodec (MozJPEG, WebP, AVIF, JXL), heic2any, svgo |
-| Smash | Ghostscript WASM (compression), qpdf WASM (structural operations) |
-| Squash | WebCodecs API, Mediabunny |
-| Swirl | gifsicle-wasm (optimize/resize), gifski-wasm (high-quality encode) |
+| App            | Processing Libraries                                               |
+| -------------- | ------------------------------------------------------------------ |
+| HEIC Converter | heic2any (libheif WASM), icodec (JPEG, PNG, WebP, AVIF)            |
+| Squish         | icodec (MozJPEG, WebP, AVIF, JXL), heic2any, svgo                  |
+| Smash          | Ghostscript WASM (compression), qpdf WASM (structural operations)  |
+| Squash         | WebCodecs API, Mediabunny                                          |
+| Swirl          | gifsicle-wasm (optimize/resize), gifski-wasm (high-quality encode) |
 
 ---
 
@@ -165,13 +165,13 @@ pnpm --filter swirl build
 
 The apps are automatically deployed to GitHub Pages when changes are pushed to the `main` branch.
 
-| App | Source | Live URL |
-|-----|--------|----------|
-| HEIC Converter | [`apps/heic/`](apps/heic) | [ishanjalan.github.io/HEICConverter](https://ishanjalan.github.io/HEICConverter/) |
-| Squish | [`apps/squish/`](apps/squish) | [ishanjalan.github.io/ImageOptimser](https://ishanjalan.github.io/ImageOptimser/) |
-| Smash | [`apps/smash/`](apps/smash) | [ishanjalan.github.io/Smash](https://ishanjalan.github.io/Smash/) |
-| Squash | [`apps/squash/`](apps/squash) | [ishanjalan.github.io/Squash](https://ishanjalan.github.io/Squash/) |
-| Swirl | [`apps/swirl/`](apps/swirl) | [ishanjalan.github.io/Swirl](https://ishanjalan.github.io/Swirl/) |
+| App            | Source                        | Live URL                                                                          |
+| -------------- | ----------------------------- | --------------------------------------------------------------------------------- |
+| HEIC Converter | [`apps/heic/`](apps/heic)     | [ishanjalan.github.io/HEICConverter](https://ishanjalan.github.io/HEICConverter/) |
+| Squish         | [`apps/squish/`](apps/squish) | [ishanjalan.github.io/ImageOptimser](https://ishanjalan.github.io/ImageOptimser/) |
+| Smash          | [`apps/smash/`](apps/smash)   | [ishanjalan.github.io/Smash](https://ishanjalan.github.io/Smash/)                 |
+| Squash         | [`apps/squash/`](apps/squash) | [ishanjalan.github.io/Squash](https://ishanjalan.github.io/Squash/)               |
+| Swirl          | [`apps/swirl/`](apps/swirl)   | [ishanjalan.github.io/Swirl](https://ishanjalan.github.io/Swirl/)                 |
 
 ---
 

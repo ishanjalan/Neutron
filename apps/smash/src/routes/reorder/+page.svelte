@@ -204,9 +204,15 @@
 
 <svelte:head>
 	<title>Reorder PDF Pages — Smash</title>
-	<meta name="description" content="Drag and drop to rearrange pages in a PDF. Free, browser-based." />
+	<meta
+		name="description"
+		content="Drag and drop to rearrange pages in a PDF. Free, browser-based."
+	/>
 	<meta property="og:title" content="Reorder PDF Pages — Smash" />
-	<meta property="og:description" content="Drag and drop to rearrange pages in a PDF. Free, browser-based." />
+	<meta
+		property="og:description"
+		content="Drag and drop to rearrange pages in a PDF. Free, browser-based."
+	/>
 	<link rel="canonical" href="https://ishanjalan.github.io/Smash/reorder" />
 </svelte:head>
 

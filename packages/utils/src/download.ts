@@ -18,9 +18,7 @@ function deduplicateName(name: string, usedNames: Map<string, number>): string {
 	usedNames.set(name, count + 1);
 	if (count === 0) return name;
 	const ext = name.lastIndexOf('.');
-	return ext >= 0
-		? `${name.slice(0, ext)}-${count}${name.slice(ext)}`
-		: `${name}-${count}`;
+	return ext >= 0 ? `${name.slice(0, ext)}-${count}${name.slice(ext)}` : `${name}-${count}`;
 }
 
 /**
@@ -79,7 +77,10 @@ export async function downloadMultipleFiles(
 		entries[`${baseName}-${i + 1}${extension}`] = await blobToUint8Array(blobs[i]);
 	}
 	const zipped = zipSync(entries, { level: 6 });
-	downloadBlob(new Blob([zipped.buffer as ArrayBuffer], { type: 'application/zip' }), `${baseName}.zip`);
+	downloadBlob(
+		new Blob([zipped.buffer as ArrayBuffer], { type: 'application/zip' }),
+		`${baseName}.zip`
+	);
 }
 
 /**

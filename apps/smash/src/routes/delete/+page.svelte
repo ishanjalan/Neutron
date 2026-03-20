@@ -154,9 +154,15 @@
 
 <svelte:head>
 	<title>Delete PDF Pages — Smash</title>
-	<meta name="description" content="Remove unwanted pages from a PDF. Visual page picker. Free and private." />
+	<meta
+		name="description"
+		content="Remove unwanted pages from a PDF. Visual page picker. Free and private."
+	/>
 	<meta property="og:title" content="Delete PDF Pages — Smash" />
-	<meta property="og:description" content="Remove unwanted pages from a PDF. Visual page picker. Free and private." />
+	<meta
+		property="og:description"
+		content="Remove unwanted pages from a PDF. Visual page picker. Free and private."
+	/>
 	<link rel="canonical" href="https://ishanjalan.github.io/Smash/delete" />
 </svelte:head>
 

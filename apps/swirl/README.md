@@ -6,18 +6,18 @@ Create, convert, and optimize GIFs with 10 independent tools. Video to GIF, fram
 
 ## ✨ Tools
 
-| Tool | URL | Description |
-|------|-----|-------------|
-| **Video to GIF** | [/video-to-gif](https://ishanjalan.github.io/Swirl/video-to-gif) | Convert MP4, WebM, or MOV to GIF with FPS and quality control |
-| **GIF Maker** | [/make](https://ishanjalan.github.io/Swirl/make) | Create an animated GIF from a sequence of images |
-| **Optimize GIF** | [/optimize](https://ishanjalan.github.io/Swirl/optimize) | Compress GIFs with one-click presets for Discord, Twitter, Slack, WhatsApp |
-| **Add Text** | [/text](https://ishanjalan.github.io/Swirl/text) | Add captions or meme-style text overlays |
-| **Combine GIFs** | [/combine](https://ishanjalan.github.io/Swirl/combine) | Merge multiple GIFs into a single animation |
-| **Resize GIF** | [/resize](https://ishanjalan.github.io/Swirl/resize) | Resize to exact dimensions or a percentage |
-| **Crop GIF** | [/crop](https://ishanjalan.github.io/Swirl/crop) | Crop with a visual drag handle |
-| **Reverse GIF** | [/reverse](https://ishanjalan.github.io/Swirl/reverse) | Play backwards or create a boomerang loop |
-| **Change Speed** | [/speed](https://ishanjalan.github.io/Swirl/speed) | Speed up or slow down any animated GIF |
-| **Split to Frames** | [/split](https://ishanjalan.github.io/Swirl/split) | Export every frame as individual PNG images |
+| Tool                | URL                                                              | Description                                                                |
+| ------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| **Video to GIF**    | [/video-to-gif](https://ishanjalan.github.io/Swirl/video-to-gif) | Convert MP4, WebM, or MOV to GIF with FPS and quality control              |
+| **GIF Maker**       | [/make](https://ishanjalan.github.io/Swirl/make)                 | Create an animated GIF from a sequence of images                           |
+| **Optimize GIF**    | [/optimize](https://ishanjalan.github.io/Swirl/optimize)         | Compress GIFs with one-click presets for Discord, Twitter, Slack, WhatsApp |
+| **Add Text**        | [/text](https://ishanjalan.github.io/Swirl/text)                 | Add captions or meme-style text overlays                                   |
+| **Combine GIFs**    | [/combine](https://ishanjalan.github.io/Swirl/combine)           | Merge multiple GIFs into a single animation                                |
+| **Resize GIF**      | [/resize](https://ishanjalan.github.io/Swirl/resize)             | Resize to exact dimensions or a percentage                                 |
+| **Crop GIF**        | [/crop](https://ishanjalan.github.io/Swirl/crop)                 | Crop with a visual drag handle                                             |
+| **Reverse GIF**     | [/reverse](https://ishanjalan.github.io/Swirl/reverse)           | Play backwards or create a boomerang loop                                  |
+| **Change Speed**    | [/speed](https://ishanjalan.github.io/Swirl/speed)               | Speed up or slow down any animated GIF                                     |
+| **Split to Frames** | [/split](https://ishanjalan.github.io/Swirl/split)               | Export every frame as individual PNG images                                |
 
 ### Platform Size Presets
 

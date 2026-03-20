@@ -147,9 +147,15 @@
 
 <svelte:head>
 	<title>Add Page Numbers — Smash</title>
-	<meta name="description" content="Add page numbers to any PDF. Choose position and format. Free and private." />
+	<meta
+		name="description"
+		content="Add page numbers to any PDF. Choose position and format. Free and private."
+	/>
 	<meta property="og:title" content="Add Page Numbers — Smash" />
-	<meta property="og:description" content="Add page numbers to any PDF. Choose position and format. Free and private." />
+	<meta
+		property="og:description"
+		content="Add page numbers to any PDF. Choose position and format. Free and private."
+	/>
 	<link rel="canonical" href="https://ishanjalan.github.io/Smash/page-numbers" />
 </svelte:head>
 

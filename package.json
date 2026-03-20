@@ -7,7 +7,6 @@
 		"build": "turbo build",
 		"check": "turbo check",
 		"dev:squish": "turbo dev --filter=squish",
-		"dev:heic": "turbo dev --filter=heic",
 		"dev:smash": "turbo dev --filter=smash",
 		"dev:squash": "turbo dev --filter=squash",
 		"dev:swirl": "turbo dev --filter=swirl",

@@ -15,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       squish: ${{ steps.filter.outputs.squish }}
-      heic: ${{ steps.filter.outputs.heic }}
       smash: ${{ steps.filter.outputs.smash }}
       squash: ${{ steps.filter.outputs.squash }}
       swirl: ${{ steps.filter.outputs.swirl }}
@@ -32,9 +31,6 @@ jobs:
             squish:
               - *shared
               - 'apps/squish/**'
-            heic:
-              - *shared
-              - 'apps/heic/**'
             smash:
               - *shared
               - 'apps/smash/**'
@@ -50,7 +46,6 @@ jobs:
     needs: changes
     if: >
       needs.changes.outputs.squish == 'true' ||
-      needs.changes.outputs.heic   == 'true' ||
       needs.changes.outputs.smash  == 'true' ||
       needs.changes.outputs.squash == 'true' ||
       needs.changes.outputs.swirl  == 'true'
@@ -102,37 +97,6 @@ jobs:
           external_repository: ishanjalan/Squish
           publish_branch: gh-pages
           publish_dir: ./apps/squish/build
-          commit_message: 'Deploy from Neutron monorepo'
-
-  heic:
-    needs: [changes, setup]
-    if: needs.changes.outputs.heic == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-      - uses: actions/cache/restore@v4
-        with:
-          path: |
-            node_modules
-            apps/*/node_modules
-            packages/*/node_modules
-          key: deps-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: deps-${{ runner.os }}-
-      - run: pnpm install
-      - run: pnpm --filter heic build
-        env:
-          NODE_ENV: production
-      - uses: peaceiris/actions-gh-pages@v4
-        with:
-          personal_token: ${{ secrets.DEPLOY_TOKEN }}
-          external_repository: ishanjalan/HEICConverter
-          publish_branch: gh-pages
-          publish_dir: ./apps/heic/build
           commit_message: 'Deploy from Neutron monorepo'
 
   smash:

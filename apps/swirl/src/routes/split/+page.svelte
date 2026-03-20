@@ -148,9 +148,15 @@
 
 <svelte:head>
 	<title>Split GIF to Frames — Swirl</title>
-	<meta name="description" content="Export every frame of a GIF as individual PNG images. Free and private." />
+	<meta
+		name="description"
+		content="Export every frame of a GIF as individual PNG images. Free and private."
+	/>
 	<meta property="og:title" content="Split GIF to Frames — Swirl" />
-	<meta property="og:description" content="Export every frame of a GIF as individual PNG images. Free and private." />
+	<meta
+		property="og:description"
+		content="Export every frame of a GIF as individual PNG images. Free and private."
+	/>
 	<link rel="canonical" href="https://ishanjalan.github.io/Swirl/split" />
 </svelte:head>
 

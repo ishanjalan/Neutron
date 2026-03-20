@@ -7,11 +7,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 # Dev servers (each app runs on its own port)
 pnpm dev              # all apps
-pnpm dev:heic         # :5178
 pnpm dev:squish       # :5176
 pnpm dev:smash        # :5174
 pnpm dev:squash       # :5175
 pnpm dev:swirl        # :5177
+# Note: heic app is deprecated (redirects to squish /heic). No dev:heic script.
 
 # Build
 pnpm build                        # all apps via Turborepo
@@ -58,9 +58,9 @@ export default createSvelteConfig('/RepoName'); // sets production base path
 
 // apps/*/vite.config.ts
 export default createViteConfig({
-  crossOriginIsolation: true,   // smash, squash, swirl — needed for SharedArrayBuffer / WASM threads
-  wasmWorkers: true,            // squish, heic — enables WASM chunking in workers
-  optimizeDepsExclude: ['icodec'], // WASM packages that must not be pre-bundled
+	crossOriginIsolation: true, // smash, squash, swirl — needed for SharedArrayBuffer / WASM threads
+	wasmWorkers: true, // squish, heic — enables WASM chunking in workers
+	optimizeDepsExclude: ['icodec'], // WASM packages that must not be pre-bundled
 });
 ```
 
@@ -76,13 +76,13 @@ Import from `@neutron/ui` directly — components are not compiled, just re-expo
 
 Subpath exports — import the narrowest one needed:
 
-| Import | Contents |
-|--------|----------|
-| `@neutron/utils` | format, download, focus-trap, blob-url, worker-pool, validation, apps |
-| `@neutron/utils/download` | `downloadBlob`, `downloadAllAsZip`, `downloadMultipleFiles`, `copyBlobToClipboard` |
-| `@neutron/utils/comlink` | Comlink re-export |
-| `@neutron/utils/worker-pool` | `createWorkerPool` |
-| `@neutron/utils/validation` | Valibot schemas for PDF/video/image/GIF settings |
+| Import                       | Contents                                                                           |
+| ---------------------------- | ---------------------------------------------------------------------------------- |
+| `@neutron/utils`             | format, download, focus-trap, blob-url, worker-pool, validation, apps              |
+| `@neutron/utils/download`    | `downloadBlob`, `downloadAllAsZip`, `downloadMultipleFiles`, `copyBlobToClipboard` |
+| `@neutron/utils/comlink`     | Comlink re-export                                                                  |
+| `@neutron/utils/worker-pool` | `createWorkerPool`                                                                 |
+| `@neutron/utils/validation`  | Valibot schemas for PDF/video/image/GIF settings                                   |
 
 ZIP generation uses `fflate` (not JSZip) via `downloadAllAsZip`.
 
@@ -110,12 +110,13 @@ WASM packages (`icodec`, `ghostscript-wasm-esm`, `gifsicle-wasm-browser`, `gifsk
 ### Tailwind / theming
 
 Every app's `src/app.css`:
+
 ```css
 @import 'tailwindcss';
-@import '@neutron/config/tailwind/base.css';  /* shared surface scale, fonts, utilities */
+@import '@neutron/config/tailwind/base.css'; /* shared surface scale, fonts, utilities */
 @theme {
-  --color-accent-start: #10b981;  /* override accent per app */
-  --color-accent-end:   #06b6d4;
+	--color-accent-start: #10b981; /* override accent per app */
+	--color-accent-end: #06b6d4;
 }
 ```
 
@@ -127,10 +128,10 @@ The base CSS defines a `surface-50`→`surface-950` scale (light↔dark), accent
 
 ### App quick-reference
 
-| App | Key libs | `vite.config` flags |
-|-----|----------|---------------------|
-| heic | heic2any, icodec | `wasmWorkers`, `optimizeDepsExclude: ['icodec','heic2any']` |
-| squish | icodec, heic2any, svgo, @sentry/sveltekit | `wasmWorkers`, `optimizeDepsExclude: ['icodec']` |
-| smash | ghostscript-wasm-esm, @neslinesli93/qpdf-wasm, pdf-lib, pdfjs-dist, tesseract.js | `crossOriginIsolation` |
-| squash | mediabunny, WebCodecs API, idb | `crossOriginIsolation` |
-| swirl | gifsicle-wasm-browser, gifski-wasm, idb | `crossOriginIsolation`, `optimizeDepsExclude: ['gifski-wasm']` |
+| App    | Key libs                                                                         | `vite.config` flags                                            |
+| ------ | -------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| heic   | ⚠️ deprecated — redirects to squish `/heic`. Not deployed in CI.                |                                                                |
+| squish | icodec, heic2any, svgo, @sentry/sveltekit                                        | `wasmWorkers`, `optimizeDepsExclude: ['icodec']`               |
+| smash  | ghostscript-wasm-esm, @neslinesli93/qpdf-wasm, pdf-lib, pdfjs-dist, tesseract.js | `crossOriginIsolation`                                         |
+| squash | mediabunny, WebCodecs API, idb                                                   | `crossOriginIsolation`                                         |
+| swirl  | gifsicle-wasm-browser, gifski-wasm, idb                                          | `crossOriginIsolation`, `optimizeDepsExclude: ['gifski-wasm']` |

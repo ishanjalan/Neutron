@@ -24,13 +24,19 @@
 <svelte:head>
 	<link rel="icon" href={favicon} />
 	<title>Smash - Privacy-First PDF Tools</title>
-	<meta name="description" content="Free online PDF tools — compress, merge, split, protect, OCR, and more. All 13 tools run instantly in your browser. 100% private, files never leave your device." />
+	<meta
+		name="description"
+		content="Free online PDF tools — compress, merge, split, protect, OCR, and more. All 13 tools run instantly in your browser. 100% private, files never leave your device."
+	/>
 
 	<!-- Open Graph -->
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://ishanjalan.github.io/Smash" />
 	<meta property="og:title" content="Smash - Privacy-First PDF Tools" />
-	<meta property="og:description" content="Free online PDF tools — compress, merge, split, protect, OCR, and more. All 13 tools run instantly in your browser. 100% private, files never leave your device." />
+	<meta
+		property="og:description"
+		content="Free online PDF tools — compress, merge, split, protect, OCR, and more. All 13 tools run instantly in your browser. 100% private, files never leave your device."
+	/>
 	<meta property="og:image" content="https://ishanjalan.github.io/Smash/og-image.svg" />
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
@@ -39,7 +45,10 @@
 	<!-- Twitter Card -->
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content="Smash - Privacy-First PDF Tools" />
-	<meta name="twitter:description" content="Free online PDF tools — compress, merge, split, protect, OCR, and more. All 13 tools run instantly in your browser. 100% private, files never leave your device." />
+	<meta
+		name="twitter:description"
+		content="Free online PDF tools — compress, merge, split, protect, OCR, and more. All 13 tools run instantly in your browser. 100% private, files never leave your device."
+	/>
 	<meta name="twitter:image" content="https://ishanjalan.github.io/Smash/og-image.svg" />
 
 	<!-- SEO -->
@@ -47,17 +56,23 @@
 	<link rel="canonical" href="https://ishanjalan.github.io/Smash" />
 
 	<!-- JSON-LD -->
-	<script type="application/ld+json">{JSON.stringify({
-		"@context": "https://schema.org",
-		"@type": "SoftwareApplication",
-		"name": "Smash - PDF Tools",
-		"operatingSystem": "Web",
-		"applicationCategory": "UtilityApplication",
-		"offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-		"description": "Free online PDF tools — compress, merge, split, protect, OCR, and more. All 13 tools run instantly in your browser. 100% private.",
-		"url": "https://ishanjalan.github.io/Smash",
-		"author": { "@type": "Person", "name": "Ishan Jalan", "url": "https://github.com/ishanjalan" }
-	})}</script>
+	<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "SoftwareApplication",
+			"name": "Smash - PDF Tools",
+			"operatingSystem": "Web",
+			"applicationCategory": "UtilityApplication",
+			"offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+			"description": "Free online PDF tools — compress, merge, split, protect, OCR, and more. All 13 tools run instantly in your browser. 100% private.",
+			"url": "https://ishanjalan.github.io/Smash",
+			"author": {
+				"@type": "Person",
+				"name": "Ishan Jalan",
+				"url": "https://github.com/ishanjalan"
+			}
+		}
+	</script>
 </svelte:head>
 
 {@render children()}

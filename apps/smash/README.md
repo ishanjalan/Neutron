@@ -6,21 +6,21 @@ A complete PDF toolkit with 13 independent tools — compress, merge, split, rot
 
 ## ✨ Tools
 
-| Tool | URL | Description |
-|------|-----|-------------|
-| **Compress PDF** | [/compress](https://ishanjalan.github.io/Smash/compress) | Reduce file size 50–90% with Ghostscript WASM |
-| **Merge PDFs** | [/merge](https://ishanjalan.github.io/Smash/merge) | Combine multiple PDFs, drag to reorder |
-| **Split PDF** | [/split](https://ishanjalan.github.io/Smash/split) | Extract pages with a visual page picker |
-| **Rotate PDF** | [/rotate](https://ishanjalan.github.io/Smash/rotate) | Rotate pages 90°, 180°, or 270° |
-| **Delete Pages** | [/delete](https://ishanjalan.github.io/Smash/delete) | Remove unwanted pages |
-| **Reorder Pages** | [/reorder](https://ishanjalan.github.io/Smash/reorder) | Drag and drop to rearrange pages |
-| **PDF to Images** | [/to-images](https://ishanjalan.github.io/Smash/to-images) | Export pages as PNG, JPG, or WebP (up to 300 DPI) |
-| **Images to PDF** | [/from-images](https://ishanjalan.github.io/Smash/from-images) | Create a PDF from JPG, PNG, or WebP images |
-| **Add Page Numbers** | [/page-numbers](https://ishanjalan.github.io/Smash/page-numbers) | Add page numbers with position and format control |
-| **Watermark PDF** | [/watermark](https://ishanjalan.github.io/Smash/watermark) | Add a custom text watermark to every page |
-| **Protect PDF** | [/protect](https://ishanjalan.github.io/Smash/protect) | Encrypt with AES-256 password protection |
-| **Unlock PDF** | [/unlock](https://ishanjalan.github.io/Smash/unlock) | Remove password protection |
-| **OCR PDF** | [/ocr](https://ishanjalan.github.io/Smash/ocr) | Extract searchable text from scanned PDFs (100+ languages) |
+| Tool                 | URL                                                              | Description                                                |
+| -------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------- |
+| **Compress PDF**     | [/compress](https://ishanjalan.github.io/Smash/compress)         | Reduce file size 50–90% with Ghostscript WASM              |
+| **Merge PDFs**       | [/merge](https://ishanjalan.github.io/Smash/merge)               | Combine multiple PDFs, drag to reorder                     |
+| **Split PDF**        | [/split](https://ishanjalan.github.io/Smash/split)               | Extract pages with a visual page picker                    |
+| **Rotate PDF**       | [/rotate](https://ishanjalan.github.io/Smash/rotate)             | Rotate pages 90°, 180°, or 270°                            |
+| **Delete Pages**     | [/delete](https://ishanjalan.github.io/Smash/delete)             | Remove unwanted pages                                      |
+| **Reorder Pages**    | [/reorder](https://ishanjalan.github.io/Smash/reorder)           | Drag and drop to rearrange pages                           |
+| **PDF to Images**    | [/to-images](https://ishanjalan.github.io/Smash/to-images)       | Export pages as PNG, JPG, or WebP (up to 300 DPI)          |
+| **Images to PDF**    | [/from-images](https://ishanjalan.github.io/Smash/from-images)   | Create a PDF from JPG, PNG, or WebP images                 |
+| **Add Page Numbers** | [/page-numbers](https://ishanjalan.github.io/Smash/page-numbers) | Add page numbers with position and format control          |
+| **Watermark PDF**    | [/watermark](https://ishanjalan.github.io/Smash/watermark)       | Add a custom text watermark to every page                  |
+| **Protect PDF**      | [/protect](https://ishanjalan.github.io/Smash/protect)           | Encrypt with AES-256 password protection                   |
+| **Unlock PDF**       | [/unlock](https://ishanjalan.github.io/Smash/unlock)             | Remove password protection                                 |
+| **OCR PDF**          | [/ocr](https://ishanjalan.github.io/Smash/ocr)                   | Extract searchable text from scanned PDFs (100+ languages) |
 
 ## 🏗️ Tech Stack
 

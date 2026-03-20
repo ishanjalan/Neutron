@@ -344,9 +344,15 @@
 
 <svelte:head>
 	<title>Crop GIF — Swirl</title>
-	<meta name="description" content="Crop an animated GIF with a visual drag handle. Free, private, browser-based." />
+	<meta
+		name="description"
+		content="Crop an animated GIF with a visual drag handle. Free, private, browser-based."
+	/>
 	<meta property="og:title" content="Crop GIF — Swirl" />
-	<meta property="og:description" content="Crop an animated GIF with a visual drag handle. Free, private, browser-based." />
+	<meta
+		property="og:description"
+		content="Crop an animated GIF with a visual drag handle. Free, private, browser-based."
+	/>
 	<link rel="canonical" href="https://ishanjalan.github.io/Swirl/crop" />
 </svelte:head>
 

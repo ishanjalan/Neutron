@@ -139,9 +139,15 @@
 
 <svelte:head>
 	<title>Rotate PDF Pages — Smash</title>
-	<meta name="description" content="Rotate pages 90°, 180°, or 270°. Select specific pages. Free, browser-based." />
+	<meta
+		name="description"
+		content="Rotate pages 90°, 180°, or 270°. Select specific pages. Free, browser-based."
+	/>
 	<meta property="og:title" content="Rotate PDF Pages — Smash" />
-	<meta property="og:description" content="Rotate pages 90°, 180°, or 270°. Select specific pages. Free, browser-based." />
+	<meta
+		property="og:description"
+		content="Rotate pages 90°, 180°, or 270°. Select specific pages. Free, browser-based."
+	/>
 	<link rel="canonical" href="https://ishanjalan.github.io/Smash/rotate" />
 </svelte:head>
 

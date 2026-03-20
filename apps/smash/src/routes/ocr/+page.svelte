@@ -205,9 +205,15 @@
 
 <svelte:head>
 	<title>OCR PDF — Smash</title>
-	<meta name="description" content="Extract searchable text from scanned PDFs using Tesseract. Supports 100+ languages. Free and private." />
+	<meta
+		name="description"
+		content="Extract searchable text from scanned PDFs using Tesseract. Supports 100+ languages. Free and private."
+	/>
 	<meta property="og:title" content="OCR PDF — Smash" />
-	<meta property="og:description" content="Extract searchable text from scanned PDFs using Tesseract. Supports 100+ languages. Free and private." />
+	<meta
+		property="og:description"
+		content="Extract searchable text from scanned PDFs using Tesseract. Supports 100+ languages. Free and private."
+	/>
 	<link rel="canonical" href="https://ishanjalan.github.io/Smash/ocr" />
 </svelte:head>
 

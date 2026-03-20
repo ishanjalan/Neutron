@@ -291,9 +291,15 @@
 
 <svelte:head>
 	<title>Change GIF Speed — Swirl</title>
-	<meta name="description" content="Speed up or slow down any animated GIF. Free, private, browser-based." />
+	<meta
+		name="description"
+		content="Speed up or slow down any animated GIF. Free, private, browser-based."
+	/>
 	<meta property="og:title" content="Change GIF Speed — Swirl" />
-	<meta property="og:description" content="Speed up or slow down any animated GIF. Free, private, browser-based." />
+	<meta
+		property="og:description"
+		content="Speed up or slow down any animated GIF. Free, private, browser-based."
+	/>
 	<link rel="canonical" href="https://ishanjalan.github.io/Swirl/speed" />
 </svelte:head>
 

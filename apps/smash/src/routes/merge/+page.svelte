@@ -222,9 +222,15 @@
 
 <svelte:head>
 	<title>Merge PDFs — Smash</title>
-	<meta name="description" content="Combine multiple PDF files into one. Drag to reorder. Free, browser-based, no upload required." />
+	<meta
+		name="description"
+		content="Combine multiple PDF files into one. Drag to reorder. Free, browser-based, no upload required."
+	/>
 	<meta property="og:title" content="Merge PDFs — Smash" />
-	<meta property="og:description" content="Combine multiple PDF files into one. Drag to reorder. Free, browser-based, no upload required." />
+	<meta
+		property="og:description"
+		content="Combine multiple PDF files into one. Drag to reorder. Free, browser-based, no upload required."
+	/>
 	<link rel="canonical" href="https://ishanjalan.github.io/Smash/merge" />
 </svelte:head>
 

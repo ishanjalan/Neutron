@@ -366,9 +366,15 @@
 
 <svelte:head>
 	<title>GIF Maker — Swirl</title>
-	<meta name="description" content="Create an animated GIF from a sequence of images. Free, private, browser-based." />
+	<meta
+		name="description"
+		content="Create an animated GIF from a sequence of images. Free, private, browser-based."
+	/>
 	<meta property="og:title" content="GIF Maker — Swirl" />
-	<meta property="og:description" content="Create an animated GIF from a sequence of images. Free, private, browser-based." />
+	<meta
+		property="og:description"
+		content="Create an animated GIF from a sequence of images. Free, private, browser-based."
+	/>
 	<link rel="canonical" href="https://ishanjalan.github.io/Swirl/make" />
 </svelte:head>
 
