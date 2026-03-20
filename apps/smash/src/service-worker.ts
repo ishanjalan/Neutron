@@ -17,7 +17,7 @@ const CACHE_NAME = `smash-cache-${version}`;
 const WASM_CACHE = 'smash-wasm-v1';
 
 // WASM files to cache separately (they're large and rarely change)
-const WASM_FILES = [`${base}/gs.wasm`, `${base}/qpdf.wasm`];
+const WASM_FILES = [`${base}/gs.wasm`];
 
 // All app files to cache
 const APP_FILES = [...build, ...files];

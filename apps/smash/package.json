@@ -34,7 +34,6 @@
 	},
 	"dependencies": {
 		"@cantoo/pdf-lib": "^2.6.4",
-		"@neslinesli93/qpdf-wasm": "^0.3.0",
 		"@neutron/config": "workspace:*",
 		"@neutron/ui": "workspace:*",
 		"@neutron/utils": "workspace:*",

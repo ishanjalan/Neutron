@@ -2,15 +2,13 @@
  * PDF Processing Utilities - Web App (WASM)
  *
  * Uses Ghostscript WASM for compression (50-90% reduction)
- * Uses qpdf WASM for encryption (AES-256)
- * Uses pdf-lib for manipulation (merge, split, rotate, etc.)
+ * Uses pdf-lib for manipulation (merge, split, rotate, encrypt, etc.)
  *
  * All processing happens locally in the browser - files never leave your device.
  */
 
 import { PDFDocument, rgb, StandardFonts, degrees } from '@cantoo/pdf-lib';
 import { compressPDF as compressWithGS, isGhostscriptReady } from './ghostscript';
-import { encryptPDF as encryptWithQpdf, decryptPDF as decryptWithQpdf, isQpdfReady } from './qpdf';
 import {
 	pdfs,
 	type PDFItem,
@@ -52,22 +50,13 @@ export async function checkGhostscript(): Promise<ToolStatus> {
 }
 
 /**
- * Check if qpdf WASM is ready
- */
-export async function checkQPDF(): Promise<ToolStatus> {
-	return { available: true, version: 'WASM' };
-}
-
-/**
  * Get backend status for UI display
  */
 export async function getBackendInfo(): Promise<{
 	ghostscript: ToolStatus;
-	qpdf: ToolStatus;
 }> {
 	return {
 		ghostscript: { available: true, version: 'WASM' },
-		qpdf: { available: true, version: 'WASM' },
 	};
 }
 
@@ -551,7 +540,7 @@ export async function addWatermark(file: File, options: WatermarkOptions): Promi
 }
 
 // ============================================
-// PASSWORD PROTECTION (qpdf WASM)
+// PASSWORD PROTECTION (pdf-lib AES-128)
 // ============================================
 
 interface ProtectOptions {
@@ -561,32 +550,9 @@ interface ProtectOptions {
 }
 
 /**
- * Password protect a PDF - uses qpdf WASM for AES-256 encryption
- * Falls back to pdf-lib if WASM fails
+ * Password protect a PDF using pdf-lib (AES-128 encryption)
  */
 export async function protectPDF(file: File, options: ProtectOptions): Promise<Blob> {
-	const { userPassword, ownerPassword = userPassword, onProgress } = options;
-
-	const arrayBuffer = await file.arrayBuffer();
-
-	// Try qpdf WASM first for AES-256 encryption
-	try {
-		onProgress?.(5);
-		const result = await encryptWithQpdf(arrayBuffer, userPassword, ownerPassword, onProgress);
-		return new Blob([result], { type: 'application/pdf' });
-	} catch (e) {
-		console.warn('qpdf WASM protection failed, falling back to pdf-lib:', e);
-	}
-
-	// Fall back to pdf-lib encryption (AES-128)
-	return await protectPDFWithPdfLib(file, options);
-}
-
-/**
- * pdf-lib encryption (AES-128)
- * Works without any external dependencies
- */
-async function protectPDFWithPdfLib(file: File, options: ProtectOptions): Promise<Blob> {
 	const { userPassword, ownerPassword = userPassword, onProgress } = options;
 
 	onProgress?.(10);
@@ -621,32 +587,9 @@ interface UnlockOptions {
 }
 
 /**
- * Unlock a password-protected PDF - uses qpdf WASM
- * Falls back to pdf-lib if WASM fails
+ * Unlock a password-protected PDF using pdf-lib
  */
 export async function unlockPDF(file: File, options: UnlockOptions): Promise<Blob> {
-	const { password, onProgress } = options;
-
-	const arrayBuffer = await file.arrayBuffer();
-
-	// Try qpdf WASM first
-	try {
-		onProgress?.(5);
-		const result = await decryptWithQpdf(arrayBuffer, password, onProgress);
-		return new Blob([result], { type: 'application/pdf' });
-	} catch (e) {
-		console.warn('qpdf WASM unlock failed, falling back to pdf-lib:', e);
-	}
-
-	// Fall back to pdf-lib
-	return await unlockPDFWithPdfLib(file, options);
-}
-
-/**
- * pdf-lib unlock
- * Works without any external dependencies
- */
-async function unlockPDFWithPdfLib(file: File, options: UnlockOptions): Promise<Blob> {
 	const { password, onProgress } = options;
 
 	onProgress?.(10);
@@ -655,7 +598,6 @@ async function unlockPDFWithPdfLib(file: File, options: UnlockOptions): Promise<
 
 	onProgress?.(30);
 
-	// Load with password
 	const pdf = await PDFDocument.load(arrayBuffer, {
 		password,
 		ignoreEncryption: false,
@@ -663,7 +605,6 @@ async function unlockPDFWithPdfLib(file: File, options: UnlockOptions): Promise<
 
 	onProgress?.(70);
 
-	// Save without encryption
 	const pdfBytes = await pdf.save();
 
 	onProgress?.(100);
@@ -773,11 +714,6 @@ function getUserFriendlyError(error: unknown): string {
 	// Ghostscript errors
 	if (lowerMessage.includes('ghostscript') || lowerMessage.includes('gs')) {
 		return 'Compression engine error. The file may be corrupted or use unsupported features.';
-	}
-
-	// qpdf errors
-	if (lowerMessage.includes('qpdf')) {
-		return 'Encryption engine error. The file may be corrupted or already encrypted.';
 	}
 
 	// Generic fallback with original message if short, otherwise generic
@@ -940,7 +876,7 @@ async function processItem(item: PDFItem) {
 				break;
 
 			case 'protect':
-				pdfs.updateItem(item.id, { progressStage: 'Encrypting with qpdf...' });
+				pdfs.updateItem(item.id, { progressStage: 'Encrypting...' });
 				result = await protectPDF(item.file, {
 					userPassword: settings.userPassword,
 					ownerPassword: settings.ownerPassword || settings.userPassword,
@@ -949,7 +885,7 @@ async function processItem(item: PDFItem) {
 				break;
 
 			case 'unlock':
-				pdfs.updateItem(item.id, { progressStage: 'Decrypting with qpdf...' });
+				pdfs.updateItem(item.id, { progressStage: 'Decrypting...' });
 				result = await unlockPDF(item.file, {
 					password: settings.userPassword,
 					onProgress: (p) => pdfs.updateItem(item.id, { progress: p }),

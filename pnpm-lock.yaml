@@ -132,9 +132,6 @@ importers:
       '@cantoo/pdf-lib':
         specifier: ^2.6.4
         version: 2.6.4
-      '@neslinesli93/qpdf-wasm':
-        specifier: ^0.3.0
-        version: 0.3.0
       '@neutron/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -931,9 +928,6 @@ packages:
 
   '@napi-rs/wasm-runtime@1.1.1':
     resolution: {integrity: sha512-p64ah1M1ld8xjWv3qbvFwHiFVWrq1yFvV4f7w+mzaqiR4IlSgkqhcRdHwsGgomwzBH51sRY4NEowLxnaBjcW/A==}
-
-  '@neslinesli93/qpdf-wasm@0.3.0':
-    resolution: {integrity: sha512-ObyTmabopTMwN6AGwrEkmDbdmM5wnwlRdn9jnJYQ2KbBUPdPDcfNf1QkcWFOVD+qIgSqILz9nK51e22T+x+gkQ==}
 
   '@opentelemetry/api-logs@0.207.0':
     resolution: {integrity: sha512-lAb0jQRVyleQQGiuuvCOTDVspc14nx6XJjP4FspJ1sNARo3Regq4ZZbrc3rN4b1TYSuUCvgH+UXUPug4SLOqEQ==}
@@ -3863,8 +3857,6 @@ snapshots:
       '@emnapi/runtime': 1.9.1
       '@tybys/wasm-util': 0.10.1
     optional: true
-
-  '@neslinesli93/qpdf-wasm@0.3.0': {}
 
   '@opentelemetry/api-logs@0.207.0':
     dependencies:
