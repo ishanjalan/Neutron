@@ -8,14 +8,8 @@
  */
 
 import Tesseract from 'tesseract.js';
-import * as pdfjsLib from 'pdfjs-dist';
 import { PDFDocument, rgb, StandardFonts } from '@cantoo/pdf-lib';
-import { base } from '$app/paths';
-
-// Configure PDF.js worker
-if (typeof window !== 'undefined') {
-	pdfjsLib.GlobalWorkerOptions.workerSrc = `${base}/pdf.worker.min.mjs`;
-}
+import { renderPageGS } from './ghostscript';
 
 export type OCRLanguage =
 	| 'eng'
@@ -107,26 +101,22 @@ async function initWorker(language: OCRLanguage): Promise<Tesseract.Worker> {
 }
 
 /**
- * Render a PDF page to a canvas and return as ImageData
+ * Render a PDF page to ImageData using GhostPDL
  */
 async function renderPageToImage(
-	pdfDoc: pdfjsLib.PDFDocumentProxy,
+	pdfArrayBuffer: ArrayBuffer,
 	pageNum: number,
-	scale: number = 2.0
+	dpi: number = 144
 ): Promise<{ imageData: ImageData; width: number; height: number }> {
-	const page = await pdfDoc.getPage(pageNum);
-	const viewport = page.getViewport({ scale });
+	const pngBuffer = await renderPageGS(pdfArrayBuffer, pageNum, dpi);
+	const bitmap = await createImageBitmap(new Blob([pngBuffer], { type: 'image/png' }));
 
 	const canvas = document.createElement('canvas');
-	canvas.width = viewport.width;
-	canvas.height = viewport.height;
+	canvas.width = bitmap.width;
+	canvas.height = bitmap.height;
 	const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
-
-	await page.render({
-		canvas,
-		canvasContext: ctx,
-		viewport,
-	}).promise;
+	ctx.drawImage(bitmap, 0, 0);
+	bitmap.close();
 
 	const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 	canvas.width = 0;
@@ -134,8 +124,8 @@ async function renderPageToImage(
 
 	return {
 		imageData,
-		width: viewport.width,
-		height: viewport.height,
+		width: imageData.width,
+		height: imageData.height,
 	};
 }
 
@@ -227,25 +217,22 @@ export async function performOCR(file: File, options: OCROptions): Promise<OCRRe
 
 	onProgress?.(5, 'Loading PDF...');
 
-	// Load PDF with pdf.js
-	// Note: We need to clone the ArrayBuffer because pdf.js may transfer it to a worker
 	const arrayBuffer = await file.arrayBuffer();
-	const arrayBufferCopy = arrayBuffer.slice(0);
-	const pdfDoc = await pdfjsLib.getDocument({ data: arrayBufferCopy }).promise;
-	const pageCount = pdfDoc.numPages;
+	const pdfLibDoc = await PDFDocument.load(arrayBuffer);
+	const pageCount = pdfLibDoc.getPageCount();
+	const dpi = 144; // Equivalent to scale 2.0 at 72 DPI base
 
 	onProgress?.(10, `Processing ${pageCount} page(s)...`);
 
 	// OCR each page
 	const ocrResults: PageOCRResult[] = [];
-	const scale = 2.0; // Higher scale = better OCR accuracy
 
 	for (let i = 1; i <= pageCount; i++) {
 		const progressBase = 10 + ((i - 1) / pageCount) * 70;
 		onProgress?.(progressBase, `OCR page ${i}/${pageCount}...`);
 
 		// Render page to image
-		const { imageData } = await renderPageToImage(pdfDoc, i, scale);
+		const { imageData } = await renderPageToImage(arrayBuffer, i, dpi);
 
 		// Perform OCR
 		const pageResult = await ocrPage(tessWorker, imageData);
@@ -263,7 +250,7 @@ export async function performOCR(file: File, options: OCROptions): Promise<OCRRe
 
 	if (outputMode === 'searchable-pdf' || outputMode === 'text-and-pdf') {
 		onProgress?.(85, 'Creating searchable PDF...');
-		searchablePdf = await createSearchablePdf(arrayBuffer, ocrResults, scale);
+		searchablePdf = await createSearchablePdf(arrayBuffer, ocrResults, dpi / 72);
 	}
 
 	onProgress?.(95, 'Cleaning up...');

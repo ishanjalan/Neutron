@@ -5,7 +5,7 @@
  * Uses ghostscript-wasm-esm package compiled to WebAssembly.
  */
 
-import createModule from 'ghostscript-wasm-esm';
+import loadWASM from '@okathira/ghostpdl-wasm';
 
 interface CompressRequest {
 	id: string;
@@ -39,7 +39,7 @@ async function initGhostscript(base: string): Promise<void> {
 
 	try {
 		// Initialize the Emscripten module
-		Module = await createModule({
+		Module = await loadWASM({
 			// Locate the WASM file from static directory, accounting for base path
 			locateFile: (path: string) => {
 				if (path.endsWith('.wasm')) {

@@ -115,7 +115,7 @@
 			popular: false,
 		},
 		{
-			href: '/workspace?tool=add-page-numbers',
+			href: '/add-page-numbers',
 			title: 'Page Numbers',
 			description: 'Add page numbers to any PDF',
 			icon: Hash,
@@ -123,7 +123,7 @@
 			popular: false,
 		},
 		{
-			href: '/workspace?tool=watermark',
+			href: '/watermark',
 			title: 'Watermark',
 			description: 'Stamp a text watermark on every page',
 			icon: Stamp,
@@ -131,7 +131,7 @@
 			popular: false,
 		},
 		{
-			href: '/workspace?tool=edit-metadata',
+			href: '/edit-metadata',
 			title: 'Edit Metadata',
 			description: 'Set title, author, and keywords',
 			icon: Tag,
@@ -139,7 +139,7 @@
 			popular: false,
 		},
 		{
-			href: '/workspace?tool=reverse-pages',
+			href: '/reverse-pages',
 			title: 'Reverse Pages',
 			description: 'Flip the page order of a PDF',
 			icon: ArrowLeftRight,
@@ -147,7 +147,7 @@
 			popular: false,
 		},
 		{
-			href: '/workspace?tool=remove-blank-pages',
+			href: '/remove-blank-pages',
 			title: 'Remove Blank Pages',
 			description: 'Automatically delete empty pages',
 			icon: FileX,
@@ -227,7 +227,7 @@
 
 							<div class="min-w-0 flex-1">
 								<h3
-									class="text-surface-100 flex items-center gap-2 text-base font-semibold transition-colors group-hover:text-surface-50"
+									class="text-surface-100 group-hover:text-surface-50 flex items-center gap-2 text-base font-semibold transition-colors"
 								>
 									{tool.title}
 									<ArrowRight

@@ -2,7 +2,7 @@
 	import { SvelteSet } from 'svelte/reactivity';
 	import { onMount, onDestroy } from 'svelte';
 	import { GripVertical, Check, X } from 'lucide-svelte';
-	import { getPdfjs } from '$lib/utils/pdf';
+	import { renderAllPagesGS } from '$lib/utils/ghostscript';
 
 	interface Props {
 		file: File;
@@ -40,39 +40,6 @@
 	let draggedIndex = $state<number | null>(null);
 	let dragOverIndex = $state<number | null>(null);
 
-	async function renderThumbnailForPage(
-		pdf: any,
-		pageNum: number
-	): Promise<{ pageNum: number; dataUrl: string } | null> {
-		if (aborted) return null;
-		try {
-			const page = await pdf.getPage(pageNum);
-			if (aborted) return null;
-
-			const viewport = page.getViewport({ scale: 0.3 });
-			const canvas = document.createElement('canvas');
-			canvas.width = viewport.width;
-			canvas.height = viewport.height;
-			const ctx = canvas.getContext('2d');
-			if (!ctx) return null;
-
-			await page.render({ canvasContext: ctx, viewport, canvas }).promise;
-			if (aborted) {
-				canvas.width = 0;
-				canvas.height = 0;
-				return null;
-			}
-
-			const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-			canvas.width = 0;
-			canvas.height = 0;
-			return { pageNum, dataUrl };
-		} catch (err) {
-			console.error(`Failed to render thumbnail for page ${pageNum}:`, err);
-			return null;
-		}
-	}
-
 	async function loadThumbnails() {
 		isLoading = true;
 		error = null;
@@ -83,26 +50,43 @@
 			const arrayBuffer = await file.arrayBuffer();
 			if (aborted) return;
 
-			const pdfjs = await getPdfjs();
+			// Render all pages at 22 DPI (≈ scale 0.3) in one GhostPDL call
+			const pngBuffers = await renderAllPagesGS(arrayBuffer, 22);
 			if (aborted) return;
 
-			const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-			if (aborted) return;
-
-			pageCount = pdf.numPages;
+			pageCount = pngBuffers.length;
 			pageOrder = Array.from({ length: pageCount }, (_, i) => i + 1);
 
-			// Render thumbnails in parallel batches to avoid sequential slowness
-			// and prevent memory spikes from all-at-once rendering
-			for (let i = 1; i <= pageCount; i += BATCH_SIZE) {
+			// Decode PNG buffers to dataURLs in batches
+			for (let i = 0; i < pngBuffers.length; i += BATCH_SIZE) {
 				if (aborted) break;
 
-				const batchNums = Array.from(
-					{ length: Math.min(BATCH_SIZE, pageCount - i + 1) },
-					(_, k) => i + k
+				const batchPngs = pngBuffers.slice(i, i + BATCH_SIZE);
+				const results = await Promise.all(
+					batchPngs.map(
+						async (pngBuffer, j): Promise<{ pageNum: number; dataUrl: string } | null> => {
+							if (aborted) return null;
+							try {
+								const bitmap = await createImageBitmap(
+									new Blob([pngBuffer], { type: 'image/png' })
+								);
+								const canvas = document.createElement('canvas');
+								canvas.width = bitmap.width;
+								canvas.height = bitmap.height;
+								const ctx = canvas.getContext('2d')!;
+								ctx.drawImage(bitmap, 0, 0);
+								bitmap.close();
+								const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+								canvas.width = 0;
+								canvas.height = 0;
+								return { pageNum: i + j + 1, dataUrl };
+							} catch (err) {
+								console.error(`Failed to decode thumbnail for page ${i + j + 1}:`, err);
+								return null;
+							}
+						}
+					)
 				);
-
-				const results = await Promise.all(batchNums.map((n) => renderThumbnailForPage(pdf, n)));
 
 				if (aborted) break;
 

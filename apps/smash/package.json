@@ -37,9 +37,8 @@
 		"@neutron/config": "workspace:*",
 		"@neutron/ui": "workspace:*",
 		"@neutron/utils": "workspace:*",
+		"@okathira/ghostpdl-wasm": "^1.1.0",
 		"comlink": "^4.4.2",
-		"ghostscript-wasm-esm": "^1.0.1",
-		"pdfjs-dist": "^5.5.207",
 		"tesseract.js": "^7.0.0"
 	}
 }

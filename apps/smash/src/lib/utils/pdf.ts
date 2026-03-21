@@ -8,31 +8,19 @@
  */
 
 import { PDFDocument, degrees, rgb, StandardFonts } from '@cantoo/pdf-lib';
-import { compressPDF as compressWithGS, isGhostscriptReady } from './ghostscript';
+import {
+	compressPDF as compressWithGS,
+	isGhostscriptReady,
+	renderPageGS,
+	renderAllPagesGS,
+} from './ghostscript';
 import {
 	pdfs,
 	type PDFItem,
 	type ImageFormat,
 	type CompressionPreset,
 } from '$lib/stores/pdfs.svelte';
-import { base } from '$app/paths';
 import { parsePageRangeHelper, getUserFriendlyError } from './pdf-utils';
-
-let pdfjsLib: typeof import('pdfjs-dist') | null = null;
-
-/**
- * Lazy-load pdfjs-dist singleton. Configures worker and returns the library.
- * Use this instead of static import to avoid bundling ~500KB until needed.
- */
-export async function getPdfjs(): Promise<typeof import('pdfjs-dist')> {
-	if (!pdfjsLib) {
-		pdfjsLib = await import('pdfjs-dist');
-		if (typeof window !== 'undefined') {
-			pdfjsLib.GlobalWorkerOptions.workerSrc = `${base}/pdf.worker.min.mjs`;
-		}
-	}
-	return pdfjsLib;
-}
 
 // ============================================
 // TOOL AVAILABILITY (for web, always available after WASM loads)
@@ -234,23 +222,19 @@ interface PDFToImagesOptions {
 
 export async function pdfToImages(file: File, options: PDFToImagesOptions): Promise<Blob[]> {
 	const arrayBuffer = await file.arrayBuffer();
-	const pdfjs = await getPdfjs();
-	const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-	const scale = options.dpi / 72;
+	const pngBuffers = await renderAllPagesGS(arrayBuffer, options.dpi);
+	const mimeType = options.format === 'jpg' ? 'image/jpeg' : `image/${options.format}`;
 	const images: Blob[] = [];
 
-	for (let i = 1; i <= pdf.numPages; i++) {
-		const page = await pdf.getPage(i);
-		const viewport = page.getViewport({ scale });
-
+	for (let i = 0; i < pngBuffers.length; i++) {
+		const bitmap = await createImageBitmap(new Blob([pngBuffers[i]], { type: 'image/png' }));
 		const canvas = document.createElement('canvas');
-		canvas.width = viewport.width;
-		canvas.height = viewport.height;
+		canvas.width = bitmap.width;
+		canvas.height = bitmap.height;
 		const ctx = canvas.getContext('2d')!;
+		ctx.drawImage(bitmap, 0, 0);
+		bitmap.close();
 
-		await page.render({ canvas, canvasContext: ctx, viewport }).promise;
-
-		const mimeType = options.format === 'jpg' ? 'image/jpeg' : `image/${options.format}`;
 		const blob = await new Promise<Blob>((resolve) => {
 			canvas.toBlob(
 				(blob) => {
@@ -264,7 +248,7 @@ export async function pdfToImages(file: File, options: PDFToImagesOptions): Prom
 		});
 
 		images.push(blob);
-		options.onProgress?.(Math.round((i / pdf.numPages) * 100));
+		options.onProgress?.(Math.round(((i + 1) / pngBuffers.length) * 100));
 	}
 
 	return images;
@@ -350,20 +334,14 @@ export async function getPageCount(file: File): Promise<number> {
 
 export async function generateThumbnail(file: File): Promise<string> {
 	const arrayBuffer = await file.arrayBuffer();
-	const pdfjs = await getPdfjs();
-	const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-	const page = await pdf.getPage(1);
-
-	const scale = 0.5;
-	const viewport = page.getViewport({ scale });
-
+	const pngBuffer = await renderPageGS(arrayBuffer, 1, 36);
+	const bitmap = await createImageBitmap(new Blob([pngBuffer], { type: 'image/png' }));
 	const canvas = document.createElement('canvas');
-	canvas.width = viewport.width;
-	canvas.height = viewport.height;
+	canvas.width = bitmap.width;
+	canvas.height = bitmap.height;
 	const ctx = canvas.getContext('2d')!;
-
-	await page.render({ canvas, canvasContext: ctx, viewport }).promise;
-
+	ctx.drawImage(bitmap, 0, 0);
+	bitmap.close();
 	const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
 	canvas.width = 0;
 	canvas.height = 0;
@@ -674,58 +652,53 @@ export async function removeBlankPages(
 	const { threshold, onProgress } = options;
 
 	const arrayBuffer = await file.arrayBuffer();
-	const pdfjs = await getPdfjs();
-	const pdfDoc = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
-	const totalPages = pdfDoc.numPages;
 
 	onProgress?.(5);
 
-	// Identify blank pages (1-based)
-	const blankPageIndices: number[] = [];
+	// Render all pages at 72 DPI for pixel-based blank detection
+	const pngBuffers = await renderAllPagesGS(arrayBuffer, 72);
+	const totalPages = pngBuffers.length;
 
-	for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
-		const page = await pdfDoc.getPage(pageNum);
+	// threshold 0 = allow 0.1% non-white (artifact tolerance)
+	// threshold N = allow N * 0.1% non-white
+	const maxNonWhitePct = threshold === 0 ? 0.1 : threshold * 0.1;
 
-		// Check for text
-		const textContent = await page.getTextContent();
-		const hasText = textContent.items.length > 0;
+	const blankPageIndices: number[] = []; // 0-based
 
-		// Check for painting operators (images, filled paths, strokes)
-		const opList = await page.getOperatorList();
-		const paintingOpCodes = new Set([
-			pdfjs.OPS.paintImageXObject,
-			pdfjs.OPS.paintImageMaskXObject,
-			pdfjs.OPS.paintInlineImageXObject,
-			pdfjs.OPS.stroke,
-			pdfjs.OPS.fill,
-			pdfjs.OPS.fillStroke,
-			pdfjs.OPS.eoFill,
-			pdfjs.OPS.eoFillStroke,
-			pdfjs.OPS.paintXObject,
-		]);
-		const hasPaintingOps = opList.fnArray.some((op: number) => paintingOpCodes.has(op));
+	for (let i = 0; i < pngBuffers.length; i++) {
+		const bitmap = await createImageBitmap(new Blob([pngBuffers[i]], { type: 'image/png' }));
+		const canvas = document.createElement('canvas');
+		canvas.width = bitmap.width;
+		canvas.height = bitmap.height;
+		const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
+		ctx.drawImage(bitmap, 0, 0);
+		bitmap.close();
 
-		// A page is blank when it has neither text nor painting operators.
-		// With threshold > 0, also treat pages with very few items as blank.
-		const isBlank =
-			threshold === 0
-				? !hasText && !hasPaintingOps
-				: !hasText && (!hasPaintingOps || opList.fnArray.length <= threshold);
+		const { width, height } = canvas;
+		const data = ctx.getImageData(0, 0, width, height).data;
+		canvas.width = 0;
+		canvas.height = 0;
 
-		if (isBlank) {
-			blankPageIndices.push(pageNum - 1); // 0-based for pdf-lib
+		let nonWhitePixels = 0;
+		for (let p = 0; p < data.length; p += 4) {
+			if (data[p] < 240 || data[p + 1] < 240 || data[p + 2] < 240) {
+				nonWhitePixels++;
+			}
 		}
 
-		onProgress?.(5 + Math.round((pageNum / totalPages) * 70));
+		const nonWhitePct = (nonWhitePixels / (width * height)) * 100;
+		if (nonWhitePct <= maxNonWhitePct) {
+			blankPageIndices.push(i);
+		}
+
+		onProgress?.(5 + Math.round(((i + 1) / totalPages) * 70));
 	}
 
 	if (blankPageIndices.length === 0) {
-		// Nothing to remove — return the original
 		onProgress?.(100);
 		return new Blob([arrayBuffer], { type: 'application/pdf' });
 	}
 
-	// Remove blank pages using pdf-lib (delete in reverse order to keep indices valid)
 	const srcPdf = await PDFDocument.load(arrayBuffer);
 	for (const idx of [...blankPageIndices].sort((a, b) => b - a)) {
 		srcPdf.removePage(idx);

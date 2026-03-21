@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
-	import type * as pdfjsLib from 'pdfjs-dist';
-	import { getPdfjs } from '$lib/utils/pdf';
+	import { PDFDocument } from '@cantoo/pdf-lib';
+	import { renderPageGS } from '$lib/utils/ghostscript';
 	import {
 		rotateSinglePage,
 		deleteSinglePage,
@@ -28,9 +28,6 @@
 		Sidebar,
 		Maximize2,
 		AlignCenter,
-		Search,
-		BookOpen,
-		ChevronDown,
 		RotateCw,
 		RotateCcw,
 		Trash2,
@@ -71,7 +68,6 @@
 	let isLoading = $state(true);
 	let error = $state<string | null>(null);
 	let sidebarVisible = $state(true);
-	let sidebarTab = $state<'pages' | 'outline'>('pages');
 
 	// Pagination for thumbnail grid
 	let thumbnailPage = $state(0);
@@ -88,49 +84,20 @@
 	let naturalPageWidth = $state(0);
 	let naturalPageHeight = $state(0);
 
-	// Canvas + text layer DOM refs
+	// Canvas DOM ref
 	let mainCanvas = $state<HTMLCanvasElement | null>(null);
-	let textLayerContainer = $state<HTMLDivElement | null>(null);
-	let annotationLayerContainer = $state<HTMLDivElement | null>(null);
 
 	// Track which thumbnails are currently loading
 	let loadingThumbnails = new SvelteSet<number>();
 
-	// PDF document reference
-	let pdfDoc: pdfjsLib.PDFDocumentProxy | null = null;
-
-	// Active render task — cancelled before starting a new one
-	let activeRenderTask: pdfjsLib.RenderTask | null = null;
-	let activeTextLayer: { cancel: () => void } | null = null;
+	// PDF document reference (raw ArrayBuffer for GhostPDL rendering)
+	let pdfArrayBuffer: ArrayBuffer | null = null;
 
 	// Sidebar scroll container ref
 	let sidebarScrollContainer: HTMLDivElement | null = null;
 
 	// Main content container ref (for fit-width/fit-page)
 	let mainContentRef: HTMLDivElement | null = null;
-
-	// ── Search ──
-	let searchVisible = $state(false);
-	let searchQuery = $state('');
-	let searchInput: HTMLInputElement | null = null;
-	const textIndex = new SvelteMap<number, string>(); // pageNum → full text
-	let searchResults = $state<Array<{ pageNum: number; count: number }>>([]);
-	let currentMatchPage = $state(0); // index into searchResults
-	const totalMatches = $derived(searchResults.reduce((s, r) => s + r.count, 0));
-	const currentMatchNum = $derived(
-		searchResults.slice(0, currentMatchPage).reduce((s, r) => s + r.count, 0) + 1
-	);
-
-	// ── Outline ──
-	interface OutlineNode {
-		title: string;
-		dest: string | unknown[] | null;
-		url: string | null;
-		items: OutlineNode[];
-		expanded?: boolean;
-	}
-	let outlineItems = $state<OutlineNode[]>([]);
-	let outlineLoaded = $state(false);
 
 	// ── Context menu ──
 	let contextMenu = $state<{
@@ -166,13 +133,10 @@
 	async function loadPDF() {
 		isLoading = true;
 		error = null;
-
 		try {
-			const arrayBuffer = await currentFile.arrayBuffer();
-			const pdfjs = await getPdfjs();
-			pdfDoc = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-			totalPages = pdfDoc.numPages;
-
+			pdfArrayBuffer = await currentFile.arrayBuffer();
+			const pdfLibDoc = await PDFDocument.load(pdfArrayBuffer);
+			totalPages = pdfLibDoc.getPageCount();
 			loadThumbnailRange(1, Math.min(THUMBNAIL_BATCH_SIZE, totalPages));
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to load PDF';
@@ -182,49 +146,32 @@
 		}
 	}
 
-	async function loadOutline() {
-		if (!pdfDoc || outlineLoaded) return;
-		outlineLoaded = true;
-		try {
-			const outline = await pdfDoc.getOutline();
-			outlineItems = outline ? (outline as OutlineNode[]) : [];
-		} catch {
-			outlineItems = [];
-		}
-	}
-
 	async function loadThumbnail(pageNum: number): Promise<string | null> {
-		if (!pdfDoc || thumbnailCache.has(pageNum) || loadingThumbnails.has(pageNum)) {
+		if (!pdfArrayBuffer || thumbnailCache.has(pageNum) || loadingThumbnails.has(pageNum)) {
 			return thumbnailCache.get(pageNum) || null;
 		}
-
 		loadingThumbnails = new SvelteSet([...loadingThumbnails, pageNum]);
-
 		try {
-			const page = await pdfDoc.getPage(pageNum);
-			const scale = 0.2;
-			const viewport = page.getViewport({ scale });
-
+			const pngBuffer = await renderPageGS(pdfArrayBuffer, pageNum, 14); // ~scale 0.2
+			const bitmap = await createImageBitmap(new Blob([pngBuffer], { type: 'image/png' }));
 			const canvas = document.createElement('canvas');
-			canvas.width = viewport.width;
-			canvas.height = viewport.height;
-			const ctx = canvas.getContext('2d');
-
-			if (ctx) {
-				await page.render({ canvasContext: ctx, viewport, canvas }).promise;
-				const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-				canvas.width = 0;
-				canvas.height = 0;
-				const updated = new SvelteMap(thumbnailCache);
-				updated.delete(pageNum);
-				updated.set(pageNum, dataUrl);
-				if (updated.size > THUMBNAIL_CACHE_MAX) {
-					const oldest = updated.keys().next().value!;
-					updated.delete(oldest);
-				}
-				thumbnailCache = updated;
-				return dataUrl;
+			canvas.width = bitmap.width;
+			canvas.height = bitmap.height;
+			const ctx = canvas.getContext('2d')!;
+			ctx.drawImage(bitmap, 0, 0);
+			bitmap.close();
+			const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+			canvas.width = 0;
+			canvas.height = 0;
+			const updated = new SvelteMap(thumbnailCache);
+			updated.delete(pageNum);
+			updated.set(pageNum, dataUrl);
+			if (updated.size > THUMBNAIL_CACHE_MAX) {
+				const oldest = updated.keys().next().value!;
+				updated.delete(oldest);
 			}
+			thumbnailCache = updated;
+			return dataUrl;
 		} catch (err) {
 			console.error(`Failed to load thumbnail for page ${pageNum}:`, err);
 		} finally {
@@ -246,197 +193,26 @@
 	}
 
 	async function renderPage(pageNum: number) {
-		if (!pdfDoc || pageNum < 1 || pageNum > totalPages) return;
+		if (!pdfArrayBuffer || pageNum < 1 || pageNum > totalPages) return;
 		if (!mainCanvas) return;
 
-		// Cancel any in-progress render
-		activeRenderTask?.cancel();
-		activeRenderTask = null;
-		activeTextLayer?.cancel();
-		activeTextLayer = null;
-
 		try {
-			const page = await pdfDoc.getPage(pageNum);
-			const scale = zoom * 1.5;
-			const viewport = page.getViewport({ scale });
+			const dpi = Math.round(72 * zoom * 1.5);
+			const pngBuffer = await renderPageGS(pdfArrayBuffer, pageNum, dpi);
+			const bitmap = await createImageBitmap(new Blob([pngBuffer], { type: 'image/png' }));
 
-			const naturalViewport = page.getViewport({ scale: 1 });
-			naturalPageWidth = naturalViewport.width;
-			naturalPageHeight = naturalViewport.height;
+			naturalPageWidth = Math.round(bitmap.width / (dpi / 72));
+			naturalPageHeight = Math.round(bitmap.height / (dpi / 72));
+			pageWidth = bitmap.width;
+			pageHeight = bitmap.height;
 
-			pageWidth = viewport.width;
-			pageHeight = viewport.height;
-
-			// Render canvas
-			mainCanvas.width = viewport.width;
-			mainCanvas.height = viewport.height;
-			const ctx = mainCanvas.getContext('2d');
-
-			if (ctx) {
-				const renderTask = page.render({ canvasContext: ctx, viewport, canvas: mainCanvas });
-				activeRenderTask = renderTask;
-				try {
-					await renderTask.promise;
-				} catch (e: unknown) {
-					if (e instanceof Error && e.name === 'RenderingCancelledException') return;
-					throw e;
-				}
-				activeRenderTask = null;
-			}
-
-			// Render text layer
-			if (textLayerContainer) {
-				// eslint-disable-next-line svelte/no-dom-manipulating
-				textLayerContainer.innerHTML = '';
-				textLayerContainer.style.width = viewport.width + 'px';
-				textLayerContainer.style.height = viewport.height + 'px';
-
-				const pdfjs = await getPdfjs();
-				const textLayer = new pdfjs.TextLayer({
-					textContentSource: page.streamTextContent(),
-					container: textLayerContainer,
-					viewport,
-				});
-
-				let cancelled = false;
-				activeTextLayer = {
-					cancel() {
-						cancelled = true;
-					},
-				};
-
-				try {
-					await textLayer.render();
-					if (!cancelled && searchQuery && textLayerContainer) {
-						applySearchHighlights(textLayerContainer, searchQuery);
-					}
-				} catch {
-					// ignore
-				}
-				activeTextLayer = null;
-			}
-
-			// Build text index for this page (for search)
-			if (!textIndex.has(pageNum)) {
-				const content = await page.getTextContent();
-				const text = content.items
-					.filter((it) => 'str' in it)
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					.map((it) => (it as any).str as string)
-					.join(' ');
-				textIndex.set(pageNum, text);
-			}
+			mainCanvas.width = bitmap.width;
+			mainCanvas.height = bitmap.height;
+			const ctx = mainCanvas.getContext('2d')!;
+			ctx.drawImage(bitmap, 0, 0);
+			bitmap.close();
 		} catch (err) {
 			console.error(`Failed to render page ${pageNum}:`, err);
-		}
-	}
-
-	function applySearchHighlights(container: HTMLElement, query: string) {
-		if (!query.trim()) return;
-		const lower = query.toLowerCase();
-		const spans = container.querySelectorAll<HTMLSpanElement>('span');
-		for (const span of spans) {
-			const text = span.textContent ?? '';
-			if (text.toLowerCase().includes(lower)) {
-				span.style.backgroundColor = 'rgba(255, 220, 0, 0.5)';
-				span.style.borderRadius = '2px';
-			} else {
-				span.style.backgroundColor = '';
-				span.style.borderRadius = '';
-			}
-		}
-	}
-
-	function clearSearchHighlights() {
-		if (!textLayerContainer) return;
-		const spans = textLayerContainer.querySelectorAll<HTMLSpanElement>('span');
-		for (const span of spans) {
-			span.style.backgroundColor = '';
-			span.style.borderRadius = '';
-		}
-	}
-
-	async function buildTextIndexForAllPages() {
-		if (!pdfDoc) return;
-		const promises: Promise<void>[] = [];
-		for (let i = 1; i <= totalPages; i++) {
-			if (!textIndex.has(i)) {
-				promises.push(
-					(async (pageNum) => {
-						const page = await pdfDoc!.getPage(pageNum);
-						const content = await page.getTextContent();
-						const text = content.items
-							.filter((it) => 'str' in it)
-							// eslint-disable-next-line @typescript-eslint/no-explicit-any
-							.map((it) => (it as any).str as string)
-							.join(' ');
-						textIndex.set(pageNum, text);
-					})(i)
-				);
-			}
-		}
-		await Promise.all(promises);
-	}
-
-	async function performSearch(query: string) {
-		if (!query.trim() || !pdfDoc) {
-			searchResults = [];
-			clearSearchHighlights();
-			return;
-		}
-
-		await buildTextIndexForAllPages();
-
-		const lower = query.toLowerCase();
-		const results: Array<{ pageNum: number; count: number }> = [];
-
-		for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
-			const text = textIndex.get(pageNum) ?? '';
-			let count = 0;
-			let idx = 0;
-			while ((idx = text.toLowerCase().indexOf(lower, idx)) !== -1) {
-				count++;
-				idx += lower.length;
-			}
-			if (count > 0) results.push({ pageNum, count });
-		}
-
-		searchResults = results;
-		currentMatchPage = 0;
-
-		if (results.length > 0) {
-			goToPage(results[0].pageNum);
-		}
-	}
-
-	function nextSearchMatch() {
-		if (searchResults.length === 0) return;
-		currentMatchPage = (currentMatchPage + 1) % searchResults.length;
-		goToPage(searchResults[currentMatchPage].pageNum);
-	}
-
-	function prevSearchMatch() {
-		if (searchResults.length === 0) return;
-		currentMatchPage = (currentMatchPage - 1 + searchResults.length) % searchResults.length;
-		goToPage(searchResults[currentMatchPage].pageNum);
-	}
-
-	async function navigateToOutlineItem(node: OutlineNode) {
-		if (!pdfDoc || !node.dest) return;
-		try {
-			let dest: unknown[];
-			if (typeof node.dest === 'string') {
-				dest = (await pdfDoc.getDestination(node.dest)) ?? [];
-			} else {
-				dest = node.dest as unknown[];
-			}
-			if (dest.length > 0) {
-				const ref = dest[0] as { num: number; gen: number };
-				const pageIndex = await pdfDoc.getPageIndex(ref);
-				goToPage(pageIndex + 1);
-			}
-		} catch {
-			// ignore
 		}
 	}
 
@@ -597,12 +373,8 @@
 			onFileChange?.(newFile);
 
 			// Reload viewer
-			pdfDoc?.destroy();
-			pdfDoc = null;
-			textIndex.clear();
+			pdfArrayBuffer = null;
 			thumbnailCache = new Map();
-			outlineLoaded = false;
-			outlineItems = [];
 			await loadPDF();
 		} catch (err) {
 			console.error('Context menu action failed:', err);
@@ -623,12 +395,8 @@
 			const newFile = new File([newBlob], currentFile.name, { type: 'application/pdf' });
 			currentFile = newFile;
 			onFileChange?.(newFile);
-			pdfDoc?.destroy();
-			pdfDoc = null;
-			textIndex.clear();
+			pdfArrayBuffer = null;
 			thumbnailCache = new Map();
-			outlineLoaded = false;
-			outlineItems = [];
 			await loadPDF();
 		} catch (err) {
 			console.error('Page action failed:', err);
@@ -672,12 +440,8 @@
 			const newFile = new File([newBlob], currentFile.name, { type: 'application/pdf' });
 			currentFile = newFile;
 			onFileChange?.(newFile);
-			pdfDoc?.destroy();
-			pdfDoc = null;
-			textIndex.clear();
+			pdfArrayBuffer = null;
 			thumbnailCache = new Map();
-			outlineLoaded = false;
-			outlineItems = [];
 			await loadPDF();
 		} catch (err) {
 			console.error('Move page failed:', err);
@@ -692,34 +456,13 @@
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
-		// Search shortcut
-		if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
-			e.preventDefault();
-			openSearch();
-			return;
-		}
-
 		// Close context menu on Escape
 		if (e.key === 'Escape') {
 			if (contextMenu.visible) {
 				closeContextMenu();
 				return;
 			}
-			if (searchVisible) {
-				closeSearch();
-				return;
-			}
 			if (onClose) onClose();
-			return;
-		}
-
-		// Search navigation
-		if (searchVisible) {
-			if (e.key === 'Enter') {
-				e.preventDefault();
-				if (e.shiftKey) prevSearchMatch();
-				else nextSearchMatch();
-			}
 			return;
 		}
 
@@ -738,43 +481,10 @@
 		}
 	}
 
-	async function openSearch() {
-		searchVisible = true;
-		await tick();
-		searchInput?.focus();
-
-		// Switch sidebar to pages tab if on outline
-		if (sidebarTab === 'outline') sidebarTab = 'pages';
-	}
-
-	function closeSearch() {
-		searchVisible = false;
-		searchQuery = '';
-		searchResults = [];
-		clearSearchHighlights();
-	}
-
-	// Reactive: re-run search when query changes (debounced via timeout)
-	let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
-	$effect(() => {
-		const q = searchQuery;
-		if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
-		searchDebounceTimer = setTimeout(() => {
-			if (searchVisible) performSearch(q);
-		}, 300);
-	});
-
 	// Load thumbnails when switching to thumbnail view
 	$effect(() => {
 		if (viewMode === 'thumbnails' && totalPages > 0) {
 			loadThumbnailRange(thumbnailStartPage, thumbnailEndPage);
-		}
-	});
-
-	// Load outline when sidebar tab switches to outline
-	$effect(() => {
-		if (sidebarTab === 'outline') {
-			loadOutline();
 		}
 	});
 
@@ -783,14 +493,12 @@
 	});
 
 	onDestroy(() => {
-		activeRenderTask?.cancel();
-		activeTextLayer?.cancel();
-		pdfDoc?.destroy();
+		// nothing to destroy
 	});
 
-	// Sole trigger for page renders — tracks mainCanvas, pdfDoc, zoom, AND currentPage
+	// Sole trigger for page renders — tracks mainCanvas, pdfArrayBuffer, zoom, AND currentPage
 	$effect(() => {
-		if (mainCanvas && pdfDoc && zoom && currentPage) {
+		if (mainCanvas && pdfArrayBuffer && zoom && currentPage) {
 			renderPage(currentPage);
 		}
 	});
@@ -880,19 +588,6 @@
 
 		<!-- Right: View controls -->
 		<div class="flex items-center gap-1">
-			<!-- Search button -->
-			<button
-				onclick={openSearch}
-				class="rounded-lg p-1.5 transition-colors {searchVisible
-					? 'bg-surface-700 text-surface-200'
-					: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700'}"
-				title="Search (⌘F)"
-			>
-				<Search class="h-4 w-4" />
-			</button>
-
-			<div class="bg-surface-700 mx-1 h-5 w-px"></div>
-
 			<button
 				onclick={zoomOut}
 				disabled={zoom <= 0.5}
@@ -951,44 +646,6 @@
 		</div>
 	</div>
 
-	<!-- Search bar -->
-	{#if searchVisible}
-		<div
-			class="bg-surface-800/80 border-surface-700/50 flex items-center gap-2 border-b px-4 py-2"
-			transition:fly={{ y: -8, duration: 150 }}
-		>
-			<Search class="text-surface-500 h-3.5 w-3.5 flex-shrink-0" />
-			<input
-				bind:this={searchInput}
-				bind:value={searchQuery}
-				placeholder="Search in document…"
-				class="text-surface-200 placeholder-surface-600 flex-1 bg-transparent text-sm outline-none"
-			/>
-			{#if searchResults.length > 0}
-				<span class="text-surface-500 text-xs">{currentMatchNum} of {totalMatches}</span>
-				<button
-					onclick={prevSearchMatch}
-					class="text-surface-400 hover:text-surface-200 rounded p-0.5"
-					title="Previous match (⇧Enter)"
-				>
-					<ChevronLeft class="h-3.5 w-3.5" />
-				</button>
-				<button
-					onclick={nextSearchMatch}
-					class="text-surface-400 hover:text-surface-200 rounded p-0.5"
-					title="Next match (Enter)"
-				>
-					<ChevronRight class="h-3.5 w-3.5" />
-				</button>
-			{:else if searchQuery.trim()}
-				<span class="text-surface-600 text-xs">No results</span>
-			{/if}
-			<button onclick={closeSearch} class="text-surface-400 hover:text-surface-200 rounded p-0.5">
-				<X class="h-3.5 w-3.5" />
-			</button>
-		</div>
-	{/if}
-
 	<!-- Selection toolbar (for page operations) -->
 	{#if selectionMode && viewMode === 'thumbnails'}
 		<div
@@ -1029,160 +686,118 @@
 				class="bg-surface-900/70 border-surface-800 flex w-44 flex-shrink-0 flex-col overflow-hidden border-r"
 				transition:fly={{ x: -176, duration: 200 }}
 			>
-				<!-- Sidebar tabs -->
-				<div class="border-surface-800 flex border-b">
-					<button
-						onclick={() => (sidebarTab = 'pages')}
-						class="flex-1 py-2 text-[10px] font-medium transition-colors {sidebarTab === 'pages'
-							? 'text-accent-start border-accent-start border-b-2'
-							: 'text-surface-500 hover:text-surface-300'}"
-					>
-						Pages
-					</button>
-					<button
-						onclick={() => (sidebarTab = 'outline')}
-						class="flex-1 py-2 text-[10px] font-medium transition-colors {sidebarTab === 'outline'
-							? 'text-accent-start border-accent-start border-b-2'
-							: 'text-surface-500 hover:text-surface-300'}"
-					>
-						Outline
-					</button>
-				</div>
-
-				{#if sidebarTab === 'pages'}
-					<!-- Pages tab: thumbnails -->
-					<div
-						bind:this={sidebarScrollContainer}
-						onscroll={handleSidebarScroll}
-						class="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-2 py-3"
-					>
-						<div class="flex flex-col items-center gap-3">
-							{#each allPages as pageNum (pageNum)}
-								{@const thumb = thumbnailCache.get(pageNum)}
+				<!-- Pages: thumbnails -->
+				<div
+					bind:this={sidebarScrollContainer}
+					onscroll={handleSidebarScroll}
+					class="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-2 py-3"
+				>
+					<div class="flex flex-col items-center gap-3">
+						{#each allPages as pageNum (pageNum)}
+							{@const thumb = thumbnailCache.get(pageNum)}
+							<div
+								data-page={pageNum}
+								draggable="true"
+								ondragstart={(e) => handleDragStart(e, pageNum)}
+								ondragover={(e) => handleDragOver(e, pageNum)}
+								ondragleave={handleDragLeave}
+								ondrop={(e) => handleDrop(e, pageNum)}
+								ondragend={handleDragEnd}
+								role="listitem"
+								class="group flex w-full cursor-grab flex-col items-center gap-1.5 active:cursor-grabbing"
+							>
 								<div
-									data-page={pageNum}
-									draggable="true"
-									ondragstart={(e) => handleDragStart(e, pageNum)}
-									ondragover={(e) => handleDragOver(e, pageNum)}
-									ondragleave={handleDragLeave}
-									ondrop={(e) => handleDrop(e, pageNum)}
-									ondragend={handleDragEnd}
-									role="listitem"
-									class="group flex w-full cursor-grab flex-col items-center gap-1.5 active:cursor-grabbing"
-								>
-									<div
-										class="relative overflow-hidden rounded-md transition-all duration-150
+									class="relative overflow-hidden rounded-md transition-all duration-150
 											{dragOverPage === pageNum && draggedPage !== pageNum
-											? 'ring-accent-start shadow-lg ring-[3px]'
-											: draggedPage === pageNum
-												? 'ring-surface-600 opacity-40 ring-1'
-												: currentPage === pageNum
-													? 'ring-accent-start shadow-accent-start/30 shadow-lg ring-[3px]'
-													: selectedPages.has(pageNum)
-														? 'shadow-lg ring-[3px] shadow-green-500/30 ring-green-500'
-														: 'ring-surface-700 hover:ring-surface-500 ring-1 hover:shadow-md'}"
+										? 'ring-accent-start shadow-lg ring-[3px]'
+										: draggedPage === pageNum
+											? 'ring-surface-600 opacity-40 ring-1'
+											: currentPage === pageNum
+												? 'ring-accent-start shadow-accent-start/30 shadow-lg ring-[3px]'
+												: selectedPages.has(pageNum)
+													? 'shadow-lg ring-[3px] shadow-green-500/30 ring-green-500'
+													: 'ring-surface-700 hover:ring-surface-500 ring-1 hover:shadow-md'}"
+								>
+									<button
+										onclick={() => {
+											goToPage(pageNum);
+											if (selectionMode) togglePageSelection(pageNum);
+										}}
+										oncontextmenu={(e) => handleThumbnailContextMenu(e, pageNum)}
+										class="block"
 									>
-										<button
-											onclick={() => {
-												goToPage(pageNum);
-												if (selectionMode) togglePageSelection(pageNum);
-											}}
-											oncontextmenu={(e) => handleThumbnailContextMenu(e, pageNum)}
-											class="block"
-										>
-											{#if thumb}
-												<img
-													src={thumb}
-													alt="Page {pageNum}"
-													class="w-28 bg-white"
-													draggable="false"
-												/>
-											{:else}
-												<div
-													class="bg-surface-800 flex aspect-[3/4] w-28 animate-pulse items-center justify-center"
-												>
-													<Loader2 class="text-surface-600 h-4 w-4 animate-spin" />
-												</div>
-											{/if}
-										</button>
-
-										<!-- Hover action bar -->
-										<div
-											class="absolute inset-x-0 bottom-0 flex translate-y-full items-center justify-center gap-0.5 bg-black/75 py-1 opacity-0 backdrop-blur-sm transition-all duration-150 group-hover:translate-y-0 group-hover:opacity-100"
-										>
-											<button
-												onclick={(e) => {
-													e.stopPropagation();
-													doPageAction('rotate-ccw', pageNum);
-												}}
-												class="rounded p-1 text-white/70 transition-colors hover:bg-white/20 hover:text-white"
-												title="Rotate CCW"
-											>
-												<RotateCcw class="h-3 w-3" />
-											</button>
-											<button
-												onclick={(e) => {
-													e.stopPropagation();
-													doPageAction('rotate-cw', pageNum);
-												}}
-												class="rounded p-1 text-white/70 transition-colors hover:bg-white/20 hover:text-white"
-												title="Rotate CW"
-											>
-												<RotateCw class="h-3 w-3" />
-											</button>
-											<div class="mx-0.5 h-3 w-px bg-white/25"></div>
-											<button
-												onclick={(e) => {
-													e.stopPropagation();
-													doPageAction('delete', pageNum);
-												}}
-												class="rounded p-1 text-white/70 transition-colors hover:bg-red-500/20 hover:text-red-400"
-												title="Delete page"
-											>
-												<Trash2 class="h-3 w-3" />
-											</button>
-										</div>
-
-										{#if selectionMode && selectedPages.has(pageNum)}
+										{#if thumb}
+											<img
+												src={thumb}
+												alt="Page {pageNum}"
+												class="w-28 bg-white"
+												draggable="false"
+											/>
+										{:else}
 											<div
-												class="absolute top-1.5 left-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-green-500 shadow-md"
+												class="bg-surface-800 flex aspect-[3/4] w-28 animate-pulse items-center justify-center"
 											>
-												<Check class="h-3 w-3 text-white" />
+												<Loader2 class="text-surface-600 h-4 w-4 animate-spin" />
 											</div>
 										{/if}
+									</button>
+
+									<!-- Hover action bar -->
+									<div
+										class="absolute inset-x-0 bottom-0 flex translate-y-full items-center justify-center gap-0.5 bg-black/75 py-1 opacity-0 backdrop-blur-sm transition-all duration-150 group-hover:translate-y-0 group-hover:opacity-100"
+									>
+										<button
+											onclick={(e) => {
+												e.stopPropagation();
+												doPageAction('rotate-ccw', pageNum);
+											}}
+											class="rounded p-1 text-white/70 transition-colors hover:bg-white/20 hover:text-white"
+											title="Rotate CCW"
+										>
+											<RotateCcw class="h-3 w-3" />
+										</button>
+										<button
+											onclick={(e) => {
+												e.stopPropagation();
+												doPageAction('rotate-cw', pageNum);
+											}}
+											class="rounded p-1 text-white/70 transition-colors hover:bg-white/20 hover:text-white"
+											title="Rotate CW"
+										>
+											<RotateCw class="h-3 w-3" />
+										</button>
+										<div class="mx-0.5 h-3 w-px bg-white/25"></div>
+										<button
+											onclick={(e) => {
+												e.stopPropagation();
+												doPageAction('delete', pageNum);
+											}}
+											class="rounded p-1 text-white/70 transition-colors hover:bg-red-500/20 hover:text-red-400"
+											title="Delete page"
+										>
+											<Trash2 class="h-3 w-3" />
+										</button>
 									</div>
 
-									<span
-										class="text-[11px] font-medium transition-colors
-											{currentPage === pageNum ? 'text-accent-start' : 'text-surface-500 group-hover:text-surface-300'}"
-									>
-										{pageNum}
-									</span>
+									{#if selectionMode && selectedPages.has(pageNum)}
+										<div
+											class="absolute top-1.5 left-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-green-500 shadow-md"
+										>
+											<Check class="h-3 w-3 text-white" />
+										</div>
+									{/if}
 								</div>
-							{/each}
-						</div>
+
+								<span
+									class="text-[11px] font-medium transition-colors
+											{currentPage === pageNum ? 'text-accent-start' : 'text-surface-500 group-hover:text-surface-300'}"
+								>
+									{pageNum}
+								</span>
+							</div>
+						{/each}
 					</div>
-				{:else}
-					<!-- Outline tab -->
-					<div class="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-2 py-3">
-						{#if !outlineLoaded}
-							<div class="flex items-center justify-center py-8">
-								<Loader2 class="text-surface-600 h-4 w-4 animate-spin" />
-							</div>
-						{:else if outlineItems.length === 0}
-							<div class="py-8 text-center">
-								<BookOpen class="text-surface-700 mx-auto mb-2 h-6 w-6" />
-								<p class="text-surface-600 text-[10px]">No bookmarks</p>
-							</div>
-						{:else}
-							<div class="space-y-0.5">
-								{#each outlineItems as node (node.title)}
-									{@render OutlineItem({ node, depth: 0, onNavigate: navigateToOutlineItem })}
-								{/each}
-							</div>
-						{/if}
-					</div>
-				{/if}
+				</div>
 			</div>
 		{/if}
 
@@ -1208,17 +823,13 @@
 					</div>
 				</div>
 			{:else if viewMode === 'single'}
-				<!-- Single page view: canvas + text layer -->
+				<!-- Single page view: canvas -->
 				<div class="flex min-h-full items-center justify-center">
 					<div
 						class="relative overflow-hidden rounded-lg bg-white shadow-2xl shadow-black/50"
 						style="width: {pageWidth}px; height: {pageHeight}px;"
 					>
 						<canvas bind:this={mainCanvas} class="block"></canvas>
-						<div
-							bind:this={textLayerContainer}
-							class="pdf-text-layer selectable absolute inset-0"
-						></div>
 					</div>
 				</div>
 			{:else}
@@ -1346,9 +957,7 @@
 					{selectedPages.size.toLocaleString()} page{selectedPages.size !== 1 ? 's' : ''} selected
 				</span>
 			{/if}
-			<span
-				>Arrow keys to navigate • ⌘F search • Drag thumbnails to reorder • Hover for quick actions</span
-			>
+			<span>Arrow keys to navigate • Drag thumbnails to reorder • Hover for quick actions</span>
 		</div>
 	</div>
 </div>
@@ -1377,65 +986,3 @@
 		{/each}
 	</div>
 {/if}
-
-<!-- Outline item component (recursive) -->
-{#snippet OutlineItem({
-	node,
-	depth,
-	onNavigate,
-}: {
-	node: OutlineNode;
-	depth: number;
-	onNavigate: (n: OutlineNode) => void;
-})}
-	<div>
-		<button
-			onclick={() => onNavigate(node)}
-			class="text-surface-400 hover:text-surface-200 hover:bg-surface-800 flex w-full items-center gap-1 rounded px-2 py-1 text-left text-[10px] transition-colors"
-			style="padding-left: {8 + depth * 10}px"
-		>
-			{#if node.items && node.items.length > 0}
-				<ChevronDown class="h-2.5 w-2.5 flex-shrink-0 opacity-50" />
-			{:else}
-				<span class="h-2.5 w-2.5 flex-shrink-0"></span>
-			{/if}
-			<span class="truncate">{node.title}</span>
-		</button>
-		{#if node.items && node.items.length > 0}
-			{#each node.items as child (child.title)}
-				{@render OutlineItem({ node: child, depth: depth + 1, onNavigate })}
-			{/each}
-		{/if}
-	</div>
-{/snippet}
-
-<!-- Text layer CSS (must be :global because spans are injected dynamically) -->
-<style>
-	:global(.pdf-text-layer) {
-		position: absolute;
-		inset: 0;
-		overflow: clip;
-		line-height: 1;
-		text-size-adjust: none;
-		forced-color-adjust: none;
-		pointer-events: none;
-	}
-
-	:global(.pdf-text-layer.selectable) {
-		pointer-events: auto;
-	}
-
-	:global(.pdf-text-layer span),
-	:global(.pdf-text-layer br) {
-		color: transparent;
-		position: absolute;
-		white-space: pre;
-		cursor: text;
-		transform-origin: 0% 0%;
-	}
-
-	:global(.pdf-text-layer span::selection) {
-		background-color: rgba(0, 100, 255, 0.25);
-		color: transparent;
-	}
-</style>

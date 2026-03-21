@@ -40,6 +40,16 @@ export interface GhostscriptClient {
 	): Promise<CompressionResult>;
 
 	/**
+	 * Render a single page of a PDF to a PNG image (ArrayBuffer)
+	 */
+	renderPage(pdfData: ArrayBuffer, pageNum: number, dpi: number): Promise<ArrayBuffer>;
+
+	/**
+	 * Render all pages of a PDF to PNG images
+	 */
+	renderAllPages(pdfData: ArrayBuffer, dpi: number): Promise<ArrayBuffer[]>;
+
+	/**
 	 * Check if the worker is ready
 	 */
 	isReady(): Promise<boolean>;
@@ -116,6 +126,24 @@ export function createGhostscriptClient(
 				api.compress(pdfData, preset, progressProxy),
 				WORKER_CALL_TIMEOUT_MS,
 				'Ghostscript compress'
+			);
+		},
+
+		async renderPage(pdfData: ArrayBuffer, pageNum: number, dpi: number): Promise<ArrayBuffer> {
+			await ensureInitialized();
+			return withTimeout(
+				api.renderPage(pdfData, pageNum, dpi),
+				WORKER_CALL_TIMEOUT_MS,
+				'Ghostscript renderPage'
+			);
+		},
+
+		async renderAllPages(pdfData: ArrayBuffer, dpi: number): Promise<ArrayBuffer[]> {
+			await ensureInitialized();
+			return withTimeout(
+				api.renderAllPages(pdfData, dpi),
+				WORKER_CALL_TIMEOUT_MS,
+				'Ghostscript renderAllPages'
 			);
 		},
 
@@ -232,6 +260,28 @@ export function onInitComplete(callback: () => void): void {
 	} else {
 		initCallbacks.push(callback);
 	}
+}
+
+/**
+ * Render a single page to PNG using Ghostscript (backward-compatible API)
+ */
+export async function renderPageGS(
+	pdfData: ArrayBuffer,
+	pageNum: number,
+	dpi: number
+): Promise<ArrayBuffer> {
+	if (!legacyClient) await initGhostscript();
+	if (!legacyClient) throw new Error('Failed to initialize Ghostscript');
+	return legacyClient.renderPage(pdfData, pageNum, dpi);
+}
+
+/**
+ * Render all pages to PNG using Ghostscript (backward-compatible API)
+ */
+export async function renderAllPagesGS(pdfData: ArrayBuffer, dpi: number): Promise<ArrayBuffer[]> {
+	if (!legacyClient) await initGhostscript();
+	if (!legacyClient) throw new Error('Failed to initialize Ghostscript');
+	return legacyClient.renderAllPages(pdfData, dpi);
 }
 
 /**

@@ -26,7 +26,7 @@
  */
 
 import { expose, transfer } from 'comlink';
-import createModule from 'ghostscript-wasm-esm';
+import loadWASM from '@okathira/ghostpdl-wasm';
 
 export type CompressionPreset = 'screen' | 'ebook' | 'printer' | 'prepress';
 
@@ -55,7 +55,7 @@ const api = {
 		basePath = base;
 
 		try {
-			Module = await createModule({
+			Module = await loadWASM({
 				locateFile: (path: string) => {
 					if (path.endsWith('.wasm')) {
 						return `${basePath}/gs.wasm`;
@@ -170,6 +170,100 @@ const api = {
 				error: error instanceof Error ? error.message : 'Compression failed',
 			};
 		}
+	},
+
+	/**
+	 * Render a single page of a PDF to a PNG image
+	 * @param pdfData - The PDF file as ArrayBuffer
+	 * @param pageNum - 1-based page number
+	 * @param dpi - Resolution (e.g. 36 for thumbnail, 72 for blank detection, 144 for OCR)
+	 */
+	async renderPage(pdfData: ArrayBuffer, pageNum: number, dpi: number): Promise<ArrayBuffer> {
+		if (!initialized || !Module) {
+			throw new Error('Ghostscript not initialized. Call init() first.');
+		}
+
+		const FS = Module.FS;
+		FS.writeFile('/render_input.pdf', new Uint8Array(pdfData));
+
+		Module.callMain([
+			'-sDEVICE=png16m',
+			`-r${dpi}`,
+			'-dNOPAUSE',
+			'-dBATCH',
+			'-dSAFER',
+			`-dFirstPage=${pageNum}`,
+			`-dLastPage=${pageNum}`,
+			'-sOutputFile=/render_single.png',
+			'/render_input.pdf',
+		]);
+
+		const outputData = FS.readFile('/render_single.png') as Uint8Array;
+		const outputBuffer = outputData.buffer.slice(
+			outputData.byteOffset,
+			outputData.byteOffset + outputData.byteLength
+		) as ArrayBuffer;
+
+		try {
+			FS.unlink('/render_input.pdf');
+			FS.unlink('/render_single.png');
+		} catch {
+			// Ignore cleanup errors
+		}
+
+		return transfer(outputBuffer, [outputBuffer]);
+	},
+
+	/**
+	 * Render all pages of a PDF to PNG images
+	 * @param pdfData - The PDF file as ArrayBuffer
+	 * @param dpi - Resolution
+	 */
+	async renderAllPages(pdfData: ArrayBuffer, dpi: number): Promise<ArrayBuffer[]> {
+		if (!initialized || !Module) {
+			throw new Error('Ghostscript not initialized. Call init() first.');
+		}
+
+		const FS = Module.FS;
+		FS.writeFile('/render_input.pdf', new Uint8Array(pdfData));
+
+		Module.callMain([
+			'-sDEVICE=png16m',
+			`-r${dpi}`,
+			'-dNOPAUSE',
+			'-dBATCH',
+			'-dSAFER',
+			'-sOutputFile=/render_page_%03d.png',
+			'/render_input.pdf',
+		]);
+
+		const results: ArrayBuffer[] = [];
+		let page = 1;
+		while (true) {
+			const filename = `/render_page_${String(page).padStart(3, '0')}.png`;
+			try {
+				const data = FS.readFile(filename) as Uint8Array;
+				results.push(
+					data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer
+				);
+				try {
+					FS.unlink(filename);
+				} catch {
+					// Ignore
+				}
+			} catch {
+				break;
+			}
+			page++;
+		}
+
+		try {
+			FS.unlink('/render_input.pdf');
+		} catch {
+			// Ignore cleanup errors
+		}
+
+		return transfer(results, results as unknown as Transferable[]);
 	},
 };
 
