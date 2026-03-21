@@ -298,10 +298,17 @@
 				<div class="h-full" transition:fade={{ duration: 200 }}>
 					<PDFViewer
 						file={selectedItem.file}
-						selectionMode={['split', 'delete-pages', 'reorder', 'rotate'].includes(pdfs.settings.tool)}
+						selectionMode={['split', 'delete-pages', 'reorder', 'rotate'].includes(
+							pdfs.settings.tool
+						)}
 						allowMultiSelect={['split', 'delete-pages', 'rotate'].includes(pdfs.settings.tool)}
-						onFileChange={(newFile) => pdfs.updateItem(selectedItem.id, { file: newFile, originalUrl: URL.createObjectURL(newFile) })}
-						onSelectionChange={(pages) => pdfs.updateItem(selectedItem.id, { selectedPages: pages })}
+						onFileChange={(newFile) =>
+							pdfs.updateItem(selectedItem.id, {
+								file: newFile,
+								originalUrl: URL.createObjectURL(newFile),
+							})}
+						onSelectionChange={(pages) =>
+							pdfs.updateItem(selectedItem.id, { selectedPages: pages })}
 						onClose={() => (selectedItemId = null)}
 					/>
 				</div>

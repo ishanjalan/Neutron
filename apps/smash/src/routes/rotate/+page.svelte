@@ -88,7 +88,7 @@
 		<div
 			class="bg-surface-900/95 border-surface-800 flex flex-shrink-0 items-center gap-3 border-b px-4 py-2"
 		>
-			<RotateCw class="text-cyan-400 h-4 w-4 flex-shrink-0" />
+			<RotateCw class="h-4 w-4 flex-shrink-0 text-cyan-400" />
 			<span class="text-surface-200 min-w-0 flex-1 truncate text-sm font-medium"
 				>{currentFile.name}</span
 			>

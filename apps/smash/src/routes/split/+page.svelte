@@ -17,7 +17,7 @@
 		Settings,
 	} from 'lucide-svelte';
 	import { fade, fly, slide } from 'svelte/transition';
-import PDFViewer from '$lib/components/PDFViewer.svelte';
+	import PDFViewer from '$lib/components/PDFViewer.svelte';
 
 	interface PDFFile {
 		id: string;
@@ -474,12 +474,15 @@ import PDFViewer from '$lib/components/PDFViewer.svelte';
 
 			<!-- PDF Viewer: page picker -->
 			{#if pdfFile}
-				<div class="mt-6 h-[70vh] overflow-hidden rounded-2xl border border-surface-700/50" in:fly={{ y: 20, duration: 200 }}>
+				<div
+					class="border-surface-700/50 mt-6 h-[70vh] overflow-hidden rounded-2xl border"
+					in:fly={{ y: 20, duration: 200 }}
+				>
 					<PDFViewer
 						file={pdfFile.file}
 						selectionMode={splitMode === 'extract'}
 						allowMultiSelect={true}
-						onSelectionChange={onSelectionChange}
+						{onSelectionChange}
 					/>
 				</div>
 			{/if}

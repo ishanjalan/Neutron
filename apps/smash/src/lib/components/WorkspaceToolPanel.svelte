@@ -707,7 +707,7 @@
 									capturedSignatureDataUrl = null;
 									isSigningPlacementMode = false;
 								}}
-								class="text-surface-500 hover:text-red-400 rounded-lg px-3 py-1.5 text-xs transition-colors"
+								class="text-surface-500 rounded-lg px-3 py-1.5 text-xs transition-colors hover:text-red-400"
 							>
 								Clear
 							</button>
@@ -727,9 +727,7 @@
 									bind:value={signPlacementPage}
 									class="bg-surface-800 border-surface-700 text-surface-200 focus:border-accent-start w-20 rounded-lg border px-3 py-2 text-xs focus:outline-none"
 								/>
-								<span class="text-surface-500 text-xs"
-									>of {pdfs.items[0]?.pageCount ?? '?'}</span
-								>
+								<span class="text-surface-500 text-xs">of {pdfs.items[0]?.pageCount ?? '?'}</span>
 							</div>
 
 							<button
@@ -809,7 +807,6 @@
 			{/if}
 		</div>
 	{/if}
-
 </div>
 
 <!-- Signature modal (teleported outside panel) -->

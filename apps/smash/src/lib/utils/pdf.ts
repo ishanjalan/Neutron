@@ -1250,7 +1250,12 @@ export async function saveAnnotations(file: File, annotations: Annotation[]): Pr
 				opacity,
 				borderWidth: 0,
 			});
-		} else if (ann.type === 'freetext' && ann.content && ann.x !== undefined && ann.y !== undefined) {
+		} else if (
+			ann.type === 'freetext' &&
+			ann.content &&
+			ann.x !== undefined &&
+			ann.y !== undefined
+		) {
 			const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
 			page.drawText(ann.content, {
 				x: ann.x,
@@ -1268,13 +1273,17 @@ export async function saveAnnotations(file: File, annotations: Annotation[]): Pr
 }
 
 // Page manipulation context menu operations
-export async function rotateSinglePage(file: File, pageNum: number, angle: 90 | -90 | 180): Promise<Blob> {
+export async function rotateSinglePage(
+	file: File,
+	pageNum: number,
+	angle: 90 | -90 | 180
+): Promise<Blob> {
 	const pdfDoc = await PDFDocument.load(await file.arrayBuffer());
 	const pages = pdfDoc.getPages();
 	if (pageNum < 1 || pageNum > pages.length) throw new Error('Invalid page');
 	const page = pages[pageNum - 1];
 	const current = page.getRotation().angle;
-	const normalizedAngle = ((current + angle) % 360 + 360) % 360;
+	const normalizedAngle = (((current + angle) % 360) + 360) % 360;
 	page.setRotation(degrees(normalizedAngle));
 	return new Blob([(await pdfDoc.save()).buffer as ArrayBuffer], { type: 'application/pdf' });
 }

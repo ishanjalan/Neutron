@@ -70,7 +70,7 @@
 				></div>
 			{/if}
 			<Icon class="h-[15px] w-[15px] flex-shrink-0" />
-			<span class="text-[10px] leading-tight font-medium text-center w-14 line-clamp-2"
+			<span class="line-clamp-2 w-14 text-center text-[10px] leading-tight font-medium"
 				>{tool.label}</span
 			>
 		</button>
