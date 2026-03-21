@@ -33,32 +33,6 @@ body {
 	@apply bg-surface-950 text-surface-100 overflow-x-hidden;
 }
 
-/* ============================================
-   Light Mode Support (system preference)
-   ============================================ */
-@media (prefers-color-scheme: light) {
-	:root {
-		/* Invert the surface scale so dark surfaces become light */
-		--color-surface-50: #09090b;
-		--color-surface-100: #18181b;
-		--color-surface-200: #27272a;
-		--color-surface-300: #3f3f46;
-		--color-surface-400: #52525b;
-		--color-surface-500: #71717a;
-		--color-surface-600: #a1a1aa;
-		--color-surface-700: #d4d4d8;
-		--color-surface-800: #e4e4e7;
-		--color-surface-900: #f4f4f5;
-		--color-surface-950: #fafafa;
-	}
-
-	/* Glass effect — lighter background in light mode */
-	.glass {
-		background-color: rgb(255 255 255 / 0.75);
-		border-color: rgb(212 212 216 / 0.5);
-		backdrop-filter: blur(12px);
-	}
-}
 
 /* ============================================
    Reduced Motion Support
