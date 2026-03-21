@@ -9,6 +9,23 @@
 	--color-surface-500: #8b8b94;
 }
 
+/* Force dark mode — Smash is dark-only; override base.css light-mode inversion */
+@media (prefers-color-scheme: light) {
+	:root {
+		--color-surface-50: #fafafa;
+		--color-surface-100: #f4f4f5;
+		--color-surface-200: #e4e4e7;
+		--color-surface-300: #d4d4d8;
+		--color-surface-400: #a1a1aa;
+		--color-surface-500: #8b8b94;
+		--color-surface-600: #52525b;
+		--color-surface-700: #3f3f46;
+		--color-surface-800: #27272a;
+		--color-surface-900: #18181b;
+		--color-surface-950: #09090b;
+	}
+}
+
 /* ============================================
    Smash-specific: Blob animations & background
    ============================================ */
