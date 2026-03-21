@@ -150,7 +150,7 @@
 			const startTime = performance.now();
 			files = files.map((f) =>
 				f.id === pdfFile.id
-					? { ...f, status: 'processing' as const, progress: 0, progressStage: 'Initializing...' }
+					? { ...f, status: 'processing' as const, progress: 0, progressStage: 'Loading Ghostscript...' }
 					: f
 			);
 
@@ -159,8 +159,10 @@
 					preset: compressionPreset,
 					onProgress: (progress) => {
 						const stage =
-							progress < 30
-								? 'Initializing...'
+							progress < 5
+								? 'Loading Ghostscript...'
+								: progress < 30
+									? 'Initializing...'
 								: progress < 80
 									? 'Compressing...'
 									: 'Finalizing...';

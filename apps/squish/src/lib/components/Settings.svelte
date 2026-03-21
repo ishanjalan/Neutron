@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { images, type OutputFormat, type ResizeMode } from '$lib/stores/images.svelte';
+	import { toast } from '@neutron/ui';
 	import { reprocessAllImages } from '$lib/utils/compress';
 	import {
 		enableAutoSave,
@@ -78,6 +79,10 @@
 	}
 
 	function handleFormatChange(format: 'same' | OutputFormat) {
+		const skipped = images.items.filter((i) => i.status === 'completed').length;
+		if (skipped > 0) {
+			toast.info(`Format updated — ${skipped} already-completed image${skipped !== 1 ? 's' : ''} won't be re-converted. Remove and re-add them to apply the new format.`);
+		}
 		images.updateSettings({ outputFormat: format });
 	}
 

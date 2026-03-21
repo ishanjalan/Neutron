@@ -209,7 +209,12 @@
 				<div class="w-full max-w-sm">
 					<DropZone />
 				</div>
-				<p class="text-surface-600 mt-5 text-xs">
+				{#if currentTool}
+					<p class="text-surface-400 mt-4 text-sm font-medium">
+						Drop a PDF to {currentTool.desc.toLowerCase()}
+					</p>
+				{/if}
+				<p class="text-surface-600 mt-2 text-xs">
 					All processing happens locally — files never leave your device
 				</p>
 			</div>

@@ -534,6 +534,25 @@
 							{/each}
 						</div>
 					{/if}
+
+					<!-- CTA: prompt to encode once enough frames are loaded -->
+					{#if frames.length >= 2 && !resultUrl && !isProcessing}
+						<div
+							class="mt-4 flex items-center justify-between gap-3 rounded-xl border border-accent-start/30 bg-accent-start/10 px-4 py-3"
+							in:fly={{ y: 8, duration: 200 }}
+						>
+							<span class="text-surface-300 text-sm"
+								><span class="text-accent-start font-semibold">{frames.length} frames</span> ready to encode</span
+							>
+							<button
+								onclick={handleCreate}
+								class="from-accent-start to-accent-end flex items-center gap-1.5 rounded-lg bg-gradient-to-r px-3 py-1.5 text-sm font-semibold text-white transition-all hover:opacity-90"
+							>
+								<Images class="h-4 w-4" />
+								Create GIF
+							</button>
+						</div>
+					{/if}
 				</div>
 
 				<!-- Right: Settings -->

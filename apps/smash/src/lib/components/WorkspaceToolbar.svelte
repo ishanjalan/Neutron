@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { pdfs, TOOLS, type PDFTool } from '$lib/stores/pdfs.svelte';
+	import { ConfirmModal } from '@neutron/ui';
 	import {
 		Minimize2,
 		Layers,
@@ -37,12 +38,31 @@
 
 	const visibleTools = TOOLS.filter((t) => !PAGE_OPS.has(t.value));
 
+	let pendingTool = $state<PDFTool | null>(null);
+
 	function getIcon(iconName: string) {
 		return iconMap[iconName as keyof typeof iconMap] || FileText;
 	}
 
 	function handleToolSelect(tool: PDFTool) {
-		pdfs.setTool(tool);
+		if (tool === pdfs.settings.tool) return;
+
+		const currentAccepts = TOOLS.find((t) => t.value === pdfs.settings.tool)?.accepts;
+		const newAccepts = TOOLS.find((t) => t.value === tool)?.accepts;
+		const wouldClear = currentAccepts !== newAccepts && pdfs.items.length > 0;
+
+		if (wouldClear) {
+			pendingTool = tool;
+		} else {
+			pdfs.setTool(tool);
+		}
+	}
+
+	function confirmSwitch() {
+		if (pendingTool) {
+			pdfs.setTool(pendingTool);
+			pendingTool = null;
+		}
 	}
 </script>
 
@@ -76,3 +96,14 @@
 		</button>
 	{/each}
 </div>
+
+<ConfirmModal
+	open={pendingTool !== null}
+	title="Switch tool?"
+	message="Switching to this tool requires different file types. Your {pdfs.items.length} loaded file{pdfs.items.length !== 1
+		? 's'
+		: ''} will be cleared."
+	confirmText="Switch & Clear"
+	onconfirm={confirmSwitch}
+	oncancel={() => (pendingTool = null)}
+/>

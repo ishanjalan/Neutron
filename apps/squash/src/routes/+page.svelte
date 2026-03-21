@@ -33,6 +33,8 @@
 
 	const hasVideos = $derived(videos.items.length > 0);
 	const completedCount = $derived(videos.items.filter((i) => i.status === 'completed').length);
+	const pendingCount = $derived(videos.items.filter((i) => i.status === 'pending').length);
+	const errorCount = $derived(videos.items.filter((i) => i.status === 'error').length);
 	const totalSaved = $derived(
 		videos.items
 			.filter((i) => i.status === 'completed' && i.compressedSize)
@@ -289,6 +291,12 @@
 								<span class="text-surface-100 text-lg font-semibold">{completedCount}</span>
 								of {videos.items.length} compressed
 							</span>
+							{#if pendingCount > 0}
+								<span class="rounded-full bg-surface-700 px-2.5 py-0.5 text-xs font-medium text-surface-400">{pendingCount} pending</span>
+							{/if}
+							{#if errorCount > 0}
+								<span class="rounded-full bg-red-500/10 px-2.5 py-0.5 text-xs font-medium text-red-400">{errorCount} failed</span>
+							{/if}
 						</div>
 						{#if totalSaved > 0}
 							<div class="flex items-center gap-4">

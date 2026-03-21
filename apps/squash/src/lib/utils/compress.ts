@@ -69,6 +69,17 @@ async function processQueue() {
 
 	isProcessing = true;
 
+	// Show initializing state on all queued videos before the (potentially slow) first init
+	if (!getCapabilitiesSync()) {
+		for (const id of queue) {
+			videos.updateItem(id, {
+				status: 'processing',
+				progress: 0,
+				progressStage: 'Initializing encoder...',
+			});
+		}
+	}
+
 	// Initialize WebCodecs capabilities early
 	const capabilities = await initWebCodecs();
 
