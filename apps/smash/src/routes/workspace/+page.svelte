@@ -22,6 +22,7 @@
 	import { fade } from 'svelte/transition';
 	import { resolve } from '$app/paths';
 	import { downloadMultipleFiles } from '$lib/utils/download';
+	import { ThemeToggle } from '@neutron/ui';
 
 	interface Props {
 		data: { initialTool: string | null };
@@ -148,6 +149,8 @@
 		</div>
 
 		<div class="flex items-center gap-1.5">
+			<ThemeToggle />
+
 			<!-- Keyboard shortcut hint -->
 			<button
 				onclick={() => (commandPaletteOpen = true)}

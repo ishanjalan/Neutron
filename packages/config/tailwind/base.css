@@ -27,12 +27,29 @@ html {
 	font-family: var(--font-sans);
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	color-scheme: dark;
+}
+
+/* Light theme — activated by data-theme="light" on <html> */
+html[data-theme='light'] {
+	color-scheme: light;
+
+	--color-surface-50: #09090b;
+	--color-surface-100: #18181b;
+	--color-surface-200: #27272a;
+	--color-surface-300: #3f3f46;
+	--color-surface-400: #52525b;
+	--color-surface-500: #71717a;
+	--color-surface-600: #a1a1aa;
+	--color-surface-700: #d4d4d8;
+	--color-surface-800: #e4e4e7;
+	--color-surface-900: #f4f4f5;
+	--color-surface-950: #fafafa;
 }
 
 body {
 	@apply bg-surface-950 text-surface-100 overflow-x-hidden;
 }
-
 
 /* ============================================
    Reduced Motion Support

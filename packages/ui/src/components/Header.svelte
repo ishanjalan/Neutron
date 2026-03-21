@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Github, WifiOff, Menu, X } from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
+	import ThemeToggle from './ThemeToggle.svelte';
 
 	interface NavLink {
 		label: string;
@@ -168,6 +169,8 @@
 				{#if children}
 					{@render children()}
 				{/if}
+
+				<ThemeToggle />
 
 				{#if githubUrl}
 					<a
