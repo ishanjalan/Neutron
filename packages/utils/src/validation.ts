@@ -71,6 +71,10 @@ export const PDFToolSchema = v.picklist([
 	'watermark',
 	'protect',
 	'unlock',
+	'ocr',
+	'reverse-pages',
+	'remove-blank-pages',
+	'edit-metadata',
 ]);
 
 export const CompressionPresetSchema = v.picklist(['screen', 'ebook', 'printer', 'prepress']);
@@ -104,7 +108,15 @@ export const PDFSettingsSchema = v.object({
 	ownerPassword: v.string(),
 	watermarkText: v.string(),
 	watermarkOpacity: Percentage,
+	watermarkFontSize: v.pipe(v.number(), v.minValue(6), v.maxValue(200)),
 	pageNumberPosition: PageNumberPositionSchema,
+	pageNumberStartAt: v.pipe(v.number(), v.integer(), v.minValue(0)),
+	pageNumberFontSize: v.pipe(v.number(), v.minValue(6), v.maxValue(72)),
+	metadataTitle: v.string(),
+	metadataAuthor: v.string(),
+	metadataSubject: v.string(),
+	metadataKeywords: v.string(),
+	blankPageThreshold: Percentage,
 });
 
 export type PDFSettings = v.InferOutput<typeof PDFSettingsSchema>;

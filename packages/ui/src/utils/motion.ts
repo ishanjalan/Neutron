@@ -54,11 +54,7 @@ export function fadeIn(
 	selector: string | Element | Element[],
 	options?: Partial<AnimationOptions>
 ) {
-	return safeAnimate(
-		selector,
-		{ opacity: [0, 1] },
-		{ duration: 0.3, ease: 'easeOut', ...options }
-	);
+	return safeAnimate(selector, { opacity: [0, 1] }, { duration: 0.3, ease: 'easeOut', ...options });
 }
 
 /**
@@ -68,11 +64,7 @@ export function fadeOut(
 	selector: string | Element | Element[],
 	options?: Partial<AnimationOptions>
 ) {
-	return safeAnimate(
-		selector,
-		{ opacity: [1, 0] },
-		{ duration: 0.2, ease: 'easeIn', ...options }
-	);
+	return safeAnimate(selector, { opacity: [1, 0] }, { duration: 0.2, ease: 'easeIn', ...options });
 }
 
 /**

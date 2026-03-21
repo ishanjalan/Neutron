@@ -196,7 +196,9 @@ export async function addTextToGif(
 
 	onProgress?.(95, 'Finalizing...');
 
-	const result = new Blob([outputBytes as unknown as Uint8Array<ArrayBuffer>], { type: 'image/gif' });
+	const result = new Blob([outputBytes as unknown as Uint8Array<ArrayBuffer>], {
+		type: 'image/gif',
+	});
 
 	// Cleanup extracted frames
 	frames.forEach((f) => URL.revokeObjectURL(f.url));

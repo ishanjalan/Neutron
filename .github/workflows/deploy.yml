@@ -10,6 +10,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # ── Type-check + unit tests (blocks all deploys on failure) ───────────────
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter squish --filter smash --filter squash --filter swirl check
+      - run: pnpm test:unit
+
   # ── Detect which apps need rebuilding ─────────────────────────────────────
   changes:
     runs-on: ubuntu-latest
@@ -69,7 +83,7 @@ jobs:
   # ── Per-app build + deploy jobs ───────────────────────────────────────────
 
   squish:
-    needs: [changes, setup]
+    needs: [changes, setup, test]
     if: needs.changes.outputs.squish == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -100,7 +114,7 @@ jobs:
           commit_message: 'Deploy from Neutron monorepo'
 
   smash:
-    needs: [changes, setup]
+    needs: [changes, setup, test]
     if: needs.changes.outputs.smash == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -131,7 +145,7 @@ jobs:
           commit_message: 'Deploy from Neutron monorepo'
 
   squash:
-    needs: [changes, setup]
+    needs: [changes, setup, test]
     if: needs.changes.outputs.squash == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -162,7 +176,7 @@ jobs:
           commit_message: 'Deploy from Neutron monorepo'
 
   swirl:
-    needs: [changes, setup]
+    needs: [changes, setup, test]
     if: needs.changes.outputs.swirl == 'true'
     runs-on: ubuntu-latest
     steps:

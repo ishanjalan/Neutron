@@ -48,7 +48,6 @@ async function extractWithImageDecoder(
 ): Promise<ExtractedFrame[]> {
 	const buffer = await file.arrayBuffer();
 
-	// @ts-expect-error - ImageDecoder is not in TypeScript types yet
 	const decoder = new ImageDecoder({
 		data: buffer,
 		type: 'image/gif',

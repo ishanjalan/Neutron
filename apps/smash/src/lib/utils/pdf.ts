@@ -7,7 +7,7 @@
  * All processing happens locally in the browser - files never leave your device.
  */
 
-import { PDFDocument, degrees } from '@cantoo/pdf-lib';
+import { PDFDocument, degrees, rgb, StandardFonts } from '@cantoo/pdf-lib';
 import { compressPDF as compressWithGS, isGhostscriptReady } from './ghostscript';
 import {
 	pdfs,
@@ -16,6 +16,7 @@ import {
 	type CompressionPreset,
 } from '$lib/stores/pdfs.svelte';
 import { base } from '$app/paths';
+import { parsePageRangeHelper, getUserFriendlyError } from './pdf-utils';
 
 let pdfjsLib: typeof import('pdfjs-dist') | null = null;
 
@@ -184,7 +185,9 @@ export async function splitPDF(file: File, options: SplitOptions): Promise<Blob[
 		const pages = await newPdf.copyPages(pdf, pageIndices);
 		pages.forEach((page) => newPdf.addPage(page));
 		const bytes = await newPdf.save();
-		results.push(new Blob([bytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' }));
+		results.push(
+			new Blob([bytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' })
+		);
 		options.onProgress?.(100);
 	} else if (options.mode === 'extract' && options.pages) {
 		const newPdf = await PDFDocument.create();
@@ -193,7 +196,9 @@ export async function splitPDF(file: File, options: SplitOptions): Promise<Blob[
 		const pages = await newPdf.copyPages(pdf, pageIndices);
 		pages.forEach((page) => newPdf.addPage(page));
 		const bytes = await newPdf.save();
-		results.push(new Blob([bytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' }));
+		results.push(
+			new Blob([bytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' })
+		);
 		options.onProgress?.(100);
 	} else if (options.mode === 'every-n' && options.everyN) {
 		const n = options.everyN;
@@ -205,7 +210,9 @@ export async function splitPDF(file: File, options: SplitOptions): Promise<Blob[
 			const pages = await newPdf.copyPages(pdf, pageIndices);
 			pages.forEach((page) => newPdf.addPage(page));
 			const bytes = await newPdf.save();
-			results.push(new Blob([bytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' }));
+			results.push(
+				new Blob([bytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' })
+			);
 
 			options.onProgress?.(Math.round((endPage / totalPages) * 100));
 		}
@@ -509,116 +516,268 @@ export async function unlockPDF(file: File, options: UnlockOptions): Promise<Blo
 }
 
 // ============================================
-// HELPER FUNCTIONS
+// ADD PAGE NUMBERS (pdf-lib)
 // ============================================
 
-function parsePageRangeHelper(rangeStr: string, maxPages: number): number[] {
-	const pages = new Set<number>();
-	const parts = rangeStr.split(',').map((s) => s.trim());
-
-	for (const part of parts) {
-		if (part.includes('-')) {
-			const [start, end] = part.split('-').map((s) => parseInt(s.trim(), 10));
-			if (!isNaN(start) && !isNaN(end)) {
-				for (let i = Math.max(1, start); i <= Math.min(maxPages, end); i++) {
-					pages.add(i);
-				}
-			}
-		} else {
-			const page = parseInt(part, 10);
-			if (!isNaN(page) && page >= 1 && page <= maxPages) {
-				pages.add(page);
-			}
-		}
-	}
-
-	return Array.from(pages).sort((a, b) => a - b);
+interface PageNumberOptions {
+	position: 'bottom-center' | 'bottom-right' | 'top-center' | 'top-right';
+	startAt: number;
+	fontSize: number;
+	onProgress?: (progress: number) => void;
 }
 
-/**
- * Convert technical error messages to user-friendly messages
- */
-function getUserFriendlyError(error: unknown): string {
-	let message = '';
+export async function addPageNumbers(file: File, options: PageNumberOptions): Promise<Blob> {
+	const { position, startAt, fontSize, onProgress } = options;
 
-	if (error instanceof Error) {
-		message = error.message;
-	} else if (typeof error === 'string') {
-		message = error;
-	} else if (error && typeof error === 'object' && 'message' in error) {
-		message = String((error as { message: unknown }).message);
-	}
+	const arrayBuffer = await file.arrayBuffer();
+	const pdf = await PDFDocument.load(arrayBuffer);
+	const font = await pdf.embedFont(StandardFonts.Helvetica);
+	const pages = pdf.getPages();
 
-	const lowerMessage = message.toLowerCase();
+	onProgress?.(10);
 
-	// Password errors
-	if (
-		lowerMessage.includes('password') ||
-		lowerMessage.includes('decrypt') ||
-		lowerMessage.includes('encrypted')
-	) {
-		if (
-			lowerMessage.includes('incorrect') ||
-			lowerMessage.includes('wrong') ||
-			lowerMessage.includes('invalid')
-		) {
-			return 'Incorrect password. Please check your password and try again.';
+	for (let i = 0; i < pages.length; i++) {
+		const page = pages[i];
+		const { width, height } = page.getSize();
+		const label = String(startAt + i);
+		const textWidth = font.widthOfTextAtSize(label, fontSize);
+		const margin = 20;
+
+		let x: number;
+		let y: number;
+
+		switch (position) {
+			case 'bottom-center':
+				x = (width - textWidth) / 2;
+				y = margin;
+				break;
+			case 'bottom-right':
+				x = width - textWidth - margin;
+				y = margin;
+				break;
+			case 'top-center':
+				x = (width - textWidth) / 2;
+				y = height - fontSize - margin;
+				break;
+			case 'top-right':
+				x = width - textWidth - margin;
+				y = height - fontSize - margin;
+				break;
 		}
-		return 'This PDF is password-protected. Please enter the correct password.';
+
+		page.drawText(label, {
+			x,
+			y,
+			size: fontSize,
+			font,
+			color: rgb(0, 0, 0),
+		});
+
+		onProgress?.(10 + Math.round(((i + 1) / pages.length) * 85));
 	}
 
-	// File format errors
-	if (
-		lowerMessage.includes('invalid pdf') ||
-		lowerMessage.includes('not a pdf') ||
-		lowerMessage.includes('parse')
-	) {
-		return 'This file appears to be corrupted or is not a valid PDF. Try re-downloading it.';
-	}
+	onProgress?.(100);
 
-	// Page range errors
-	if (
-		lowerMessage.includes('page') &&
-		(lowerMessage.includes('range') || lowerMessage.includes('out of'))
-	) {
-		return 'Invalid page range. Please check that the page numbers are within the document.';
-	}
-
-	// No pages selected
-	if (lowerMessage.includes('no pages selected')) {
-		return message; // Already user-friendly
-	}
-
-	// Memory/size errors
-	if (
-		lowerMessage.includes('memory') ||
-		lowerMessage.includes('too large') ||
-		lowerMessage.includes('exceeded')
-	) {
-		return 'This file is too large to process. Try a smaller file or reduce the quality settings.';
-	}
-
-	// Network errors (for WASM loading)
-	if (
-		lowerMessage.includes('network') ||
-		lowerMessage.includes('fetch') ||
-		lowerMessage.includes('load')
-	) {
-		return 'Failed to load processing engine. Please check your internet connection and try again.';
-	}
-
-	// Ghostscript errors
-	if (lowerMessage.includes('ghostscript') || lowerMessage.includes('gs')) {
-		return 'Compression engine error. The file may be corrupted or use unsupported features.';
-	}
-
-	// Generic fallback with original message if short, otherwise generic
-	if (message.length > 0 && message.length < 100) {
-		return message;
-	}
-
-	return 'Something went wrong while processing your file. Please try again.';
+	const pdfBytes = await pdf.save();
+	return new Blob([pdfBytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' });
 }
+
+// ============================================
+// WATERMARK (pdf-lib)
+// ============================================
+
+interface WatermarkOptions {
+	text: string;
+	opacity: number; // 0-100
+	fontSize: number;
+	onProgress?: (progress: number) => void;
+}
+
+export async function addWatermark(file: File, options: WatermarkOptions): Promise<Blob> {
+	const { text, opacity, fontSize, onProgress } = options;
+
+	if (!text.trim()) throw new Error('Watermark text cannot be empty');
+
+	const arrayBuffer = await file.arrayBuffer();
+	const pdf = await PDFDocument.load(arrayBuffer);
+	const font = await pdf.embedFont(StandardFonts.HelveticaBold);
+	const pages = pdf.getPages();
+
+	onProgress?.(10);
+
+	for (let i = 0; i < pages.length; i++) {
+		const page = pages[i];
+		const { width, height } = page.getSize();
+		const textWidth = font.widthOfTextAtSize(text, fontSize);
+
+		page.drawText(text, {
+			x: (width - textWidth) / 2,
+			y: height / 2 - fontSize / 2,
+			size: fontSize,
+			font,
+			color: rgb(0.5, 0.5, 0.5),
+			opacity: opacity / 100,
+			rotate: degrees(45),
+		});
+
+		onProgress?.(10 + Math.round(((i + 1) / pages.length) * 85));
+	}
+
+	onProgress?.(100);
+
+	const pdfBytes = await pdf.save();
+	return new Blob([pdfBytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' });
+}
+
+// ============================================
+// REVERSE PAGES (pdf-lib)
+// ============================================
+
+export async function reversePages(
+	file: File,
+	onProgress?: (progress: number) => void
+): Promise<Blob> {
+	const arrayBuffer = await file.arrayBuffer();
+	const srcPdf = await PDFDocument.load(arrayBuffer);
+	const newPdf = await PDFDocument.create();
+	const pageCount = srcPdf.getPageCount();
+
+	onProgress?.(10);
+
+	const reversedIndices = Array.from({ length: pageCount }, (_, i) => pageCount - 1 - i);
+	const pages = await newPdf.copyPages(srcPdf, reversedIndices);
+	pages.forEach((page) => newPdf.addPage(page));
+
+	onProgress?.(90);
+
+	const pdfBytes = await newPdf.save();
+
+	onProgress?.(100);
+
+	return new Blob([pdfBytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' });
+}
+
+// ============================================
+// REMOVE BLANK PAGES (pdfjs-dist + pdf-lib)
+// ============================================
+
+interface RemoveBlankPagesOptions {
+	/** 0 = remove only completely empty pages; 1-100 = increasingly aggressive */
+	threshold: number;
+	onProgress?: (progress: number) => void;
+}
+
+export async function removeBlankPages(
+	file: File,
+	options: RemoveBlankPagesOptions
+): Promise<Blob> {
+	const { threshold, onProgress } = options;
+
+	const arrayBuffer = await file.arrayBuffer();
+	const pdfjs = await getPdfjs();
+	const pdfDoc = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+	const totalPages = pdfDoc.numPages;
+
+	onProgress?.(5);
+
+	// Identify blank pages (1-based)
+	const blankPageIndices: number[] = [];
+
+	for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+		const page = await pdfDoc.getPage(pageNum);
+
+		// Check for text
+		const textContent = await page.getTextContent();
+		const hasText = textContent.items.length > 0;
+
+		// Check for painting operators (images, filled paths, strokes)
+		const opList = await page.getOperatorList();
+		const paintingOpCodes = new Set([
+			pdfjs.OPS.paintImageXObject,
+			pdfjs.OPS.paintImageMaskXObject,
+			pdfjs.OPS.paintInlineImageXObject,
+			pdfjs.OPS.stroke,
+			pdfjs.OPS.fill,
+			pdfjs.OPS.fillStroke,
+			pdfjs.OPS.eoFill,
+			pdfjs.OPS.eoFillStroke,
+			pdfjs.OPS.paintXObject,
+		]);
+		const hasPaintingOps = opList.fnArray.some((op: number) => paintingOpCodes.has(op));
+
+		// A page is blank when it has neither text nor painting operators.
+		// With threshold > 0, also treat pages with very few items as blank.
+		const isBlank =
+			threshold === 0
+				? !hasText && !hasPaintingOps
+				: !hasText && (!hasPaintingOps || opList.fnArray.length <= threshold);
+
+		if (isBlank) {
+			blankPageIndices.push(pageNum - 1); // 0-based for pdf-lib
+		}
+
+		onProgress?.(5 + Math.round((pageNum / totalPages) * 70));
+	}
+
+	if (blankPageIndices.length === 0) {
+		// Nothing to remove — return the original
+		onProgress?.(100);
+		return new Blob([arrayBuffer], { type: 'application/pdf' });
+	}
+
+	// Remove blank pages using pdf-lib (delete in reverse order to keep indices valid)
+	const srcPdf = await PDFDocument.load(arrayBuffer);
+	for (const idx of [...blankPageIndices].sort((a, b) => b - a)) {
+		srcPdf.removePage(idx);
+	}
+
+	onProgress?.(95);
+
+	const pdfBytes = await srcPdf.save();
+
+	onProgress?.(100);
+
+	return new Blob([pdfBytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' });
+}
+
+// ============================================
+// EDIT METADATA (pdf-lib)
+// ============================================
+
+interface EditMetadataOptions {
+	title: string;
+	author: string;
+	subject: string;
+	keywords: string;
+	onProgress?: (progress: number) => void;
+}
+
+export async function editMetadata(file: File, options: EditMetadataOptions): Promise<Blob> {
+	const { title, author, subject, keywords, onProgress } = options;
+
+	const arrayBuffer = await file.arrayBuffer();
+	const pdf = await PDFDocument.load(arrayBuffer);
+
+	onProgress?.(30);
+
+	if (title !== '') pdf.setTitle(title);
+	if (author !== '') pdf.setAuthor(author);
+	if (subject !== '') pdf.setSubject(subject);
+	if (keywords !== '') pdf.setKeywords([keywords]);
+
+	onProgress?.(80);
+
+	const pdfBytes = await pdf.save();
+
+	onProgress?.(100);
+
+	return new Blob([pdfBytes as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' });
+}
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+// parsePageRangeHelper and getUserFriendlyError are imported from ./pdf-utils
 
 // ============================================
 // PROCESS QUEUE
@@ -769,6 +928,50 @@ async function processItem(item: PDFItem) {
 				pdfs.updateItem(item.id, { progressStage: 'Decrypting...' });
 				result = await unlockPDF(item.file, {
 					password: settings.userPassword,
+					onProgress: (p) => pdfs.updateItem(item.id, { progress: p }),
+				});
+				break;
+
+			case 'add-page-numbers':
+				pdfs.updateItem(item.id, { progressStage: 'Adding page numbers...' });
+				result = await addPageNumbers(item.file, {
+					position: settings.pageNumberPosition,
+					startAt: settings.pageNumberStartAt,
+					fontSize: settings.pageNumberFontSize,
+					onProgress: (p) => pdfs.updateItem(item.id, { progress: p }),
+				});
+				break;
+
+			case 'watermark':
+				pdfs.updateItem(item.id, { progressStage: 'Adding watermark...' });
+				result = await addWatermark(item.file, {
+					text: settings.watermarkText,
+					opacity: settings.watermarkOpacity,
+					fontSize: settings.watermarkFontSize,
+					onProgress: (p) => pdfs.updateItem(item.id, { progress: p }),
+				});
+				break;
+
+			case 'reverse-pages':
+				pdfs.updateItem(item.id, { progressStage: 'Reversing pages...' });
+				result = await reversePages(item.file, (p) => pdfs.updateItem(item.id, { progress: p }));
+				break;
+
+			case 'remove-blank-pages':
+				pdfs.updateItem(item.id, { progressStage: 'Scanning for blank pages...' });
+				result = await removeBlankPages(item.file, {
+					threshold: settings.blankPageThreshold,
+					onProgress: (p) => pdfs.updateItem(item.id, { progress: p }),
+				});
+				break;
+
+			case 'edit-metadata':
+				pdfs.updateItem(item.id, { progressStage: 'Updating metadata...' });
+				result = await editMetadata(item.file, {
+					title: settings.metadataTitle,
+					author: settings.metadataAuthor,
+					subject: settings.metadataSubject,
+					keywords: settings.metadataKeywords,
 					onProgress: (p) => pdfs.updateItem(item.id, { progress: p }),
 				});
 				break;
@@ -928,6 +1131,16 @@ export function getOutputFilename(originalName: string, tool: string, index?: nu
 			return `${baseName}-protected.pdf`;
 		case 'unlock':
 			return `${baseName}-unlocked.pdf`;
+		case 'add-page-numbers':
+			return `${baseName}-numbered.pdf`;
+		case 'watermark':
+			return `${baseName}-watermarked.pdf`;
+		case 'reverse-pages':
+			return `${baseName}-reversed.pdf`;
+		case 'remove-blank-pages':
+			return `${baseName}-cleaned.pdf`;
+		case 'edit-metadata':
+			return `${baseName}-metadata.pdf`;
 		default:
 			return `${baseName}-processed.pdf`;
 	}

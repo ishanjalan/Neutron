@@ -7,7 +7,6 @@
 	const canReorder = $derived(
 		pdfs.settings.tool === 'merge' || pdfs.settings.tool === 'images-to-pdf'
 	);
-
 </script>
 
 {#if pdfs.items.length > 0}

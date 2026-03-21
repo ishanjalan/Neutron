@@ -13,7 +13,12 @@ export type PDFTool =
 	| 'images-to-pdf'
 	| 'protect'
 	| 'unlock'
-	| 'ocr';
+	| 'ocr'
+	| 'add-page-numbers'
+	| 'watermark'
+	| 'reverse-pages'
+	| 'remove-blank-pages'
+	| 'edit-metadata';
 export type ImageFormat = 'png' | 'jpg' | 'webp';
 export type CompressionPreset = 'screen' | 'ebook' | 'printer' | 'prepress';
 
@@ -64,16 +69,33 @@ export interface PDFSettings {
 	// Protection settings
 	userPassword: string;
 	ownerPassword: string;
+	// Watermark settings
+	watermarkText: string;
+	watermarkOpacity: number; // 0-100
+	// Page numbers settings
+	pageNumberPosition: 'bottom-center' | 'bottom-right' | 'top-center' | 'top-right';
 	// OCR settings
 	ocrLanguage: string;
 	ocrOutputMode: 'searchable-pdf' | 'text-only' | 'text-and-pdf';
+	// Page numbers settings
+	pageNumberStartAt: number;
+	pageNumberFontSize: number;
+	// Watermark settings
+	watermarkFontSize: number;
+	// Edit metadata settings
+	metadataTitle: string;
+	metadataAuthor: string;
+	metadataSubject: string;
+	metadataKeywords: string;
+	// Remove blank pages settings
+	blankPageThreshold: number; // 0 = only completely blank; higher = more aggressive
 }
 
 // Ghostscript compression presets (real PDF compression, preserves text)
 // User-friendly labels with clear recommendations
 export const COMPRESSION_PRESETS = {
 	screen: {
-		label: 'Email/Web',
+		label: 'Web & Email',
 		desc: 'Smallest (~70% reduction)',
 		icon: 'Monitor',
 		dpi: 72,
@@ -81,15 +103,15 @@ export const COMPRESSION_PRESETS = {
 		recommended: false,
 	},
 	ebook: {
-		label: 'Reading',
-		desc: 'Balanced (~50% reduction)',
+		label: 'Balanced',
+		desc: 'Good quality (~50% reduction)',
 		icon: 'BookOpen',
 		dpi: 150,
 		gsFlag: '/ebook',
 		recommended: true,
 	},
 	printer: {
-		label: 'Print-Ready',
+		label: 'Print Quality',
 		desc: 'High quality (~30% reduction)',
 		icon: 'Printer',
 		dpi: 300,
@@ -97,7 +119,7 @@ export const COMPRESSION_PRESETS = {
 		recommended: false,
 	},
 	prepress: {
-		label: 'Professional',
+		label: 'Archive',
 		desc: 'Maximum quality',
 		icon: 'FileCheck',
 		dpi: 300,
@@ -215,6 +237,48 @@ export const TOOLS = [
 		accepts: '.pdf',
 		category: 'convert',
 	},
+	// Enhance
+	{
+		value: 'add-page-numbers' as const,
+		label: 'Page Numbers',
+		desc: 'Add page numbers to PDF',
+		icon: 'Hash',
+		accepts: '.pdf',
+		category: 'enhance',
+	},
+	{
+		value: 'watermark' as const,
+		label: 'Watermark',
+		desc: 'Add text watermark overlay',
+		icon: 'Stamp',
+		accepts: '.pdf',
+		category: 'enhance',
+	},
+	{
+		value: 'edit-metadata' as const,
+		label: 'Edit Metadata',
+		desc: 'Set title, author, keywords',
+		icon: 'Tag',
+		accepts: '.pdf',
+		category: 'enhance',
+	},
+	// Additional page tools
+	{
+		value: 'reverse-pages' as const,
+		label: 'Reverse Pages',
+		desc: 'Reverse page order',
+		icon: 'ArrowLeftRight',
+		accepts: '.pdf',
+		category: 'pages',
+	},
+	{
+		value: 'remove-blank-pages' as const,
+		label: 'Remove Blank Pages',
+		desc: 'Delete empty pages automatically',
+		icon: 'FileX',
+		accepts: '.pdf',
+		category: 'pages',
+	},
 ] as const;
 
 // Tool categories for organized display
@@ -223,6 +287,7 @@ export const TOOL_CATEGORIES = [
 	{ id: 'pages', label: 'Page Tools' },
 	{ id: 'convert', label: 'Convert' },
 	{ id: 'security', label: 'Security' },
+	{ id: 'enhance', label: 'Enhance' },
 ] as const;
 
 // Large file threshold — files above this size show a warning
@@ -241,8 +306,19 @@ const DEFAULT_SETTINGS: PDFSettings = {
 	rotationAngle: 90,
 	userPassword: '',
 	ownerPassword: '',
+	watermarkText: '',
+	watermarkOpacity: 30,
+	pageNumberPosition: 'bottom-center',
 	ocrLanguage: 'eng',
 	ocrOutputMode: 'searchable-pdf',
+	pageNumberStartAt: 1,
+	pageNumberFontSize: 12,
+	watermarkFontSize: 48,
+	metadataTitle: '',
+	metadataAuthor: '',
+	metadataSubject: '',
+	metadataKeywords: '',
+	blankPageThreshold: 0,
 };
 
 // Load settings from localStorage

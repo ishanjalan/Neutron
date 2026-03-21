@@ -229,7 +229,7 @@
 								>{formatDuration(stats().avgCompressionTime)}</span
 							>
 						</div>
-						{/if}
+					{/if}
 				</div>
 			</div>
 

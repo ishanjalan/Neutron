@@ -198,7 +198,9 @@
 			progress = 98;
 
 			// Create blob and URL
-			const blob = new Blob([finalBuffer as unknown as Uint8Array<ArrayBuffer>], { type: 'image/gif' });
+			const blob = new Blob([finalBuffer as unknown as Uint8Array<ArrayBuffer>], {
+				type: 'image/gif',
+			});
 			resultBlob = blob;
 			resultUrl = URL.createObjectURL(blob);
 			resultSize = blob.size;

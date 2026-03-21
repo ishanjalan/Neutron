@@ -18,10 +18,10 @@
 	} from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
 
-	// Tool cards with routes and metadata
+	// Tool cards with workspace routes and metadata
 	const tools = [
 		{
-			href: '/compress',
+			href: '/workspace?tool=compress',
 			title: 'Compress PDF',
 			description: 'Reduce file size while keeping text sharp',
 			icon: Minimize2,
@@ -29,7 +29,7 @@
 			popular: true,
 		},
 		{
-			href: '/merge',
+			href: '/workspace?tool=merge',
 			title: 'Merge PDFs',
 			description: 'Combine multiple PDFs into one document',
 			icon: Layers,
@@ -37,7 +37,7 @@
 			popular: true,
 		},
 		{
-			href: '/split',
+			href: '/workspace?tool=split',
 			title: 'Split PDF',
 			description: 'Extract pages or split into multiple files',
 			icon: Scissors,
@@ -45,7 +45,7 @@
 			popular: true,
 		},
 		{
-			href: '/ocr',
+			href: '/workspace?tool=ocr',
 			title: 'OCR',
 			description: 'Extract searchable text from scanned PDFs',
 			icon: FileSearch,
@@ -53,7 +53,7 @@
 			popular: true,
 		},
 		{
-			href: '/protect',
+			href: '/workspace?tool=protect',
 			title: 'Protect PDF',
 			description: 'Add AES-128 password encryption',
 			icon: Lock,
@@ -61,7 +61,7 @@
 			popular: false,
 		},
 		{
-			href: '/unlock',
+			href: '/workspace?tool=unlock',
 			title: 'Unlock PDF',
 			description: 'Remove password protection',
 			icon: Unlock,
@@ -69,7 +69,7 @@
 			popular: false,
 		},
 		{
-			href: '/rotate',
+			href: '/workspace?tool=rotate',
 			title: 'Rotate Pages',
 			description: 'Rotate PDF pages 90°, 180°, or 270°',
 			icon: RotateCw,
@@ -77,7 +77,7 @@
 			popular: false,
 		},
 		{
-			href: '/delete',
+			href: '/workspace?tool=delete-pages',
 			title: 'Delete Pages',
 			description: 'Remove unwanted pages from your PDF',
 			icon: Trash2,
@@ -85,7 +85,7 @@
 			popular: false,
 		},
 		{
-			href: '/reorder',
+			href: '/workspace?tool=reorder',
 			title: 'Reorder Pages',
 			description: 'Drag and drop to rearrange pages',
 			icon: ArrowUpDown,
@@ -93,7 +93,7 @@
 			popular: false,
 		},
 		{
-			href: '/to-images',
+			href: '/workspace?tool=pdf-to-images',
 			title: 'PDF to Images',
 			description: 'Convert pages to PNG, JPG, or WebP',
 			icon: Image,
@@ -101,7 +101,7 @@
 			popular: false,
 		},
 		{
-			href: '/from-images',
+			href: '/workspace?tool=images-to-pdf',
 			title: 'Images to PDF',
 			description: 'Create a PDF from your images',
 			icon: FileText,

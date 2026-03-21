@@ -5,8 +5,11 @@ export default defineConfig({
 	test: {
 		// Use jsdom for DOM testing
 		environment: 'jsdom',
-		// Include only unit test files (exclude e2e)
-		include: ['tests/unit/**/*.{test,spec}.{js,ts}'],
+		// Include unit test files in both tests/ and app source directories
+		include: [
+			'tests/unit/**/*.{test,spec}.{js,ts}',
+			'apps/*/src/**/*.{test,spec}.{ts}',
+		],
 		// Global test utilities
 		globals: true,
 		// Setup files
@@ -19,12 +22,35 @@ export default defineConfig({
 		},
 	},
 	resolve: {
-		alias: {
-			'@neutron/utils': resolve(__dirname, 'packages/utils/src'),
-			'@neutron/utils/validation': resolve(__dirname, 'packages/utils/src/validation.ts'),
-			'@neutron/utils/comlink': resolve(__dirname, 'packages/utils/src/comlink.ts'),
-			'@neutron/ui': resolve(__dirname, 'packages/ui/src'),
-			'@neutron/ui/motion': resolve(__dirname, 'packages/ui/src/utils/motion.ts'),
-		},
+		// Use an array so that more-specific subpath aliases are matched before
+		// their package-root prefix (e.g. @neutron/ui/motion before @neutron/ui).
+		alias: [
+			{
+				find: '@neutron/utils/validation',
+				replacement: resolve(__dirname, 'packages/utils/src/validation.ts'),
+			},
+			{
+				find: '@neutron/utils/comlink',
+				replacement: resolve(__dirname, 'packages/utils/src/comlink.ts'),
+			},
+			{
+				find: '@neutron/utils/focus-trap',
+				replacement: resolve(__dirname, 'packages/utils/src/focus-trap.ts'),
+			},
+			{
+				find: '@neutron/utils/download',
+				replacement: resolve(__dirname, 'packages/utils/src/download.ts'),
+			},
+			{
+				find: '@neutron/utils/worker-pool',
+				replacement: resolve(__dirname, 'packages/utils/src/worker-pool.ts'),
+			},
+			{ find: '@neutron/utils', replacement: resolve(__dirname, 'packages/utils/src') },
+			{
+				find: '@neutron/ui/motion',
+				replacement: resolve(__dirname, 'packages/ui/src/utils/motion.ts'),
+			},
+			{ find: '@neutron/ui', replacement: resolve(__dirname, 'packages/ui/src') },
+		],
 	},
 });

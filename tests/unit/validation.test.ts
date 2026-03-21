@@ -10,9 +10,16 @@ import {
 	getValidationErrors,
 	PDFSettingsSchema,
 	CompressionSettingsSchema,
+	ImageSettingsSchema,
+	GIFSettingsSchema,
 	EmailSchema,
+	NonEmptyString,
+	FileSize,
 	Percentage,
 	PositiveInt,
+	CompressionPresetSchema,
+	ImageFormatSchema,
+	PDFToolSchema,
 	v,
 } from '@neutron/utils/validation';
 
@@ -79,7 +86,15 @@ describe('PDFSettingsSchema', () => {
 		ownerPassword: '',
 		watermarkText: '',
 		watermarkOpacity: 30,
+		watermarkFontSize: 48,
 		pageNumberPosition: 'bottom-center',
+		pageNumberStartAt: 1,
+		pageNumberFontSize: 12,
+		metadataTitle: '',
+		metadataAuthor: '',
+		metadataSubject: '',
+		metadataKeywords: '',
+		blankPageThreshold: 0,
 	};
 
 	it('should accept valid PDF settings', () => {
@@ -146,6 +161,155 @@ describe('CompressionSettingsSchema', () => {
 	});
 });
 
+describe('NonEmptyString', () => {
+	it('accepts non-empty string', () => {
+		expect(v.safeParse(NonEmptyString, 'hello').success).toBe(true);
+	});
+
+	it('rejects empty string', () => {
+		expect(v.safeParse(NonEmptyString, '').success).toBe(false);
+	});
+
+	it('rejects whitespace-only string', () => {
+		expect(v.safeParse(NonEmptyString, '   ').success).toBe(false);
+	});
+});
+
+describe('FileSize', () => {
+	it('accepts 0 bytes', () => {
+		expect(v.safeParse(FileSize, 0).success).toBe(true);
+	});
+
+	it('accepts 2GB', () => {
+		expect(v.safeParse(FileSize, 2 * 1024 * 1024 * 1024).success).toBe(true);
+	});
+
+	it('rejects negative values', () => {
+		expect(v.safeParse(FileSize, -1).success).toBe(false);
+	});
+
+	it('rejects fractional values', () => {
+		expect(v.safeParse(FileSize, 1.5).success).toBe(false);
+	});
+});
+
+describe('CompressionPresetSchema', () => {
+	it('accepts all valid presets', () => {
+		for (const preset of ['screen', 'ebook', 'printer', 'prepress'] as const) {
+			expect(v.safeParse(CompressionPresetSchema, preset).success).toBe(true);
+		}
+	});
+
+	it('rejects unknown preset', () => {
+		expect(v.safeParse(CompressionPresetSchema, 'ultra').success).toBe(false);
+	});
+});
+
+describe('ImageFormatSchema', () => {
+	it('accepts png, jpg, webp', () => {
+		for (const fmt of ['png', 'jpg', 'webp'] as const) {
+			expect(v.safeParse(ImageFormatSchema, fmt).success).toBe(true);
+		}
+	});
+
+	it('rejects unknown format', () => {
+		expect(v.safeParse(ImageFormatSchema, 'gif').success).toBe(false);
+	});
+});
+
+describe('PDFToolSchema', () => {
+	const validTools = [
+		'compress',
+		'merge',
+		'split',
+		'rotate',
+		'delete-pages',
+		'reorder',
+		'pdf-to-images',
+		'images-to-pdf',
+		'add-page-numbers',
+		'watermark',
+		'protect',
+		'unlock',
+		'ocr',
+		'reverse-pages',
+		'remove-blank-pages',
+		'edit-metadata',
+	] as const;
+
+	it('accepts all 16 current tool names', () => {
+		for (const tool of validTools) {
+			expect(v.safeParse(PDFToolSchema, tool).success).toBe(true);
+		}
+	});
+
+	it('rejects unknown tool', () => {
+		expect(v.safeParse(PDFToolSchema, 'redact').success).toBe(false);
+	});
+});
+
+describe('GIFSettingsSchema', () => {
+	const valid = { fps: 24, width: 640, quality: 80, loop: 0 };
+
+	it('accepts valid GIF settings', () => {
+		expect(validate(GIFSettingsSchema, valid).success).toBe(true);
+	});
+
+	it('accepts fps boundary values (1 and 60)', () => {
+		expect(validate(GIFSettingsSchema, { ...valid, fps: 1 }).success).toBe(true);
+		expect(validate(GIFSettingsSchema, { ...valid, fps: 60 }).success).toBe(true);
+	});
+
+	it('rejects fps outside 1-60', () => {
+		expect(validate(GIFSettingsSchema, { ...valid, fps: 0 }).success).toBe(false);
+		expect(validate(GIFSettingsSchema, { ...valid, fps: 61 }).success).toBe(false);
+	});
+
+	it('rejects quality outside 1-100', () => {
+		expect(validate(GIFSettingsSchema, { ...valid, quality: 0 }).success).toBe(false);
+		expect(validate(GIFSettingsSchema, { ...valid, quality: 101 }).success).toBe(false);
+	});
+
+	it('accepts loop = 0 (infinite)', () => {
+		expect(validate(GIFSettingsSchema, { ...valid, loop: 0 }).success).toBe(true);
+	});
+
+	it('rejects negative loop', () => {
+		expect(validate(GIFSettingsSchema, { ...valid, loop: -1 }).success).toBe(false);
+	});
+
+	it('accepts undefined width (optional)', () => {
+		const { width: _, ...noWidth } = valid;
+		expect(validate(GIFSettingsSchema, noWidth).success).toBe(true);
+	});
+});
+
+describe('ImageSettingsSchema', () => {
+	const valid = {
+		format: 'webp',
+		quality: 85,
+		preserveAspectRatio: true,
+	};
+
+	it('accepts valid image settings', () => {
+		expect(validate(ImageSettingsSchema, valid).success).toBe(true);
+	});
+
+	it('accepts optional maxWidth and maxHeight', () => {
+		expect(validate(ImageSettingsSchema, { ...valid, maxWidth: 1920, maxHeight: 1080 }).success).toBe(
+			true
+		);
+	});
+
+	it('rejects invalid format', () => {
+		expect(validate(ImageSettingsSchema, { ...valid, format: 'gif' }).success).toBe(false);
+	});
+
+	it('rejects quality outside 0-100', () => {
+		expect(validate(ImageSettingsSchema, { ...valid, quality: 150 }).success).toBe(false);
+	});
+});
+
 describe('Validation Helpers', () => {
 	describe('validateOrThrow', () => {
 		it('should return data when valid', () => {
@@ -170,6 +334,15 @@ describe('Validation Helpers', () => {
 			const errors = getValidationErrors(result);
 			expect(errors.length).toBeGreaterThan(0);
 			expect(errors[0]).toContain('100');
+		});
+
+		it('returns array of strings', () => {
+			const result = v.safeParse(PDFToolSchema, 'unknown-tool');
+			const errors = getValidationErrors(result);
+			expect(Array.isArray(errors)).toBe(true);
+			for (const e of errors) {
+				expect(e).toBeTypeOf('string');
+			}
 		});
 	});
 });

@@ -28,12 +28,7 @@ export {
 } from './utils/compress';
 export { downloadVideo, downloadAllAsZip } from './utils/download';
 export { formatBytes } from '@neutron/utils';
-export {
-	formatDuration,
-	formatETA,
-	formatTimeInput,
-	parseTimeInput,
-} from './utils/format';
+export { formatDuration, formatETA, formatTimeInput, parseTimeInput } from './utils/format';
 export { createFocusTrap, trapFocus, releaseFocus, focusTrap } from '@neutron/utils/focus-trap';
 export {
 	storeVideo,

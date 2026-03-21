@@ -150,7 +150,6 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 								hardwareAcceleration: 'prefer-hardware',
 							});
 							// If configure succeeds, check if it's using hardware
-							// @ts-expect-error - hardwareAcceleration may not be in types
 							const isHardware = testEncoder.encodeQueueSize !== undefined;
 							testEncoder.close();
 

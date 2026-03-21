@@ -197,7 +197,7 @@
 			</div>
 		{:else if item.status === 'completed'}
 			<div class="space-y-3">
-<div class="flex items-center justify-between">
+				<div class="flex items-center justify-between">
 					{#if item.processedBlobs}
 						<span class="text-surface-400 text-xs">
 							{item.processedBlobs.length} files
