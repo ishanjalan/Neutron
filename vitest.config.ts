@@ -6,10 +6,7 @@ export default defineConfig({
 		// Use jsdom for DOM testing
 		environment: 'jsdom',
 		// Include unit test files in both tests/ and app source directories
-		include: [
-			'tests/unit/**/*.{test,spec}.{js,ts}',
-			'apps/*/src/**/*.{test,spec}.{ts}',
-		],
+		include: ['tests/unit/**/*.{test,spec}.{js,ts}', 'apps/*/src/**/*.{test,spec}.{ts}'],
 		// Global test utilities
 		globals: true,
 		// Setup files

@@ -296,9 +296,9 @@ describe('ImageSettingsSchema', () => {
 	});
 
 	it('accepts optional maxWidth and maxHeight', () => {
-		expect(validate(ImageSettingsSchema, { ...valid, maxWidth: 1920, maxHeight: 1080 }).success).toBe(
-			true
-		);
+		expect(
+			validate(ImageSettingsSchema, { ...valid, maxWidth: 1920, maxHeight: 1080 }).success
+		).toBe(true);
 	});
 
 	it('rejects invalid format', () => {

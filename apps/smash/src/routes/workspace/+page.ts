@@ -18,6 +18,7 @@ const VALID_TOOLS: PDFTool[] = [
 	'edit-metadata',
 	'reverse-pages',
 	'remove-blank-pages',
+	'sign',
 ];
 
 export const load: PageLoad = ({ url }) => {

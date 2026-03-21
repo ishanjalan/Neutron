@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
+	import PDFViewer from '$lib/components/PDFViewer.svelte';
 	import { Footer } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
 	import { downloadBlob, downloadAllAsZip } from '@neutron/utils';
@@ -49,6 +50,7 @@
 	let showAdvanced = $state(false);
 	let fileInput: HTMLInputElement;
 	let isDragging = $state(false);
+	let selectedFileForViewer = $state<File | null>(null);
 
 	// Compression presets
 	const presets = {
@@ -76,6 +78,14 @@
 			? Math.round((1 - totalCompressed / totalOriginal) * 100)
 			: 0
 	);
+
+	// Auto-select first file for viewer when files are added/removed
+	$effect(() => {
+		if (files.length > 0 && !selectedFileForViewer) {
+			selectedFileForViewer = files[0].file;
+		}
+		if (files.length === 0) selectedFileForViewer = null;
+	});
 
 	function generateId(): string {
 		return `pdf-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -121,6 +131,10 @@
 		if (file) {
 			URL.revokeObjectURL(file.originalUrl);
 			if (file.compressedUrl) URL.revokeObjectURL(file.compressedUrl);
+			if (selectedFileForViewer?.name === file.file.name) {
+				const remaining = files.filter((f) => f.id !== id);
+				selectedFileForViewer = remaining.length > 0 ? remaining[0].file : null;
+			}
 		}
 		files = files.filter((f) => f.id !== id);
 	}
@@ -366,7 +380,11 @@
 						<div class="mt-4 space-y-2" in:fly={{ y: 20, duration: 200 }}>
 							{#each files as pdfFile (pdfFile.id)}
 								<div
-									class="glass flex items-center justify-between rounded-xl p-3"
+									role="button"
+									tabindex="0"
+									onclick={() => (selectedFileForViewer = pdfFile.file)}
+									onkeydown={(e) => e.key === 'Enter' && (selectedFileForViewer = pdfFile.file)}
+									class="glass flex cursor-pointer items-center justify-between rounded-xl p-3 transition-all {selectedFileForViewer?.name === pdfFile.file.name ? 'ring-accent-start ring-2' : 'hover:ring-surface-600 hover:ring-1'}"
 									in:slide={{ duration: 200 }}
 								>
 									<div class="flex min-w-0 flex-1 items-center gap-3">
@@ -418,7 +436,7 @@
 											<Loader2 class="text-accent-start h-5 w-5 animate-spin" />
 										{:else if pdfFile.status === 'completed'}
 											<button
-												onclick={() => downloadFile(pdfFile)}
+												onclick={(e) => { e.stopPropagation(); downloadFile(pdfFile); }}
 												class="p-2 text-green-400 transition-colors hover:text-green-300"
 												title="Download"
 											>
@@ -428,7 +446,7 @@
 											<AlertCircle class="h-5 w-5 text-red-400" />
 										{/if}
 										<button
-											onclick={() => removeFile(pdfFile.id)}
+											onclick={(e) => { e.stopPropagation(); removeFile(pdfFile.id); }}
 											class="text-surface-500 p-2 transition-colors hover:text-red-400"
 											title="Remove"
 										>
@@ -533,6 +551,13 @@
 					</button>
 				</div>
 			</div>
+
+			<!-- PDF Viewer: shown for the currently-selected PDF -->
+			{#if selectedFileForViewer}
+				<div class="mt-6 h-[70vh] overflow-hidden rounded-2xl border border-surface-700/50" in:fly={{ y: 20, duration: 200 }}>
+					<PDFViewer file={selectedFileForViewer} />
+				</div>
+			{/if}
 		</div>
 	</main>
 

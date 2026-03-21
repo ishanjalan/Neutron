@@ -1,8 +1,17 @@
 <script lang="ts">
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
-	import { pdfs, formatBytes, type PDFItem } from '$lib/stores/pdfs.svelte';
+	import { formatBytes } from '$lib/stores/pdfs.svelte';
 	import type * as pdfjsLib from 'pdfjs-dist';
 	import { getPdfjs } from '$lib/utils/pdf';
+	import {
+		rotateSinglePage,
+		deleteSinglePage,
+		extractSinglePage,
+		duplicatePage,
+		insertBlankPage,
+		movePage,
+		downloadFile,
+	} from '$lib/utils/pdf';
 	import {
 		ZoomIn,
 		ZoomOut,
@@ -19,20 +28,39 @@
 		Sidebar,
 		Maximize2,
 		AlignCenter,
+		Search,
+		BookOpen,
+		ChevronDown,
+		RotateCw,
+		RotateCcw,
+		Trash2,
 	} from 'lucide-svelte';
 	import { onMount, onDestroy, tick } from 'svelte';
 	import { fly } from 'svelte/transition';
 
 	interface Props {
-		item: PDFItem;
+		file: File;
+		onFileChange?: (newFile: File) => void;
+		onSelectionChange?: (pages: number[]) => void;
+		selectionMode?: boolean;
+		allowMultiSelect?: boolean;
 		onClose?: () => void;
 	}
 
-	const { item, onClose }: Props = $props();
+	const {
+		file,
+		onFileChange,
+		onSelectionChange,
+		selectionMode = false,
+		allowMultiSelect = false,
+		onClose,
+	}: Props = $props();
+
+	let currentFile = $state(file);
 
 	// Constants
-	const THUMBNAILS_PER_PAGE = 50; // Pagination for thumbnail grid
-	const THUMBNAIL_BATCH_SIZE = 20; // How many thumbnails to load at once
+	const THUMBNAILS_PER_PAGE = 50;
+	const THUMBNAIL_BATCH_SIZE = 20;
 
 	// View state
 	let currentPage = $state(1);
@@ -43,6 +71,7 @@
 	let isLoading = $state(true);
 	let error = $state<string | null>(null);
 	let sidebarVisible = $state(true);
+	let sidebarTab = $state<'pages' | 'outline'>('pages');
 
 	// Pagination for thumbnail grid
 	let thumbnailPage = $state(0);
@@ -54,11 +83,15 @@
 
 	const THUMBNAIL_CACHE_MAX = 50;
 	let thumbnailCache = $state<Map<number, string>>(new Map());
-	let currentPageCanvas = $state<string | null>(null);
 	let pageWidth = $state(0);
 	let pageHeight = $state(0);
 	let naturalPageWidth = $state(0);
 	let naturalPageHeight = $state(0);
+
+	// Canvas + text layer DOM refs
+	let mainCanvas = $state<HTMLCanvasElement | null>(null);
+	let textLayerContainer = $state<HTMLDivElement | null>(null);
+	let annotationLayerContainer = $state<HTMLDivElement | null>(null);
 
 	// Track which thumbnails are currently loading
 	let loadingThumbnails = new SvelteSet<number>();
@@ -66,8 +99,9 @@
 	// PDF document reference
 	let pdfDoc: pdfjsLib.PDFDocumentProxy | null = null;
 
-	// Active render task — cancelled before starting a new one (fix race condition)
+	// Active render task — cancelled before starting a new one
 	let activeRenderTask: pdfjsLib.RenderTask | null = null;
+	let activeTextLayer: { cancel: () => void } | null = null;
 
 	// Sidebar scroll container ref
 	let sidebarScrollContainer: HTMLDivElement | null = null;
@@ -75,15 +109,43 @@
 	// Main content container ref (for fit-width/fit-page)
 	let mainContentRef: HTMLDivElement | null = null;
 
-	// Tool-specific behavior
-	const isPageSelectionTool = $derived(
-		['split', 'delete-pages', 'reorder', 'rotate'].includes(pdfs.settings.tool)
-	);
-	const allowMultiSelect = $derived(
-		['split', 'delete-pages', 'rotate'].includes(pdfs.settings.tool)
+	// ── Search ──
+	let searchVisible = $state(false);
+	let searchQuery = $state('');
+	let searchInput: HTMLInputElement | null = null;
+	const textIndex = new SvelteMap<number, string>(); // pageNum → full text
+	let searchResults = $state<Array<{ pageNum: number; count: number }>>([]);
+	let currentMatchPage = $state(0); // index into searchResults
+	const totalMatches = $derived(searchResults.reduce((s, r) => s + r.count, 0));
+	const currentMatchNum = $derived(
+		searchResults.slice(0, currentMatchPage).reduce((s, r) => s + r.count, 0) + 1
 	);
 
-	// Pages to display in current view — use $derived.by for proper memoization
+	// ── Outline ──
+	interface OutlineNode {
+		title: string;
+		dest: string | unknown[] | null;
+		url: string | null;
+		items: OutlineNode[];
+		expanded?: boolean;
+	}
+	let outlineItems = $state<OutlineNode[]>([]);
+	let outlineLoaded = $state(false);
+
+	// ── Context menu ──
+	let contextMenu = $state<{
+		visible: boolean;
+		x: number;
+		y: number;
+		pageNum: number;
+	}>({ visible: false, x: 0, y: 0, pageNum: 0 });
+	let contextMenuProcessing = $state(false);
+
+	// ── Drag-to-reorder ──
+	let draggedPage = $state<number | null>(null);
+	let dragOverPage = $state<number | null>(null);
+
+	// Pages to display in current view
 	const visiblePages = $derived.by(() => {
 		const pages: number[] = [];
 		for (let i = thumbnailStartPage; i <= thumbnailEndPage; i++) {
@@ -92,7 +154,7 @@
 		return pages;
 	});
 
-	// All pages for sidebar — use $derived.by for proper memoization
+	// All pages for sidebar
 	const allPages = $derived.by(() => {
 		const pages: number[] = [];
 		for (let i = 1; i <= totalPages; i++) {
@@ -106,23 +168,28 @@
 		error = null;
 
 		try {
-			const arrayBuffer = await item.file.arrayBuffer();
-			// Use getPdfjs() to get a properly configured instance with worker set up
+			const arrayBuffer = await currentFile.arrayBuffer();
 			const pdfjs = await getPdfjs();
 			pdfDoc = await pdfjs.getDocument({ data: arrayBuffer }).promise;
 			totalPages = pdfDoc.numPages;
 
-			// Update item with page count
-			pdfs.updateItem(item.id, { pageCount: totalPages });
-
-			// Do NOT call renderPage here — the $effect will fire when pdfDoc changes
-			// Pre-load initial thumbnails for sidebar
 			loadThumbnailRange(1, Math.min(THUMBNAIL_BATCH_SIZE, totalPages));
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to load PDF';
 			console.error('PDF load error:', err);
 		} finally {
 			isLoading = false;
+		}
+	}
+
+	async function loadOutline() {
+		if (!pdfDoc || outlineLoaded) return;
+		outlineLoaded = true;
+		try {
+			const outline = await pdfDoc.getOutline();
+			outlineItems = outline ? (outline as OutlineNode[]) : [];
+		} catch {
+			outlineItems = [];
 		}
 	}
 
@@ -180,17 +247,19 @@
 
 	async function renderPage(pageNum: number) {
 		if (!pdfDoc || pageNum < 1 || pageNum > totalPages) return;
+		if (!mainCanvas) return;
 
-		// Cancel any in-progress render to avoid race conditions
+		// Cancel any in-progress render
 		activeRenderTask?.cancel();
 		activeRenderTask = null;
+		activeTextLayer?.cancel();
+		activeTextLayer = null;
 
 		try {
 			const page = await pdfDoc.getPage(pageNum);
 			const scale = zoom * 1.5;
 			const viewport = page.getViewport({ scale });
 
-			// Capture natural page dimensions (at scale=1) for fit-width/fit-page
 			const naturalViewport = page.getViewport({ scale: 1 });
 			naturalPageWidth = naturalViewport.width;
 			naturalPageHeight = naturalViewport.height;
@@ -198,41 +267,183 @@
 			pageWidth = viewport.width;
 			pageHeight = viewport.height;
 
-			const canvas = document.createElement('canvas');
-			canvas.width = viewport.width;
-			canvas.height = viewport.height;
-			const ctx = canvas.getContext('2d');
+			// Render canvas
+			mainCanvas.width = viewport.width;
+			mainCanvas.height = viewport.height;
+			const ctx = mainCanvas.getContext('2d');
 
 			if (ctx) {
-				const renderTask = page.render({ canvasContext: ctx, viewport, canvas });
+				const renderTask = page.render({ canvasContext: ctx, viewport, canvas: mainCanvas });
 				activeRenderTask = renderTask;
 				try {
 					await renderTask.promise;
 				} catch (e: unknown) {
-					// Ignore cancellation errors — this is expected when navigating quickly
 					if (e instanceof Error && e.name === 'RenderingCancelledException') return;
 					throw e;
 				}
 				activeRenderTask = null;
-				// Use JPEG for main viewer — PNG is lossless but memory-heavy for large pages
-				currentPageCanvas = canvas.toDataURL('image/jpeg', 0.92);
-				canvas.width = 0;
-				canvas.height = 0;
+			}
+
+			// Render text layer
+			if (textLayerContainer) {
+				// eslint-disable-next-line svelte/no-dom-manipulating
+				textLayerContainer.innerHTML = '';
+				textLayerContainer.style.width = viewport.width + 'px';
+				textLayerContainer.style.height = viewport.height + 'px';
+
+				const pdfjs = await getPdfjs();
+				const textLayer = new pdfjs.TextLayer({
+					textContentSource: page.streamTextContent(),
+					container: textLayerContainer,
+					viewport,
+				});
+
+				let cancelled = false;
+				activeTextLayer = {
+					cancel() {
+						cancelled = true;
+					},
+				};
+
+				try {
+					await textLayer.render();
+					if (!cancelled && searchQuery && textLayerContainer) {
+						applySearchHighlights(textLayerContainer, searchQuery);
+					}
+				} catch {
+					// ignore
+				}
+				activeTextLayer = null;
+			}
+
+			// Build text index for this page (for search)
+			if (!textIndex.has(pageNum)) {
+				const content = await page.getTextContent();
+				const text = content.items
+					.filter((it) => 'str' in it)
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					.map((it) => (it as any).str as string)
+					.join(' ');
+				textIndex.set(pageNum, text);
 			}
 		} catch (err) {
 			console.error(`Failed to render page ${pageNum}:`, err);
 		}
 	}
 
+	function applySearchHighlights(container: HTMLElement, query: string) {
+		if (!query.trim()) return;
+		const lower = query.toLowerCase();
+		const spans = container.querySelectorAll<HTMLSpanElement>('span');
+		for (const span of spans) {
+			const text = span.textContent ?? '';
+			if (text.toLowerCase().includes(lower)) {
+				span.style.backgroundColor = 'rgba(255, 220, 0, 0.5)';
+				span.style.borderRadius = '2px';
+			} else {
+				span.style.backgroundColor = '';
+				span.style.borderRadius = '';
+			}
+		}
+	}
+
+	function clearSearchHighlights() {
+		if (!textLayerContainer) return;
+		const spans = textLayerContainer.querySelectorAll<HTMLSpanElement>('span');
+		for (const span of spans) {
+			span.style.backgroundColor = '';
+			span.style.borderRadius = '';
+		}
+	}
+
+	async function buildTextIndexForAllPages() {
+		if (!pdfDoc) return;
+		const promises: Promise<void>[] = [];
+		for (let i = 1; i <= totalPages; i++) {
+			if (!textIndex.has(i)) {
+				promises.push(
+					(async (pageNum) => {
+						const page = await pdfDoc!.getPage(pageNum);
+						const content = await page.getTextContent();
+						const text = content.items
+							.filter((it) => 'str' in it)
+							// eslint-disable-next-line @typescript-eslint/no-explicit-any
+							.map((it) => (it as any).str as string)
+							.join(' ');
+						textIndex.set(pageNum, text);
+					})(i)
+				);
+			}
+		}
+		await Promise.all(promises);
+	}
+
+	async function performSearch(query: string) {
+		if (!query.trim() || !pdfDoc) {
+			searchResults = [];
+			clearSearchHighlights();
+			return;
+		}
+
+		await buildTextIndexForAllPages();
+
+		const lower = query.toLowerCase();
+		const results: Array<{ pageNum: number; count: number }> = [];
+
+		for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+			const text = textIndex.get(pageNum) ?? '';
+			let count = 0;
+			let idx = 0;
+			while ((idx = text.toLowerCase().indexOf(lower, idx)) !== -1) {
+				count++;
+				idx += lower.length;
+			}
+			if (count > 0) results.push({ pageNum, count });
+		}
+
+		searchResults = results;
+		currentMatchPage = 0;
+
+		if (results.length > 0) {
+			goToPage(results[0].pageNum);
+		}
+	}
+
+	function nextSearchMatch() {
+		if (searchResults.length === 0) return;
+		currentMatchPage = (currentMatchPage + 1) % searchResults.length;
+		goToPage(searchResults[currentMatchPage].pageNum);
+	}
+
+	function prevSearchMatch() {
+		if (searchResults.length === 0) return;
+		currentMatchPage = (currentMatchPage - 1 + searchResults.length) % searchResults.length;
+		goToPage(searchResults[currentMatchPage].pageNum);
+	}
+
+	async function navigateToOutlineItem(node: OutlineNode) {
+		if (!pdfDoc || !node.dest) return;
+		try {
+			let dest: unknown[];
+			if (typeof node.dest === 'string') {
+				dest = (await pdfDoc.getDestination(node.dest)) ?? [];
+			} else {
+				dest = node.dest as unknown[];
+			}
+			if (dest.length > 0) {
+				const ref = dest[0] as { num: number; gen: number };
+				const pageIndex = await pdfDoc.getPageIndex(ref);
+				goToPage(pageIndex + 1);
+			}
+		} catch {
+			// ignore
+		}
+	}
+
 	function goToPage(pageNum: number) {
 		if (pageNum >= 1 && pageNum <= totalPages) {
 			currentPage = pageNum;
-			// Do NOT call renderPage directly — the $effect tracks currentPage and will fire
-
-			// Load nearby thumbnails for sidebar
 			loadThumbnailRange(Math.max(1, pageNum - 10), Math.min(totalPages, pageNum + 10));
-
-			// Scroll thumbnail into view
 			scrollToCurrentPage();
 		}
 	}
@@ -247,24 +458,20 @@
 		}
 	}
 
-	// Handle sidebar scroll to load visible thumbnails
 	function handleSidebarScroll(e: Event) {
 		const container = e.target as HTMLDivElement;
 		const scrollTop = container.scrollTop;
 		const clientHeight = container.clientHeight;
 
-		// Read actual thumbnail height rather than hardcoding 160px
 		const thumbnailEl = container.querySelector('[data-page]');
 		const thumbnailHeight = thumbnailEl?.getBoundingClientRect().height ?? 160;
 
-		// Calculate which pages are currently visible
 		const startPage = Math.floor(scrollTop / thumbnailHeight) + 1;
 		const endPage = Math.min(
 			totalPages,
 			Math.ceil((scrollTop + clientHeight) / thumbnailHeight) + 2
 		);
 
-		// Load thumbnails that are about to be visible
 		loadThumbnailRange(Math.max(1, startPage - 2), Math.min(totalPages, endPage + 2));
 	}
 
@@ -282,19 +489,15 @@
 
 	function zoomIn() {
 		zoom = Math.min(zoom + 0.25, 3);
-		// Do NOT call renderPage — the $effect tracks zoom and will fire
 	}
 
 	function zoomOut() {
 		zoom = Math.max(zoom - 0.25, 0.5);
-		// Do NOT call renderPage — the $effect tracks zoom and will fire
 	}
 
 	function fitWidth() {
 		if (!mainContentRef || !naturalPageWidth) return;
-		// Account for padding (p-4 = 16px each side = 32px total)
 		const containerWidth = mainContentRef.clientWidth - 32;
-		// naturalPageWidth * zoom * 1.5 = rendered width, solve for zoom:
 		zoom = Math.max(0.5, Math.min(3, containerWidth / (naturalPageWidth * 1.5)));
 	}
 
@@ -308,7 +511,7 @@
 	}
 
 	function togglePageSelection(pageNum: number) {
-		if (!isPageSelectionTool) return;
+		if (!selectionMode) return;
 
 		const newSelection = new SvelteSet(selectedPages);
 		if (newSelection.has(pageNum)) {
@@ -320,17 +523,17 @@
 			newSelection.add(pageNum);
 		}
 		selectedPages = newSelection;
-		pdfs.updateItem(item.id, { selectedPages: Array.from(selectedPages).sort((a, b) => a - b) });
+		onSelectionChange?.(Array.from(selectedPages).sort((a, b) => a - b));
 	}
 
 	function selectAll() {
 		selectedPages = new SvelteSet(Array.from({ length: totalPages }, (_, i) => i + 1));
-		pdfs.updateItem(item.id, { selectedPages: Array.from(selectedPages) });
+		onSelectionChange?.(Array.from(selectedPages).sort((a, b) => a - b));
 	}
 
 	function selectNone() {
 		selectedPages = new SvelteSet();
-		pdfs.updateItem(item.id, { selectedPages: [] });
+		onSelectionChange?.([]);
 	}
 
 	function selectRange(start: number, end: number) {
@@ -339,24 +542,193 @@
 			newSelection.add(i);
 		}
 		selectedPages = newSelection;
-		pdfs.updateItem(item.id, { selectedPages: Array.from(selectedPages).sort((a, b) => a - b) });
+		onSelectionChange?.(Array.from(selectedPages).sort((a, b) => a - b));
 	}
 
 	function goToThumbnailPage(page: number) {
 		thumbnailPage = Math.max(0, Math.min(page, totalThumbnailPages - 1));
-		// Load thumbnails for this page
 		loadThumbnailRange(thumbnailStartPage, thumbnailEndPage);
 	}
 
+	// Context menu
+	function handleThumbnailContextMenu(e: MouseEvent, pageNum: number) {
+		e.preventDefault();
+		contextMenu = { visible: true, x: e.clientX, y: e.clientY, pageNum };
+	}
+
+	function closeContextMenu() {
+		contextMenu = { ...contextMenu, visible: false };
+	}
+
+	async function handleContextMenuAction(
+		action: 'rotate-cw' | 'rotate-ccw' | 'delete' | 'extract' | 'duplicate' | 'insert-blank'
+	) {
+		const pageNum = contextMenu.pageNum;
+		closeContextMenu();
+		contextMenuProcessing = true;
+		try {
+			let newBlob: Blob;
+			switch (action) {
+				case 'rotate-cw':
+					newBlob = await rotateSinglePage(currentFile, pageNum, 90);
+					break;
+				case 'rotate-ccw':
+					newBlob = await rotateSinglePage(currentFile, pageNum, -90);
+					break;
+				case 'delete':
+					newBlob = await deleteSinglePage(currentFile, pageNum);
+					break;
+				case 'extract': {
+					const extracted = await extractSinglePage(currentFile, pageNum);
+					downloadFile(extracted, `${currentFile.name.replace(/\.pdf$/i, '')}-page${pageNum}.pdf`);
+					contextMenuProcessing = false;
+					return;
+				}
+				case 'duplicate':
+					newBlob = await duplicatePage(currentFile, pageNum);
+					break;
+				case 'insert-blank':
+					newBlob = await insertBlankPage(currentFile, pageNum);
+					break;
+			}
+
+			const newFile = new File([newBlob!], currentFile.name, { type: 'application/pdf' });
+			currentFile = newFile;
+			onFileChange?.(newFile);
+
+			// Reload viewer
+			pdfDoc?.destroy();
+			pdfDoc = null;
+			textIndex.clear();
+			thumbnailCache = new Map();
+			outlineLoaded = false;
+			outlineItems = [];
+			await loadPDF();
+		} catch (err) {
+			console.error('Context menu action failed:', err);
+		} finally {
+			contextMenuProcessing = false;
+		}
+	}
+
+	// Direct page action (from hover controls — no context menu)
+	async function doPageAction(action: 'rotate-cw' | 'rotate-ccw' | 'delete', pageNum: number) {
+		contextMenuProcessing = true;
+		try {
+			let newBlob: Blob;
+			if (action === 'rotate-cw') newBlob = await rotateSinglePage(currentFile, pageNum, 90);
+			else if (action === 'rotate-ccw') newBlob = await rotateSinglePage(currentFile, pageNum, -90);
+			else newBlob = await deleteSinglePage(currentFile, pageNum);
+
+			const newFile = new File([newBlob], currentFile.name, { type: 'application/pdf' });
+			currentFile = newFile;
+			onFileChange?.(newFile);
+			pdfDoc?.destroy();
+			pdfDoc = null;
+			textIndex.clear();
+			thumbnailCache = new Map();
+			outlineLoaded = false;
+			outlineItems = [];
+			await loadPDF();
+		} catch (err) {
+			console.error('Page action failed:', err);
+		} finally {
+			contextMenuProcessing = false;
+		}
+	}
+
+	// Drag-to-reorder handlers
+	function handleDragStart(e: DragEvent, pageNum: number) {
+		draggedPage = pageNum;
+		if (e.dataTransfer) {
+			e.dataTransfer.effectAllowed = 'move';
+			e.dataTransfer.setData('text/plain', String(pageNum));
+		}
+	}
+
+	function handleDragOver(e: DragEvent, pageNum: number) {
+		e.preventDefault();
+		if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+		dragOverPage = pageNum;
+	}
+
+	function handleDragLeave() {
+		dragOverPage = null;
+	}
+
+	async function handleDrop(e: DragEvent, toPage: number) {
+		e.preventDefault();
+		dragOverPage = null;
+		if (draggedPage === null || draggedPage === toPage) {
+			draggedPage = null;
+			return;
+		}
+		const from = draggedPage;
+		draggedPage = null;
+
+		contextMenuProcessing = true;
+		try {
+			const newBlob = await movePage(currentFile, from, toPage);
+			const newFile = new File([newBlob], currentFile.name, { type: 'application/pdf' });
+			currentFile = newFile;
+			onFileChange?.(newFile);
+			pdfDoc?.destroy();
+			pdfDoc = null;
+			textIndex.clear();
+			thumbnailCache = new Map();
+			outlineLoaded = false;
+			outlineItems = [];
+			await loadPDF();
+		} catch (err) {
+			console.error('Move page failed:', err);
+		} finally {
+			contextMenuProcessing = false;
+		}
+	}
+
+	function handleDragEnd() {
+		draggedPage = null;
+		dragOverPage = null;
+	}
+
 	function handleKeydown(e: KeyboardEvent) {
+		// Search shortcut
+		if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
+			e.preventDefault();
+			openSearch();
+			return;
+		}
+
+		// Close context menu on Escape
+		if (e.key === 'Escape') {
+			if (contextMenu.visible) {
+				closeContextMenu();
+				return;
+			}
+			if (searchVisible) {
+				closeSearch();
+				return;
+			}
+			if (onClose) onClose();
+			return;
+		}
+
+		// Search navigation
+		if (searchVisible) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				if (e.shiftKey) prevSearchMatch();
+				else nextSearchMatch();
+			}
+			return;
+		}
+
 		if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
 			e.preventDefault();
 			nextPage();
 		} else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
 			e.preventDefault();
 			prevPage();
-		} else if (e.key === 'Escape' && onClose) {
-			onClose();
 		} else if (e.key === '+' || e.key === '=') {
 			e.preventDefault();
 			zoomIn();
@@ -366,10 +738,43 @@
 		}
 	}
 
-	// Load thumbnails when switching to thumbnail view or changing page
+	async function openSearch() {
+		searchVisible = true;
+		await tick();
+		searchInput?.focus();
+
+		// Switch sidebar to pages tab if on outline
+		if (sidebarTab === 'outline') sidebarTab = 'pages';
+	}
+
+	function closeSearch() {
+		searchVisible = false;
+		searchQuery = '';
+		searchResults = [];
+		clearSearchHighlights();
+	}
+
+	// Reactive: re-run search when query changes (debounced via timeout)
+	let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+	$effect(() => {
+		const q = searchQuery;
+		if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+		searchDebounceTimer = setTimeout(() => {
+			if (searchVisible) performSearch(q);
+		}, 300);
+	});
+
+	// Load thumbnails when switching to thumbnail view
 	$effect(() => {
 		if (viewMode === 'thumbnails' && totalPages > 0) {
 			loadThumbnailRange(thumbnailStartPage, thumbnailEndPage);
+		}
+	});
+
+	// Load outline when sidebar tab switches to outline
+	$effect(() => {
+		if (sidebarTab === 'outline') {
+			loadOutline();
 		}
 	});
 
@@ -379,19 +784,27 @@
 
 	onDestroy(() => {
 		activeRenderTask?.cancel();
+		activeTextLayer?.cancel();
 		pdfDoc?.destroy();
 	});
 
-	// Sole trigger for page renders — tracks pdfDoc, zoom, AND currentPage
-	// This prevents double-renders since we never call renderPage() directly elsewhere
+	// Sole trigger for page renders — tracks mainCanvas, pdfDoc, zoom, AND currentPage
 	$effect(() => {
-		if (pdfDoc && zoom && currentPage) {
+		if (mainCanvas && pdfDoc && zoom && currentPage) {
 			renderPage(currentPage);
 		}
 	});
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
+<svelte:window
+	onkeydown={handleKeydown}
+	onclick={(e) => {
+		if (contextMenu.visible) {
+			const target = e.target as Element;
+			if (!target.closest('[data-context-menu]')) closeContextMenu();
+		}
+	}}
+/>
 
 <div
 	class="bg-surface-950 border-surface-800 flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border"
@@ -402,7 +815,6 @@
 	>
 		<!-- Left: File info + sidebar toggle -->
 		<div class="flex items-center gap-3">
-			<!-- Sidebar toggle -->
 			<button
 				onclick={toggleSidebar}
 				class="rounded-lg p-1.5 transition-colors {sidebarVisible
@@ -424,11 +836,11 @@
 			{/if}
 			<div class="flex items-center gap-2">
 				<FileText class="text-accent-start h-4 w-4" />
-				<span class="text-surface-200 max-w-[200px] truncate text-sm font-medium" title={item.name}>
-					{item.name}
+				<span class="text-surface-200 max-w-[200px] truncate text-sm font-medium" title={file.name}>
+					{file.name}
 				</span>
 				<span class="text-surface-500 text-xs">
-					{formatBytes(item.originalSize)}
+					{formatBytes(file.size)}
 				</span>
 			</div>
 		</div>
@@ -468,6 +880,19 @@
 
 		<!-- Right: View controls -->
 		<div class="flex items-center gap-1">
+			<!-- Search button -->
+			<button
+				onclick={openSearch}
+				class="rounded-lg p-1.5 transition-colors {searchVisible
+					? 'bg-surface-700 text-surface-200'
+					: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700'}"
+				title="Search (⌘F)"
+			>
+				<Search class="h-4 w-4" />
+			</button>
+
+			<div class="bg-surface-700 mx-1 h-5 w-px"></div>
+
 			<button
 				onclick={zoomOut}
 				disabled={zoom <= 0.5}
@@ -486,7 +911,6 @@
 				<ZoomIn class="h-4 w-4" />
 			</button>
 
-			<!-- Fit-width and fit-page buttons -->
 			<button
 				onclick={fitWidth}
 				disabled={!naturalPageWidth}
@@ -504,7 +928,7 @@
 				<Maximize2 class="h-4 w-4" />
 			</button>
 
-			<div class="bg-surface-700 mx-2 h-5 w-px"></div>
+			<div class="bg-surface-700 mx-1 h-5 w-px"></div>
 
 			<button
 				onclick={() => (viewMode = 'single')}
@@ -527,8 +951,46 @@
 		</div>
 	</div>
 
+	<!-- Search bar -->
+	{#if searchVisible}
+		<div
+			class="bg-surface-800/80 border-surface-700/50 flex items-center gap-2 border-b px-4 py-2"
+			transition:fly={{ y: -8, duration: 150 }}
+		>
+			<Search class="text-surface-500 h-3.5 w-3.5 flex-shrink-0" />
+			<input
+				bind:this={searchInput}
+				bind:value={searchQuery}
+				placeholder="Search in document…"
+				class="text-surface-200 placeholder-surface-600 flex-1 bg-transparent text-sm outline-none"
+			/>
+			{#if searchResults.length > 0}
+				<span class="text-surface-500 text-xs">{currentMatchNum} of {totalMatches}</span>
+				<button
+					onclick={prevSearchMatch}
+					class="text-surface-400 hover:text-surface-200 rounded p-0.5"
+					title="Previous match (⇧Enter)"
+				>
+					<ChevronLeft class="h-3.5 w-3.5" />
+				</button>
+				<button
+					onclick={nextSearchMatch}
+					class="text-surface-400 hover:text-surface-200 rounded p-0.5"
+					title="Next match (Enter)"
+				>
+					<ChevronRight class="h-3.5 w-3.5" />
+				</button>
+			{:else if searchQuery.trim()}
+				<span class="text-surface-600 text-xs">No results</span>
+			{/if}
+			<button onclick={closeSearch} class="text-surface-400 hover:text-surface-200 rounded p-0.5">
+				<X class="h-3.5 w-3.5" />
+			</button>
+		</div>
+	{/if}
+
 	<!-- Selection toolbar (for page operations) -->
-	{#if isPageSelectionTool && viewMode === 'thumbnails'}
+	{#if selectionMode && viewMode === 'thumbnails'}
 		<div
 			class="bg-surface-800/50 border-surface-700/50 flex items-center justify-between border-b px-4 py-2"
 			transition:fly={{ y: -10, duration: 150 }}
@@ -561,68 +1023,166 @@
 
 	<!-- Main content area -->
 	<div class="flex min-h-0 flex-1 overflow-hidden">
-		<!-- macOS Preview-style sidebar with thumbnails -->
+		<!-- Sidebar with tabs -->
 		{#if sidebarVisible}
 			<div
 				class="bg-surface-900/70 border-surface-800 flex w-44 flex-shrink-0 flex-col overflow-hidden border-r"
 				transition:fly={{ x: -176, duration: 200 }}
 			>
-				<div
-					bind:this={sidebarScrollContainer}
-					onscroll={handleSidebarScroll}
-					class="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-2 py-3"
-				>
-					<div class="flex flex-col items-center gap-3">
-						{#each allPages as pageNum (pageNum)}
-							{@const thumb = thumbnailCache.get(pageNum)}
-							<button
-								data-page={pageNum}
-								onclick={() => {
-									goToPage(pageNum);
-									if (isPageSelectionTool) togglePageSelection(pageNum);
-								}}
-								class="group flex w-full flex-col items-center gap-1.5"
-							>
-								<!-- Thumbnail container with selection highlight -->
-								<div
-									class="relative overflow-hidden rounded-md transition-all duration-150
-										{currentPage === pageNum
-										? 'ring-accent-start shadow-accent-start/30 shadow-lg ring-[3px]'
-										: selectedPages.has(pageNum)
-											? 'shadow-lg ring-[3px] shadow-green-500/30 ring-green-500'
-											: 'ring-surface-700 hover:ring-surface-500 ring-1 hover:shadow-md'}"
-								>
-									{#if thumb}
-										<img src={thumb} alt="Page {pageNum}" class="w-28 bg-white" draggable="false" />
-									{:else}
-										<div
-											class="bg-surface-800 flex aspect-[3/4] w-28 animate-pulse items-center justify-center"
-										>
-											<Loader2 class="text-surface-600 h-4 w-4 animate-spin" />
-										</div>
-									{/if}
-
-									<!-- Selection checkmark for page tools -->
-									{#if isPageSelectionTool && selectedPages.has(pageNum)}
-										<div
-											class="absolute top-1.5 left-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-green-500 shadow-md"
-										>
-											<Check class="h-3 w-3 text-white" />
-										</div>
-									{/if}
-								</div>
-
-								<!-- Page number below thumbnail (macOS Preview style) -->
-								<span
-									class="text-[11px] font-medium transition-colors
-										{currentPage === pageNum ? 'text-accent-start' : 'text-surface-500 group-hover:text-surface-300'}"
-								>
-									{pageNum}
-								</span>
-							</button>
-						{/each}
-					</div>
+				<!-- Sidebar tabs -->
+				<div class="border-surface-800 flex border-b">
+					<button
+						onclick={() => (sidebarTab = 'pages')}
+						class="flex-1 py-2 text-[10px] font-medium transition-colors {sidebarTab === 'pages'
+							? 'text-accent-start border-accent-start border-b-2'
+							: 'text-surface-500 hover:text-surface-300'}"
+					>
+						Pages
+					</button>
+					<button
+						onclick={() => (sidebarTab = 'outline')}
+						class="flex-1 py-2 text-[10px] font-medium transition-colors {sidebarTab === 'outline'
+							? 'text-accent-start border-accent-start border-b-2'
+							: 'text-surface-500 hover:text-surface-300'}"
+					>
+						Outline
+					</button>
 				</div>
+
+				{#if sidebarTab === 'pages'}
+					<!-- Pages tab: thumbnails -->
+					<div
+						bind:this={sidebarScrollContainer}
+						onscroll={handleSidebarScroll}
+						class="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-2 py-3"
+					>
+						<div class="flex flex-col items-center gap-3">
+							{#each allPages as pageNum (pageNum)}
+								{@const thumb = thumbnailCache.get(pageNum)}
+								<div
+									data-page={pageNum}
+									draggable="true"
+									ondragstart={(e) => handleDragStart(e, pageNum)}
+									ondragover={(e) => handleDragOver(e, pageNum)}
+									ondragleave={handleDragLeave}
+									ondrop={(e) => handleDrop(e, pageNum)}
+									ondragend={handleDragEnd}
+									role="listitem"
+									class="group flex w-full cursor-grab flex-col items-center gap-1.5 active:cursor-grabbing"
+								>
+									<div
+										class="relative overflow-hidden rounded-md transition-all duration-150
+											{dragOverPage === pageNum && draggedPage !== pageNum
+											? 'ring-accent-start shadow-lg ring-[3px]'
+											: draggedPage === pageNum
+												? 'ring-surface-600 opacity-40 ring-1'
+												: currentPage === pageNum
+													? 'ring-accent-start shadow-accent-start/30 shadow-lg ring-[3px]'
+													: selectedPages.has(pageNum)
+														? 'shadow-lg ring-[3px] shadow-green-500/30 ring-green-500'
+														: 'ring-surface-700 hover:ring-surface-500 ring-1 hover:shadow-md'}"
+									>
+										<button
+											onclick={() => {
+												goToPage(pageNum);
+												if (selectionMode) togglePageSelection(pageNum);
+											}}
+											oncontextmenu={(e) => handleThumbnailContextMenu(e, pageNum)}
+											class="block"
+										>
+											{#if thumb}
+												<img
+													src={thumb}
+													alt="Page {pageNum}"
+													class="w-28 bg-white"
+													draggable="false"
+												/>
+											{:else}
+												<div
+													class="bg-surface-800 flex aspect-[3/4] w-28 animate-pulse items-center justify-center"
+												>
+													<Loader2 class="text-surface-600 h-4 w-4 animate-spin" />
+												</div>
+											{/if}
+										</button>
+
+										<!-- Hover action bar -->
+										<div
+											class="absolute inset-x-0 bottom-0 flex translate-y-full items-center justify-center gap-0.5 bg-black/75 py-1 opacity-0 backdrop-blur-sm transition-all duration-150 group-hover:translate-y-0 group-hover:opacity-100"
+										>
+											<button
+												onclick={(e) => {
+													e.stopPropagation();
+													doPageAction('rotate-ccw', pageNum);
+												}}
+												class="rounded p-1 text-white/70 transition-colors hover:bg-white/20 hover:text-white"
+												title="Rotate CCW"
+											>
+												<RotateCcw class="h-3 w-3" />
+											</button>
+											<button
+												onclick={(e) => {
+													e.stopPropagation();
+													doPageAction('rotate-cw', pageNum);
+												}}
+												class="rounded p-1 text-white/70 transition-colors hover:bg-white/20 hover:text-white"
+												title="Rotate CW"
+											>
+												<RotateCw class="h-3 w-3" />
+											</button>
+											<div class="mx-0.5 h-3 w-px bg-white/25"></div>
+											<button
+												onclick={(e) => {
+													e.stopPropagation();
+													doPageAction('delete', pageNum);
+												}}
+												class="rounded p-1 text-white/70 transition-colors hover:bg-red-500/20 hover:text-red-400"
+												title="Delete page"
+											>
+												<Trash2 class="h-3 w-3" />
+											</button>
+										</div>
+
+										{#if selectionMode && selectedPages.has(pageNum)}
+											<div
+												class="absolute top-1.5 left-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-green-500 shadow-md"
+											>
+												<Check class="h-3 w-3 text-white" />
+											</div>
+										{/if}
+									</div>
+
+									<span
+										class="text-[11px] font-medium transition-colors
+											{currentPage === pageNum ? 'text-accent-start' : 'text-surface-500 group-hover:text-surface-300'}"
+									>
+										{pageNum}
+									</span>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{:else}
+					<!-- Outline tab -->
+					<div class="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-2 py-3">
+						{#if !outlineLoaded}
+							<div class="flex items-center justify-center py-8">
+								<Loader2 class="text-surface-600 h-4 w-4 animate-spin" />
+							</div>
+						{:else if outlineItems.length === 0}
+							<div class="py-8 text-center">
+								<BookOpen class="text-surface-700 mx-auto mb-2 h-6 w-6" />
+								<p class="text-surface-600 text-[10px]">No bookmarks</p>
+							</div>
+						{:else}
+							<div class="space-y-0.5">
+								{#each outlineItems as node (node.title)}
+									{@render OutlineItem({ node, depth: 0, onNavigate: navigateToOutlineItem })}
+								{/each}
+							</div>
+						{/if}
+					</div>
+				{/if}
 			</div>
 		{/if}
 
@@ -648,26 +1208,22 @@
 					</div>
 				</div>
 			{:else if viewMode === 'single'}
-				<!-- Single page view -->
+				<!-- Single page view: canvas + text layer -->
 				<div class="flex min-h-full items-center justify-center">
-					{#if currentPageCanvas}
+					<div
+						class="relative overflow-hidden rounded-lg bg-white shadow-2xl shadow-black/50"
+						style="width: {pageWidth}px; height: {pageHeight}px;"
+					>
+						<canvas bind:this={mainCanvas} class="block"></canvas>
 						<div
-							class="overflow-hidden rounded-lg bg-white shadow-2xl shadow-black/50"
-							style="max-width: {pageWidth}px"
-						>
-							<img
-								src={currentPageCanvas}
-								alt="Page {currentPage}"
-								class="h-auto w-full"
-								draggable="false"
-							/>
-						</div>
-					{/if}
+							bind:this={textLayerContainer}
+							class="pdf-text-layer selectable absolute inset-0"
+						></div>
+					</div>
 				</div>
 			{:else}
 				<!-- Thumbnail grid view with pagination -->
 				<div class="space-y-4">
-					<!-- Pagination header -->
 					{#if totalThumbnailPages > 1}
 						<div class="bg-surface-900/50 flex items-center justify-between rounded-lg p-3">
 							<button
@@ -716,7 +1272,6 @@
 						</div>
 					{/if}
 
-					<!-- Thumbnail grid -->
 					<div
 						class="grid grid-cols-4 gap-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10"
 					>
@@ -724,13 +1279,14 @@
 							{@const thumb = thumbnailCache.get(pageNum)}
 							<button
 								onclick={() => {
-									if (isPageSelectionTool) {
+									if (selectionMode) {
 										togglePageSelection(pageNum);
 									} else {
 										goToPage(pageNum);
 										viewMode = 'single';
 									}
 								}}
+								oncontextmenu={(e) => handleThumbnailContextMenu(e, pageNum)}
 								class="relative aspect-[3/4] overflow-hidden rounded-lg border-2 bg-white transition-all
 									{selectedPages.has(pageNum)
 									? 'scale-[1.02] border-green-500 ring-2 ring-green-500/30'
@@ -750,7 +1306,7 @@
 								>
 									{pageNum}
 								</div>
-								{#if isPageSelectionTool}
+								{#if selectionMode}
 									<div class="absolute top-1 left-1">
 										{#if selectedPages.has(pageNum)}
 											<div
@@ -776,17 +1332,110 @@
 		class="bg-surface-900/80 border-surface-800 text-surface-500 flex items-center justify-between border-t px-4 py-2 text-xs"
 	>
 		<div>
-			{totalPages.toLocaleString()} page{totalPages !== 1 ? 's' : ''} • {formatBytes(
-				item.originalSize
-			)}
+			{totalPages.toLocaleString()} page{totalPages !== 1 ? 's' : ''} • {formatBytes(file.size)}
 		</div>
 		<div class="flex items-center gap-4">
-			{#if isPageSelectionTool && selectedPages.size > 0}
+			{#if contextMenuProcessing}
+				<span class="text-accent-start flex items-center gap-1">
+					<Loader2 class="h-3 w-3 animate-spin" />
+					Processing…
+				</span>
+			{/if}
+			{#if selectionMode && selectedPages.size > 0}
 				<span class="text-accent-start font-medium">
 					{selectedPages.size.toLocaleString()} page{selectedPages.size !== 1 ? 's' : ''} selected
 				</span>
 			{/if}
-			<span>Use arrow keys to navigate</span>
+			<span
+				>Arrow keys to navigate • ⌘F search • Drag thumbnails to reorder • Hover for quick actions</span
+			>
 		</div>
 	</div>
 </div>
+
+<!-- Context menu (rendered outside main container for z-index) -->
+{#if contextMenu.visible}
+	<div
+		data-context-menu
+		class="bg-surface-800 border-surface-600 fixed z-50 min-w-[180px] rounded-xl border py-1.5 shadow-2xl"
+		style="left: {contextMenu.x}px; top: {contextMenu.y}px"
+		transition:fly={{ y: 4, duration: 100 }}
+	>
+		{#each [{ action: 'rotate-cw', label: 'Rotate Clockwise' }, { action: 'rotate-ccw', label: 'Rotate Counter-clockwise' }, null, { action: 'duplicate', label: 'Duplicate Page' }, { action: 'insert-blank', label: 'Insert Blank Page After' }, null, { action: 'extract', label: 'Extract Page', accent: false }, null, { action: 'delete', label: 'Delete Page', danger: true }] as item, i (i)}
+			{#if item === null}
+				<div class="bg-surface-700 mx-2 my-1 h-px"></div>
+			{:else}
+				<button
+					onclick={() => handleContextMenuAction((item as any).action)}
+					class="w-full px-3 py-1.5 text-left text-sm transition-colors {(item as any).danger
+						? 'text-red-400 hover:bg-red-500/10'
+						: 'text-surface-200 hover:bg-surface-700'}"
+				>
+					{(item as any).label}
+				</button>
+			{/if}
+		{/each}
+	</div>
+{/if}
+
+<!-- Outline item component (recursive) -->
+{#snippet OutlineItem({
+	node,
+	depth,
+	onNavigate,
+}: {
+	node: OutlineNode;
+	depth: number;
+	onNavigate: (n: OutlineNode) => void;
+})}
+	<div>
+		<button
+			onclick={() => onNavigate(node)}
+			class="text-surface-400 hover:text-surface-200 hover:bg-surface-800 flex w-full items-center gap-1 rounded px-2 py-1 text-left text-[10px] transition-colors"
+			style="padding-left: {8 + depth * 10}px"
+		>
+			{#if node.items && node.items.length > 0}
+				<ChevronDown class="h-2.5 w-2.5 flex-shrink-0 opacity-50" />
+			{:else}
+				<span class="h-2.5 w-2.5 flex-shrink-0"></span>
+			{/if}
+			<span class="truncate">{node.title}</span>
+		</button>
+		{#if node.items && node.items.length > 0}
+			{#each node.items as child (child.title)}
+				{@render OutlineItem({ node: child, depth: depth + 1, onNavigate })}
+			{/each}
+		{/if}
+	</div>
+{/snippet}
+
+<!-- Text layer CSS (must be :global because spans are injected dynamically) -->
+<style>
+	:global(.pdf-text-layer) {
+		position: absolute;
+		inset: 0;
+		overflow: clip;
+		line-height: 1;
+		text-size-adjust: none;
+		forced-color-adjust: none;
+		pointer-events: none;
+	}
+
+	:global(.pdf-text-layer.selectable) {
+		pointer-events: auto;
+	}
+
+	:global(.pdf-text-layer span),
+	:global(.pdf-text-layer br) {
+		color: transparent;
+		position: absolute;
+		white-space: pre;
+		cursor: text;
+		transform-origin: 0% 0%;
+	}
+
+	:global(.pdf-text-layer span::selection) {
+		background-color: rgba(0, 100, 255, 0.25);
+		color: transparent;
+	}
+</style>

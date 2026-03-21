@@ -17,6 +17,7 @@
 		Settings,
 	} from 'lucide-svelte';
 	import { fade, fly, slide } from 'svelte/transition';
+import PDFViewer from '$lib/components/PDFViewer.svelte';
 
 	interface PDFFile {
 		id: string;
@@ -202,6 +203,21 @@
 		if (droppedFiles && droppedFiles.length > 0) {
 			await handleFiles(Array.from(droppedFiles));
 		}
+	}
+
+	function onSelectionChange(pages: number[]) {
+		if (pages.length === 0) return;
+		splitMode = 'extract';
+		// Convert array of page numbers to compact range string
+		const ranges: string[] = [];
+		let i = 0;
+		while (i < pages.length) {
+			let j = i;
+			while (j + 1 < pages.length && pages[j + 1] === pages[j] + 1) j++;
+			ranges.push(j > i ? `${pages[i]}-${pages[j]}` : String(pages[i]));
+			i = j + 1;
+		}
+		pageRange = ranges.join(', ');
 	}
 
 	function openFilePicker() {
@@ -455,6 +471,18 @@
 					</button>
 				</div>
 			</div>
+
+			<!-- PDF Viewer: page picker -->
+			{#if pdfFile}
+				<div class="mt-6 h-[70vh] overflow-hidden rounded-2xl border border-surface-700/50" in:fly={{ y: 20, duration: 200 }}>
+					<PDFViewer
+						file={pdfFile.file}
+						selectionMode={splitMode === 'extract'}
+						allowMultiSelect={true}
+						onSelectionChange={onSelectionChange}
+					/>
+				</div>
+			{/if}
 		</div>
 	</main>
 

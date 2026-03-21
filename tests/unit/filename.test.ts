@@ -7,9 +7,7 @@ describe('getOutputFilename', () => {
 	});
 
 	it('uses custom suffix', () => {
-		expect(getOutputFilename('photo.jpg', { suffix: 'compressed' })).toBe(
-			'photo-compressed.jpg'
-		);
+		expect(getOutputFilename('photo.jpg', { suffix: 'compressed' })).toBe('photo-compressed.jpg');
 	});
 
 	it('uses custom extension', () => {

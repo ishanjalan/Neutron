@@ -18,10 +18,10 @@
 	} from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
 
-	// Tool cards with workspace routes and metadata
+	// Tool cards
 	const tools = [
 		{
-			href: '/workspace?tool=compress',
+			href: '/compress',
 			title: 'Compress PDF',
 			description: 'Reduce file size while keeping text sharp',
 			icon: Minimize2,
@@ -29,7 +29,7 @@
 			popular: true,
 		},
 		{
-			href: '/workspace?tool=merge',
+			href: '/merge',
 			title: 'Merge PDFs',
 			description: 'Combine multiple PDFs into one document',
 			icon: Layers,
@@ -37,7 +37,7 @@
 			popular: true,
 		},
 		{
-			href: '/workspace?tool=split',
+			href: '/split',
 			title: 'Split PDF',
 			description: 'Extract pages or split into multiple files',
 			icon: Scissors,
@@ -45,7 +45,7 @@
 			popular: true,
 		},
 		{
-			href: '/workspace?tool=ocr',
+			href: '/ocr',
 			title: 'OCR',
 			description: 'Extract searchable text from scanned PDFs',
 			icon: FileSearch,
@@ -53,7 +53,7 @@
 			popular: true,
 		},
 		{
-			href: '/workspace?tool=protect',
+			href: '/protect',
 			title: 'Protect PDF',
 			description: 'Add AES-128 password encryption',
 			icon: Lock,
@@ -61,7 +61,7 @@
 			popular: false,
 		},
 		{
-			href: '/workspace?tool=unlock',
+			href: '/unlock',
 			title: 'Unlock PDF',
 			description: 'Remove password protection',
 			icon: Unlock,
@@ -69,31 +69,31 @@
 			popular: false,
 		},
 		{
-			href: '/workspace?tool=rotate',
+			href: '/rotate',
 			title: 'Rotate Pages',
-			description: 'Rotate PDF pages 90°, 180°, or 270°',
+			description: 'Click or drag thumbnails to rotate — no settings needed',
 			icon: RotateCw,
 			gradient: 'from-cyan-500 to-blue-500',
 			popular: false,
 		},
 		{
-			href: '/workspace?tool=delete-pages',
+			href: '/delete',
 			title: 'Delete Pages',
-			description: 'Remove unwanted pages from your PDF',
+			description: 'Hover any thumbnail and click delete',
 			icon: Trash2,
 			gradient: 'from-red-500 to-pink-500',
 			popular: false,
 		},
 		{
-			href: '/workspace?tool=reorder',
+			href: '/reorder',
 			title: 'Reorder Pages',
-			description: 'Drag and drop to rearrange pages',
+			description: 'Drag thumbnails to rearrange pages',
 			icon: ArrowUpDown,
 			gradient: 'from-orange-500 to-red-500',
 			popular: false,
 		},
 		{
-			href: '/workspace?tool=pdf-to-images',
+			href: '/to-images',
 			title: 'PDF to Images',
 			description: 'Convert pages to PNG, JPG, or WebP',
 			icon: Image,
@@ -101,7 +101,7 @@
 			popular: false,
 		},
 		{
-			href: '/workspace?tool=images-to-pdf',
+			href: '/from-images',
 			title: 'Images to PDF',
 			description: 'Create a PDF from your images',
 			icon: FileText,

@@ -5,9 +5,9 @@
 	import { downloadAllAsZip } from '@neutron/utils';
 	import PDFViewer from '$lib/components/PDFViewer.svelte';
 	import DropZone from '$lib/components/DropZone.svelte';
-	import BatchSummary from '$lib/components/BatchSummary.svelte';
 	import WorkspaceToolPanel from '$lib/components/WorkspaceToolPanel.svelte';
 	import WorkspaceToolbar from '$lib/components/WorkspaceToolbar.svelte';
+	import CommandPalette from '$lib/components/CommandPalette.svelte';
 	import {
 		FileText,
 		X,
@@ -17,10 +17,9 @@
 		Loader2,
 		AlertCircle,
 		ChevronRight,
-		ChevronDown,
 		Layers,
 	} from 'lucide-svelte';
-	import { fade, fly } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 	import { resolve } from '$app/paths';
 	import { downloadMultipleFiles } from '$lib/utils/download';
 
@@ -31,8 +30,8 @@
 	const { data }: Props = $props();
 
 	let selectedItemId = $state<string | null>(null);
-	let fileInput: HTMLInputElement;
-	let showFileList = $state(false); // collapsible file list for multi-file tools
+	let fileInput = $state<HTMLInputElement | null>(null);
+	let commandPaletteOpen = $state(false);
 
 	const hasItems = $derived(pdfs.items.length > 0);
 	const selectedItem = $derived(
@@ -42,38 +41,18 @@
 	const completedCount = $derived(pdfs.items.filter((i) => i.status === 'completed').length);
 	const isAnyProcessing = $derived(pdfs.items.some((i) => i.status === 'processing'));
 	const isSingleFileTool = $derived(!['merge', 'images-to-pdf'].includes(pdfs.settings.tool));
-	const needsViewer = $derived(
-		[
-			'split',
-			'delete-pages',
-			'reorder',
-			'rotate',
-			'compress',
-			'protect',
-			'unlock',
-			'ocr',
-			'add-page-numbers',
-			'watermark',
-			'edit-metadata',
-			'reverse-pages',
-			'remove-blank-pages',
-			'pdf-to-images',
-		].includes(pdfs.settings.tool)
-	);
 	const currentTool = $derived(TOOLS.find((t) => t.value === pdfs.settings.tool));
 
-	// Auto-select first item for single-file tools
+	// Auto-select first item
 	$effect(() => {
-		if (hasItems && !selectedItemId && isSingleFileTool) {
+		if (hasItems && !selectedItemId) {
 			selectedItemId = pdfs.items[0].id;
 		}
-		// Clear selection if item no longer exists
 		if (selectedItemId && !pdfs.items.find((i) => i.id === selectedItemId)) {
 			selectedItemId = pdfs.items.length > 0 ? pdfs.items[0].id : null;
 		}
 	});
 
-	// Set initial tool from URL param
 	onMount(() => {
 		if (data.initialTool) {
 			pdfs.setTool(data.initialTool as any);
@@ -81,8 +60,8 @@
 	});
 
 	function openFilePicker() {
-		const accepts = currentTool?.accepts ?? '.pdf';
-		fileInput.accept = accepts;
+		if (!fileInput) return;
+		fileInput.accept = currentTool?.accepts ?? '.pdf';
 		fileInput.multiple = !isSingleFileTool || pdfs.settings.tool === 'compress';
 		fileInput.click();
 	}
@@ -95,18 +74,10 @@
 		input.value = '';
 	}
 
-	function removeItem(id: string) {
-		pdfs.removeItem(id);
-		if (selectedItemId === id) {
-			selectedItemId = pdfs.items.length > 0 ? pdfs.items[0].id : null;
-		}
-	}
-
 	function handleDownload(item: PDFItem) {
 		if (item.processedBlob) {
-			const filename = getOutputFilename(item.name, pdfs.settings.tool);
-			downloadFile(item.processedBlob, filename);
-		} else if (item.processedBlobs && item.processedBlobs.length > 0) {
+			downloadFile(item.processedBlob, getOutputFilename(item.name, pdfs.settings.tool));
+		} else if (item.processedBlobs?.length) {
 			const baseName = item.name.replace(/\.[^/.]+$/, '');
 			const ext = pdfs.settings.tool === 'pdf-to-images' ? `.${pdfs.settings.imageFormat}` : '.pdf';
 			downloadMultipleFiles(item.processedBlobs, baseName, ext);
@@ -126,65 +97,66 @@
 		}));
 		await downloadAllAsZip(files, 'smash-output.zip');
 	}
-
-	function getStatusColor(status: string) {
-		switch (status) {
-			case 'completed':
-				return 'text-green-400';
-			case 'processing':
-				return 'text-accent-start';
-			case 'error':
-				return 'text-red-400';
-			default:
-				return 'text-surface-400';
-		}
-	}
 </script>
 
 <!-- Hidden file input -->
 <input bind:this={fileInput} type="file" class="hidden" onchange={handleFileInputChange} />
 
-<div class="bg-surface-950 flex h-screen flex-col overflow-hidden">
-	<!-- ── Top bar ── -->
-	<header
-		class="bg-surface-900/80 border-surface-800 flex h-12 flex-shrink-0 items-center justify-between border-b px-4"
-	>
-		<div class="flex items-center gap-3">
-			<!-- Logo -->
-			<a href={resolve('/')} class="flex items-center gap-2">
-				<div
-					class="from-accent-start to-accent-end flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br shadow-sm"
-				>
-					<FileText class="h-4 w-4 text-white" />
-				</div>
-				<span class="text-surface-200 text-sm font-bold">Smash</span>
-			</a>
+<svelte:window
+	onkeydown={(e) => {
+		if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+			e.preventDefault();
+			commandPaletteOpen = true;
+		}
+	}}
+/>
 
-			<!-- Active tool badge -->
-			{#if currentTool}
-				<div class="text-surface-600">›</div>
-				<span class="text-surface-400 text-xs">{currentTool.label}</span>
+<CommandPalette
+	open={commandPaletteOpen}
+	onClose={() => (commandPaletteOpen = false)}
+	onDownload={handleDownloadAll}
+	onClear={() => {
+		pdfs.clearAll();
+		selectedItemId = null;
+	}}
+	onOpenFile={openFilePicker}
+/>
+
+<div class="bg-surface-950 flex h-screen flex-col overflow-hidden">
+
+	<!-- ── Title bar ── -->
+	<header class="bg-surface-900 border-surface-800 flex h-11 flex-shrink-0 items-center justify-between border-b px-3">
+		<div class="flex items-center gap-2.5">
+			<a href={resolve('/')} class="flex items-center gap-2 opacity-80 hover:opacity-100 transition-opacity">
+				<div class="from-accent-start to-accent-end flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br">
+					<FileText class="h-3.5 w-3.5 text-white" />
+				</div>
+				<span class="text-surface-300 text-sm font-semibold">Smash</span>
+			</a>
+			{#if selectedItem}
+				<span class="text-surface-700">·</span>
+				<span class="text-surface-500 max-w-[200px] truncate text-xs" title={selectedItem.name}>{selectedItem.name}</span>
 			{/if}
 		</div>
 
-		<div class="flex items-center gap-2">
-			<!-- File count -->
-			{#if hasItems}
-				<span class="text-surface-500 text-xs"
-					>{pdfs.items.length} file{pdfs.items.length !== 1 ? 's' : ''}</span
-				>
-			{/if}
+		<div class="flex items-center gap-1.5">
+			<!-- Keyboard shortcut hint -->
+			<button
+				onclick={() => (commandPaletteOpen = true)}
+				class="text-surface-600 hover:text-surface-400 hover:bg-surface-800 rounded px-1.5 py-1 font-mono text-[10px] transition-colors"
+				title="Command palette"
+			>⌘K</button>
 
-			<!-- Open file -->
+			<!-- Add file -->
 			<button
 				onclick={openFilePicker}
-				class="text-surface-300 hover:text-surface-100 hover:bg-surface-800 flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
+				class="text-surface-400 hover:text-surface-200 hover:bg-surface-800 flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
 			>
 				<Plus class="h-3.5 w-3.5" />
 				Open
 			</button>
 
-			<!-- Download -->
+			<!-- Download — prominent when something is ready -->
 			{#if completedCount > 0}
 				<button
 					onclick={handleDownloadAll}
@@ -195,15 +167,11 @@
 				</button>
 			{/if}
 
-			<!-- Clear all -->
 			{#if hasItems}
 				<button
-					onclick={() => {
-						pdfs.clearAll();
-						selectedItemId = null;
-					}}
-					class="text-surface-500 hover:text-surface-300 hover:bg-surface-800 rounded-lg p-1.5 transition-colors"
-					title="Clear all files"
+					onclick={() => { pdfs.clearAll(); selectedItemId = null; }}
+					class="text-surface-600 hover:text-surface-400 hover:bg-surface-800 rounded-lg p-1.5 transition-colors"
+					title="Close document"
 				>
 					<X class="h-3.5 w-3.5" />
 				</button>
@@ -211,225 +179,148 @@
 		</div>
 	</header>
 
+	<!-- ── Tool toolbar ── -->
+	<div class="bg-surface-900/60 border-surface-800 h-[52px] flex-shrink-0 border-b">
+		<WorkspaceToolbar />
+	</div>
+
 	<!-- ── Main content ── -->
-	<div class="flex min-h-0 flex-1">
-		<!-- ═══ Left/Center: PDF Viewer or File Grid or Empty State ═══ -->
-		<div class="flex min-w-0 flex-1 flex-col overflow-hidden">
-			<!-- Multi-file tool: show file list with thumbnails -->
-			{#if !isSingleFileTool && hasItems}
-				<!-- Collapsible file list header -->
-				<div class="border-surface-800 bg-surface-900/60 border-b px-4 py-2">
-					<button
-						onclick={() => (showFileList = !showFileList)}
-						class="text-surface-400 hover:text-surface-200 flex items-center gap-2 text-xs font-medium transition-colors"
-					>
-						<Layers class="h-3.5 w-3.5" />
-						{pdfs.items.length} file{pdfs.items.length !== 1 ? 's' : ''}
-						<ChevronDown
-							class="h-3.5 w-3.5 transition-transform {showFileList ? 'rotate-180' : ''}"
-						/>
-					</button>
+	<div class="flex min-h-0 flex-1 overflow-hidden">
+
+		{#if !hasItems}
+			<!-- Empty state: centred drop zone -->
+			<div class="flex flex-1 flex-col items-center justify-center p-12" transition:fade={{ duration: 200 }}>
+				<div class="w-full max-w-sm">
+					<DropZone />
 				</div>
+				<p class="text-surface-600 mt-5 text-xs">All processing happens locally — files never leave your device</p>
+			</div>
 
-				{#if showFileList}
-					<div class="border-surface-800 border-b p-3" transition:fly={{ y: -8, duration: 150 }}>
-						<div class="flex flex-wrap gap-2">
-							{#each pdfs.items as item (item.id)}
-								<div
-									class="bg-surface-800/80 border-surface-700 flex items-center gap-2 rounded-lg border px-2 py-1.5 text-xs"
-								>
-									{#if item.thumbnail}
-										<img src={item.thumbnail} alt="" class="h-6 w-5 rounded object-cover" />
-									{:else}
-										<FileText class="text-surface-500 h-4 w-4" />
-									{/if}
-									<span class="text-surface-300 max-w-[120px] truncate" title={item.name}
-										>{item.name}</span
-									>
-									<button
-										onclick={() => removeItem(item.id)}
-										class="text-surface-500 transition-colors hover:text-red-400"
-										aria-label="Remove {item.name}"
-									>
-										<X class="h-3 w-3" />
-									</button>
-								</div>
-							{/each}
-							<button
-								onclick={openFilePicker}
-								class="border-surface-600 text-surface-500 hover:text-surface-300 hover:border-surface-500 flex items-center gap-1 rounded-lg border border-dashed px-2 py-1.5 text-xs transition-colors"
-							>
-								<Plus class="h-3.5 w-3.5" />
-								Add
-							</button>
-						</div>
-					</div>
-				{/if}
-
-				<!-- Multi-file empty/ready area -->
-				<div class="flex flex-1 items-center justify-center p-8">
-					<div class="max-w-sm text-center">
-						<div
-							class="bg-accent-start/10 border-accent-start/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border"
-						>
-							<Layers class="text-accent-start h-8 w-8" />
-						</div>
-						<h3 class="text-surface-200 mb-2 text-lg font-semibold">{currentTool?.label}</h3>
-						<p class="text-surface-500 mb-6 text-sm">
-							{pdfs.items.length} file{pdfs.items.length !== 1 ? 's' : ''} ready.
-							{#if pdfs.settings.tool === 'merge'}
-								Files will be merged in the order shown above.
-							{:else if pdfs.settings.tool === 'images-to-pdf'}
-								Images will become pages in the order shown above.
-							{/if}
+		{:else if !isSingleFileTool}
+			<!-- Merge / Images-to-PDF: file list -->
+			<div class="flex flex-1 flex-col overflow-hidden">
+				<div class="border-surface-800/60 bg-surface-900/40 flex-1 overflow-y-auto p-4">
+					<div class="mx-auto max-w-md space-y-2">
+						<p class="text-surface-500 mb-4 text-xs">
+							{#if pdfs.settings.tool === 'merge'}Files will be merged in this order.{:else}Images will become pages in this order.{/if}
 						</p>
-					</div>
-				</div>
-
-				<!-- Single-file tool with a selected item to view -->
-			{:else if selectedItem && needsViewer}
-				<div class="flex-1 overflow-hidden" transition:fade={{ duration: 150 }}>
-					<PDFViewer item={selectedItem} />
-				</div>
-
-				<!-- Completed single item -->
-			{:else if selectedItem?.status === 'completed'}
-				<div
-					class="flex flex-1 items-center justify-center p-8"
-					transition:fade={{ duration: 150 }}
-				>
-					<div class="text-center">
-						<div
-							class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20"
-						>
-							<Check class="h-8 w-8 text-green-400" />
-						</div>
-						<h3 class="text-surface-200 mb-2 text-xl font-semibold">Done</h3>
-						<p class="text-surface-400 mb-1 text-sm">{selectedItem.name}</p>
-						{#if selectedItem.processedSize}
-							<p class="text-surface-500 mb-6 text-xs">
-								{formatBytes(selectedItem.originalSize)}
-								<ChevronRight class="inline h-3 w-3" />
-								<span
-									class={selectedItem.processedSize < selectedItem.originalSize
-										? 'text-green-400'
-										: 'text-amber-400'}
-								>
-									{formatBytes(selectedItem.processedSize)}
-								</span>
-							</p>
-						{/if}
+						{#each pdfs.items as item (item.id)}
+							<div class="bg-surface-800/60 border-surface-700/60 flex items-center gap-3 rounded-xl border px-3 py-2.5">
+								<FileText class="text-surface-500 h-4 w-4 flex-shrink-0" />
+								<span class="text-surface-300 flex-1 truncate text-sm">{item.name}</span>
+								<span class="text-surface-600 text-xs">{formatBytes(item.originalSize)}</span>
+								<button
+									onclick={() => pdfs.removeItem(item.id)}
+									class="text-surface-600 hover:text-red-400 rounded p-0.5 transition-colors"
+									aria-label="Remove"
+								><X class="h-3.5 w-3.5" /></button>
+							</div>
+						{/each}
 						<button
-							onclick={() => handleDownload(selectedItem)}
-							class="from-accent-start to-accent-end shadow-accent-start/30 mx-auto flex items-center gap-2 rounded-xl bg-gradient-to-r px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:opacity-90"
+							onclick={openFilePicker}
+							class="border-surface-700 text-surface-600 hover:text-surface-400 hover:border-surface-500 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed py-3 text-sm transition-colors"
 						>
-							<Download class="h-4 w-4" />
-							Download
+							<Plus class="h-4 w-4" />
+							Add files
 						</button>
 					</div>
 				</div>
+			</div>
 
-				<!-- Processing -->
-			{:else if selectedItem?.status === 'processing'}
-				<div class="flex flex-1 items-center justify-center p-8">
-					<div class="text-center">
-						<Loader2 class="text-accent-start mx-auto mb-4 h-10 w-10 animate-spin" />
-						<p class="text-surface-300 text-sm font-medium">
-							{selectedItem.progressStage ?? 'Processing'}…
-						</p>
+		{:else if selectedItem}
+			<!-- Single-file view: always show the viewer -->
+			<div class="flex min-w-0 flex-1 flex-col overflow-hidden">
+
+				<!-- Processing / completion banner (non-blocking) -->
+				{#if selectedItem.status === 'processing'}
+					<div class="bg-surface-800/80 border-surface-700/50 border-b px-4 py-2 flex items-center gap-3">
+						<Loader2 class="text-accent-start h-3.5 w-3.5 animate-spin flex-shrink-0" />
+						<span class="text-surface-300 text-xs">{selectedItem.progressStage ?? 'Processing'}…</span>
 						{#if selectedItem.progress > 0}
-							<div class="bg-surface-800 mx-auto mt-4 h-2 w-48 overflow-hidden rounded-full">
-								<div
-									class="from-accent-start to-accent-end h-full bg-gradient-to-r transition-all"
-									style="width: {selectedItem.progress}%"
-								></div>
+							<div class="bg-surface-700 h-1 flex-1 overflow-hidden rounded-full">
+								<div class="from-accent-start to-accent-end h-full bg-gradient-to-r transition-all" style="width: {selectedItem.progress}%"></div>
 							</div>
 						{/if}
 					</div>
-				</div>
-
-				<!-- Error -->
-			{:else if selectedItem?.status === 'error'}
-				<div class="flex flex-1 items-center justify-center p-8">
-					<div class="text-center">
-						<AlertCircle class="mx-auto mb-4 h-10 w-10 text-red-400" />
-						<p class="text-surface-200 mb-2 text-sm font-medium">Processing failed</p>
-						<p class="text-surface-500 mb-4 max-w-xs text-xs">{selectedItem.error}</p>
-					</div>
-				</div>
-
-				<!-- Empty state (no files) -->
-			{:else}
-				<div
-					class="flex flex-1 flex-col items-center justify-center p-8"
-					transition:fade={{ duration: 200 }}
-				>
-					<div class="w-full max-w-md">
-						<DropZone />
-					</div>
-					{#if !hasItems}
-						<p class="text-surface-600 mt-4 text-xs">
-							All processing happens locally — files never leave your device
-						</p>
-					{/if}
-				</div>
-			{/if}
-
-			<!-- File list strip for single-file tools (when multiple pending files exist) -->
-			{#if isSingleFileTool && pdfs.items.length > 1}
-				<div
-					class="border-surface-800 bg-surface-900/60 flex h-14 flex-shrink-0 items-center gap-2 overflow-x-auto border-t px-4"
-				>
-					{#each pdfs.items as item (item.id)}
+				{:else if selectedItem.status === 'completed'}
+					<div class="bg-green-500/10 border-green-500/20 border-b px-4 py-2 flex items-center gap-3">
+						<Check class="h-3.5 w-3.5 text-green-400 flex-shrink-0" />
+						<span class="text-green-300 text-xs font-medium">Done</span>
+						{#if selectedItem.processedSize}
+							<span class="text-surface-500 text-xs">
+								{formatBytes(selectedItem.originalSize)}
+								<ChevronRight class="inline h-3 w-3" />
+								<span class={selectedItem.processedSize < selectedItem.originalSize ? 'text-green-400' : 'text-amber-400'}>
+									{formatBytes(selectedItem.processedSize)}
+								</span>
+							</span>
+						{/if}
+						<div class="flex-1"></div>
 						<button
-							onclick={() => {
-								selectedItemId = item.id;
-							}}
-							class="flex flex-shrink-0 items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs transition-all
-								{selectedItemId === item.id
-								? 'bg-accent-start/20 border-accent-start/30 text-surface-200 border'
-								: 'text-surface-400 hover:text-surface-200 hover:bg-surface-800'}"
+							onclick={() => handleDownload(selectedItem)}
+							class="from-accent-start to-accent-end flex items-center gap-1.5 rounded-lg bg-gradient-to-r px-3 py-1 text-xs font-semibold text-white hover:opacity-90 transition-opacity"
 						>
-							{#if item.status === 'completed'}
-								<Check class="h-3 w-3 text-green-400" />
-							{:else if item.status === 'processing'}
-								<Loader2 class="text-accent-start h-3 w-3 animate-spin" />
-							{:else if item.status === 'error'}
-								<AlertCircle class="h-3 w-3 text-red-400" />
-							{:else}
-								<FileText class="h-3 w-3 {getStatusColor(item.status)}" />
-							{/if}
-							<span class="max-w-[140px] truncate" title={item.name}>{item.name}</span>
+							<Download class="h-3 w-3" />
+							Download
 						</button>
-					{/each}
-					<button
-						onclick={openFilePicker}
-						class="text-surface-500 hover:text-surface-300 flex flex-shrink-0 items-center gap-1 rounded-lg px-2 py-1.5 text-xs transition-colors"
-					>
-						<Plus class="h-3.5 w-3.5" />
-						Add
-					</button>
+					</div>
+				{:else if selectedItem.status === 'error'}
+					<div class="bg-red-500/10 border-red-500/20 border-b px-4 py-2 flex items-center gap-3">
+						<AlertCircle class="h-3.5 w-3.5 text-red-400 flex-shrink-0" />
+						<span class="text-red-300 text-xs">{selectedItem.error ?? 'Processing failed'}</span>
+					</div>
+				{/if}
+
+				<!-- PDF Viewer fills remaining space -->
+				<div class="flex-1 overflow-hidden">
+					<PDFViewer
+						file={selectedItem.file}
+						selectionMode={['split', 'delete-pages', 'reorder', 'rotate'].includes(pdfs.settings.tool)}
+						allowMultiSelect={['split', 'delete-pages', 'rotate'].includes(pdfs.settings.tool)}
+						onFileChange={(newFile) => pdfs.updateItem(selectedItem.id, { file: newFile, originalUrl: URL.createObjectURL(newFile) })}
+						onSelectionChange={(pages) => pdfs.updateItem(selectedItem.id, { selectedPages: pages })}
+					/>
 				</div>
-			{/if}
 
-			<!-- Batch summary when completed -->
-			{#if completedCount > 1}
-				<div class="border-surface-800 border-t p-3">
-					<BatchSummary compact={true} />
-				</div>
-			{/if}
-		</div>
+				<!-- File tab strip (multiple files) -->
+				{#if pdfs.items.length > 1}
+					<div class="border-surface-800 bg-surface-900/80 flex h-10 flex-shrink-0 items-center gap-1 overflow-x-auto border-t px-2">
+						{#each pdfs.items as item (item.id)}
+							<button
+								onclick={() => (selectedItemId = item.id)}
+								class="flex flex-shrink-0 items-center gap-1.5 rounded px-2.5 py-1 text-xs transition-all
+									{selectedItemId === item.id
+									? 'bg-surface-700 text-surface-100'
+									: 'text-surface-500 hover:text-surface-300 hover:bg-surface-800/60'}"
+							>
+								{#if item.status === 'completed'}
+									<Check class="h-2.5 w-2.5 text-green-400" />
+								{:else if item.status === 'processing'}
+									<Loader2 class="text-accent-start h-2.5 w-2.5 animate-spin" />
+								{:else if item.status === 'error'}
+									<AlertCircle class="h-2.5 w-2.5 text-red-400" />
+								{:else}
+									<FileText class="text-surface-600 h-2.5 w-2.5" />
+								{/if}
+								<span class="max-w-[120px] truncate">{item.name}</span>
+							</button>
+						{/each}
+						<button
+							onclick={openFilePicker}
+							class="text-surface-600 hover:text-surface-400 ml-1 flex flex-shrink-0 items-center gap-1 rounded px-1.5 py-1 text-xs transition-colors"
+						>
+							<Plus class="h-3 w-3" />
+						</button>
+					</div>
+				{/if}
+			</div>
+		{/if}
 
-		<!-- ═══ Right: Tool Panel ═══ -->
-		<div
-			class="border-surface-800 bg-surface-900/40 flex w-72 flex-shrink-0 flex-col overflow-hidden border-l"
-		>
-			<WorkspaceToolPanel />
-		</div>
-	</div>
-
-	<!-- ── Bottom toolbar ── -->
-	<div class="border-surface-800 h-14 flex-shrink-0 border-t">
-		<WorkspaceToolbar />
+		<!-- ── Right: Inspector ── -->
+		{#if hasItems}
+			<div class="border-surface-800 bg-surface-900/30 flex w-64 flex-shrink-0 flex-col overflow-hidden border-l">
+				<WorkspaceToolPanel />
+			</div>
+		{/if}
 	</div>
 </div>

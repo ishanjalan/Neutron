@@ -1,10 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import {
-	createTrackedUrl,
-	revokeTrackedUrl,
-	revokeAll,
-	getTrackedUrlCount,
-} from '@neutron/utils';
+import { createTrackedUrl, revokeTrackedUrl, revokeAll, getTrackedUrlCount } from '@neutron/utils';
 
 // Override the global mock to return unique URLs per call so the Set tracks
 // multiple entries correctly.

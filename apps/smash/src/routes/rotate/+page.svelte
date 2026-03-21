@@ -1,107 +1,36 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
+	import PDFViewer from '$lib/components/PDFViewer.svelte';
 	import { Footer } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
 	import { downloadBlob } from '@neutron/utils';
-	import { rotatePDF, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
-	import { formatBytes } from '$lib/stores/pdfs.svelte';
-	import {
-		RotateCw,
-		Upload,
-		FileText,
-		Download,
-		Trash2,
-		Loader2,
-		CheckCircle,
-		Settings,
-	} from 'lucide-svelte';
-	import { fade, fly } from 'svelte/transition';
+	import { getOutputFilename } from '$lib/utils/pdf';
+	import { RotateCw, Upload, Download, X, FileText } from 'lucide-svelte';
 
-	interface PDFFile {
-		id: string;
-		file: File;
-		originalUrl: string;
-		thumbnail?: string;
-		pageCount?: number;
-	}
-
-	let pdfFile = $state<PDFFile | null>(null);
-	let isProcessing = $state(false);
-	let rotationAngle = $state<90 | 180 | 270>(90);
-	let resultBlob = $state<Blob | null>(null);
-	let progress = $state(0);
-	let fileInput: HTMLInputElement;
+	let currentFile = $state<File | null>(null);
+	let hasChanges = $state(false);
 	let isDragging = $state(false);
+	let fileInput: HTMLInputElement;
 
-	const hasFile = $derived(pdfFile !== null);
-
-	function generateId(): string {
-		return `pdf-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-	}
-
-	async function handleFiles(newFiles: File[]) {
-		const file = newFiles.find((f) => f.type === 'application/pdf' || f.name.endsWith('.pdf'));
-		if (!file) {
+	async function handleFiles(files: FileList | File[]) {
+		const arr = Array.from(files);
+		const pdf = arr.find((f) => f.type === 'application/pdf' || f.name.endsWith('.pdf'));
+		if (!pdf) {
 			toast.error('Please select a PDF file');
 			return;
 		}
-
-		if (pdfFile) URL.revokeObjectURL(pdfFile.originalUrl);
-
-		const newPdf: PDFFile = {
-			id: generateId(),
-			file,
-			originalUrl: URL.createObjectURL(file),
-		};
-
-		try {
-			newPdf.thumbnail = await generateThumbnail(file);
-			newPdf.pageCount = await getPageCount(file);
-		} catch (e) {
-			console.warn('Failed to get PDF metadata:', e);
-		}
-
-		pdfFile = newPdf;
-		resultBlob = null;
-		toast.success('PDF loaded');
+		currentFile = pdf;
+		hasChanges = false;
 	}
 
-	function removeFile() {
-		if (pdfFile) {
-			URL.revokeObjectURL(pdfFile.originalUrl);
-			pdfFile = null;
-			resultBlob = null;
-		}
+	function handleDownload() {
+		if (!currentFile) return;
+		downloadBlob(currentFile, getOutputFilename(currentFile.name, 'rotate'));
 	}
 
-	async function handleRotate() {
-		if (!pdfFile) return;
-
-		isProcessing = true;
-		progress = 0;
-
-		try {
-			const result = await rotatePDF(pdfFile.file, {
-				angle: rotationAngle,
-				onProgress: (p) => {
-					progress = p;
-				},
-			});
-
-			resultBlob = result;
-			toast.success('PDF rotated successfully!');
-		} catch (error) {
-			console.error('Rotate error:', error);
-			toast.error(error instanceof Error ? error.message : 'Rotation failed');
-		} finally {
-			isProcessing = false;
-		}
-	}
-
-	function downloadResult() {
-		if (!resultBlob || !pdfFile) return;
-		const filename = getOutputFilename(pdfFile.file.name, 'rotate');
-		downloadBlob(resultBlob, filename);
+	function clearFile() {
+		currentFile = null;
+		hasChanges = false;
 	}
 
 	function handleDragEnter(e: DragEvent) {
@@ -125,14 +54,14 @@
 	async function handleDrop(e: DragEvent) {
 		e.preventDefault();
 		isDragging = false;
-		if (e.dataTransfer?.files) await handleFiles(Array.from(e.dataTransfer.files));
+		if (e.dataTransfer?.files) await handleFiles(e.dataTransfer.files);
 	}
 	function openFilePicker() {
 		fileInput?.click();
 	}
 	async function handleFileInput(e: Event) {
 		const target = e.target as HTMLInputElement;
-		if (target.files) await handleFiles(Array.from(target.files));
+		if (target.files) await handleFiles(target.files);
 		target.value = '';
 	}
 </script>
@@ -151,150 +80,92 @@
 	<link rel="canonical" href="https://ishanjalan.github.io/Smash/rotate" />
 </svelte:head>
 
-<div class="flex min-h-screen flex-col">
+<div class="flex flex-col" style="height: 100dvh;">
 	<Header />
-	<div class="fixed inset-0 -z-10 overflow-hidden">
+
+	{#if currentFile}
+		<!-- Slim action bar -->
 		<div
-			class="absolute -top-1/2 -right-1/4 h-[800px] w-[800px] rounded-full bg-gradient-to-br from-cyan-500/10 to-blue-500/10 blur-3xl"
-		></div>
-	</div>
+			class="bg-surface-900/95 border-surface-800 flex flex-shrink-0 items-center gap-3 border-b px-4 py-2"
+		>
+			<RotateCw class="text-cyan-400 h-4 w-4 flex-shrink-0" />
+			<span class="text-surface-200 min-w-0 flex-1 truncate text-sm font-medium"
+				>{currentFile.name}</span
+			>
+			<span class="text-surface-500 flex-shrink-0 text-xs">
+				{hasChanges ? 'Unsaved changes' : 'No changes yet'}
+			</span>
+			<button
+				onclick={handleDownload}
+				disabled={!hasChanges}
+				class="flex flex-shrink-0 items-center gap-1.5 rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-40"
+			>
+				<Download class="h-3.5 w-3.5" /> Download
+			</button>
+			<button
+				onclick={clearFile}
+				class="text-surface-500 hover:text-surface-300 flex-shrink-0 rounded p-1 transition-colors"
+				title="Clear file"
+			>
+				<X class="h-4 w-4" />
+			</button>
+		</div>
 
-	<main class="flex-1 px-4 pt-28 pb-12 sm:px-6 lg:px-8">
-		<div class="mx-auto max-w-4xl">
-			<div class="mb-8 text-center" in:fade={{ duration: 200 }}>
-				<div
-					class="mb-4 inline-flex items-center gap-2 rounded-full bg-cyan-500/10 px-4 py-1.5 text-sm font-medium text-cyan-400"
-				>
-					<RotateCw class="h-4 w-4" />
-					Rotate PDF
-				</div>
-				<h1 class="text-surface-100 text-3xl font-bold">Rotate all pages in your PDF</h1>
-				<p class="text-surface-500 mt-2">Rotate clockwise by 90°, 180°, or 270°</p>
-			</div>
-
-			<div class="grid gap-6 lg:grid-cols-2">
-				<div>
-					{#if !hasFile}
-						<div
-							role="button"
-							tabindex="0"
-							ondragenter={handleDragEnter}
-							ondragleave={handleDragLeave}
-							ondragover={handleDragOver}
-							ondrop={handleDrop}
-							onclick={openFilePicker}
-							onkeydown={(e) => e.key === 'Enter' && openFilePicker()}
-							class="relative cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed py-16 transition-all duration-300 {isDragging
-								? 'border-accent-start bg-accent-start/10 scale-[1.02]'
-								: 'border-surface-700 hover:border-surface-600 bg-surface-900/50'}"
-						>
-							<input
-								bind:this={fileInput}
-								type="file"
-								accept=".pdf,application/pdf"
-								class="hidden"
-								onchange={handleFileInput}
-							/>
-							<div class="flex flex-col items-center justify-center gap-4 px-6">
-								<div
-									class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20"
-								>
-									<Upload class="h-8 w-8 text-cyan-400" />
-								</div>
-								<p class="text-surface-200 text-lg font-medium">
-									Drop a PDF here or click to browse
-								</p>
-							</div>
-						</div>
-					{:else if pdfFile}
-						<div class="glass rounded-2xl p-4" in:fly={{ y: 20, duration: 200 }}>
-							<div class="flex items-start gap-4">
-								<div class="bg-surface-800 h-24 w-20 flex-shrink-0 overflow-hidden rounded-lg">
-									{#if pdfFile.thumbnail}
-										<img src={pdfFile.thumbnail} alt="" class="h-full w-full object-cover" />
-									{:else}
-										<div class="flex h-full w-full items-center justify-center">
-											<FileText class="text-surface-500 h-10 w-10" />
-										</div>
-									{/if}
-								</div>
-								<div class="min-w-0 flex-1">
-									<p class="text-surface-200 truncate font-medium">{pdfFile.file.name}</p>
-									<p class="text-surface-500 mt-1 text-sm">
-										{formatBytes(pdfFile.file.size)} • {pdfFile.pageCount} pages
-									</p>
-									<button
-										onclick={removeFile}
-										class="mt-2 flex items-center gap-1 text-sm text-red-400 hover:text-red-300"
-									>
-										<Trash2 class="h-3 w-3" /> Remove
-									</button>
-								</div>
-							</div>
-							{#if isProcessing}
-								<div class="mt-4">
-									<div class="bg-surface-700 h-2 overflow-hidden rounded-full">
-										<div
-											class="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all"
-											style="width: {progress}%"
-										></div>
-									</div>
-								</div>
-							{/if}
-						</div>
-						{#if resultBlob}
-							<div
-								class="mt-4 rounded-xl border border-green-500/30 bg-green-500/10 p-4"
-								in:fly={{ y: 10, duration: 200 }}
-							>
-								<div class="flex items-center justify-between">
-									<p class="flex items-center gap-2 font-medium text-green-400">
-										<CheckCircle class="h-4 w-4" /> Rotation complete!
-									</p>
-									<button
-										onclick={downloadResult}
-										class="flex items-center gap-2 rounded-lg bg-green-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-600"
-									>
-										<Download class="h-3 w-3" /> Download
-									</button>
-								</div>
-							</div>
-						{/if}
-					{/if}
-				</div>
-
-				<div class="glass rounded-2xl p-6" in:fly={{ y: 20, delay: 100, duration: 200 }}>
-					<h3 class="text-surface-100 mb-6 flex items-center gap-2 text-lg font-semibold">
-						<Settings class="text-accent-start h-5 w-5" /> Rotation Settings
-					</h3>
-					<div>
-						<label class="text-surface-300 mb-3 block text-sm font-medium">Rotation Angle</label>
-						<div class="grid grid-cols-3 gap-2">
-							{#each [90, 180, 270] as angle (angle)}
-								<button
-									onclick={() => (rotationAngle = angle as 90 | 180 | 270)}
-									class="rounded-xl px-4 py-3 text-center transition-all {rotationAngle === angle
-										? 'bg-accent-start text-white'
-										: 'bg-surface-800 text-surface-400 hover:text-surface-200 hover:bg-surface-700'}"
-								>
-									<span class="block font-bold">{angle}°</span>
-								</button>
-							{/each}
-						</div>
-					</div>
-					<button
-						onclick={handleRotate}
-						disabled={!hasFile || isProcessing}
-						class="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-3 text-base font-semibold text-white shadow-lg transition-all hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+		<!-- Viewer -->
+		<div class="min-h-0 flex-1 overflow-hidden">
+			<PDFViewer
+				file={currentFile}
+				onFileChange={(newFile) => {
+					currentFile = newFile;
+					hasChanges = true;
+				}}
+			/>
+		</div>
+	{:else}
+		<!-- Drop zone -->
+		<div class="flex min-h-0 flex-1 items-center justify-center p-8">
+			<div
+				role="button"
+				tabindex="0"
+				ondragenter={handleDragEnter}
+				ondragleave={handleDragLeave}
+				ondragover={handleDragOver}
+				ondrop={handleDrop}
+				onclick={openFilePicker}
+				onkeydown={(e) => e.key === 'Enter' && openFilePicker()}
+				class="relative w-full max-w-lg cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed py-20 transition-all duration-300 {isDragging
+					? 'border-accent-start bg-accent-start/10 scale-[1.02]'
+					: 'border-surface-700 hover:border-surface-600 bg-surface-900/50'}"
+			>
+				<input
+					bind:this={fileInput}
+					type="file"
+					accept=".pdf,application/pdf"
+					class="hidden"
+					onchange={handleFileInput}
+				/>
+				<div class="flex flex-col items-center justify-center gap-4 px-6 text-center">
+					<div
+						class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20"
 					>
-						{#if isProcessing}<Loader2 class="h-5 w-5 animate-spin" /> Rotating...{:else}<RotateCw
-								class="h-5 w-5"
-							/> Rotate PDF{/if}
-					</button>
+						<Upload class="h-8 w-8 text-cyan-400" />
+					</div>
+					<div>
+						<p class="text-surface-200 text-lg font-medium">Drop a PDF here or click to browse</p>
+						<p class="text-surface-500 mt-1 text-sm">
+							Use the hover controls on each thumbnail to rotate pages individually
+						</p>
+					</div>
+					<div
+						class="mt-2 inline-flex items-center gap-2 rounded-full bg-cyan-500/10 px-4 py-1.5 text-sm font-medium text-cyan-400"
+					>
+						<RotateCw class="h-4 w-4" />
+						Rotate PDF Pages
+					</div>
 				</div>
 			</div>
 		</div>
-	</main>
-	<Footer currentApp="smash" />
+		<Footer currentApp="smash" />
+	{/if}
 </div>
 <Toast />

@@ -47,39 +47,51 @@ function makeStaticGif(width: number, height: number, version: '89a' | '87a' = '
  * Animated GIF with N frames, each preceded by a Graphics Control Extension
  * with the specified delay (in centiseconds).
  */
-function makeAnimatedGif(
-	width: number,
-	height: number,
-	delaysCs: number[]
-): ArrayBuffer {
+function makeAnimatedGif(width: number, height: number, delaysCs: number[]): ArrayBuffer {
 	const bytes: number[] = [
 		// Header: GIF89a
-		0x47, 0x49, 0x46, 0x38, 0x39, 0x61,
+		0x47,
+		0x49,
+		0x46,
+		0x38,
+		0x39,
+		0x61,
 		// Logical Screen Descriptor
-		width & 0xff, (width >> 8) & 0xff,
-		height & 0xff, (height >> 8) & 0xff,
-		0x00, 0x00, 0x00, // packed, bg, aspect
+		width & 0xff,
+		(width >> 8) & 0xff,
+		height & 0xff,
+		(height >> 8) & 0xff,
+		0x00,
+		0x00,
+		0x00, // packed, bg, aspect
 	];
 
 	for (const delayCs of delaysCs) {
 		// Graphics Control Extension
 		bytes.push(
-			0x21, 0xf9, // ext introducer + GCE label
+			0x21,
+			0xf9, // ext introducer + GCE label
 			0x04, // block size
 			0x00, // packed
-			delayCs & 0xff, (delayCs >> 8) & 0xff, // delay in centiseconds
+			delayCs & 0xff,
+			(delayCs >> 8) & 0xff, // delay in centiseconds
 			0x00, // transparent color index
-			0x00, // block terminator
+			0x00 // block terminator
 		);
 		// Image Descriptor
 		bytes.push(
 			0x2c,
-			0x00, 0x00, 0x00, 0x00, // left, top
-			width & 0xff, (width >> 8) & 0xff,
-			height & 0xff, (height >> 8) & 0xff,
+			0x00,
+			0x00,
+			0x00,
+			0x00, // left, top
+			width & 0xff,
+			(width >> 8) & 0xff,
+			height & 0xff,
+			(height >> 8) & 0xff,
 			0x00, // packed: no local color table
 			0x02, // LZW minimum code size
-			0x00, // block terminator
+			0x00 // block terminator
 		);
 	}
 

@@ -6,7 +6,7 @@
 		IMAGE_FORMAT_OPTIONS,
 		TOOLS,
 	} from '$lib/stores/pdfs.svelte';
-	import { processFiles } from '$lib/utils/pdf';
+	import { processFiles, signPDF, downloadFile } from '$lib/utils/pdf';
 	import { isGhostscriptReady, onInitStart, onInitComplete } from '$lib/utils/ghostscript';
 	import { onMount } from 'svelte';
 	import {
@@ -20,8 +20,18 @@
 		Info,
 		MousePointerClick,
 		Type,
+		PenTool,
+		Download,
 	} from 'lucide-svelte';
 	import Tooltip from './Tooltip.svelte';
+	import SignatureModal from './SignatureModal.svelte';
+
+	// Sign tool state
+	let showSignatureModal = $state(false);
+	let capturedSignatureDataUrl = $state<string | null>(null);
+	let isSigningPlacementMode = $state(false);
+	let signPlacementPage = $state(1);
+	let isApplyingSignature = $state(false);
 
 	let isProcessing = $state(false);
 	let isLoadingWasm = $state(false);
@@ -76,6 +86,8 @@
 				return 'Reverse';
 			case 'remove-blank-pages':
 				return 'Remove Blanks';
+			case 'sign':
+				return 'Apply Signature';
 			default:
 				return 'Process';
 		}
@@ -138,7 +150,9 @@
 	<div class="flex-1 space-y-5 overflow-y-auto px-4 py-4">
 		<!-- WASM loading -->
 		{#if isLoadingWasm}
-			<div class="bg-accent-start/10 border-accent-start/30 flex items-center gap-2 rounded-lg border p-3">
+			<div
+				class="bg-accent-start/10 border-accent-start/30 flex items-center gap-2 rounded-lg border p-3"
+			>
 				<Loader2 class="text-accent-start h-4 w-4 animate-spin" />
 				<span class="text-accent-start text-xs font-medium">Loading compression engine…</span>
 			</div>
@@ -147,7 +161,7 @@
 		<!-- ── Compress ── -->
 		{#if pdfs.settings.tool === 'compress'}
 			<div class="space-y-2">
-				<span class="text-surface-300 text-xs font-semibold uppercase tracking-wider">Quality</span>
+				<span class="text-surface-300 text-xs font-semibold tracking-wider uppercase">Quality</span>
 				<div class="grid grid-cols-2 gap-2">
 					{#each Object.entries(COMPRESSION_PRESETS) as [key, preset] (key)}
 						{@const PresetIcon = getPresetIcon(key)}
@@ -159,7 +173,9 @@
 								: 'bg-surface-800 text-surface-400 hover:text-surface-200 hover:bg-surface-700'}"
 						>
 							{#if preset.recommended}
-								<div class="absolute -top-1.5 -right-1.5 rounded-full bg-green-500 px-1.5 py-0.5 text-[9px] font-bold text-white">
+								<div
+									class="absolute -top-1.5 -right-1.5 rounded-full bg-green-500 px-1.5 py-0.5 text-[9px] font-bold text-white"
+								>
 									Best
 								</div>
 							{/if}
@@ -179,7 +195,9 @@
 			<div class="space-y-3">
 				{#if pdfs.settings.tool === 'split'}
 					<div class="space-y-1.5">
-						<span class="text-surface-300 text-xs font-semibold uppercase tracking-wider">Split Mode</span>
+						<span class="text-surface-300 text-xs font-semibold tracking-wider uppercase"
+							>Split Mode</span
+						>
 						<div class="flex gap-2">
 							{#each [{ value: 'range', label: 'Page Range' }, { value: 'every-n', label: 'Every N Pages' }] as mode (mode.value)}
 								<button
@@ -199,7 +217,7 @@
 				{#if pdfs.settings.splitMode === 'range' || pdfs.settings.tool === 'delete-pages'}
 					<div class="space-y-1.5">
 						<div class="flex items-center justify-between">
-							<span class="text-surface-300 text-xs font-semibold uppercase tracking-wider">
+							<span class="text-surface-300 text-xs font-semibold tracking-wider uppercase">
 								{pdfs.settings.tool === 'delete-pages' ? 'Pages to Delete' : 'Page Range'}
 							</span>
 							<div class="bg-surface-800 flex items-center gap-0.5 rounded p-0.5">
@@ -227,8 +245,14 @@
 						{#if useVisualPicker}
 							<div class="bg-surface-800/50 border-surface-700/50 rounded-lg border p-3">
 								{#if hasVisualSelection}
-									<p class="text-surface-400 mb-1 text-[10px]">{visuallySelectedPages.length} page{visuallySelectedPages.length !== 1 ? 's' : ''} selected</p>
-									<p class="text-surface-200 text-xs">{formatPageSelection(visuallySelectedPages)}</p>
+									<p class="text-surface-400 mb-1 text-[10px]">
+										{visuallySelectedPages.length} page{visuallySelectedPages.length !== 1
+											? 's'
+											: ''} selected
+									</p>
+									<p class="text-surface-200 text-xs">
+										{formatPageSelection(visuallySelectedPages)}
+									</p>
 								{:else}
 									<p class="text-surface-500 text-xs">Click pages in the viewer to select them</p>
 								{/if}
@@ -245,13 +269,17 @@
 					</div>
 				{:else if pdfs.settings.splitMode === 'every-n'}
 					<div class="space-y-1.5">
-						<label class="text-surface-300 text-xs font-semibold uppercase tracking-wider" for="split-n">Pages per file</label>
+						<label
+							class="text-surface-300 text-xs font-semibold tracking-wider uppercase"
+							for="split-n">Pages per file</label
+						>
 						<input
 							id="split-n"
 							type="number"
 							min="1"
 							value={pdfs.settings.splitEveryN}
-							oninput={(e) => pdfs.updateSettings({ splitEveryN: parseInt(e.currentTarget.value) || 1 })}
+							oninput={(e) =>
+								pdfs.updateSettings({ splitEveryN: parseInt(e.currentTarget.value) || 1 })}
 							class="bg-surface-800 border-surface-700 text-surface-200 focus:border-accent-start w-24 rounded-lg border px-3 py-2 text-xs focus:outline-none"
 						/>
 					</div>
@@ -262,7 +290,7 @@
 		<!-- ── Rotate ── -->
 		{#if pdfs.settings.tool === 'rotate'}
 			<div class="space-y-1.5">
-				<span class="text-surface-300 text-xs font-semibold uppercase tracking-wider">Angle</span>
+				<span class="text-surface-300 text-xs font-semibold tracking-wider uppercase">Angle</span>
 				<div class="flex gap-2">
 					{#each [90, 180, 270] as angle (angle)}
 						<button
@@ -283,7 +311,8 @@
 		{#if pdfs.settings.tool === 'pdf-to-images'}
 			<div class="space-y-4">
 				<div class="space-y-1.5">
-					<span class="text-surface-300 text-xs font-semibold uppercase tracking-wider">Format</span>
+					<span class="text-surface-300 text-xs font-semibold tracking-wider uppercase">Format</span
+					>
 					<div class="flex gap-2">
 						{#each IMAGE_FORMAT_OPTIONS as fmt (fmt.value)}
 							<button
@@ -300,9 +329,13 @@
 				</div>
 
 				<div class="space-y-1.5">
-					<span class="text-surface-300 flex items-center gap-1 text-xs font-semibold uppercase tracking-wider">
+					<span
+						class="text-surface-300 flex items-center gap-1 text-xs font-semibold tracking-wider uppercase"
+					>
 						DPI
-						<Tooltip text="Higher DPI = larger files but better quality. 72 for screens, 300 for print." />
+						<Tooltip
+							text="Higher DPI = larger files but better quality. 72 for screens, 300 for print."
+						/>
 					</span>
 					<div class="flex flex-wrap gap-2">
 						{#each DPI_OPTIONS as dpi (dpi.value)}
@@ -320,7 +353,10 @@
 				</div>
 
 				<div class="space-y-1.5">
-					<label for="img-quality" class="text-surface-300 text-xs font-semibold uppercase tracking-wider">
+					<label
+						for="img-quality"
+						class="text-surface-300 text-xs font-semibold tracking-wider uppercase"
+					>
 						Quality: {pdfs.settings.imageQuality}%
 					</label>
 					<input
@@ -345,7 +381,10 @@
 					<span>AES-128 encryption</span>
 				</div>
 				<div class="space-y-1.5">
-					<label for="user-pw" class="text-surface-300 flex items-center gap-1 text-xs font-semibold uppercase tracking-wider">
+					<label
+						for="user-pw"
+						class="text-surface-300 flex items-center gap-1 text-xs font-semibold tracking-wider uppercase"
+					>
 						Password to Open
 						<Tooltip text="Required to open the PDF." />
 					</label>
@@ -359,7 +398,10 @@
 					/>
 				</div>
 				<div class="space-y-1.5">
-					<label for="owner-pw" class="text-surface-300 flex items-center gap-1 text-xs font-semibold uppercase tracking-wider">
+					<label
+						for="owner-pw"
+						class="text-surface-300 flex items-center gap-1 text-xs font-semibold tracking-wider uppercase"
+					>
 						Owner Password
 						<Tooltip text="Controls editing permissions. Leave blank to use the open password." />
 					</label>
@@ -378,7 +420,11 @@
 		<!-- ── Unlock ── -->
 		{#if pdfs.settings.tool === 'unlock'}
 			<div class="space-y-1.5">
-				<label for="unlock-pw" class="text-surface-300 text-xs font-semibold uppercase tracking-wider">PDF Password</label>
+				<label
+					for="unlock-pw"
+					class="text-surface-300 text-xs font-semibold tracking-wider uppercase"
+					>PDF Password</label
+				>
 				<input
 					id="unlock-pw"
 					type="password"
@@ -394,7 +440,9 @@
 		{#if pdfs.settings.tool === 'ocr'}
 			<div class="space-y-3">
 				<div class="space-y-1.5">
-					<span class="text-surface-300 text-xs font-semibold uppercase tracking-wider">Language</span>
+					<span class="text-surface-300 text-xs font-semibold tracking-wider uppercase"
+						>Language</span
+					>
 					<select
 						value={pdfs.settings.ocrLanguage}
 						onchange={(e) => pdfs.updateSettings({ ocrLanguage: e.currentTarget.value })}
@@ -415,7 +463,8 @@
 					</select>
 				</div>
 				<div class="space-y-1.5">
-					<span class="text-surface-300 text-xs font-semibold uppercase tracking-wider">Output</span>
+					<span class="text-surface-300 text-xs font-semibold tracking-wider uppercase">Output</span
+					>
 					<div class="flex flex-col gap-1.5">
 						{#each [{ value: 'searchable-pdf', label: 'Searchable PDF' }, { value: 'text-only', label: 'Text File' }, { value: 'text-and-pdf', label: 'Both' }] as mode (mode.value)}
 							<button
@@ -437,7 +486,9 @@
 		{#if pdfs.settings.tool === 'add-page-numbers'}
 			<div class="space-y-3">
 				<div class="space-y-1.5">
-					<span class="text-surface-300 text-xs font-semibold uppercase tracking-wider">Position</span>
+					<span class="text-surface-300 text-xs font-semibold tracking-wider uppercase"
+						>Position</span
+					>
 					<div class="grid grid-cols-2 gap-2">
 						{#each [{ value: 'bottom-center', label: 'Bottom Center' }, { value: 'bottom-right', label: 'Bottom Right' }, { value: 'top-center', label: 'Top Center' }, { value: 'top-right', label: 'Top Right' }] as pos (pos.value)}
 							<button
@@ -453,26 +504,36 @@
 					</div>
 				</div>
 				<div class="flex gap-3">
-					<div class="space-y-1.5 flex-1">
-						<label for="pn-start" class="text-surface-300 text-xs font-semibold uppercase tracking-wider">Start at</label>
+					<div class="flex-1 space-y-1.5">
+						<label
+							for="pn-start"
+							class="text-surface-300 text-xs font-semibold tracking-wider uppercase"
+							>Start at</label
+						>
 						<input
 							id="pn-start"
 							type="number"
 							min="0"
 							value={pdfs.settings.pageNumberStartAt}
-							oninput={(e) => pdfs.updateSettings({ pageNumberStartAt: parseInt(e.currentTarget.value) || 1 })}
+							oninput={(e) =>
+								pdfs.updateSettings({ pageNumberStartAt: parseInt(e.currentTarget.value) || 1 })}
 							class="bg-surface-800 border-surface-700 text-surface-200 focus:border-accent-start w-full rounded-lg border px-3 py-2 text-xs focus:outline-none"
 						/>
 					</div>
-					<div class="space-y-1.5 flex-1">
-						<label for="pn-size" class="text-surface-300 text-xs font-semibold uppercase tracking-wider">Font size</label>
+					<div class="flex-1 space-y-1.5">
+						<label
+							for="pn-size"
+							class="text-surface-300 text-xs font-semibold tracking-wider uppercase"
+							>Font size</label
+						>
 						<input
 							id="pn-size"
 							type="number"
 							min="6"
 							max="72"
 							value={pdfs.settings.pageNumberFontSize}
-							oninput={(e) => pdfs.updateSettings({ pageNumberFontSize: parseInt(e.currentTarget.value) || 12 })}
+							oninput={(e) =>
+								pdfs.updateSettings({ pageNumberFontSize: parseInt(e.currentTarget.value) || 12 })}
 							class="bg-surface-800 border-surface-700 text-surface-200 focus:border-accent-start w-full rounded-lg border px-3 py-2 text-xs focus:outline-none"
 						/>
 					</div>
@@ -484,7 +545,10 @@
 		{#if pdfs.settings.tool === 'watermark'}
 			<div class="space-y-3">
 				<div class="space-y-1.5">
-					<label for="wm-text" class="text-surface-300 text-xs font-semibold uppercase tracking-wider">Text</label>
+					<label
+						for="wm-text"
+						class="text-surface-300 text-xs font-semibold tracking-wider uppercase">Text</label
+					>
 					<input
 						id="wm-text"
 						type="text"
@@ -495,7 +559,10 @@
 					/>
 				</div>
 				<div class="space-y-1.5">
-					<label for="wm-opacity" class="text-surface-300 text-xs font-semibold uppercase tracking-wider">
+					<label
+						for="wm-opacity"
+						class="text-surface-300 text-xs font-semibold tracking-wider uppercase"
+					>
 						Opacity: {pdfs.settings.watermarkOpacity}%
 					</label>
 					<input
@@ -505,12 +572,17 @@
 						max="100"
 						step="5"
 						value={pdfs.settings.watermarkOpacity}
-						oninput={(e) => pdfs.updateSettings({ watermarkOpacity: parseInt(e.currentTarget.value) })}
+						oninput={(e) =>
+							pdfs.updateSettings({ watermarkOpacity: parseInt(e.currentTarget.value) })}
 						class="accent-accent-start w-full"
 					/>
 				</div>
 				<div class="space-y-1.5">
-					<label for="wm-size" class="text-surface-300 text-xs font-semibold uppercase tracking-wider">Font size: {pdfs.settings.watermarkFontSize}pt</label>
+					<label
+						for="wm-size"
+						class="text-surface-300 text-xs font-semibold tracking-wider uppercase"
+						>Font size: {pdfs.settings.watermarkFontSize}pt</label
+					>
 					<input
 						id="wm-size"
 						type="range"
@@ -518,7 +590,8 @@
 						max="200"
 						step="4"
 						value={pdfs.settings.watermarkFontSize}
-						oninput={(e) => pdfs.updateSettings({ watermarkFontSize: parseInt(e.currentTarget.value) })}
+						oninput={(e) =>
+							pdfs.updateSettings({ watermarkFontSize: parseInt(e.currentTarget.value) })}
 						class="accent-accent-start w-full"
 					/>
 				</div>
@@ -530,7 +603,11 @@
 			<div class="space-y-3">
 				{#each [{ key: 'metadataTitle', label: 'Title', placeholder: 'Document title' }, { key: 'metadataAuthor', label: 'Author', placeholder: 'Author name' }, { key: 'metadataSubject', label: 'Subject', placeholder: 'Subject' }, { key: 'metadataKeywords', label: 'Keywords', placeholder: 'keyword1, keyword2' }] as field (field.key)}
 					<div class="space-y-1.5">
-						<label for="meta-{field.key}" class="text-surface-300 text-xs font-semibold uppercase tracking-wider">{field.label}</label>
+						<label
+							for="meta-{field.key}"
+							class="text-surface-300 text-xs font-semibold tracking-wider uppercase"
+							>{field.label}</label
+						>
 						<input
 							id="meta-{field.key}"
 							type="text"
@@ -547,7 +624,10 @@
 		<!-- ── Remove Blank Pages ── -->
 		{#if pdfs.settings.tool === 'remove-blank-pages'}
 			<div class="space-y-1.5">
-				<label for="blank-threshold" class="text-surface-300 text-xs font-semibold uppercase tracking-wider">
+				<label
+					for="blank-threshold"
+					class="text-surface-300 text-xs font-semibold tracking-wider uppercase"
+				>
 					Sensitivity: {pdfs.settings.blankPageThreshold}%
 					<Tooltip text="0% = only fully blank pages. Higher values remove near-blank pages too." />
 				</label>
@@ -558,7 +638,8 @@
 					max="50"
 					step="5"
 					value={pdfs.settings.blankPageThreshold}
-					oninput={(e) => pdfs.updateSettings({ blankPageThreshold: parseInt(e.currentTarget.value) })}
+					oninput={(e) =>
+						pdfs.updateSettings({ blankPageThreshold: parseInt(e.currentTarget.value) })}
 					class="accent-accent-start w-full"
 				/>
 			</div>
@@ -571,11 +652,13 @@
 					<Info class="text-surface-500 mt-0.5 h-4 w-4 flex-shrink-0" />
 					<p class="text-surface-500 text-xs">
 						{#if pdfs.settings.tool === 'merge'}
-							Drag to reorder files before merging. The output will contain all pages in the order shown.
+							Drag to reorder files before merging. The output will contain all pages in the order
+							shown.
 						{:else if pdfs.settings.tool === 'reorder'}
 							Select pages in the viewer. The new order will be saved to the output PDF.
 						{:else if pdfs.settings.tool === 'images-to-pdf'}
-							Images will become full pages in the order shown. Add multiple images, then click Create PDF.
+							Images will become full pages in the order shown. Add multiple images, then click
+							Create PDF.
 						{:else if pdfs.settings.tool === 'reverse-pages'}
 							All pages will be reversed in order — last page becomes first.
 						{/if}
@@ -583,31 +666,159 @@
 				</div>
 			</div>
 		{/if}
-	</div>
 
-	<!-- Apply button (pinned to bottom) -->
-	<div class="border-surface-700/50 border-t p-4">
-		{#if !canProcess}
-			<div class="text-surface-500 rounded-lg py-2 text-center text-xs">
-				{needsMultipleFiles ? 'Add at least 2 files to continue' : 'Add a file to get started'}
-			</div>
-		{:else}
-			<button
-				onclick={handleApply}
-				disabled={!canStartProcessing || isProcessing || isAnyProcessing}
-				class="from-accent-start to-accent-end shadow-accent-start/30 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-			>
-				{#if isProcessing || isAnyProcessing}
-					<Loader2 class="h-4 w-4 animate-spin" />
-					Processing…
+		<!-- ── Sign ── -->
+		{#if pdfs.settings.tool === 'sign'}
+			<div class="space-y-3">
+				{#if !capturedSignatureDataUrl}
+					<div class="bg-surface-800/50 border-surface-700/50 rounded-lg border p-3">
+						<div class="flex items-start gap-2">
+							<Info class="text-surface-500 mt-0.5 h-4 w-4 flex-shrink-0" />
+							<p class="text-surface-500 text-xs">
+								Draw, type, or upload your signature, then click to place it on any page.
+							</p>
+						</div>
+					</div>
+					<button
+						onclick={() => (showSignatureModal = true)}
+						class="bg-surface-800 hover:bg-surface-700 text-surface-200 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-medium transition-colors"
+					>
+						<PenTool class="h-4 w-4" />
+						Create Signature
+					</button>
 				{:else}
-					<Play class="h-4 w-4" fill="currentColor" />
-					{getProcessLabel()}
-					{#if pendingCount > 1}
-						<span class="bg-white/20 rounded-full px-1.5 py-0.5 text-xs">{pendingCount}</span>
+					<div class="space-y-2">
+						<div class="bg-surface-950 rounded-xl p-3">
+							<img
+								src={capturedSignatureDataUrl}
+								alt="Your signature"
+								class="max-h-20 w-full object-contain"
+							/>
+						</div>
+						<div class="flex gap-2">
+							<button
+								onclick={() => (showSignatureModal = true)}
+								class="bg-surface-800 hover:bg-surface-700 text-surface-300 flex-1 rounded-lg px-3 py-1.5 text-xs transition-colors"
+							>
+								Change
+							</button>
+							<button
+								onclick={() => {
+									capturedSignatureDataUrl = null;
+									isSigningPlacementMode = false;
+								}}
+								class="text-surface-500 hover:text-red-400 rounded-lg px-3 py-1.5 text-xs transition-colors"
+							>
+								Clear
+							</button>
+						</div>
+					</div>
+
+					{#if capturedSignatureDataUrl && pdfs.items.length > 0}
+						<div class="space-y-2">
+							<label class="text-surface-300 text-xs font-semibold tracking-wider uppercase"
+								>Place on page</label
+							>
+							<div class="flex items-center gap-2">
+								<input
+									type="number"
+									min="1"
+									max={pdfs.items[0]?.pageCount ?? 1}
+									bind:value={signPlacementPage}
+									class="bg-surface-800 border-surface-700 text-surface-200 focus:border-accent-start w-20 rounded-lg border px-3 py-2 text-xs focus:outline-none"
+								/>
+								<span class="text-surface-500 text-xs"
+									>of {pdfs.items[0]?.pageCount ?? '?'}</span
+								>
+							</div>
+
+							<button
+								onclick={async () => {
+									const targetItem = pdfs.items.find((i) => i.status === 'pending');
+									if (!targetItem || !capturedSignatureDataUrl) return;
+									isApplyingSignature = true;
+									try {
+										const { width, height } = await (async () => {
+											const img = new Image();
+											img.src = capturedSignatureDataUrl!;
+											await new Promise((r) => (img.onload = r));
+											return { width: img.width, height: img.height };
+										})();
+										// Place at center-ish of page (PDF default: 612x792 pts)
+										const sigW = 200;
+										const sigH = sigW * (height / width);
+										const sigX = 206;
+										const sigY = 40;
+										const { signPDF: doSign } = await import('$lib/utils/pdf');
+										const blob = await doSign(targetItem.file, capturedSignatureDataUrl!, {
+											pageNum: signPlacementPage,
+											x: sigX,
+											y: sigY,
+											width: sigW,
+											height: sigH,
+										});
+										downloadFile(blob, targetItem.name.replace(/\.pdf$/i, '-signed.pdf'));
+									} catch (err) {
+										console.error('Sign failed:', err);
+									} finally {
+										isApplyingSignature = false;
+									}
+								}}
+								disabled={isApplyingSignature}
+								class="from-accent-start to-accent-end flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r px-4 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
+							>
+								{#if isApplyingSignature}
+									<Loader2 class="h-4 w-4 animate-spin" />
+									Applying…
+								{:else}
+									<Download class="h-4 w-4" />
+									Apply & Download
+								{/if}
+							</button>
+						</div>
 					{/if}
 				{/if}
-			</button>
+			</div>
 		{/if}
 	</div>
+
+	<!-- Apply button (pinned to bottom) — hidden for sign tool (it has its own apply) -->
+	{#if pdfs.settings.tool !== 'sign'}
+		<div class="border-surface-700/50 border-t p-4">
+			{#if !canProcess}
+				<div class="text-surface-500 rounded-lg py-2 text-center text-xs">
+					{needsMultipleFiles ? 'Add at least 2 files to continue' : 'Add a file to get started'}
+				</div>
+			{:else}
+				<button
+					onclick={handleApply}
+					disabled={!canStartProcessing || isProcessing || isAnyProcessing}
+					class="from-accent-start to-accent-end shadow-accent-start/30 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+				>
+					{#if isProcessing || isAnyProcessing}
+						<Loader2 class="h-4 w-4 animate-spin" />
+						Processing…
+					{:else}
+						<Play class="h-4 w-4" fill="currentColor" />
+						{getProcessLabel()}
+						{#if pendingCount > 1}
+							<span class="rounded-full bg-white/20 px-1.5 py-0.5 text-xs">{pendingCount}</span>
+						{/if}
+					{/if}
+				</button>
+			{/if}
+		</div>
+	{/if}
+
 </div>
+
+<!-- Signature modal (teleported outside panel) -->
+{#if showSignatureModal}
+	<SignatureModal
+		onConfirm={(dataUrl) => {
+			capturedSignatureDataUrl = dataUrl;
+			showSignatureModal = false;
+		}}
+		onClose={() => (showSignatureModal = false)}
+	/>
+{/if}

@@ -1,2 +1,4 @@
 import { redirect } from '@sveltejs/kit';
-export function load() { redirect(301, '/workspace?tool=pdf-to-images'); }
+export function load() {
+	redirect(301, '/workspace?tool=pdf-to-images');
+}

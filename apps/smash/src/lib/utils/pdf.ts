@@ -1141,7 +1141,188 @@ export function getOutputFilename(originalName: string, tool: string, index?: nu
 			return `${baseName}-cleaned.pdf`;
 		case 'edit-metadata':
 			return `${baseName}-metadata.pdf`;
+		case 'sign':
+			return `${baseName}-signed.pdf`;
 		default:
 			return `${baseName}-processed.pdf`;
 	}
+}
+
+// ============================================
+// SIGNATURE
+// ============================================
+
+export interface SignaturePlacement {
+	pageNum: number;
+	x: number; // PDF coordinate (from left)
+	y: number; // PDF coordinate (from bottom)
+	width: number;
+	height: number;
+}
+
+/**
+ * Embed a signature image into a PDF page at the given placement.
+ */
+export async function signPDF(
+	file: File,
+	signatureDataUrl: string,
+	placement: SignaturePlacement
+): Promise<Blob> {
+	const arrayBuffer = await file.arrayBuffer();
+	const pdfDoc = await PDFDocument.load(arrayBuffer);
+
+	// Decode base64 data URL
+	const [header, base64Data] = signatureDataUrl.split(',');
+	const isPng = header.includes('image/png');
+	const bytes = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
+
+	const image = isPng ? await pdfDoc.embedPng(bytes) : await pdfDoc.embedJpg(bytes);
+
+	const pages = pdfDoc.getPages();
+	if (placement.pageNum < 1 || placement.pageNum > pages.length) {
+		throw new Error(`Page ${placement.pageNum} does not exist`);
+	}
+	const page = pages[placement.pageNum - 1];
+
+	page.drawImage(image, {
+		x: placement.x,
+		y: placement.y,
+		width: placement.width,
+		height: placement.height,
+	});
+
+	const resultBytes = await pdfDoc.save();
+	return new Blob([resultBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
+}
+
+// ============================================
+// ANNOTATIONS
+// ============================================
+
+export interface Annotation {
+	type: 'highlight' | 'freetext' | 'ink';
+	pageNum: number;
+	// Highlight: quad points (x,y pairs in PDF coords)
+	quadPoints?: number[];
+	// FreeText: position + content
+	x?: number;
+	y?: number;
+	width?: number;
+	height?: number;
+	content?: string;
+	// Ink: array of stroke point arrays
+	inkStrokes?: Array<Array<{ x: number; y: number }>>;
+	color?: { r: number; g: number; b: number };
+	opacity?: number;
+}
+
+/**
+ * Save pending annotations into a PDF using pdf-lib.
+ */
+export async function saveAnnotations(file: File, annotations: Annotation[]): Promise<Blob> {
+	const arrayBuffer = await file.arrayBuffer();
+	const pdfDoc = await PDFDocument.load(arrayBuffer);
+	const pages = pdfDoc.getPages();
+
+	for (const ann of annotations) {
+		if (ann.pageNum < 1 || ann.pageNum > pages.length) continue;
+		const page = pages[ann.pageNum - 1];
+		const { height: pageHeight } = page.getSize();
+		const r = ann.color?.r ?? 1;
+		const g = ann.color?.g ?? 0.9;
+		const b = ann.color?.b ?? 0;
+		const opacity = ann.opacity ?? 0.3;
+
+		if (ann.type === 'highlight' && ann.quadPoints && ann.quadPoints.length >= 8) {
+			// Draw a rectangle highlight approximation (pdf-lib doesn't support QuadPoints directly)
+			const xs = ann.quadPoints.filter((_, i) => i % 2 === 0);
+			const ys = ann.quadPoints.filter((_, i) => i % 2 === 1);
+			const minX = Math.min(...xs);
+			const minY = Math.min(...ys);
+			const maxX = Math.max(...xs);
+			const maxY = Math.max(...ys);
+			page.drawRectangle({
+				x: minX,
+				y: pageHeight - maxY,
+				width: maxX - minX,
+				height: maxY - minY,
+				color: rgb(r, g, b),
+				opacity,
+				borderWidth: 0,
+			});
+		} else if (ann.type === 'freetext' && ann.content && ann.x !== undefined && ann.y !== undefined) {
+			const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+			page.drawText(ann.content, {
+				x: ann.x,
+				y: pageHeight - (ann.y ?? 0) - 12,
+				font: helvetica,
+				size: 10,
+				color: rgb(0.1, 0.1, 0.1),
+				maxWidth: ann.width ?? 200,
+			});
+		}
+	}
+
+	const resultBytes = await pdfDoc.save();
+	return new Blob([resultBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
+}
+
+// Page manipulation context menu operations
+export async function rotateSinglePage(file: File, pageNum: number, angle: 90 | -90 | 180): Promise<Blob> {
+	const pdfDoc = await PDFDocument.load(await file.arrayBuffer());
+	const pages = pdfDoc.getPages();
+	if (pageNum < 1 || pageNum > pages.length) throw new Error('Invalid page');
+	const page = pages[pageNum - 1];
+	const current = page.getRotation().angle;
+	const normalizedAngle = ((current + angle) % 360 + 360) % 360;
+	page.setRotation(degrees(normalizedAngle));
+	return new Blob([(await pdfDoc.save()).buffer as ArrayBuffer], { type: 'application/pdf' });
+}
+
+export async function deleteSinglePage(file: File, pageNum: number): Promise<Blob> {
+	const pdfDoc = await PDFDocument.load(await file.arrayBuffer());
+	pdfDoc.removePage(pageNum - 1);
+	return new Blob([(await pdfDoc.save()).buffer as ArrayBuffer], { type: 'application/pdf' });
+}
+
+export async function extractSinglePage(file: File, pageNum: number): Promise<Blob> {
+	const src = await PDFDocument.load(await file.arrayBuffer());
+	const newDoc = await PDFDocument.create();
+	const [copied] = await newDoc.copyPages(src, [pageNum - 1]);
+	newDoc.addPage(copied);
+	return new Blob([(await newDoc.save()).buffer as ArrayBuffer], { type: 'application/pdf' });
+}
+
+export async function duplicatePage(file: File, pageNum: number): Promise<Blob> {
+	const pdfDoc = await PDFDocument.load(await file.arrayBuffer());
+	const [copied] = await pdfDoc.copyPages(pdfDoc, [pageNum - 1]);
+	pdfDoc.insertPage(pageNum, copied);
+	return new Blob([(await pdfDoc.save()).buffer as ArrayBuffer], { type: 'application/pdf' });
+}
+
+export async function insertBlankPage(file: File, afterPageNum: number): Promise<Blob> {
+	const pdfDoc = await PDFDocument.load(await file.arrayBuffer());
+	const pages = pdfDoc.getPages();
+	// Use same size as adjacent page
+	const refPage = pages[Math.min(afterPageNum - 1, pages.length - 1)];
+	const { width, height } = refPage.getSize();
+	pdfDoc.insertPage(afterPageNum, [width, height]);
+	return new Blob([(await pdfDoc.save()).buffer as ArrayBuffer], { type: 'application/pdf' });
+}
+
+/**
+ * Move a single page from one position to another (1-indexed).
+ * fromPage and toPage are both 1-indexed page numbers.
+ */
+export async function movePage(file: File, fromPage: number, toPage: number): Promise<Blob> {
+	const pdfDoc = await PDFDocument.load(await file.arrayBuffer());
+	const count = pdfDoc.getPageCount();
+	if (fromPage === toPage || fromPage < 1 || fromPage > count || toPage < 1 || toPage > count) {
+		return new Blob([await file.arrayBuffer()], { type: 'application/pdf' });
+	}
+	// Build new order by moving fromPage to toPage
+	const order = Array.from({ length: count }, (_, i) => i + 1);
+	order.splice(fromPage - 1, 1);
+	order.splice(toPage - 1, 0, fromPage);
+	return reorderPages(file, { newOrder: order });
 }

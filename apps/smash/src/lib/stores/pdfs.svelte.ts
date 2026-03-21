@@ -18,7 +18,8 @@ export type PDFTool =
 	| 'watermark'
 	| 'reverse-pages'
 	| 'remove-blank-pages'
-	| 'edit-metadata';
+	| 'edit-metadata'
+	| 'sign';
 export type ImageFormat = 'png' | 'jpg' | 'webp';
 export type CompressionPreset = 'screen' | 'ebook' | 'printer' | 'prepress';
 
@@ -278,6 +279,14 @@ export const TOOLS = [
 		icon: 'FileX',
 		accepts: '.pdf',
 		category: 'pages',
+	},
+	{
+		value: 'sign' as const,
+		label: 'Sign',
+		desc: 'Add a signature to PDF',
+		icon: 'PenTool',
+		accepts: '.pdf',
+		category: 'enhance',
 	},
 ] as const;
 
