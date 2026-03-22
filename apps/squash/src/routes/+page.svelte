@@ -292,10 +292,16 @@
 								of {videos.items.length} compressed
 							</span>
 							{#if pendingCount > 0}
-								<span class="rounded-full bg-surface-700 px-2.5 py-0.5 text-xs font-medium text-surface-400">{pendingCount} pending</span>
+								<span
+									class="bg-surface-700 text-surface-400 rounded-full px-2.5 py-0.5 text-xs font-medium"
+									>{pendingCount} pending</span
+								>
 							{/if}
 							{#if errorCount > 0}
-								<span class="rounded-full bg-red-500/10 px-2.5 py-0.5 text-xs font-medium text-red-400">{errorCount} failed</span>
+								<span
+									class="rounded-full bg-red-500/10 px-2.5 py-0.5 text-xs font-medium text-red-400"
+									>{errorCount} failed</span
+								>
 							{/if}
 						</div>
 						{#if totalSaved > 0}

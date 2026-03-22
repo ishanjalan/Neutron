@@ -14,7 +14,6 @@
 		Trash2,
 		Loader2,
 		CheckCircle,
-		Settings,
 	} from 'lucide-svelte';
 	import { fade, fly, slide } from 'svelte/transition';
 	import PDFViewer from '$lib/components/PDFViewer.svelte';
@@ -386,7 +385,7 @@
 				<!-- Right: Settings -->
 				<div class="glass rounded-2xl p-6" in:fly={{ y: 20, delay: 100, duration: 200 }}>
 					<h3 class="text-surface-100 mb-6 flex items-center gap-2 text-lg font-semibold">
-						<Settings class="text-accent-start h-5 w-5" />
+						<Scissors class="text-accent-start h-5 w-5" />
 						Split Options
 					</h3>
 

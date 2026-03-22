@@ -23,7 +23,6 @@
 		Loader2,
 		CheckCircle,
 		AlertCircle,
-		Settings,
 		Languages,
 		FileOutput,
 		Clock,
@@ -401,7 +400,7 @@
 				<!-- Right: Settings -->
 				<div class="glass rounded-2xl p-6" in:fly={{ y: 20, delay: 100, duration: 200 }}>
 					<h3 class="text-surface-100 mb-6 flex items-center gap-2 text-lg font-semibold">
-						<Settings class="h-5 w-5 text-sky-400" />
+						<FileSearch class="h-5 w-5 text-sky-400" />
 						OCR Settings
 					</h3>
 
@@ -463,13 +462,6 @@
 					{/if}
 
 					<!-- Info -->
-					<div class="bg-surface-800/50 border-surface-700 mb-6 rounded-xl border p-3">
-						<p class="text-surface-400 text-sm">
-							<strong class="text-surface-300">How it works:</strong> OCR (Optical Character Recognition)
-							scans your PDF images and extracts text, making them searchable and copyable. All processing
-							happens locally in your browser.
-						</p>
-					</div>
 
 					<!-- Process Button -->
 					<button

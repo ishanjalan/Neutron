@@ -100,9 +100,8 @@
 <ConfirmModal
 	open={pendingTool !== null}
 	title="Switch tool?"
-	message="Switching to this tool requires different file types. Your {pdfs.items.length} loaded file{pdfs.items.length !== 1
-		? 's'
-		: ''} will be cleared."
+	message="Switching to this tool requires different file types. Your {pdfs.items
+		.length} loaded file{pdfs.items.length !== 1 ? 's' : ''} will be cleared."
 	confirmText="Switch & Clear"
 	onconfirm={confirmSwitch}
 	oncancel={() => (pendingTool = null)}

@@ -157,7 +157,7 @@
 	}
 </script>
 
-<div class="glass mb-6 overflow-hidden rounded-2xl sm:mb-8">
+<div class="glass mb-6 rounded-2xl sm:mb-8">
 	<!-- Main settings row -->
 	<div class="p-4 sm:p-6">
 		<div class="flex flex-wrap items-center gap-3 sm:gap-4">
@@ -374,7 +374,7 @@
 	<!-- Advanced settings panel -->
 	{#if isExpanded}
 		<div
-			class="border-surface-700/50 bg-surface-900/50 border-t p-4 sm:p-6"
+			class="border-surface-700/50 bg-surface-900/50 rounded-b-2xl border-t p-4 sm:p-6"
 			transition:slide={{ duration: 200 }}
 		>
 			<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

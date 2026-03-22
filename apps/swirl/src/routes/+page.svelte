@@ -157,7 +157,7 @@
 
 							<div class="min-w-0 flex-1">
 								<h3
-									class="text-surface-100 flex items-center gap-2 text-base font-semibold transition-colors group-hover:text-surface-50"
+									class="text-surface-100 group-hover:text-surface-50 flex items-center gap-2 text-base font-semibold transition-colors"
 								>
 									{tool.title}
 									<ArrowRight

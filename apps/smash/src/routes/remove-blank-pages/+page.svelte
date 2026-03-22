@@ -18,7 +18,6 @@
 		Trash2,
 		Loader2,
 		CheckCircle,
-		Settings,
 	} from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 
@@ -287,13 +286,12 @@
 
 				<div class="glass rounded-2xl p-6" in:fly={{ y: 20, delay: 100, duration: 200 }}>
 					<h3 class="text-surface-100 mb-6 flex items-center gap-2 text-lg font-semibold">
-						<Settings class="text-accent-start h-5 w-5" /> Detection Settings
+						<FileX class="text-accent-start h-5 w-5" /> Detection Settings
 					</h3>
 					<div class="space-y-5">
 						<div>
 							<label class="text-surface-300 mb-1 block text-sm font-medium"
-								>Detection threshold: <span class="text-surface-100 font-semibold"
-									>{threshold}</span
+								>Detection threshold: <span class="text-surface-100 font-semibold">{threshold}</span
 								></label
 							>
 							<p class="text-surface-500 mb-3 text-xs">{thresholdLabel}</p>
@@ -310,7 +308,7 @@
 							</div>
 						</div>
 
-						<div class="bg-surface-800/50 border-surface-700/50 rounded-xl border p-4 space-y-1.5">
+						<div class="bg-surface-800/50 border-surface-700/50 space-y-1.5 rounded-xl border p-4">
 							<p class="text-surface-400 text-xs font-medium">How it works</p>
 							<p class="text-surface-500 text-xs">
 								Pages are analysed for text and drawing operators. Pages with neither are treated as

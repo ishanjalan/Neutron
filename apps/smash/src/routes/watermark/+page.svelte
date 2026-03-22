@@ -13,7 +13,6 @@
 		Trash2,
 		Loader2,
 		CheckCircle,
-		Settings,
 	} from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 
@@ -267,7 +266,7 @@
 
 				<div class="glass rounded-2xl p-6" in:fly={{ y: 20, delay: 100, duration: 200 }}>
 					<h3 class="text-surface-100 mb-6 flex items-center gap-2 text-lg font-semibold">
-						<Settings class="text-accent-start h-5 w-5" /> Watermark Settings
+						<Stamp class="text-accent-start h-5 w-5" /> Watermark Settings
 					</h3>
 					<div class="space-y-5">
 						<div>
@@ -279,6 +278,17 @@
 								maxlength="50"
 								class="bg-surface-800 border-surface-700 text-surface-100 placeholder:text-surface-600 focus:border-accent-start w-full rounded-xl border px-4 py-2.5 focus:outline-none"
 							/>
+						</div>
+
+						<!-- Preview hint -->
+						<div class="bg-surface-800/50 border-surface-700/50 rounded-xl border p-3 text-center">
+							<p
+								class="text-surface-400 font-bold opacity-30"
+								style="font-size: clamp(10px, {fontSize /
+									8}px, 24px); transform: rotate(-20deg); display: inline-block;"
+							>
+								{watermarkText || 'WATERMARK'}
+							</p>
 						</div>
 
 						<div>
@@ -315,15 +325,6 @@
 							</div>
 						</div>
 
-						<!-- Preview hint -->
-						<div class="bg-surface-800/50 border-surface-700/50 rounded-xl border p-3 text-center">
-							<p
-								class="font-bold text-surface-400 opacity-30"
-								style="font-size: clamp(10px, {fontSize / 8}px, 24px); transform: rotate(-20deg); display: inline-block;"
-							>
-								{watermarkText || 'WATERMARK'}
-							</p>
-						</div>
 					</div>
 
 					<button

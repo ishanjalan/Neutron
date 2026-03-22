@@ -7,7 +7,6 @@
 	import TimelineSlider from '$lib/components/TimelineSlider.svelte';
 	import {
 		Film,
-		Settings,
 		Download,
 		Play,
 		Pause,
@@ -378,8 +377,8 @@
 					<!-- Settings -->
 					<div class="glass rounded-2xl p-6">
 						<h3 class="text-surface-100 mb-6 flex items-center gap-2 text-lg font-semibold">
-							<Settings class="text-accent-start h-5 w-5" />
-							Settings
+							<Film class="text-accent-start h-5 w-5" />
+							Conversion Settings
 						</h3>
 
 						<div class="space-y-5">
@@ -440,17 +439,21 @@
 
 							<!-- Optimize Output -->
 							<div class="bg-surface-800/50 space-y-3 rounded-xl p-4">
-								<label class="flex cursor-pointer items-center gap-3">
-									<input
-										type="checkbox"
-										bind:checked={optimizeOutput}
-										class="bg-surface-700 border-surface-600 text-accent-start focus:ring-accent-start h-5 w-5 rounded"
-									/>
+								<div class="flex items-center justify-between">
 									<div>
 										<span class="text-surface-200 text-sm font-medium">Optimize output</span>
 										<p class="text-surface-500 text-xs">Compress GIF further after creation</p>
 									</div>
-								</label>
+									<button
+										type="button"
+										onclick={() => (optimizeOutput = !optimizeOutput)}
+										class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none {optimizeOutput ? 'bg-accent-start' : 'bg-surface-600'}"
+										role="switch"
+										aria-checked={optimizeOutput}
+									>
+										<span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 {optimizeOutput ? 'translate-x-5' : 'translate-x-0'}"></span>
+									</button>
+								</div>
 
 								{#if optimizeOutput}
 									<div class="border-surface-700 border-t pt-2">

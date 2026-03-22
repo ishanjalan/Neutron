@@ -81,7 +81,9 @@
 	function handleFormatChange(format: 'same' | OutputFormat) {
 		const skipped = images.items.filter((i) => i.status === 'completed').length;
 		if (skipped > 0) {
-			toast.info(`Format updated — ${skipped} already-completed image${skipped !== 1 ? 's' : ''} won't be re-converted. Remove and re-add them to apply the new format.`);
+			toast.info(
+				`Format updated — ${skipped} already-completed image${skipped !== 1 ? 's' : ''} won't be re-converted. Remove and re-add them to apply the new format.`
+			);
 		}
 		images.updateSettings({ outputFormat: format });
 	}
@@ -294,89 +296,97 @@
 		<!-- Advanced Options Section (Collapsible) -->
 		{#if showAdvanced}
 			<div
-				class="border-surface-700/30 flex flex-wrap items-center gap-3 border-t pt-3"
+				class="border-surface-700/30 flex flex-col gap-5 border-t pt-4"
 				transition:slide={{ duration: 200 }}
 			>
-				<!-- Strip Metadata Toggle -->
-				<button
-					onclick={handleMetadataToggle}
-					class="flex items-center gap-3 rounded-xl px-4 py-3 transition-all {images.settings
-						.stripMetadata
-						? 'text-accent-start bg-accent-start/10'
-						: 'text-surface-400 bg-surface-800/30 hover:bg-surface-700/30'}"
-					title={images.settings.stripMetadata
-						? 'Location, camera info, timestamps will be removed'
-						: 'Metadata will be preserved (may include location)'}
-				>
-					<Shield class="h-4 w-4" />
-					<div class="flex flex-col items-start">
-						<span class="text-sm font-medium">Strip Metadata</span>
-						<span class="text-surface-500 text-[10px]">Location, camera, timestamps</span>
-					</div>
-					<div
-						class="relative ml-2 h-5 w-9 rounded-full transition-colors {images.settings
-							.stripMetadata
-							? 'bg-accent-start'
-							: 'bg-surface-600'}"
+				<!-- Group: Processing -->
+				<div class="flex flex-col gap-2">
+					<span class="text-surface-600 text-[10px] font-semibold tracking-widest uppercase"
+						>Processing</span
 					>
-						<span
-							class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform {images
-								.settings.stripMetadata
-								? 'translate-x-4'
-								: 'translate-x-0'}"
-						></span>
-					</div>
-				</button>
-
-				<!-- Lossless Toggle -->
-				<button
-					onclick={handleLosslessToggle}
-					class="flex items-center gap-3 rounded-xl px-4 py-3 transition-all {isLossless
-						? 'text-accent-start bg-accent-start/10'
-						: 'text-surface-400 bg-surface-800/30 hover:bg-surface-700/30'}"
-					title={isLossless
-						? 'No quality loss, larger files'
-						: 'Smaller files, slight quality reduction'}
-				>
-					<Sparkles class="h-4 w-4" />
-					<div class="flex flex-col items-start">
-						<span class="text-sm font-medium">Lossless</span>
-						<span class="text-surface-500 text-[10px]"
-							>{isLossless ? 'Perfect quality' : 'Larger files'}</span
+					<div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+						<!-- Strip Metadata Toggle -->
+						<button
+							onclick={handleMetadataToggle}
+							class="flex items-center gap-3 rounded-xl px-4 py-3 transition-all {images.settings
+								.stripMetadata
+								? 'text-accent-start bg-accent-start/10'
+								: 'text-surface-400 bg-surface-800/30 hover:bg-surface-700/30'}"
+							title={images.settings.stripMetadata
+								? 'Location, camera info, timestamps will be removed'
+								: 'Metadata will be preserved (may include location)'}
 						>
-					</div>
-					<div
-						class="relative ml-2 h-5 w-9 rounded-full transition-colors {isLossless
-							? 'bg-accent-start'
-							: 'bg-surface-600'}"
-					>
-						<span
-							class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform {isLossless
-								? 'translate-x-4'
-								: 'translate-x-0'}"
-						></span>
-					</div>
-				</button>
+							<Shield class="h-4 w-4 shrink-0" />
+							<div class="flex flex-col items-start">
+								<span class="text-sm font-medium">Strip Metadata</span>
+								<span class="text-surface-500 text-[10px]">Location, camera, timestamps</span>
+							</div>
+							<div
+								class="relative ml-auto h-5 w-9 shrink-0 rounded-full transition-colors {images
+									.settings.stripMetadata
+									? 'bg-accent-start'
+									: 'bg-surface-600'}"
+							>
+								<span
+									class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform {images
+										.settings.stripMetadata
+										? 'translate-x-4'
+										: 'translate-x-0'}"
+								></span>
+							</div>
+						</button>
 
-				<!-- Resize Toggle + Controls -->
-				<div
-					class="flex items-center gap-3 rounded-xl px-4 py-3 {resizeEnabled
-						? 'bg-accent-start/10'
-						: 'bg-surface-800/30'}"
-				>
+						<!-- Lossless Toggle -->
+						<button
+							onclick={handleLosslessToggle}
+							class="flex items-center gap-3 rounded-xl px-4 py-3 transition-all {isLossless
+								? 'text-accent-start bg-accent-start/10'
+								: 'text-surface-400 bg-surface-800/30 hover:bg-surface-700/30'}"
+							title={isLossless
+								? 'No quality loss, larger files'
+								: 'Smaller files, slight quality reduction'}
+						>
+							<Sparkles class="h-4 w-4 shrink-0" />
+							<div class="flex flex-col items-start">
+								<span class="text-sm font-medium">Lossless</span>
+								<span class="text-surface-500 text-[10px]"
+									>{isLossless ? 'Perfect quality' : 'Larger files'}</span
+								>
+							</div>
+							<div
+								class="relative ml-auto h-5 w-9 shrink-0 rounded-full transition-colors {isLossless
+									? 'bg-accent-start'
+									: 'bg-surface-600'}"
+							>
+								<span
+									class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform {isLossless
+										? 'translate-x-4'
+										: 'translate-x-0'}"
+								></span>
+							</div>
+						</button>
+					</div>
+				</div>
+
+				<!-- Group: Transform -->
+				<div class="flex flex-col gap-2">
+					<span class="text-surface-600 text-[10px] font-semibold tracking-widest uppercase"
+						>Transform</span
+					>
+					<!-- Resize Toggle Row -->
 					<button
 						onclick={handleResizeToggle}
-						class="flex items-center gap-3 transition-all {resizeEnabled
-							? 'text-accent-start'
-							: 'text-surface-400 hover:text-surface-300'}"
+						class="flex items-center gap-3 rounded-xl px-4 py-3 transition-all {resizeEnabled
+							? 'text-accent-start bg-accent-start/10'
+							: 'text-surface-400 bg-surface-800/30 hover:bg-surface-700/30'}"
 					>
-						<Maximize2 class="h-4 w-4" />
+						<Maximize2 class="h-4 w-4 shrink-0" />
 						<div class="flex flex-col items-start">
 							<span class="text-sm font-medium">Resize</span>
-							<span class="text-surface-500 text-[10px]">Scale images</span>
+							<span class="text-surface-500 text-[10px]">Scale images before saving</span>
 						</div>
 						<div
-							class="relative ml-2 h-5 w-9 rounded-full transition-colors {resizeEnabled
+							class="relative ml-auto h-5 w-9 shrink-0 rounded-full transition-colors {resizeEnabled
 								? 'bg-accent-start'
 								: 'bg-surface-600'}"
 						>
@@ -388,13 +398,16 @@
 						</div>
 					</button>
 
+					<!-- Resize Controls (expands below toggle) -->
 					{#if resizeEnabled}
-						<div class="border-surface-600 ml-2 flex items-center gap-3 border-l pl-3">
-							<!-- Mode selector -->
+						<div
+							class="bg-surface-800/20 border-surface-700/30 flex flex-wrap items-center gap-3 rounded-xl border px-4 py-3"
+							transition:slide={{ duration: 150 }}
+						>
 							<div class="bg-surface-700/50 flex gap-0.5 rounded-md p-0.5">
 								<button
 									onclick={() => handleResizeModeChange('percentage')}
-									class="rounded px-2 py-1 text-xs font-medium transition-all {resizeMode ===
+									class="rounded px-2.5 py-1 text-xs font-medium transition-all {resizeMode ===
 									'percentage'
 										? 'bg-surface-600 text-white'
 										: 'text-surface-400 hover:text-surface-200'}"
@@ -403,7 +416,7 @@
 								</button>
 								<button
 									onclick={() => handleResizeModeChange('fit')}
-									class="rounded px-2 py-1 text-xs font-medium transition-all {resizeMode === 'fit'
+									class="rounded px-2.5 py-1 text-xs font-medium transition-all {resizeMode === 'fit'
 										? 'bg-surface-600 text-white'
 										: 'text-surface-400 hover:text-surface-200'}"
 								>
@@ -449,107 +462,111 @@
 					{/if}
 				</div>
 
-				<!-- Auto-Save to Folder (File System Access API) -->
-				{#if fsapiSupported}
-					<div
-						class="flex items-center gap-3 rounded-xl px-4 py-3 {autoSave.enabled
-							? 'bg-data-green/10'
-							: 'bg-surface-800/30'}"
+				<!-- Group: Output -->
+				<div class="flex flex-col gap-2">
+					<span class="text-surface-600 text-[10px] font-semibold tracking-widest uppercase"
+						>Output</span
 					>
-						<button
-							onclick={handleAutoSaveToggle}
-							class="flex items-center gap-3 transition-all {autoSave.enabled
-								? 'text-data-green'
-								: 'text-surface-400 hover:text-surface-300'}"
+
+					<!-- Auto-Save to Folder -->
+					{#if fsapiSupported}
+						<div
+							class="flex items-center gap-3 rounded-xl px-4 py-3 {autoSave.enabled
+								? 'bg-data-green/10'
+								: 'bg-surface-800/30'}"
 						>
-							<FolderOutput class="h-4 w-4" />
-							<div class="flex flex-col items-start">
-								<span class="text-sm font-medium">Auto-Save to Folder</span>
-								<span class="text-surface-500 text-[10px]">
-									{#if autoSave.enabled}
-										Saving to: {autoSave.folderName}
-										{#if autoSave.savedCount > 0}
-											&nbsp;({autoSave.savedCount} saved)
-										{/if}
-									{:else}
-										Write files directly to disk
-									{/if}
-								</span>
-							</div>
-							<div
-								class="relative ml-2 h-5 w-9 rounded-full transition-colors {autoSave.enabled
-									? 'bg-data-green'
-									: 'bg-surface-600'}"
-							>
-								<span
-									class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform {autoSave.enabled
-										? 'translate-x-4'
-										: 'translate-x-0'}"
-								></span>
-							</div>
-						</button>
-						{#if autoSave.enabled}
 							<button
 								onclick={handleAutoSaveToggle}
-								class="text-surface-500 hover:text-surface-300 ml-auto text-xs underline"
+								class="flex min-w-0 flex-1 items-center gap-3 transition-all {autoSave.enabled
+									? 'text-data-green'
+									: 'text-surface-400 hover:text-surface-300'}"
 							>
-								Change folder
+								<FolderOutput class="h-4 w-4 shrink-0" />
+								<div class="flex min-w-0 flex-col items-start">
+									<span class="text-sm font-medium">Auto-Save to Folder</span>
+									<span class="text-surface-500 truncate text-[10px]">
+										{#if autoSave.enabled}
+											Saving to: {autoSave.folderName}{autoSave.savedCount > 0
+												? ` (${autoSave.savedCount} saved)`
+												: ''}
+										{:else}
+											Write files directly to disk
+										{/if}
+									</span>
+								</div>
+								<div
+									class="relative ml-auto h-5 w-9 shrink-0 rounded-full transition-colors {autoSave.enabled
+										? 'bg-data-green'
+										: 'bg-surface-600'}"
+								>
+									<span
+										class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform {autoSave.enabled
+											? 'translate-x-4'
+											: 'translate-x-0'}"
+									></span>
+								</div>
 							</button>
-						{/if}
-					</div>
-				{/if}
+							{#if autoSave.enabled}
+								<button
+									onclick={handleAutoSaveToggle}
+									class="text-surface-500 hover:text-surface-300 shrink-0 text-xs underline"
+								>
+									Change folder
+								</button>
+							{/if}
+						</div>
+					{/if}
 
-				<!-- Filename Template -->
-				<div class="flex flex-col gap-2">
-					<label
-						class="text-surface-500 flex items-center gap-2 text-xs font-semibold tracking-wider uppercase"
-					>
-						<FileText class="h-3.5 w-3.5" />
-						Output Filename
-					</label>
-					<input
-						type="text"
-						value={images.settings.filenameTemplate}
-						oninput={(e) =>
-							images.updateSettings({
-								filenameTemplate: e.currentTarget.value,
-							})}
-						class="glass text-surface-200 placeholder:text-surface-600 rounded-lg px-3 py-2 text-sm"
-						placeholder="{'{name}'}-optimized.{'{ext}'}"
-					/>
-					<p class="text-surface-500 text-xs">
-						Tokens: {'{name}'} (filename), {'{ext}'} (format)
-					</p>
-
-					<!-- Quick presets -->
-					<div class="flex flex-wrap gap-2">
-						<button
-							onclick={() =>
-								images.updateSettings({
-									filenameTemplate: '{name}-optimized.{ext}',
-								})}
-							class="glass hover:bg-surface-700/50 rounded px-2 py-1 text-xs transition-colors"
+					<!-- Filename Template -->
+					<div class="bg-surface-800/30 flex flex-col gap-2.5 rounded-xl px-4 py-3">
+						<label
+							class="text-surface-400 flex items-center gap-2 text-xs font-semibold tracking-wider uppercase"
 						>
-							name-optimized.ext
-						</button>
-						<button
-							onclick={() =>
+							<FileText class="h-3.5 w-3.5" />
+							Output Filename
+						</label>
+						<input
+							type="text"
+							value={images.settings.filenameTemplate}
+							oninput={(e) =>
 								images.updateSettings({
-									filenameTemplate: '{name}-squished.{ext}',
+									filenameTemplate: e.currentTarget.value,
 								})}
-							class="glass hover:bg-surface-700/50 rounded px-2 py-1 text-xs transition-colors"
-						>
-							name-squished.ext
-						</button>
-						<button
-							onclick={() =>
-								images.updateSettings({
-									filenameTemplate: '{name}@2x.{ext}',
-								})}
-							class="glass hover:bg-surface-700/50 rounded px-2 py-1 text-xs transition-colors"
-						>
-							name@2x.ext
-						</button>
+							class="glass text-surface-200 placeholder:text-surface-600 rounded-lg px-3 py-2 text-sm"
+							placeholder="{'{name}'}-optimized.{'{ext}'}"
+						/>
+						<p class="text-surface-600 text-[10px]">
+							Tokens: {'{name}'} (filename), {'{ext}'} (format)
+						</p>
+						<div class="flex flex-wrap gap-2">
+							<button
+								onclick={() =>
+									images.updateSettings({
+										filenameTemplate: '{name}-optimized.{ext}',
+									})}
+								class="glass hover:bg-surface-700/50 rounded px-2 py-1 text-xs transition-colors"
+							>
+								name-optimized.ext
+							</button>
+							<button
+								onclick={() =>
+									images.updateSettings({
+										filenameTemplate: '{name}-squished.{ext}',
+									})}
+								class="glass hover:bg-surface-700/50 rounded px-2 py-1 text-xs transition-colors"
+							>
+								name-squished.ext
+							</button>
+							<button
+								onclick={() =>
+									images.updateSettings({
+										filenameTemplate: '{name}@2x.{ext}',
+									})}
+								class="glass hover:bg-surface-700/50 rounded px-2 py-1 text-xs transition-colors"
+							>
+								name@2x.ext
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>

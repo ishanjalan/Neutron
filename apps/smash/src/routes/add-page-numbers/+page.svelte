@@ -18,7 +18,6 @@
 		Trash2,
 		Loader2,
 		CheckCircle,
-		Settings,
 	} from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 
@@ -274,7 +273,7 @@
 
 				<div class="glass rounded-2xl p-6" in:fly={{ y: 20, delay: 100, duration: 200 }}>
 					<h3 class="text-surface-100 mb-6 flex items-center gap-2 text-lg font-semibold">
-						<Settings class="text-accent-start h-5 w-5" /> Settings
+						<Hash class="text-accent-start h-5 w-5" /> Numbering Settings
 					</h3>
 					<div class="space-y-5">
 						<div>

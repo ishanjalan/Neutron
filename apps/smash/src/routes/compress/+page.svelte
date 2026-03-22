@@ -15,7 +15,6 @@
 		Loader2,
 		CheckCircle,
 		AlertCircle,
-		Settings,
 		ChevronDown,
 		Monitor,
 		BookOpen,
@@ -150,7 +149,12 @@
 			const startTime = performance.now();
 			files = files.map((f) =>
 				f.id === pdfFile.id
-					? { ...f, status: 'processing' as const, progress: 0, progressStage: 'Loading Ghostscript...' }
+					? {
+							...f,
+							status: 'processing' as const,
+							progress: 0,
+							progressStage: 'Loading Ghostscript...',
+						}
 					: f
 			);
 
@@ -163,9 +167,9 @@
 								? 'Loading Ghostscript...'
 								: progress < 30
 									? 'Initializing...'
-								: progress < 80
-									? 'Compressing...'
-									: 'Finalizing...';
+									: progress < 80
+										? 'Compressing...'
+										: 'Finalizing...';
 						files = files.map((f) =>
 							f.id === pdfFile.id ? { ...f, progress, progressStage: stage } : f
 						);
@@ -501,7 +505,7 @@
 				<!-- Right: Settings -->
 				<div class="glass rounded-2xl p-6" in:fly={{ y: 20, delay: 100, duration: 200 }}>
 					<h3 class="text-surface-100 mb-6 flex items-center gap-2 text-lg font-semibold">
-						<Settings class="text-accent-start h-5 w-5" />
+						<Minimize2 class="text-accent-start h-5 w-5" />
 						Compression Settings
 					</h3>
 
@@ -535,15 +539,6 @@
 						</div>
 					</div>
 
-					<!-- Info Box -->
-					<div class="bg-surface-800/50 border-surface-700/50 mt-6 rounded-xl border p-4">
-						<p class="text-surface-400 text-sm">
-							<strong class="text-surface-300">How it works:</strong> Your PDF is compressed using Ghostscript
-							WASM directly in your browser. Text remains searchable and selectable. Images are optimized
-							based on your selected quality preset.
-						</p>
-					</div>
-
 					<!-- Compress Button -->
 					<button
 						onclick={handleCompress}
@@ -560,6 +555,16 @@
 								: 'PDFs'}
 						{/if}
 					</button>
+
+					<!-- Info Box -->
+					<div class="bg-surface-800/50 border-surface-700/50 mt-6 rounded-xl border p-4">
+						<p class="text-surface-400 text-sm">
+							<strong class="text-surface-300">How it works:</strong> Your PDF is compressed using Ghostscript
+							WASM directly in your browser. Text remains searchable and selectable. Images are optimized
+							based on your selected quality preset.
+						</p>
+					</div>
+
 				</div>
 			</div>
 

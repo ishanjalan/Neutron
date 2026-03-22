@@ -6,7 +6,6 @@
 	import { toast } from '@neutron/ui';
 	import {
 		Images,
-		Settings,
 		Download,
 		Play,
 		Pause,
@@ -538,11 +537,12 @@
 					<!-- CTA: prompt to encode once enough frames are loaded -->
 					{#if frames.length >= 2 && !resultUrl && !isProcessing}
 						<div
-							class="mt-4 flex items-center justify-between gap-3 rounded-xl border border-accent-start/30 bg-accent-start/10 px-4 py-3"
+							class="border-accent-start/30 bg-accent-start/10 mt-4 flex items-center justify-between gap-3 rounded-xl border px-4 py-3"
 							in:fly={{ y: 8, duration: 200 }}
 						>
 							<span class="text-surface-300 text-sm"
-								><span class="text-accent-start font-semibold">{frames.length} frames</span> ready to encode</span
+								><span class="text-accent-start font-semibold">{frames.length} frames</span> ready to
+								encode</span
 							>
 							<button
 								onclick={handleCreate}
@@ -558,8 +558,8 @@
 				<!-- Right: Settings -->
 				<div class="glass h-fit rounded-2xl p-6" in:fly={{ y: 20, delay: 100, duration: 200 }}>
 					<h3 class="text-surface-100 mb-6 flex items-center gap-2 text-lg font-semibold">
-						<Settings class="text-accent-start h-5 w-5" />
-						Settings
+						<Images class="text-accent-start h-5 w-5" />
+						GIF Settings
 					</h3>
 
 					<div class="space-y-5">
@@ -649,17 +649,21 @@
 
 						<!-- Optimize Output -->
 						<div class="bg-surface-800/50 space-y-3 rounded-xl p-4">
-							<label class="flex cursor-pointer items-center gap-3">
-								<input
-									type="checkbox"
-									bind:checked={optimizeOutput}
-									class="bg-surface-700 border-surface-600 text-accent-start focus:ring-accent-start h-5 w-5 rounded"
-								/>
+							<div class="flex items-center justify-between">
 								<div>
 									<span class="text-surface-200 text-sm font-medium">Optimize output</span>
 									<p class="text-surface-500 text-xs">Compress GIF further after creation</p>
 								</div>
-							</label>
+								<button
+									type="button"
+									onclick={() => (optimizeOutput = !optimizeOutput)}
+									class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none {optimizeOutput ? 'bg-accent-start' : 'bg-surface-600'}"
+									role="switch"
+									aria-checked={optimizeOutput}
+								>
+									<span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 {optimizeOutput ? 'translate-x-5' : 'translate-x-0'}"></span>
+								</button>
+							</div>
 
 							{#if optimizeOutput}
 								<div class="border-surface-700 border-t pt-2">

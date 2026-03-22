@@ -20,8 +20,8 @@
 
 <div class="flex min-h-screen items-center justify-center {bgClass}">
 	<div class="text-center">
-		<h1 class="text-6xl font-bold text-surface-100">{status}</h1>
-		<p class="mt-3 text-lg text-surface-400">{message}</p>
+		<h1 class="text-surface-100 text-6xl font-bold">{status}</h1>
+		<p class="text-surface-400 mt-3 text-lg">{message}</p>
 		<a
 			href={homeHref}
 			class="mt-6 inline-block rounded-xl px-6 py-3 text-sm font-medium transition {accentClass}"

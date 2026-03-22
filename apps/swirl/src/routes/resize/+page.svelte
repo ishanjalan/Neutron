@@ -7,7 +7,6 @@
 	import { toast } from '@neutron/ui';
 	import {
 		Scaling,
-		Settings,
 		Download,
 		Trash2,
 		Eye,
@@ -485,7 +484,7 @@
 				<!-- Right: Settings -->
 				<div class="glass rounded-2xl p-6" in:fly={{ y: 20, delay: 100, duration: 200 }}>
 					<h3 class="text-surface-100 mb-6 flex items-center gap-2 text-lg font-semibold">
-						<Settings class="h-5 w-5 text-cyan-400" />
+						<Scaling class="h-5 w-5 text-cyan-400" />
 						Resize Settings
 					</h3>
 
@@ -564,18 +563,20 @@
 					</div>
 
 					<!-- Optimize after resize -->
-					<div class="mb-6">
-						<label class="flex cursor-pointer items-center gap-3">
-							<input
-								type="checkbox"
-								bind:checked={optimizeAfterResize}
-								class="border-surface-600 bg-surface-800 h-5 w-5 rounded text-cyan-400 focus:ring-cyan-400"
-							/>
-							<div>
-								<p class="text-surface-300 text-sm font-medium">Optimize after resize</p>
-								<p class="text-surface-500 text-xs">Reduce colors to minimize file size</p>
-							</div>
-						</label>
+					<div class="bg-surface-800/50 border-surface-700/50 mb-6 flex items-center justify-between rounded-xl border p-4">
+						<div>
+							<p class="text-surface-300 text-sm font-medium">Optimize after resize</p>
+							<p class="text-surface-500 text-xs">Reduce colors to minimize file size</p>
+						</div>
+						<button
+							type="button"
+							onclick={() => (optimizeAfterResize = !optimizeAfterResize)}
+							class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none {optimizeAfterResize ? 'bg-cyan-500' : 'bg-surface-600'}"
+							role="switch"
+							aria-checked={optimizeAfterResize}
+						>
+							<span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 {optimizeAfterResize ? 'translate-x-5' : 'translate-x-0'}"></span>
+						</button>
 					</div>
 
 					{#if optimizeAfterResize}
@@ -591,6 +592,9 @@
 								step="16"
 								class="w-full accent-cyan-400"
 							/>
+							<div class="text-surface-600 mt-1 flex justify-between text-xs">
+								<span>16 (smaller)</span><span>256 (better quality)</span>
+							</div>
 						</div>
 					{/if}
 
