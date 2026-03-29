@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { SvelteSet } from 'svelte/reactivity';
 	import Header from '$lib/components/Header.svelte';
-	import { Footer } from '@neutron/ui';
+	import { Footer, SEOSection } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
+	import { splitSEO } from '$lib/seo-content';
 	import { downloadBlob, downloadAllAsZip } from '@neutron/utils';
 	import { splitPDF, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
@@ -486,6 +487,7 @@
 				</div>
 			{/if}
 		</div>
+		<SEOSection intro={splitSEO.intro} faqs={splitSEO.faqs} />
 	</main>
 
 	<Footer currentApp="smash" />

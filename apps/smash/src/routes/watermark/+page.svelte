@@ -1,19 +1,12 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import { Footer } from '@neutron/ui';
+	import { Footer, SEOSection } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
+	import { watermarkSEO } from '$lib/seo-content';
 	import { downloadBlob } from '@neutron/utils';
 	import { addWatermark, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
-	import {
-		Stamp,
-		Upload,
-		FileText,
-		Download,
-		Trash2,
-		Loader2,
-		CheckCircle,
-	} from 'lucide-svelte';
+	import { Stamp, Upload, FileText, Download, Trash2, Loader2, CheckCircle } from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 
 	interface PDFFile {
@@ -324,7 +317,6 @@
 								<span>12pt</span><span>96pt</span>
 							</div>
 						</div>
-
 					</div>
 
 					<button
@@ -339,6 +331,7 @@
 				</div>
 			</div>
 		</div>
+		<SEOSection intro={watermarkSEO.intro} faqs={watermarkSEO.faqs} />
 	</main>
 	<Footer currentApp="smash" />
 </div>

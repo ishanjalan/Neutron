@@ -1,7 +1,8 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import { Footer } from '@neutron/ui';
+	import { Footer, SEOSection } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
+	import { fromImagesSEO } from '$lib/seo-content';
 	import { downloadBlob } from '@neutron/utils';
 	import { imagesToPDF, getOutputFilename } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
@@ -306,6 +307,7 @@
 				</button>
 			{/if}
 		</div>
+		<SEOSection intro={fromImagesSEO.intro} faqs={fromImagesSEO.faqs} />
 	</main>
 	<Footer currentApp="smash" />
 </div>

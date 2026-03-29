@@ -1,7 +1,8 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import { Footer } from '@neutron/ui';
+	import { Footer, SEOSection } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
+	import { addPageNumbersSEO } from '$lib/seo-content';
 	import { downloadBlob } from '@neutron/utils';
 	import {
 		addPageNumbers,
@@ -10,15 +11,7 @@
 		getPageCount,
 	} from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
-	import {
-		Hash,
-		Upload,
-		FileText,
-		Download,
-		Trash2,
-		Loader2,
-		CheckCircle,
-	} from 'lucide-svelte';
+	import { Hash, Upload, FileText, Download, Trash2, Loader2, CheckCircle } from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 
 	interface PDFFile {
@@ -339,6 +332,7 @@
 				</div>
 			</div>
 		</div>
+		<SEOSection intro={addPageNumbersSEO.intro} faqs={addPageNumbersSEO.faqs} />
 	</main>
 	<Footer currentApp="smash" />
 </div>

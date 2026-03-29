@@ -23,6 +23,16 @@
 		PenTool,
 	} from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
+	import { onMount } from 'svelte';
+	import { detectLocale, type Locale } from '@neutron/utils/seo';
+	import { smashHomeMeta } from '$lib/seo';
+
+	let locale = $state<Locale>('en');
+	let pageMeta = $derived(smashHomeMeta[locale]);
+
+	onMount(() => {
+		locale = detectLocale();
+	});
 
 	// Tool cards
 	const tools = [
@@ -166,11 +176,8 @@
 </script>
 
 <svelte:head>
-	<title>Smash - PDF Tools</title>
-	<meta
-		name="description"
-		content="Free browser-based PDF tools. Compress, merge, split, protect, and convert PDFs - 100% private, works offline."
-	/>
+	<title>{pageMeta.title}</title>
+	<meta name="description" content={pageMeta.description} />
 </svelte:head>
 
 <div class="flex min-h-screen flex-col">

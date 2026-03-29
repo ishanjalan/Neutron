@@ -416,7 +416,8 @@
 								</button>
 								<button
 									onclick={() => handleResizeModeChange('fit')}
-									class="rounded px-2.5 py-1 text-xs font-medium transition-all {resizeMode === 'fit'
+									class="rounded px-2.5 py-1 text-xs font-medium transition-all {resizeMode ===
+									'fit'
 										? 'bg-surface-600 text-white'
 										: 'text-surface-400 hover:text-surface-200'}"
 								>

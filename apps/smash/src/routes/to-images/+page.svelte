@@ -1,19 +1,12 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import { Footer } from '@neutron/ui';
+	import { Footer, SEOSection } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
+	import { toImagesSEO } from '$lib/seo-content';
 	import { downloadBlob, downloadAllAsZip } from '@neutron/utils';
 	import { pdfToImages, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
-	import {
-		Image,
-		Upload,
-		FileText,
-		Download,
-		Trash2,
-		Loader2,
-		CheckCircle,
-	} from 'lucide-svelte';
+	import { Image, Upload, FileText, Download, Trash2, Loader2, CheckCircle } from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 
 	interface PDFFile {
@@ -370,6 +363,7 @@
 				</div>
 			</div>
 		</div>
+		<SEOSection intro={toImagesSEO.intro} faqs={toImagesSEO.faqs} />
 	</main>
 	<Footer currentApp="smash" />
 </div>

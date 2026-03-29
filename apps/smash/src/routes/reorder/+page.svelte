@@ -1,8 +1,9 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import PDFViewer from '$lib/components/PDFViewer.svelte';
-	import { Footer } from '@neutron/ui';
+	import { Footer, SEOSection } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
+	import { reorderSEO } from '$lib/seo-content';
 	import { downloadBlob } from '@neutron/utils';
 	import { getOutputFilename } from '$lib/utils/pdf';
 	import { ArrowUpDown, Upload, Download, X } from 'lucide-svelte';
@@ -165,6 +166,7 @@
 				</div>
 			</div>
 		</div>
+		<SEOSection intro={reorderSEO.intro} faqs={reorderSEO.faqs} />
 		<Footer currentApp="smash" />
 	{/if}
 </div>

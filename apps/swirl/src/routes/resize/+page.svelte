@@ -4,7 +4,8 @@
 	import DropZone from '$lib/components/DropZone.svelte';
 	import CompareSlider from '$lib/components/CompareSlider.svelte';
 	import BatchSummary from '$lib/components/BatchSummary.svelte';
-	import { toast } from '@neutron/ui';
+	import { toast, SEOSection } from '@neutron/ui';
+	import { resizeGifSEO } from '$lib/seo-content';
 	import {
 		Scaling,
 		Download,
@@ -563,7 +564,9 @@
 					</div>
 
 					<!-- Optimize after resize -->
-					<div class="bg-surface-800/50 border-surface-700/50 mb-6 flex items-center justify-between rounded-xl border p-4">
+					<div
+						class="bg-surface-800/50 border-surface-700/50 mb-6 flex items-center justify-between rounded-xl border p-4"
+					>
 						<div>
 							<p class="text-surface-300 text-sm font-medium">Optimize after resize</p>
 							<p class="text-surface-500 text-xs">Reduce colors to minimize file size</p>
@@ -571,11 +574,17 @@
 						<button
 							type="button"
 							onclick={() => (optimizeAfterResize = !optimizeAfterResize)}
-							class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none {optimizeAfterResize ? 'bg-cyan-500' : 'bg-surface-600'}"
+							class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none {optimizeAfterResize
+								? 'bg-cyan-500'
+								: 'bg-surface-600'}"
 							role="switch"
 							aria-checked={optimizeAfterResize}
 						>
-							<span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 {optimizeAfterResize ? 'translate-x-5' : 'translate-x-0'}"></span>
+							<span
+								class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 {optimizeAfterResize
+									? 'translate-x-5'
+									: 'translate-x-0'}"
+							></span>
 						</button>
 					</div>
 
@@ -628,6 +637,7 @@
 				</div>
 			</div>
 		</div>
+		<SEOSection intro={resizeGifSEO.intro} faqs={resizeGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

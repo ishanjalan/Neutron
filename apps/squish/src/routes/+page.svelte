@@ -7,7 +7,8 @@
 	import BatchSummary from '$lib/components/BatchSummary.svelte';
 	import LiveSavingsTicker from '$lib/components/LiveSavingsTicker.svelte';
 	import MobileOptimizations from '$lib/components/MobileOptimizations.svelte';
-	import { ConfirmModal, AnimatedNumber, toast } from '@neutron/ui';
+	import { ConfirmModal, AnimatedNumber, toast, SEOSection } from '@neutron/ui';
+	import { squishSEO } from '$lib/seo-content';
 	import { images, formatBytes } from '$lib';
 	import { processImages, cancelProcessing, reprocessImage } from '$lib/utils/compress';
 	import { terminatePool } from '$lib/utils/worker-pool';
@@ -457,6 +458,7 @@
 				<DropZone />
 			{/if}
 		</div>
+		<SEOSection intro={squishSEO.intro} faqs={squishSEO.faqs} />
 	</main>
 
 	<Footer currentApp="squish" />

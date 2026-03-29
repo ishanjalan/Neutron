@@ -1,8 +1,9 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import PDFViewer from '$lib/components/PDFViewer.svelte';
-	import { Footer } from '@neutron/ui';
+	import { Footer, SEOSection } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
+	import { compressSEO } from '$lib/seo-content';
 	import { downloadBlob, downloadAllAsZip } from '@neutron/utils';
 	import { compressPDF, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
@@ -564,7 +565,6 @@
 							based on your selected quality preset.
 						</p>
 					</div>
-
 				</div>
 			</div>
 
@@ -578,6 +578,7 @@
 				</div>
 			{/if}
 		</div>
+		<SEOSection intro={compressSEO.intro} faqs={compressSEO.faqs} />
 	</main>
 
 	<Footer currentApp="smash" />

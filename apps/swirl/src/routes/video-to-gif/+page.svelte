@@ -3,7 +3,8 @@
 	import { Footer } from '@neutron/ui';
 	import DropZone from '$lib/components/DropZone.svelte';
 	import CompareSlider from '$lib/components/CompareSlider.svelte';
-	import { toast } from '@neutron/ui';
+	import { toast, SEOSection } from '@neutron/ui';
+	import { videoToGifSEO } from '$lib/seo-content';
 	import TimelineSlider from '$lib/components/TimelineSlider.svelte';
 	import {
 		Film,
@@ -447,11 +448,17 @@
 									<button
 										type="button"
 										onclick={() => (optimizeOutput = !optimizeOutput)}
-										class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none {optimizeOutput ? 'bg-accent-start' : 'bg-surface-600'}"
+										class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none {optimizeOutput
+											? 'bg-accent-start'
+											: 'bg-surface-600'}"
 										role="switch"
 										aria-checked={optimizeOutput}
 									>
-										<span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 {optimizeOutput ? 'translate-x-5' : 'translate-x-0'}"></span>
+										<span
+											class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 {optimizeOutput
+												? 'translate-x-5'
+												: 'translate-x-0'}"
+										></span>
 									</button>
 								</div>
 
@@ -596,6 +603,7 @@
 				</div>
 			{/if}
 		</div>
+		<SEOSection intro={videoToGifSEO.intro} faqs={videoToGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

@@ -17,6 +17,7 @@ export { default as CompareSlider } from './components/CompareSlider.svelte';
 export { default as Footer } from './components/Footer.svelte';
 export { default as AppHeader } from './components/Header.svelte';
 export { default as ThemeToggle } from './components/ThemeToggle.svelte';
+export { default as SEOSection, type FAQ as SEOFaq } from './components/SEOSection.svelte';
 
 // Motion animation utilities
 export {

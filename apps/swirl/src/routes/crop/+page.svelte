@@ -3,7 +3,8 @@
 	import { Footer } from '@neutron/ui';
 	import DropZone from '$lib/components/DropZone.svelte';
 	import CompareSlider from '$lib/components/CompareSlider.svelte';
-	import { toast } from '@neutron/ui';
+	import { toast, SEOSection } from '@neutron/ui';
+	import { cropGifSEO } from '$lib/seo-content';
 	import {
 		Crop,
 		Settings,
@@ -759,6 +760,7 @@
 				</div>
 			{/if}
 		</div>
+		<SEOSection intro={cropGifSEO.intro} faqs={cropGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

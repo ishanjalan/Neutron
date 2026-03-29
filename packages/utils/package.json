@@ -51,6 +51,10 @@
 		"./apps": {
 			"types": "./src/apps.ts",
 			"default": "./src/apps.ts"
+		},
+		"./seo": {
+			"types": "./src/seo.ts",
+			"default": "./src/seo.ts"
 		}
 	},
 	"devDependencies": {

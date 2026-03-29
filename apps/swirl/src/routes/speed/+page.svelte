@@ -4,7 +4,8 @@
 	import DropZone from '$lib/components/DropZone.svelte';
 	import CompareSlider from '$lib/components/CompareSlider.svelte';
 	import BatchSummary from '$lib/components/BatchSummary.svelte';
-	import { toast } from '@neutron/ui';
+	import { toast, SEOSection } from '@neutron/ui';
+	import { speedGifSEO } from '$lib/seo-content';
 	import {
 		Gauge,
 		Settings,
@@ -600,6 +601,7 @@
 				</div>
 			</div>
 		</div>
+		<SEOSection intro={speedGifSEO.intro} faqs={speedGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

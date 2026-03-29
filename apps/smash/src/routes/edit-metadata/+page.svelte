@@ -1,7 +1,8 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import { Footer } from '@neutron/ui';
+	import { Footer, SEOSection } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
+	import { editMetadataSEO } from '$lib/seo-content';
 	import { downloadBlob } from '@neutron/utils';
 	import { editMetadata, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
@@ -333,6 +334,7 @@
 				</div>
 			</div>
 		</div>
+		<SEOSection intro={editMetadataSEO.intro} faqs={editMetadataSEO.faqs} />
 	</main>
 	<Footer currentApp="smash" />
 </div>

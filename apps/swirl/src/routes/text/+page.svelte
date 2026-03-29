@@ -2,7 +2,8 @@
 	import Header from '$lib/components/Header.svelte';
 	import { Footer } from '@neutron/ui';
 	import DropZone from '$lib/components/DropZone.svelte';
-	import { toast } from '@neutron/ui';
+	import { toast, SEOSection } from '@neutron/ui';
+	import { textGifSEO } from '$lib/seo-content';
 	import {
 		Type,
 		Settings,
@@ -671,6 +672,7 @@
 				</div>
 			</div>
 		</div>
+		<SEOSection intro={textGifSEO.intro} faqs={textGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

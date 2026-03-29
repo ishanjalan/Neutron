@@ -2,29 +2,34 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { Toast } from '@neutron/ui';
+	import { onMount } from 'svelte';
+	import { detectLocale, type Locale } from '@neutron/utils/seo';
+	import { squishMeta } from '$lib/seo';
 
 	let { children } = $props();
 
 	const siteUrl = 'https://ishanjalan.github.io/Squish';
 	const ogImage = `${siteUrl}/og-image.svg`;
+
+	let locale = $state<Locale>('en');
+	let meta = $derived(squishMeta[locale]);
+
+	onMount(() => {
+		locale = detectLocale();
+		document.documentElement.lang = locale;
+	});
 </script>
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<title>Squish — Compress HEIC, JPEG, PNG, WebP & More</title>
-	<meta
-		name="description"
-		content="Compress and convert HEIC, JPEG, PNG, WebP, AVIF, JPEG XL, SVG and GIF images in your browser. 100% private — files never leave your device."
-	/>
+	<title>{meta.title}</title>
+	<meta name="description" content={meta.description} />
 
 	<!-- Open Graph -->
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content={siteUrl} />
-	<meta property="og:title" content="Squish — Compress HEIC, JPEG, PNG, WebP & More" />
-	<meta
-		property="og:description"
-		content="Compress and convert HEIC, JPEG, PNG, WebP, AVIF, JPEG XL, SVG and GIF images in your browser. 100% private — files never leave your device."
-	/>
+	<meta property="og:title" content={meta.title} />
+	<meta property="og:description" content={meta.description} />
 	<meta property="og:image" content={ogImage} />
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
@@ -32,16 +37,14 @@
 
 	<!-- Twitter Card -->
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content="Squish — Compress HEIC, JPEG, PNG, WebP & More" />
-	<meta
-		name="twitter:description"
-		content="Compress and convert HEIC, JPEG, PNG, WebP, AVIF, JPEG XL, SVG and GIF images in your browser. 100% private — files never leave your device."
-	/>
+	<meta name="twitter:title" content={meta.title} />
+	<meta name="twitter:description" content={meta.description} />
 	<meta name="twitter:image" content={ogImage} />
 
 	<!-- Additional SEO -->
 	<meta name="robots" content="index, follow" />
 	<link rel="canonical" href={siteUrl} />
+	<link rel="alternate" hreflang="x-default" href={siteUrl} />
 
 	<!-- JSON-LD -->
 	<script type="application/ld+json">

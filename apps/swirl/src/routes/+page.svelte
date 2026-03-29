@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import Header from '$lib/components/Header.svelte';
-	import { Footer } from '@neutron/ui';
+	import { Footer, SEOSection } from '@neutron/ui';
+	import { swirlHomeSEO } from '$lib/seo-content';
 	import { Film, Gauge, Maximize2, ArrowRight, Rewind, Images, Crop, Type } from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
 
@@ -173,6 +174,7 @@
 				{/each}
 			</div>
 		</div>
+		<SEOSection intro={swirlHomeSEO.intro} faqs={swirlHomeSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />
