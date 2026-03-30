@@ -639,7 +639,7 @@
 			</div>
 		</div>
 		<RelatedTools tools={swirlRelated['resize']} />
-	<SEOSection intro={resizeGifSEO.intro} faqs={resizeGifSEO.faqs} />
+		<SEOSection intro={resizeGifSEO.intro} faqs={resizeGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

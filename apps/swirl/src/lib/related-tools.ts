@@ -38,7 +38,11 @@ export const swirlRelated: Record<string, RelatedTool[]> = {
 	crop: [
 		{ label: 'Resize GIF', href: `${base}/resize`, description: 'Scale to exact pixel dimensions' },
 		{ label: 'Optimize GIF', href: `${base}/optimize`, description: 'Shrink GIF file size' },
-		{ label: 'Add Text to GIF', href: `${base}/text`, description: 'Overlay a caption on every frame' },
+		{
+			label: 'Add Text to GIF',
+			href: `${base}/text`,
+			description: 'Overlay a caption on every frame',
+		},
 	],
 	reverse: [
 		{ label: 'Change Speed', href: `${base}/speed`, description: 'Adjust frame delays' },

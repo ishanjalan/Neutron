@@ -168,7 +168,7 @@
 			</div>
 		</div>
 		<RelatedTools tools={smashRelated['reorder']} />
-	<SEOSection intro={reorderSEO.intro} faqs={reorderSEO.faqs} />
+		<SEOSection intro={reorderSEO.intro} faqs={reorderSEO.faqs} />
 		<Footer currentApp="smash" />
 	{/if}
 </div>

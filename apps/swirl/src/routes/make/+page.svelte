@@ -776,7 +776,7 @@
 			</div>
 		</div>
 		<RelatedTools tools={swirlRelated['make']} />
-	<SEOSection intro={makeGifSEO.intro} faqs={makeGifSEO.faqs} />
+		<SEOSection intro={makeGifSEO.intro} faqs={makeGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

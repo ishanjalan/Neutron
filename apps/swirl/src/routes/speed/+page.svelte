@@ -603,7 +603,7 @@
 			</div>
 		</div>
 		<RelatedTools tools={swirlRelated['speed']} />
-	<SEOSection intro={speedGifSEO.intro} faqs={speedGifSEO.faqs} />
+		<SEOSection intro={speedGifSEO.intro} faqs={speedGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

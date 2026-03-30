@@ -674,7 +674,7 @@
 			</div>
 		</div>
 		<RelatedTools tools={swirlRelated['text']} />
-	<SEOSection intro={textGifSEO.intro} faqs={textGifSEO.faqs} />
+		<SEOSection intro={textGifSEO.intro} faqs={textGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

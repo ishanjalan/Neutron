@@ -762,7 +762,7 @@
 			{/if}
 		</div>
 		<RelatedTools tools={swirlRelated['crop']} />
-	<SEOSection intro={cropGifSEO.intro} faqs={cropGifSEO.faqs} />
+		<SEOSection intro={cropGifSEO.intro} faqs={cropGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

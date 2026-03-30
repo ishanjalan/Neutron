@@ -605,7 +605,7 @@
 			{/if}
 		</div>
 		<RelatedTools tools={swirlRelated['video-to-gif']} />
-	<SEOSection intro={videoToGifSEO.intro} faqs={videoToGifSEO.faqs} />
+		<SEOSection intro={videoToGifSEO.intro} faqs={videoToGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

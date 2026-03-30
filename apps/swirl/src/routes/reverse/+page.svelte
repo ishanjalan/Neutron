@@ -521,7 +521,7 @@
 			</div>
 		</div>
 		<RelatedTools tools={swirlRelated['reverse']} />
-	<SEOSection intro={reverseGifSEO.intro} faqs={reverseGifSEO.faqs} />
+		<SEOSection intro={reverseGifSEO.intro} faqs={reverseGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

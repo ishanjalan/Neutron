@@ -44,7 +44,11 @@
 	<meta name="robots" content="index, follow" />
 	<link rel="canonical" href={siteUrl} />
 	<link rel="alternate" hreflang="x-default" href={siteUrl} />
-	<link rel="sitemap" type="application/xml" href="https://ishanjalan.github.io/Squash/sitemap.xml" />
+	<link
+		rel="sitemap"
+		type="application/xml"
+		href="https://ishanjalan.github.io/Squash/sitemap.xml"
+	/>
 
 	<!-- JSON-LD -->
 	<script type="application/ld+json">

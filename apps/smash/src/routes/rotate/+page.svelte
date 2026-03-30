@@ -168,7 +168,7 @@
 			</div>
 		</div>
 		<RelatedTools tools={smashRelated['rotate']} />
-	<SEOSection intro={rotateSEO.intro} faqs={rotateSEO.faqs} />
+		<SEOSection intro={rotateSEO.intro} faqs={rotateSEO.faqs} />
 		<Footer currentApp="smash" />
 	{/if}
 </div>

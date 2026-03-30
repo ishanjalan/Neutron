@@ -168,7 +168,7 @@
 			</div>
 		</div>
 		<RelatedTools tools={smashRelated['delete']} />
-	<SEOSection intro={deleteSEO.intro} faqs={deleteSEO.faqs} />
+		<SEOSection intro={deleteSEO.intro} faqs={deleteSEO.faqs} />
 		<Footer currentApp="smash" />
 	{/if}
 </div>
