@@ -4,8 +4,9 @@
 	import DropZone from '$lib/components/DropZone.svelte';
 	import CompareSlider from '$lib/components/CompareSlider.svelte';
 	import BatchSummary from '$lib/components/BatchSummary.svelte';
-	import { toast, SEOSection } from '@neutron/ui';
+	import { toast, SEOSection, RelatedTools } from '@neutron/ui';
 	import { reverseGifSEO } from '$lib/seo-content';
+	import { swirlRelated } from '$lib/related-tools';
 	import {
 		Settings,
 		Download,
@@ -256,12 +257,12 @@
 </script>
 
 <svelte:head>
-	<title>Reverse GIF — Swirl</title>
+	<title>Reverse GIF Online — Free | Swirl</title>
 	<meta
 		name="description"
 		content="Reverse a GIF or create a boomerang loop effect. Free, browser-based."
 	/>
-	<meta property="og:title" content="Reverse GIF — Swirl" />
+	<meta property="og:title" content="Reverse GIF Online — Free | Swirl" />
 	<meta
 		property="og:description"
 		content="Reverse a GIF or create a boomerang loop effect. Free, browser-based."
@@ -519,7 +520,8 @@
 				</div>
 			</div>
 		</div>
-		<SEOSection intro={reverseGifSEO.intro} faqs={reverseGifSEO.faqs} />
+		<RelatedTools tools={swirlRelated['reverse']} />
+	<SEOSection intro={reverseGifSEO.intro} faqs={reverseGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

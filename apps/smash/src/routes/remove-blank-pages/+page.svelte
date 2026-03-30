@@ -1,8 +1,9 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import { Footer, SEOSection } from '@neutron/ui';
+	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
 	import { removeBlankPagesSEO } from '$lib/seo-content';
+	import { smashRelated } from '$lib/related-tools';
 	import { downloadBlob } from '@neutron/utils';
 	import {
 		removeBlankPages,
@@ -150,12 +151,12 @@
 </script>
 
 <svelte:head>
-	<title>Remove Blank Pages — Smash</title>
+	<title>Remove Blank Pages from PDF Online — Free | Smash</title>
 	<meta
 		name="description"
 		content="Automatically detect and remove blank pages from your PDF. Free, private, no upload."
 	/>
-	<meta property="og:title" content="Remove Blank Pages — Smash" />
+	<meta property="og:title" content="Remove Blank Pages from PDF Online — Free | Smash" />
 	<meta
 		property="og:description"
 		content="Automatically detect and remove blank pages from your PDF. Free, private, no upload."
@@ -322,6 +323,7 @@
 				</div>
 			</div>
 		</div>
+		<RelatedTools tools={smashRelated['remove-blank-pages']} />
 		<SEOSection intro={removeBlankPagesSEO.intro} faqs={removeBlankPagesSEO.faqs} />
 	</main>
 	<Footer currentApp="smash" />

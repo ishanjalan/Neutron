@@ -1,9 +1,10 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import PDFViewer from '$lib/components/PDFViewer.svelte';
-	import { Footer, SEOSection } from '@neutron/ui';
+	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
 	import { compressSEO } from '$lib/seo-content';
+	import { smashRelated } from '$lib/related-tools';
 	import { downloadBlob, downloadAllAsZip } from '@neutron/utils';
 	import { compressPDF, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
@@ -284,12 +285,12 @@
 </script>
 
 <svelte:head>
-	<title>Compress PDF — Smash</title>
+	<title>Compress PDF Online — Free, No Upload | Smash</title>
 	<meta
 		name="description"
 		content="Reduce PDF file size by 50–90% in your browser using Ghostscript WASM. Free, private, no upload required."
 	/>
-	<meta property="og:title" content="Compress PDF — Smash" />
+	<meta property="og:title" content="Compress PDF Online — Free, No Upload | Smash" />
 	<meta
 		property="og:description"
 		content="Reduce PDF file size by 50–90% in your browser using Ghostscript WASM. Free, private, no upload required."
@@ -578,6 +579,7 @@
 				</div>
 			{/if}
 		</div>
+		<RelatedTools tools={smashRelated['compress']} />
 		<SEOSection intro={compressSEO.intro} faqs={compressSEO.faqs} />
 	</main>
 

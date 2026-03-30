@@ -4,8 +4,9 @@
 	import DropZone from '$lib/components/DropZone.svelte';
 	import CompareSlider from '$lib/components/CompareSlider.svelte';
 	import BatchSummary from '$lib/components/BatchSummary.svelte';
-	import { toast, SEOSection } from '@neutron/ui';
+	import { toast, SEOSection, RelatedTools } from '@neutron/ui';
 	import { speedGifSEO } from '$lib/seo-content';
+	import { swirlRelated } from '$lib/related-tools';
 	import {
 		Gauge,
 		Settings,
@@ -291,12 +292,12 @@
 </script>
 
 <svelte:head>
-	<title>Change GIF Speed — Swirl</title>
+	<title>Change GIF Speed Online — Free | Swirl</title>
 	<meta
 		name="description"
 		content="Speed up or slow down any animated GIF. Free, private, browser-based."
 	/>
-	<meta property="og:title" content="Change GIF Speed — Swirl" />
+	<meta property="og:title" content="Change GIF Speed Online — Free | Swirl" />
 	<meta
 		property="og:description"
 		content="Speed up or slow down any animated GIF. Free, private, browser-based."
@@ -601,7 +602,8 @@
 				</div>
 			</div>
 		</div>
-		<SEOSection intro={speedGifSEO.intro} faqs={speedGifSEO.faqs} />
+		<RelatedTools tools={swirlRelated['speed']} />
+	<SEOSection intro={speedGifSEO.intro} faqs={speedGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

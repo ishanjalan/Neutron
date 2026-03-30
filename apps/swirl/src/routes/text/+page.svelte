@@ -2,8 +2,9 @@
 	import Header from '$lib/components/Header.svelte';
 	import { Footer } from '@neutron/ui';
 	import DropZone from '$lib/components/DropZone.svelte';
-	import { toast, SEOSection } from '@neutron/ui';
+	import { toast, SEOSection, RelatedTools } from '@neutron/ui';
 	import { textGifSEO } from '$lib/seo-content';
+	import { swirlRelated } from '$lib/related-tools';
 	import {
 		Type,
 		Settings,
@@ -316,12 +317,12 @@
 </script>
 
 <svelte:head>
-	<title>Add Text to GIF — Swirl</title>
+	<title>Add Text to GIF Online — Free | Swirl</title>
 	<meta
 		name="description"
 		content="Add captions or meme-style text overlays to any GIF. Free, browser-based."
 	/>
-	<meta property="og:title" content="Add Text to GIF — Swirl" />
+	<meta property="og:title" content="Add Text to GIF Online — Free | Swirl" />
 	<meta
 		property="og:description"
 		content="Add captions or meme-style text overlays to any GIF. Free, browser-based."
@@ -672,7 +673,8 @@
 				</div>
 			</div>
 		</div>
-		<SEOSection intro={textGifSEO.intro} faqs={textGifSEO.faqs} />
+		<RelatedTools tools={swirlRelated['text']} />
+	<SEOSection intro={textGifSEO.intro} faqs={textGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

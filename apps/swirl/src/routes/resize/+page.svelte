@@ -4,8 +4,9 @@
 	import DropZone from '$lib/components/DropZone.svelte';
 	import CompareSlider from '$lib/components/CompareSlider.svelte';
 	import BatchSummary from '$lib/components/BatchSummary.svelte';
-	import { toast, SEOSection } from '@neutron/ui';
+	import { toast, SEOSection, RelatedTools } from '@neutron/ui';
 	import { resizeGifSEO } from '$lib/seo-content';
+	import { swirlRelated } from '$lib/related-tools';
 	import {
 		Scaling,
 		Download,
@@ -306,12 +307,12 @@
 </script>
 
 <svelte:head>
-	<title>Resize GIF — Swirl</title>
+	<title>Resize GIF Online — Free | Swirl</title>
 	<meta
 		name="description"
 		content="Resize a GIF to exact dimensions or a percentage. Free, browser-based."
 	/>
-	<meta property="og:title" content="Resize GIF — Swirl" />
+	<meta property="og:title" content="Resize GIF Online — Free | Swirl" />
 	<meta
 		property="og:description"
 		content="Resize a GIF to exact dimensions or a percentage. Free, browser-based."
@@ -637,7 +638,8 @@
 				</div>
 			</div>
 		</div>
-		<SEOSection intro={resizeGifSEO.intro} faqs={resizeGifSEO.faqs} />
+		<RelatedTools tools={swirlRelated['resize']} />
+	<SEOSection intro={resizeGifSEO.intro} faqs={resizeGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

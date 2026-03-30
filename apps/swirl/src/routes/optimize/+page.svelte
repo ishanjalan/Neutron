@@ -4,8 +4,9 @@
 	import DropZone from '$lib/components/DropZone.svelte';
 	import CompareSlider from '$lib/components/CompareSlider.svelte';
 	import BatchSummary from '$lib/components/BatchSummary.svelte';
-	import { toast, SEOSection } from '@neutron/ui';
+	import { toast, SEOSection, RelatedTools } from '@neutron/ui';
 	import { optimizeGifSEO } from '$lib/seo-content';
+	import { swirlRelated } from '$lib/related-tools';
 	import {
 		Gauge,
 		Settings,
@@ -299,12 +300,12 @@
 </script>
 
 <svelte:head>
-	<title>Optimize GIF — Swirl</title>
+	<title>Compress & Optimize GIF Online — Free | Swirl</title>
 	<meta
 		name="description"
 		content="Compress GIFs for Discord, Twitter, Slack, or WhatsApp with one-click size targets. Free."
 	/>
-	<meta property="og:title" content="Optimize GIF — Swirl" />
+	<meta property="og:title" content="Compress & Optimize GIF Online — Free | Swirl" />
 	<meta
 		property="og:description"
 		content="Compress GIFs for Discord, Twitter, Slack, or WhatsApp with one-click size targets. Free."
@@ -629,7 +630,8 @@
 				</div>
 			</div>
 		</div>
-		<SEOSection intro={optimizeGifSEO.intro} faqs={optimizeGifSEO.faqs} />
+		<RelatedTools tools={swirlRelated['optimize']} />
+	<SEOSection intro={optimizeGifSEO.intro} faqs={optimizeGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

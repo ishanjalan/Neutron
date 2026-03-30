@@ -1,8 +1,9 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import { Footer, SEOSection } from '@neutron/ui';
+	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
 	import { toImagesSEO } from '$lib/seo-content';
+	import { smashRelated } from '$lib/related-tools';
 	import { downloadBlob, downloadAllAsZip } from '@neutron/utils';
 	import { pdfToImages, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
@@ -152,12 +153,12 @@
 </script>
 
 <svelte:head>
-	<title>PDF to Images — Smash</title>
+	<title>PDF to Images Online — Free | Smash</title>
 	<meta
 		name="description"
 		content="Convert PDF pages to PNG, JPG, or WebP at up to 300 DPI. Free and private."
 	/>
-	<meta property="og:title" content="PDF to Images — Smash" />
+	<meta property="og:title" content="PDF to Images Online — Free | Smash" />
 	<meta
 		property="og:description"
 		content="Convert PDF pages to PNG, JPG, or WebP at up to 300 DPI. Free and private."
@@ -363,6 +364,7 @@
 				</div>
 			</div>
 		</div>
+		<RelatedTools tools={smashRelated['to-images']} />
 		<SEOSection intro={toImagesSEO.intro} faqs={toImagesSEO.faqs} />
 	</main>
 	<Footer currentApp="smash" />

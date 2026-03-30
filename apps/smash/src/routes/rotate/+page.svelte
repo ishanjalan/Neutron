@@ -1,9 +1,10 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import PDFViewer from '$lib/components/PDFViewer.svelte';
-	import { Footer, SEOSection } from '@neutron/ui';
+	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
 	import { rotateSEO } from '$lib/seo-content';
+	import { smashRelated } from '$lib/related-tools';
 	import { downloadBlob } from '@neutron/utils';
 	import { getOutputFilename } from '$lib/utils/pdf';
 	import { RotateCw, Upload, Download, X, FileText } from 'lucide-svelte';
@@ -68,12 +69,12 @@
 </script>
 
 <svelte:head>
-	<title>Rotate PDF Pages — Smash</title>
+	<title>Rotate PDF Pages Online — Free | Smash</title>
 	<meta
 		name="description"
 		content="Rotate pages 90°, 180°, or 270°. Select specific pages. Free, browser-based."
 	/>
-	<meta property="og:title" content="Rotate PDF Pages — Smash" />
+	<meta property="og:title" content="Rotate PDF Pages Online — Free | Smash" />
 	<meta
 		property="og:description"
 		content="Rotate pages 90°, 180°, or 270°. Select specific pages. Free, browser-based."
@@ -166,7 +167,8 @@
 				</div>
 			</div>
 		</div>
-		<SEOSection intro={rotateSEO.intro} faqs={rotateSEO.faqs} />
+		<RelatedTools tools={smashRelated['rotate']} />
+	<SEOSection intro={rotateSEO.intro} faqs={rotateSEO.faqs} />
 		<Footer currentApp="smash" />
 	{/if}
 </div>

@@ -100,6 +100,14 @@
 	}
 </script>
 
+<svelte:head>
+	<title>PDF Workspace — Multi-Tool Editor | Smash</title>
+	<meta
+		name="description"
+		content="Open PDFs in the Smash workspace to apply multiple tools in one session — compress, merge, split, rotate, OCR, and more without re-uploading."
+	/>
+</svelte:head>
+
 <!-- Hidden file input -->
 <input bind:this={fileInput} type="file" class="hidden" onchange={handleFileInputChange} />
 

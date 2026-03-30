@@ -1,8 +1,9 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import { Footer, SEOSection } from '@neutron/ui';
+	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
 	import { editMetadataSEO } from '$lib/seo-content';
+	import { smashRelated } from '$lib/related-tools';
 	import { downloadBlob } from '@neutron/utils';
 	import { editMetadata, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
@@ -145,12 +146,12 @@
 </script>
 
 <svelte:head>
-	<title>Edit PDF Metadata — Smash</title>
+	<title>Edit PDF Metadata Online — Free | Smash</title>
 	<meta
 		name="description"
 		content="Edit title, author, subject, and keywords in your PDF's document properties. Free, private, no upload."
 	/>
-	<meta property="og:title" content="Edit PDF Metadata — Smash" />
+	<meta property="og:title" content="Edit PDF Metadata Online — Free | Smash" />
 	<meta
 		property="og:description"
 		content="Edit title, author, subject, and keywords in your PDF's document properties. Free, private, no upload."
@@ -334,6 +335,7 @@
 				</div>
 			</div>
 		</div>
+		<RelatedTools tools={smashRelated['edit-metadata']} />
 		<SEOSection intro={editMetadataSEO.intro} faqs={editMetadataSEO.faqs} />
 	</main>
 	<Footer currentApp="smash" />

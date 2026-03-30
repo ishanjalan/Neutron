@@ -19,7 +19,7 @@ export function detectLocale(): Locale {
 		it: 'it',
 		nl: 'nl',
 		tr: 'tr',
-		uk: 'uk'
+		uk: 'uk',
 	};
 	return map[lang] ?? 'en';
 }

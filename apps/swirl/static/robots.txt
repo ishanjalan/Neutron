@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://ishanjalan.github.io/Swirl/sitemap.xml

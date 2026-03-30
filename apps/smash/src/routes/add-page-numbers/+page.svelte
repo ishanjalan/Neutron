@@ -1,8 +1,9 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import { Footer, SEOSection } from '@neutron/ui';
+	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
 	import { addPageNumbersSEO } from '$lib/seo-content';
+	import { smashRelated } from '$lib/related-tools';
 	import { downloadBlob } from '@neutron/utils';
 	import {
 		addPageNumbers,
@@ -138,12 +139,12 @@
 </script>
 
 <svelte:head>
-	<title>Add Page Numbers — Smash</title>
+	<title>Add Page Numbers to PDF Online — Free | Smash</title>
 	<meta
 		name="description"
 		content="Add page numbers to any PDF. Choose position, starting number, and font size. Free, private, no upload."
 	/>
-	<meta property="og:title" content="Add Page Numbers — Smash" />
+	<meta property="og:title" content="Add Page Numbers to PDF Online — Free | Smash" />
 	<meta
 		property="og:description"
 		content="Add page numbers to any PDF. Choose position, starting number, and font size. Free, private, no upload."
@@ -332,6 +333,7 @@
 				</div>
 			</div>
 		</div>
+		<RelatedTools tools={smashRelated['add-page-numbers']} />
 		<SEOSection intro={addPageNumbersSEO.intro} faqs={addPageNumbersSEO.faqs} />
 	</main>
 	<Footer currentApp="smash" />

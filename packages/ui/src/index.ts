@@ -18,6 +18,10 @@ export { default as Footer } from './components/Footer.svelte';
 export { default as AppHeader } from './components/Header.svelte';
 export { default as ThemeToggle } from './components/ThemeToggle.svelte';
 export { default as SEOSection, type FAQ as SEOFaq } from './components/SEOSection.svelte';
+export {
+	default as RelatedTools,
+	type RelatedTool,
+} from './components/RelatedTools.svelte';
 
 // Motion animation utilities
 export {

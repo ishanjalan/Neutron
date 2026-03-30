@@ -1,9 +1,10 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import PDFViewer from '$lib/components/PDFViewer.svelte';
-	import { Footer, SEOSection } from '@neutron/ui';
+	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
 	import { reorderSEO } from '$lib/seo-content';
+	import { smashRelated } from '$lib/related-tools';
 	import { downloadBlob } from '@neutron/utils';
 	import { getOutputFilename } from '$lib/utils/pdf';
 	import { ArrowUpDown, Upload, Download, X } from 'lucide-svelte';
@@ -68,12 +69,12 @@
 </script>
 
 <svelte:head>
-	<title>Reorder PDF Pages — Smash</title>
+	<title>Reorder PDF Pages Online — Free | Smash</title>
 	<meta
 		name="description"
 		content="Drag and drop to rearrange pages in a PDF. Free, browser-based."
 	/>
-	<meta property="og:title" content="Reorder PDF Pages — Smash" />
+	<meta property="og:title" content="Reorder PDF Pages Online — Free | Smash" />
 	<meta
 		property="og:description"
 		content="Drag and drop to rearrange pages in a PDF. Free, browser-based."
@@ -166,7 +167,8 @@
 				</div>
 			</div>
 		</div>
-		<SEOSection intro={reorderSEO.intro} faqs={reorderSEO.faqs} />
+		<RelatedTools tools={smashRelated['reorder']} />
+	<SEOSection intro={reorderSEO.intro} faqs={reorderSEO.faqs} />
 		<Footer currentApp="smash" />
 	{/if}
 </div>

@@ -53,6 +53,7 @@
 	<meta name="robots" content="index, follow" />
 	<link rel="canonical" href="https://ishanjalan.github.io/Smash" />
 	<link rel="alternate" hreflang="x-default" href="https://ishanjalan.github.io/Smash" />
+	<link rel="sitemap" type="application/xml" href="https://ishanjalan.github.io/Smash/sitemap.xml" />
 
 	<!-- JSON-LD -->
 	<script type="application/ld+json">

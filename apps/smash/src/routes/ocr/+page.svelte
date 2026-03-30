@@ -1,8 +1,9 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import { Footer, SEOSection } from '@neutron/ui';
+	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
 	import { ocrSEO } from '$lib/seo-content';
+	import { smashRelated } from '$lib/related-tools';
 	import { downloadBlob } from '@neutron/utils';
 	import {
 		performOCR,
@@ -204,12 +205,12 @@
 </script>
 
 <svelte:head>
-	<title>OCR PDF — Smash</title>
+	<title>OCR PDF Online — Extract Text from Scanned PDF | Smash</title>
 	<meta
 		name="description"
 		content="Extract searchable text from scanned PDFs using Tesseract. Supports 100+ languages. Free and private."
 	/>
-	<meta property="og:title" content="OCR PDF — Smash" />
+	<meta property="og:title" content="OCR PDF Online — Extract Text from Scanned PDF | Smash" />
 	<meta
 		property="og:description"
 		content="Extract searchable text from scanned PDFs using Tesseract. Supports 100+ languages. Free and private."
@@ -481,6 +482,7 @@
 				</div>
 			</div>
 		</div>
+		<RelatedTools tools={smashRelated['ocr']} />
 		<SEOSection intro={ocrSEO.intro} faqs={ocrSEO.faqs} />
 	</main>
 

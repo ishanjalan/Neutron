@@ -1,8 +1,9 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import { Footer, SEOSection } from '@neutron/ui';
+	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
 	import { watermarkSEO } from '$lib/seo-content';
+	import { smashRelated } from '$lib/related-tools';
 	import { downloadBlob } from '@neutron/utils';
 	import { addWatermark, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
@@ -131,12 +132,12 @@
 </script>
 
 <svelte:head>
-	<title>Add Watermark — Smash</title>
+	<title>Add Watermark to PDF Online — Free | Smash</title>
 	<meta
 		name="description"
 		content="Add a diagonal text watermark to every page of your PDF. Free, private, no upload."
 	/>
-	<meta property="og:title" content="Add Watermark — Smash" />
+	<meta property="og:title" content="Add Watermark to PDF Online — Free | Smash" />
 	<meta
 		property="og:description"
 		content="Add a diagonal text watermark to every page of your PDF. Free, private, no upload."
@@ -331,6 +332,7 @@
 				</div>
 			</div>
 		</div>
+		<RelatedTools tools={smashRelated['watermark']} />
 		<SEOSection intro={watermarkSEO.intro} faqs={watermarkSEO.faqs} />
 	</main>
 	<Footer currentApp="smash" />

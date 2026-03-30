@@ -3,8 +3,9 @@
 	import { Footer } from '@neutron/ui';
 	import DropZone from '$lib/components/DropZone.svelte';
 	import CompareSlider from '$lib/components/CompareSlider.svelte';
-	import { toast, SEOSection } from '@neutron/ui';
+	import { toast, SEOSection, RelatedTools } from '@neutron/ui';
 	import { cropGifSEO } from '$lib/seo-content';
+	import { swirlRelated } from '$lib/related-tools';
 	import {
 		Crop,
 		Settings,
@@ -344,12 +345,12 @@
 />
 
 <svelte:head>
-	<title>Crop GIF — Swirl</title>
+	<title>Crop GIF Online — Free | Swirl</title>
 	<meta
 		name="description"
 		content="Crop an animated GIF with a visual drag handle. Free, private, browser-based."
 	/>
-	<meta property="og:title" content="Crop GIF — Swirl" />
+	<meta property="og:title" content="Crop GIF Online — Free | Swirl" />
 	<meta
 		property="og:description"
 		content="Crop an animated GIF with a visual drag handle. Free, private, browser-based."
@@ -760,7 +761,8 @@
 				</div>
 			{/if}
 		</div>
-		<SEOSection intro={cropGifSEO.intro} faqs={cropGifSEO.faqs} />
+		<RelatedTools tools={swirlRelated['crop']} />
+	<SEOSection intro={cropGifSEO.intro} faqs={cropGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

@@ -3,8 +3,9 @@
 	import { Footer } from '@neutron/ui';
 	import DropZone from '$lib/components/DropZone.svelte';
 	import CompareSlider from '$lib/components/CompareSlider.svelte';
-	import { toast, SEOSection } from '@neutron/ui';
+	import { toast, SEOSection, RelatedTools } from '@neutron/ui';
 	import { videoToGifSEO } from '$lib/seo-content';
+	import { swirlRelated } from '$lib/related-tools';
 	import TimelineSlider from '$lib/components/TimelineSlider.svelte';
 	import {
 		Film,
@@ -267,12 +268,12 @@
 </script>
 
 <svelte:head>
-	<title>Video to GIF — Swirl</title>
+	<title>Convert Video to GIF Online — Free, No Upload | Swirl</title>
 	<meta
 		name="description"
 		content="Convert MP4, WebM, or MOV to GIF. Control FPS, size, and quality. Free, browser-based."
 	/>
-	<meta property="og:title" content="Video to GIF — Swirl" />
+	<meta property="og:title" content="Convert Video to GIF Online — Free, No Upload | Swirl" />
 	<meta
 		property="og:description"
 		content="Convert MP4, WebM, or MOV to GIF. Control FPS, size, and quality. Free, browser-based."
@@ -603,7 +604,8 @@
 				</div>
 			{/if}
 		</div>
-		<SEOSection intro={videoToGifSEO.intro} faqs={videoToGifSEO.faqs} />
+		<RelatedTools tools={swirlRelated['video-to-gif']} />
+	<SEOSection intro={videoToGifSEO.intro} faqs={videoToGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

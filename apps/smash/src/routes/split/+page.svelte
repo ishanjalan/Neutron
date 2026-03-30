@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { SvelteSet } from 'svelte/reactivity';
 	import Header from '$lib/components/Header.svelte';
-	import { Footer, SEOSection } from '@neutron/ui';
+	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
 	import { splitSEO } from '$lib/seo-content';
+	import { smashRelated } from '$lib/related-tools';
 	import { downloadBlob, downloadAllAsZip } from '@neutron/utils';
 	import { splitPDF, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
@@ -234,12 +235,12 @@
 </script>
 
 <svelte:head>
-	<title>Split PDF — Smash</title>
+	<title>Split PDF Online — Free, No Upload | Smash</title>
 	<meta
 		name="description"
 		content="Extract specific pages from a PDF with a visual page picker. Free and private."
 	/>
-	<meta property="og:title" content="Split PDF — Smash" />
+	<meta property="og:title" content="Split PDF Online — Free, No Upload | Smash" />
 	<meta
 		property="og:description"
 		content="Extract specific pages from a PDF with a visual page picker. Free and private."
@@ -487,6 +488,7 @@
 				</div>
 			{/if}
 		</div>
+		<RelatedTools tools={smashRelated['split']} />
 		<SEOSection intro={splitSEO.intro} faqs={splitSEO.faqs} />
 	</main>
 

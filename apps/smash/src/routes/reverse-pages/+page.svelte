@@ -1,8 +1,9 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import { Footer, SEOSection } from '@neutron/ui';
+	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
 	import { reversePagesSEO } from '$lib/seo-content';
+	import { smashRelated } from '$lib/related-tools';
 	import { downloadBlob } from '@neutron/utils';
 	import { reversePages, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
@@ -127,12 +128,12 @@
 </script>
 
 <svelte:head>
-	<title>Reverse PDF Pages — Smash</title>
+	<title>Reverse PDF Page Order Online — Free | Smash</title>
 	<meta
 		name="description"
 		content="Reverse the page order of a PDF in one click. Free, private, no upload."
 	/>
-	<meta property="og:title" content="Reverse PDF Pages — Smash" />
+	<meta property="og:title" content="Reverse PDF Page Order Online — Free | Smash" />
 	<meta
 		property="og:description"
 		content="Reverse the page order of a PDF in one click. Free, private, no upload."
@@ -259,6 +260,7 @@
 				</button>
 			{/if}
 		</div>
+		<RelatedTools tools={smashRelated['reverse-pages']} />
 		<SEOSection intro={reversePagesSEO.intro} faqs={reversePagesSEO.faqs} />
 	</main>
 	<Footer currentApp="smash" />

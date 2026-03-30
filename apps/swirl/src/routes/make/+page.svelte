@@ -3,8 +3,9 @@
 	import { Footer } from '@neutron/ui';
 	import DropZone from '$lib/components/DropZone.svelte';
 	import CompareSlider from '$lib/components/CompareSlider.svelte';
-	import { toast, SEOSection } from '@neutron/ui';
+	import { toast, SEOSection, RelatedTools } from '@neutron/ui';
 	import { makeGifSEO } from '$lib/seo-content';
+	import { swirlRelated } from '$lib/related-tools';
 	import {
 		Images,
 		Download,
@@ -367,12 +368,12 @@
 </script>
 
 <svelte:head>
-	<title>GIF Maker — Swirl</title>
+	<title>Make GIF from Images Online — Free | Swirl</title>
 	<meta
 		name="description"
 		content="Create an animated GIF from a sequence of images. Free, private, browser-based."
 	/>
-	<meta property="og:title" content="GIF Maker — Swirl" />
+	<meta property="og:title" content="Make GIF from Images Online — Free | Swirl" />
 	<meta
 		property="og:description"
 		content="Create an animated GIF from a sequence of images. Free, private, browser-based."
@@ -774,7 +775,8 @@
 				</div>
 			</div>
 		</div>
-		<SEOSection intro={makeGifSEO.intro} faqs={makeGifSEO.faqs} />
+		<RelatedTools tools={swirlRelated['make']} />
+	<SEOSection intro={makeGifSEO.intro} faqs={makeGifSEO.faqs} />
 	</main>
 
 	<Footer currentApp="swirl" />

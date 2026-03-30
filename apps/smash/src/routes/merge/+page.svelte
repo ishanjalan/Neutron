@@ -1,8 +1,9 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import { Footer, SEOSection } from '@neutron/ui';
+	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
 	import { mergeSEO } from '$lib/seo-content';
+	import { smashRelated } from '$lib/related-tools';
 	import { downloadBlob } from '@neutron/utils';
 	import { mergePDFs, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
@@ -222,12 +223,12 @@
 </script>
 
 <svelte:head>
-	<title>Merge PDFs — Smash</title>
+	<title>Merge PDF Files Online — Free, No Upload | Smash</title>
 	<meta
 		name="description"
 		content="Combine multiple PDF files into one. Drag to reorder. Free, browser-based, no upload required."
 	/>
-	<meta property="og:title" content="Merge PDFs — Smash" />
+	<meta property="og:title" content="Merge PDF Files Online — Free, No Upload | Smash" />
 	<meta
 		property="og:description"
 		content="Combine multiple PDF files into one. Drag to reorder. Free, browser-based, no upload required."
@@ -400,6 +401,7 @@
 				</button>
 			{/if}
 		</div>
+		<RelatedTools tools={smashRelated['merge']} />
 		<SEOSection intro={mergeSEO.intro} faqs={mergeSEO.faqs} />
 	</main>
 

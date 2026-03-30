@@ -1,8 +1,9 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import { Footer, SEOSection } from '@neutron/ui';
+	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
 	import { protectSEO } from '$lib/seo-content';
+	import { smashRelated } from '$lib/related-tools';
 	import { downloadBlob } from '@neutron/utils';
 	import { protectPDF, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
@@ -138,12 +139,12 @@
 </script>
 
 <svelte:head>
-	<title>Protect PDF — Smash</title>
+	<title>Password Protect PDF Online — Free | Smash</title>
 	<meta
 		name="description"
 		content="Encrypt a PDF with AES-128 password protection. Free, private, no upload."
 	/>
-	<meta property="og:title" content="Protect PDF — Smash" />
+	<meta property="og:title" content="Password Protect PDF Online — Free | Smash" />
 	<meta
 		property="og:description"
 		content="Encrypt a PDF with AES-128 password protection. Free, private, no upload."
@@ -320,6 +321,7 @@
 				</div>
 			</div>
 		</div>
+		<RelatedTools tools={smashRelated['protect']} />
 		<SEOSection intro={protectSEO.intro} faqs={protectSEO.faqs} />
 	</main>
 	<Footer currentApp="smash" />

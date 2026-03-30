@@ -1,9 +1,10 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import PDFViewer from '$lib/components/PDFViewer.svelte';
-	import { Footer, SEOSection } from '@neutron/ui';
+	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
 	import { deleteSEO } from '$lib/seo-content';
+	import { smashRelated } from '$lib/related-tools';
 	import { downloadBlob } from '@neutron/utils';
 	import { getOutputFilename } from '$lib/utils/pdf';
 	import { Trash2, Upload, Download, X } from 'lucide-svelte';
@@ -68,12 +69,12 @@
 </script>
 
 <svelte:head>
-	<title>Delete PDF Pages — Smash</title>
+	<title>Delete PDF Pages Online — Free | Smash</title>
 	<meta
 		name="description"
 		content="Remove unwanted pages from a PDF. Visual page picker. Free and private."
 	/>
-	<meta property="og:title" content="Delete PDF Pages — Smash" />
+	<meta property="og:title" content="Delete PDF Pages Online — Free | Smash" />
 	<meta
 		property="og:description"
 		content="Remove unwanted pages from a PDF. Visual page picker. Free and private."
@@ -166,7 +167,8 @@
 				</div>
 			</div>
 		</div>
-		<SEOSection intro={deleteSEO.intro} faqs={deleteSEO.faqs} />
+		<RelatedTools tools={smashRelated['delete']} />
+	<SEOSection intro={deleteSEO.intro} faqs={deleteSEO.faqs} />
 		<Footer currentApp="smash" />
 	{/if}
 </div>
