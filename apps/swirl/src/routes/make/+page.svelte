@@ -65,7 +65,7 @@
 
 	// Drag and drop reordering
 	let draggedFrame: Frame | null = null;
-	let dragOverIndex: number | null = null;
+	let dragOverIndex = $state<number | null>(null);
 
 	function generateId(): string {
 		return `frame-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -485,6 +485,7 @@
 
 							{#each frames as frame, index (frame.id)}
 								<div
+									role="listitem"
 									class="glass flex cursor-move items-center gap-3 rounded-xl p-3 {dragOverIndex ===
 									index
 										? 'ring-accent-start ring-2'
@@ -567,11 +568,12 @@
 					<div class="space-y-5">
 						<!-- Global Delay -->
 						<div>
-							<label class="text-surface-300 mb-2 block text-sm font-medium">
+							<label for="global-delay" class="text-surface-300 mb-2 block text-sm font-medium">
 								Frame Delay: <span class="text-accent-start">{globalDelay}ms</span>
 							</label>
 							<div class="flex gap-2">
 								<input
+									id="global-delay"
 									type="range"
 									bind:value={globalDelay}
 									min="10"
@@ -594,10 +596,11 @@
 
 						<!-- Output Width -->
 						<div>
-							<label class="text-surface-300 mb-2 block text-sm font-medium">
+							<label for="output-width" class="text-surface-300 mb-2 block text-sm font-medium">
 								Width: <span class="text-accent-start">{outputWidth}px</span>
 							</label>
 							<input
+								id="output-width"
 								type="range"
 								bind:value={outputWidth}
 								min="100"
@@ -613,10 +616,11 @@
 
 						<!-- Quality -->
 						<div>
-							<label class="text-surface-300 mb-2 block text-sm font-medium">
+							<label for="make-quality" class="text-surface-300 mb-2 block text-sm font-medium">
 								Quality: <span class="text-accent-start">{quality}%</span>
 							</label>
 							<input
+								id="make-quality"
 								type="range"
 								bind:value={quality}
 								min="10"
@@ -631,12 +635,13 @@
 
 						<!-- Loop -->
 						<div>
-							<label class="text-surface-300 mb-2 block text-sm font-medium">
+							<label for="make-loop" class="text-surface-300 mb-2 block text-sm font-medium">
 								Loop: <span class="text-accent-start"
 									>{loop === 0 ? 'Infinite' : loop + ' times'}</span
 								>
 							</label>
 							<input
+								id="make-loop"
 								type="range"
 								bind:value={loop}
 								min="0"
@@ -662,6 +667,7 @@
 									class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none {optimizeOutput
 										? 'bg-accent-start'
 										: 'bg-surface-600'}"
+									aria-label="Toggle output optimization"
 									role="switch"
 									aria-checked={optimizeOutput}
 								>
@@ -675,10 +681,11 @@
 
 							{#if optimizeOutput}
 								<div class="border-surface-700 border-t pt-2">
-									<label class="text-surface-300 mb-2 block text-sm font-medium">
+									<label for="make-lossy" class="text-surface-300 mb-2 block text-sm font-medium">
 										Compression: <span class="text-accent-start">{lossyLevel}</span>
 									</label>
 									<input
+										id="make-lossy"
 										type="range"
 										bind:value={lossyLevel}
 										min="0"

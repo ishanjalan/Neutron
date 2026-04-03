@@ -12,7 +12,7 @@
 	let currentFile = $state<File | null>(null);
 	let hasChanges = $state(false);
 	let isDragging = $state(false);
-	let fileInput: HTMLInputElement;
+	let fileInput = $state<HTMLInputElement | null>(null);
 
 	async function handleFiles(files: FileList | File[]) {
 		const arr = Array.from(files);

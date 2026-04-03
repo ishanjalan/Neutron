@@ -209,6 +209,7 @@
 										penColor = color;
 										if (drawCtx) drawCtx.strokeStyle = color;
 									}}
+									aria-label="Pen color {color}"
 									class="h-5 w-5 rounded-full border-2 transition-all {penColor === color
 										? 'border-accent-start scale-110'
 										: 'border-surface-600'}"

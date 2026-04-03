@@ -29,7 +29,7 @@
 	let isProcessing = $state(false);
 	let resultBlob = $state<Blob | null>(null);
 	let progress = $state(0);
-	let fileInput: HTMLInputElement;
+	let fileInput = $state<HTMLInputElement | null>(null);
 	let isDragging = $state(false);
 
 	// Settings
@@ -271,7 +271,7 @@
 					</h3>
 					<div class="space-y-5">
 						<div>
-							<label class="text-surface-300 mb-2 block text-sm font-medium">Position</label>
+							<p class="text-surface-300 mb-2 block text-sm font-medium">Position</p>
 							<div class="grid grid-cols-2 gap-2">
 								{#each ['bottom-center', 'bottom-right', 'top-center', 'top-right'] as pos (pos)}
 									<button
@@ -291,10 +291,11 @@
 						</div>
 
 						<div>
-							<label class="text-surface-300 mb-2 block text-sm font-medium"
+							<label for="start-number" class="text-surface-300 mb-2 block text-sm font-medium"
 								>Start number: <span class="text-surface-100 font-semibold">{startAt}</span></label
 							>
 							<input
+								id="start-number"
 								type="number"
 								bind:value={startAt}
 								min="1"
@@ -304,10 +305,11 @@
 						</div>
 
 						<div>
-							<label class="text-surface-300 mb-2 block text-sm font-medium"
+							<label for="font-size" class="text-surface-300 mb-2 block text-sm font-medium"
 								>Font size: <span class="text-surface-100 font-semibold">{fontSize}pt</span></label
 							>
 							<input
+								id="font-size"
 								type="range"
 								bind:value={fontSize}
 								min="6"

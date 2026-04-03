@@ -114,6 +114,16 @@
 		bind:this={containerRef}
 		class="bg-surface-800 relative h-12 cursor-pointer touch-none overflow-hidden rounded-xl select-none"
 		onclick={handleTrackClick}
+		onkeydown={(e) => {
+			const step = duration * 0.01;
+			if (e.key === 'ArrowRight') {
+				e.preventDefault();
+				onseek?.(Math.min(startTime + step, duration));
+			} else if (e.key === 'ArrowLeft') {
+				e.preventDefault();
+				onseek?.(Math.max(startTime - step, 0));
+			}
+		}}
 		role="slider"
 		aria-valuenow={startTime}
 		aria-valuemin={0}

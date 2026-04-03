@@ -7,8 +7,9 @@
 	import KeyboardShortcuts from '$lib/components/KeyboardShortcuts.svelte';
 	import PerformanceMonitor from '$lib/components/PerformanceMonitor.svelte';
 	import OnboardingModal from '$lib/components/OnboardingModal.svelte';
-	import { Toast, toast, ConfirmModal, SEOSection } from '@neutron/ui';
+	import { Toast, toast, ConfirmModal, SEOSection, RelatedTools } from '@neutron/ui';
 	import { squashSEO } from '$lib/seo-content';
+	import { squashRelated } from '$lib/related-tools';
 	import { videos, QUALITY_PRESETS } from '$lib/stores/videos.svelte';
 	import {
 		Download,
@@ -381,6 +382,7 @@
 				<DraggableVideoList />
 			{/if}
 		</div>
+		<RelatedTools tools={squashRelated} />
 		<SEOSection intro={squashSEO.intro} faqs={squashSEO.faqs} />
 	</main>
 

@@ -306,6 +306,7 @@
 
 					{#each files.sort((a, b) => a.order - b.order) as pdfFile (pdfFile.id)}
 						<div
+							role="listitem"
 							class="glass flex cursor-grab items-center justify-between rounded-xl p-3 transition-transform active:cursor-grabbing {draggedItem ===
 							pdfFile.id
 								? 'scale-95 opacity-50'

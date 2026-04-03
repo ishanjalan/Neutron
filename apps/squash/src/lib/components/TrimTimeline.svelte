@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount, onDestroy, untrack } from 'svelte';
 	import { formatTimeInput } from '$lib/utils/format';
 
 	interface Props {
@@ -29,8 +29,8 @@
 	let isGeneratingThumbnails = $state(true);
 
 	// Local state for smooth dragging
-	let localStart = $state(trimStart);
-	let localEnd = $state(trimEnd);
+	let localStart = $state(untrack(() => trimStart));
+	let localEnd = $state(untrack(() => trimEnd));
 
 	// Sync with props
 	$effect(() => {

@@ -36,7 +36,7 @@
 	let showPassword = $state(false);
 	let resultBlob = $state<Blob | null>(null);
 	let progress = $state(0);
-	let fileInput: HTMLInputElement;
+	let fileInput = $state<HTMLInputElement | null>(null);
 	let isDragging = $state(false);
 
 	const hasFile = $derived(pdfFile !== null);
@@ -268,9 +268,12 @@
 					</h3>
 					<div class="space-y-4">
 						<div>
-							<label class="text-surface-300 mb-2 block text-sm font-medium">Password</label>
+							<label for="protect-password" class="text-surface-300 mb-2 block text-sm font-medium"
+								>Password</label
+							>
 							<div class="relative">
 								<input
+									id="protect-password"
 									type={showPassword ? 'text' : 'password'}
 									bind:value={password}
 									placeholder="Enter password (min 4 characters)"
@@ -286,9 +289,12 @@
 							</div>
 						</div>
 						<div>
-							<label class="text-surface-300 mb-2 block text-sm font-medium">Confirm Password</label
+							<label
+								for="protect-confirm-password"
+								class="text-surface-300 mb-2 block text-sm font-medium">Confirm Password</label
 							>
 							<input
+								id="protect-confirm-password"
 								type={showPassword ? 'text' : 'password'}
 								bind:value={confirmPassword}
 								placeholder="Confirm password"

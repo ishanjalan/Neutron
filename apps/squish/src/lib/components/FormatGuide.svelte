@@ -96,6 +96,7 @@
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby="format-guide-title"
+		tabindex="-1"
 		onkeydown={handleKeydown}
 		use:focusTrap
 	>

@@ -11,15 +11,17 @@
 
 	let { intro, faqs }: Props = $props();
 
-	const jsonLd = JSON.stringify({
-		'@context': 'https://schema.org',
-		'@type': 'FAQPage',
-		mainEntity: faqs.map(({ q, a }) => ({
-			'@type': 'Question',
-			name: q,
-			acceptedAnswer: { '@type': 'Answer', text: a },
-		})),
-	});
+	const jsonLd = $derived(
+		JSON.stringify({
+			'@context': 'https://schema.org',
+			'@type': 'FAQPage',
+			mainEntity: faqs.map(({ q, a }) => ({
+				'@type': 'Question',
+				name: q,
+				acceptedAnswer: { '@type': 'Answer', text: a },
+			})),
+		})
+	);
 </script>
 
 <svelte:head>

@@ -716,11 +716,14 @@
 
 					{#if capturedSignatureDataUrl && pdfs.items.length > 0}
 						<div class="space-y-2">
-							<label class="text-surface-300 text-xs font-semibold tracking-wider uppercase"
+							<label
+								for="sign-placement-page"
+								class="text-surface-300 text-xs font-semibold tracking-wider uppercase"
 								>Place on page</label
 							>
 							<div class="flex items-center gap-2">
 								<input
+									id="sign-placement-page"
 									type="number"
 									min="1"
 									max={pdfs.items[0]?.pageCount ?? 1}

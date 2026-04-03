@@ -28,7 +28,7 @@
 	let resultBlob = $state<Blob | null>(null);
 	let resultMessage = $state('');
 	let progress = $state(0);
-	let fileInput: HTMLInputElement;
+	let fileInput = $state<HTMLInputElement | null>(null);
 	let isDragging = $state(false);
 
 	// Settings
@@ -284,7 +284,9 @@
 					</h3>
 					<div class="space-y-5">
 						<div>
-							<label class="text-surface-300 mb-1 block text-sm font-medium"
+							<label
+								for="detection-threshold"
+								class="text-surface-300 mb-1 block text-sm font-medium"
 								>Detection threshold: <span class="text-surface-100 font-semibold">{threshold}</span
 								></label
 							>

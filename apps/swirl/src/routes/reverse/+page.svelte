@@ -438,7 +438,7 @@
 
 					<!-- Mode Selection -->
 					<div class="mb-6 space-y-3">
-						<label class="text-surface-300 mb-3 block text-sm font-medium">Choose Effect</label>
+						<p class="text-surface-300 mb-3 block text-sm font-medium">Choose Effect</p>
 
 						<button
 							onclick={() => (mode = 'reverse')}

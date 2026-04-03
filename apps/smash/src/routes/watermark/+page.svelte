@@ -22,7 +22,7 @@
 	let isProcessing = $state(false);
 	let resultBlob = $state<Blob | null>(null);
 	let progress = $state(0);
-	let fileInput: HTMLInputElement;
+	let fileInput = $state<HTMLInputElement | null>(null);
 	let isDragging = $state(false);
 
 	// Settings
@@ -264,8 +264,11 @@
 					</h3>
 					<div class="space-y-5">
 						<div>
-							<label class="text-surface-300 mb-2 block text-sm font-medium">Watermark text</label>
+							<label for="watermark-text" class="text-surface-300 mb-2 block text-sm font-medium"
+								>Watermark text</label
+							>
 							<input
+								id="watermark-text"
 								type="text"
 								bind:value={watermarkText}
 								placeholder="e.g. CONFIDENTIAL"
@@ -286,10 +289,11 @@
 						</div>
 
 						<div>
-							<label class="text-surface-300 mb-2 block text-sm font-medium"
+							<label for="watermark-opacity" class="text-surface-300 mb-2 block text-sm font-medium"
 								>Opacity: <span class="text-surface-100 font-semibold">{opacity}%</span></label
 							>
 							<input
+								id="watermark-opacity"
 								type="range"
 								bind:value={opacity}
 								min="5"
@@ -303,10 +307,13 @@
 						</div>
 
 						<div>
-							<label class="text-surface-300 mb-2 block text-sm font-medium"
+							<label
+								for="watermark-font-size"
+								class="text-surface-300 mb-2 block text-sm font-medium"
 								>Font size: <span class="text-surface-100 font-semibold">{fontSize}pt</span></label
 							>
 							<input
+								id="watermark-font-size"
 								type="range"
 								bind:value={fontSize}
 								min="12"

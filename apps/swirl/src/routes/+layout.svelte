@@ -5,10 +5,37 @@
 	import { onMount } from 'svelte';
 	import { detectLocale, type Locale } from '@neutron/utils/seo';
 	import { swirlMeta } from '$lib/seo';
+	import { page } from '$app/state';
 
 	let { children } = $props();
 
 	const siteUrl = 'https://ishanjalan.github.io/Swirl';
+
+	const routeLabels: Record<string, string> = {
+		'video-to-gif': 'Video to GIF',
+		make: 'GIF Maker',
+		optimize: 'Optimise GIF',
+		text: 'Add Text to GIF',
+		resize: 'Resize GIF',
+		crop: 'Crop GIF',
+		reverse: 'Reverse GIF',
+		speed: 'GIF Speed',
+	};
+
+	let breadcrumbHtml = $derived.by(() => {
+		const segment = page.url.pathname.split('/').filter(Boolean).at(-1) ?? '';
+		const label = routeLabels[segment];
+		if (!label) return null;
+		const schema = {
+			'@context': 'https://schema.org',
+			'@type': 'BreadcrumbList',
+			itemListElement: [
+				{ '@type': 'ListItem', position: 1, name: 'Home', item: `${siteUrl}/` },
+				{ '@type': 'ListItem', position: 2, name: label, item: `${siteUrl}/${segment}` },
+			],
+		};
+		return '<script type="application/ld+json">' + JSON.stringify(schema) + '<' + '/script>';
+	});
 	const ogImage = `${siteUrl}/og-image.svg`;
 
 	let locale = $state<Locale>('en');
@@ -50,6 +77,12 @@
 		type="application/xml"
 		href="https://ishanjalan.github.io/Swirl/sitemap.xml"
 	/>
+
+	<!-- BreadcrumbList JSON-LD (tool pages only) -->
+	{#if breadcrumbHtml}
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+		{@html breadcrumbHtml}
+	{/if}
 
 	<!-- JSON-LD -->
 	<script type="application/ld+json">

@@ -14,7 +14,7 @@
 	let showUrlInput = $state(false);
 	let urlValue = $state('');
 	let isLoadingUrl = $state(false);
-	let urlInputRef: HTMLInputElement;
+	let urlInputRef = $state<HTMLInputElement | null>(null);
 
 	const acceptedFormats = '.jpg,.jpeg,.png,.webp,.avif,.jxl,.svg,.heic,.heif';
 	const validTypes = [

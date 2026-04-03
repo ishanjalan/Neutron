@@ -32,7 +32,7 @@
 		RotateCcw,
 		Trash2,
 	} from 'lucide-svelte';
-	import { onMount, onDestroy, tick } from 'svelte';
+	import { onMount, onDestroy, tick, untrack } from 'svelte';
 	import { fly } from 'svelte/transition';
 
 	interface Props {
@@ -53,7 +53,7 @@
 		onClose,
 	}: Props = $props();
 
-	let currentFile = $state(file);
+	let currentFile = $state(untrack(() => file));
 
 	// Constants
 	const THUMBNAILS_PER_PAGE = 50;
@@ -64,7 +64,8 @@
 	let totalPages = $state(0);
 	let zoom = $state(1);
 	let viewMode = $state<'single' | 'thumbnails'>('single');
-	let selectedPages = new SvelteSet<number>();
+	// eslint-disable-next-line svelte/no-unnecessary-state-wrap -- reassigned, not just mutated
+	let selectedPages = $state(new SvelteSet<number>());
 	let isLoading = $state(true);
 	let error = $state<string | null>(null);
 	let sidebarVisible = $state(true);
@@ -94,7 +95,7 @@
 	let pdfArrayBuffer: ArrayBuffer | null = null;
 
 	// Sidebar scroll container ref
-	let sidebarScrollContainer: HTMLDivElement | null = null;
+	let sidebarScrollContainer = $state<HTMLDivElement | null>(null);
 
 	// Main content container ref (for fit-width/fit-page)
 	let mainContentRef: HTMLDivElement | null = null;

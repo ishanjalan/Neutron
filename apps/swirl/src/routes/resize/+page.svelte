@@ -492,7 +492,7 @@
 
 					<!-- Size Presets -->
 					<div class="mb-6">
-						<label class="text-surface-300 mb-3 block text-sm font-medium">Size Presets</label>
+						<p class="text-surface-300 mb-3 block text-sm font-medium">Size Presets</p>
 						<div class="grid grid-cols-2 gap-2">
 							{#each sizePresets as preset (preset.id)}
 								<button
@@ -518,11 +518,12 @@
 
 					<!-- Custom Dimensions -->
 					<div class="mb-6">
-						<label class="text-surface-300 mb-2 block text-sm font-medium">Dimensions</label>
+						<p class="text-surface-300 mb-2 block text-sm font-medium">Dimensions</p>
 						<div class="flex items-center gap-3">
 							<div class="flex-1">
-								<label class="text-surface-500 mb-1 block text-xs">Width</label>
+								<label for="resize-width" class="text-surface-500 mb-1 block text-xs">Width</label>
 								<input
+									id="resize-width"
 									type="number"
 									bind:value={targetWidth}
 									min="16"
@@ -545,8 +546,10 @@
 								{/if}
 							</button>
 							<div class="flex-1">
-								<label class="text-surface-500 mb-1 block text-xs">Height</label>
+								<label for="resize-height" class="text-surface-500 mb-1 block text-xs">Height</label
+								>
 								<input
+									id="resize-height"
 									type="number"
 									bind:value={targetHeight}
 									min="16"
@@ -578,6 +581,7 @@
 							class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none {optimizeAfterResize
 								? 'bg-cyan-500'
 								: 'bg-surface-600'}"
+							aria-label="Toggle optimize after resize"
 							role="switch"
 							aria-checked={optimizeAfterResize}
 						>
@@ -591,10 +595,11 @@
 
 					{#if optimizeAfterResize}
 						<div class="mb-6" in:slide={{ duration: 200 }}>
-							<label class="text-surface-300 mb-2 block text-sm font-medium">
+							<label for="resize-colors" class="text-surface-300 mb-2 block text-sm font-medium">
 								Colors: <span class="text-cyan-400">{colors}</span>
 							</label>
 							<input
+								id="resize-colors"
 								type="range"
 								bind:value={colors}
 								min="16"

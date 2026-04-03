@@ -30,7 +30,7 @@
 	let isProcessing = $state(false);
 	let resultBlob = $state<Blob | null>(null);
 	let progress = $state(0);
-	let fileInput: HTMLInputElement;
+	let fileInput = $state<HTMLInputElement | null>(null);
 	let isDragging = $state(false);
 
 	const hasFile = $derived(pdfFile !== null);

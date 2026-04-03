@@ -31,7 +31,7 @@
 	let isProcessing = $state(false);
 	let resultBlob = $state<Blob | null>(null);
 	let progress = $state(0);
-	let fileInput: HTMLInputElement;
+	let fileInput = $state<HTMLInputElement | null>(null);
 	let isDragging = $state(false);
 
 	// Metadata fields
@@ -279,9 +279,12 @@
 					<div class="space-y-4">
 						{#each [{ key: 'title', label: 'Title', placeholder: 'e.g. Annual Report 2025' }, { key: 'author', label: 'Author', placeholder: 'e.g. Jane Smith' }, { key: 'subject', label: 'Subject', placeholder: 'e.g. Financial Summary' }, { key: 'keywords', label: 'Keywords', placeholder: 'e.g. finance, report, 2025' }] as field (field.key)}
 							<div>
-								<label class="text-surface-300 mb-2 block text-sm font-medium">{field.label}</label>
+								<label for={field.key} class="text-surface-300 mb-2 block text-sm font-medium"
+									>{field.label}</label
+								>
 								{#if field.key === 'title'}
 									<input
+										id={field.key}
 										type="text"
 										bind:value={title}
 										placeholder={field.placeholder}
@@ -289,6 +292,7 @@
 									/>
 								{:else if field.key === 'author'}
 									<input
+										id={field.key}
 										type="text"
 										bind:value={author}
 										placeholder={field.placeholder}
@@ -296,6 +300,7 @@
 									/>
 								{:else if field.key === 'subject'}
 									<input
+										id={field.key}
 										type="text"
 										bind:value={subject}
 										placeholder={field.placeholder}
@@ -303,6 +308,7 @@
 									/>
 								{:else}
 									<input
+										id={field.key}
 										type="text"
 										bind:value={keywords}
 										placeholder={field.placeholder}

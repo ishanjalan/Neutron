@@ -27,7 +27,7 @@
 	// State
 	let videoFile = $state<File | null>(null);
 	let videoUrl = $state<string | null>(null);
-	let videoElement: HTMLVideoElement;
+	let videoElement = $state<HTMLVideoElement | null>(null);
 	let isPlaying = $state(false);
 	let duration = $state(0);
 	let currentTime = $state(0);
@@ -386,10 +386,11 @@
 						<div class="space-y-5">
 							<!-- FPS -->
 							<div>
-								<label class="text-surface-300 mb-2 block text-sm font-medium">
+								<label for="gif-fps" class="text-surface-300 mb-2 block text-sm font-medium">
 									Frame Rate: <span class="text-accent-start">{fps} FPS</span>
 								</label>
 								<input
+									id="gif-fps"
 									type="range"
 									bind:value={fps}
 									min="5"
@@ -404,10 +405,11 @@
 
 							<!-- Width -->
 							<div>
-								<label class="text-surface-300 mb-2 block text-sm font-medium">
+								<label for="gif-width" class="text-surface-300 mb-2 block text-sm font-medium">
 									Width: <span class="text-accent-start">{width}px</span>
 								</label>
 								<input
+									id="gif-width"
 									type="range"
 									bind:value={width}
 									min="240"
@@ -423,10 +425,11 @@
 
 							<!-- Quality -->
 							<div>
-								<label class="text-surface-300 mb-2 block text-sm font-medium">
+								<label for="gif-quality" class="text-surface-300 mb-2 block text-sm font-medium">
 									Quality: <span class="text-accent-start">{quality}%</span>
 								</label>
 								<input
+									id="gif-quality"
 									type="range"
 									bind:value={quality}
 									min="10"
@@ -452,6 +455,7 @@
 										class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none {optimizeOutput
 											? 'bg-accent-start'
 											: 'bg-surface-600'}"
+										aria-label="Toggle output optimization"
 										role="switch"
 										aria-checked={optimizeOutput}
 									>
@@ -465,10 +469,14 @@
 
 								{#if optimizeOutput}
 									<div class="border-surface-700 border-t pt-2">
-										<label class="text-surface-300 mb-2 block text-sm font-medium">
+										<label
+											for="gif-compression"
+											class="text-surface-300 mb-2 block text-sm font-medium"
+										>
 											Compression: <span class="text-accent-start">{lossyLevel}</span>
 										</label>
 										<input
+											id="gif-compression"
 											type="range"
 											bind:value={lossyLevel}
 											min="0"

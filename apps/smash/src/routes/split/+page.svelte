@@ -37,7 +37,7 @@
 	let everyN = $state(1);
 	let resultBlobs = $state<Blob[]>([]);
 	let progress = $state(0);
-	let fileInput: HTMLInputElement;
+	let fileInput = $state<HTMLInputElement | null>(null);
 	let isDragging = $state(false);
 
 	const hasFile = $derived(pdfFile !== null);
@@ -394,7 +394,7 @@
 					<!-- Mode Selection -->
 					<div class="space-y-4">
 						<div>
-							<label class="text-surface-300 mb-3 block text-sm font-medium">Split Method</label>
+							<p class="text-surface-300 mb-3 block text-sm font-medium">Split Method</p>
 							<div class="grid grid-cols-2 gap-2">
 								<button
 									onclick={() => (splitMode = 'extract')}
@@ -419,8 +419,12 @@
 
 						{#if splitMode === 'extract'}
 							<div in:slide={{ duration: 150 }}>
-								<label class="text-surface-300 mb-2 block text-sm font-medium">Page Range</label>
+								<label
+									for="split-page-range"
+									class="text-surface-300 mb-2 block text-sm font-medium">Page Range</label
+								>
 								<input
+									id="split-page-range"
 									type="text"
 									bind:value={pageRange}
 									placeholder="e.g., 1-5, 8, 12-15"
@@ -436,9 +440,12 @@
 							</div>
 						{:else}
 							<div in:slide={{ duration: 150 }}>
-								<label class="text-surface-300 mb-2 block text-sm font-medium">Split every</label>
+								<label for="split-every-n" class="text-surface-300 mb-2 block text-sm font-medium"
+									>Split every</label
+								>
 								<div class="flex items-center gap-2">
 									<input
+										id="split-every-n"
 										type="number"
 										bind:value={everyN}
 										min="1"

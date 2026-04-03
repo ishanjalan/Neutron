@@ -484,8 +484,7 @@
 					{#if !reverse && !boomerang}
 						<!-- Speed Presets -->
 						<div class="mb-6" transition:slide={{ duration: 200 }}>
-							<label class="text-surface-300 mb-3 block text-sm font-medium">Speed Multiplier</label
-							>
+							<p class="text-surface-300 mb-3 block text-sm font-medium">Speed Multiplier</p>
 							<div class="grid grid-cols-3 gap-2">
 								{#each speedPresets as preset (preset.id)}
 									<button
@@ -504,10 +503,11 @@
 
 						<!-- Custom Speed -->
 						<div class="mb-6" transition:slide={{ duration: 200 }}>
-							<label class="text-surface-300 mb-2 block text-sm font-medium">
+							<label for="custom-speed" class="text-surface-300 mb-2 block text-sm font-medium">
 								Custom Speed: <span class="text-orange-400">{speedMultiplier}×</span>
 							</label>
 							<input
+								id="custom-speed"
 								type="range"
 								bind:value={speedMultiplier}
 								min="0.1"
@@ -525,7 +525,7 @@
 
 					<!-- Special Effects -->
 					<div class="mb-6 space-y-3">
-						<label class="text-surface-300 mb-2 block text-sm font-medium">Special Effects</label>
+						<p class="text-surface-300 mb-2 block text-sm font-medium">Special Effects</p>
 
 						<label
 							class="bg-surface-800 hover:bg-surface-700 flex cursor-pointer items-center gap-3 rounded-xl p-3 transition-colors"

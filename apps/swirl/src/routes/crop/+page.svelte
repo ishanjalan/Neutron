@@ -68,8 +68,8 @@
 	let showComparison = $state(false);
 
 	// Crop container reference for coordinate calculations
-	let containerRef: HTMLDivElement;
-	let imageRef: HTMLImageElement;
+	let containerRef = $state<HTMLDivElement | null>(null);
+	let imageRef = $state<HTMLImageElement | null>(null);
 	let isDragging = $state(false);
 	let dragType = $state<
 		| 'move'
@@ -483,7 +483,7 @@
 										e.stopPropagation();
 										startDrag(e, 'resize-nw');
 									}}
-									role="slider"
+									role="button"
 									aria-label="Resize top-left corner"
 									tabindex="0"
 								></div>
@@ -497,7 +497,7 @@
 										e.stopPropagation();
 										startDrag(e, 'resize-ne');
 									}}
-									role="slider"
+									role="button"
 									aria-label="Resize top-right corner"
 									tabindex="0"
 								></div>
@@ -511,7 +511,7 @@
 										e.stopPropagation();
 										startDrag(e, 'resize-sw');
 									}}
-									role="slider"
+									role="button"
 									aria-label="Resize bottom-left corner"
 									tabindex="0"
 								></div>
@@ -525,7 +525,7 @@
 										e.stopPropagation();
 										startDrag(e, 'resize-se');
 									}}
-									role="slider"
+									role="button"
 									aria-label="Resize bottom-right corner"
 									tabindex="0"
 								></div>
@@ -541,7 +541,7 @@
 										e.stopPropagation();
 										startDrag(e, 'resize-n');
 									}}
-									role="slider"
+									role="button"
 									aria-label="Resize top edge"
 									tabindex="0"
 								></div>
@@ -555,7 +555,7 @@
 										e.stopPropagation();
 										startDrag(e, 'resize-s');
 									}}
-									role="slider"
+									role="button"
 									aria-label="Resize bottom edge"
 									tabindex="0"
 								></div>
@@ -569,7 +569,7 @@
 										e.stopPropagation();
 										startDrag(e, 'resize-w');
 									}}
-									role="slider"
+									role="button"
 									aria-label="Resize left edge"
 									tabindex="0"
 								></div>
@@ -583,7 +583,7 @@
 										e.stopPropagation();
 										startDrag(e, 'resize-e');
 									}}
-									role="slider"
+									role="button"
 									aria-label="Resize right edge"
 									tabindex="0"
 								></div>
@@ -627,7 +627,7 @@
 
 						<!-- Aspect Ratio Presets -->
 						<div class="mb-6">
-							<label class="text-surface-300 mb-3 block text-sm font-medium">Aspect Ratio</label>
+							<p class="text-surface-300 mb-3 block text-sm font-medium">Aspect Ratio</p>
 							<div class="grid grid-cols-3 gap-2">
 								{#each aspectPresets as preset (preset.id)}
 									<button
@@ -644,7 +644,7 @@
 
 						<!-- Crop Dimensions Display -->
 						<div class="bg-surface-800/50 mb-6 rounded-xl p-4">
-							<label class="text-surface-300 mb-3 block text-sm font-medium">Crop Area</label>
+							<p class="text-surface-300 mb-3 block text-sm font-medium">Crop Area</p>
 							<div class="grid grid-cols-2 gap-4 text-sm">
 								<div>
 									<span class="text-surface-500">Position:</span>

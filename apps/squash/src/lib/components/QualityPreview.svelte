@@ -98,7 +98,7 @@
 		}
 	}
 
-	const preset = QUALITY_PRESETS[quality];
+	const preset = $derived(QUALITY_PRESETS[quality]);
 </script>
 
 <div

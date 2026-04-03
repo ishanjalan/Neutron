@@ -232,6 +232,7 @@
 					<div class="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
 						{#each images.sort((a, b) => a.order - b.order) as img (img.id)}
 							<div
+								role="listitem"
 								class="group relative cursor-grab overflow-hidden rounded-xl border-2 active:cursor-grabbing {draggedItem ===
 								img.id
 									? 'border-accent-start opacity-50'

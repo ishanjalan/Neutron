@@ -513,7 +513,7 @@
 
 					<!-- Presets -->
 					<div class="space-y-3">
-						<label class="text-surface-300 block text-sm font-medium">Quality Preset</label>
+						<p class="text-surface-300 block text-sm font-medium">Quality Preset</p>
 						<div class="grid grid-cols-2 gap-2">
 							{#each Object.entries(presets) as [key, preset] (key)}
 								{@const Icon = preset.icon}

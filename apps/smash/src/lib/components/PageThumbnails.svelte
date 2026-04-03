@@ -261,7 +261,7 @@
 								{:else}
 									<div
 										class="h-5 w-5 rounded border-2 border-white/50 transition-colors group-hover:border-white"
-									/>
+									></div>
 								{/if}
 							</div>
 						{/if}

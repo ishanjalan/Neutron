@@ -531,7 +531,7 @@
 
 					<!-- Position -->
 					<div class="mb-6">
-						<label class="text-surface-300 mb-3 block text-sm font-medium">Position</label>
+						<p class="text-surface-300 mb-3 block text-sm font-medium">Position</p>
 						<div class="grid grid-cols-3 gap-2">
 							{#each positionOptions as opt (opt.value)}
 								<button
@@ -549,10 +549,11 @@
 
 					<!-- Font Size -->
 					<div class="mb-6">
-						<label class="text-surface-300 mb-2 block text-sm font-medium">
+						<label for="text-font-size" class="text-surface-300 mb-2 block text-sm font-medium">
 							Font Size: <span class="text-yellow-400">{fontSize}px</span>
 						</label>
 						<input
+							id="text-font-size"
 							type="range"
 							bind:value={fontSize}
 							min="16"
@@ -626,10 +627,11 @@
 
 					<!-- Stroke Width -->
 					<div class="mb-6">
-						<label class="text-surface-300 mb-2 block text-sm font-medium">
+						<label for="text-stroke-width" class="text-surface-300 mb-2 block text-sm font-medium">
 							Outline Width: <span class="text-yellow-400">{strokeWidth}px</span>
 						</label>
 						<input
+							id="text-stroke-width"
 							type="range"
 							bind:value={strokeWidth}
 							min="0"

@@ -502,7 +502,7 @@
 
 					<!-- Platform Presets -->
 					<div class="mb-6">
-						<label class="text-surface-300 mb-3 block text-sm font-medium">Target Platform</label>
+						<p class="text-surface-300 mb-3 block text-sm font-medium">Target Platform</p>
 						<div class="grid grid-cols-2 gap-2">
 							{#each sizePresets as preset (preset.id)}
 								<button
@@ -524,10 +524,11 @@
 
 					<!-- Custom Target Size -->
 					<div class="mb-6">
-						<label class="text-surface-300 mb-2 block text-sm font-medium">
+						<label for="target-size" class="text-surface-300 mb-2 block text-sm font-medium">
 							Target Size: <span class="text-accent-start">{targetSizeMB} MB</span>
 						</label>
 						<input
+							id="target-size"
 							type="range"
 							bind:value={targetSizeMB}
 							min="0.5"
@@ -561,10 +562,14 @@
 							>
 								<!-- Color Reduction -->
 								<div>
-									<label class="text-surface-300 mb-2 block text-sm font-medium">
+									<label
+										for="color-reduction"
+										class="text-surface-300 mb-2 block text-sm font-medium"
+									>
 										Colors: <span class="text-accent-start">{colorReduction}</span>
 									</label>
 									<input
+										id="color-reduction"
 										type="range"
 										bind:value={colorReduction}
 										min="16"
@@ -580,10 +585,11 @@
 
 								<!-- Lossy Level -->
 								<div>
-									<label class="text-surface-300 mb-2 block text-sm font-medium">
+									<label for="lossy-level" class="text-surface-300 mb-2 block text-sm font-medium">
 										Lossy Compression: <span class="text-accent-start">{lossy}</span>
 									</label>
 									<input
+										id="lossy-level"
 										type="range"
 										bind:value={lossy}
 										min="0"

@@ -2,58 +2,58 @@ import type { AppMeta, Locale } from '@neutron/utils/seo';
 
 export const squashMeta: Record<Locale, AppMeta> = {
 	en: {
-		title: 'Squash - Video Compressor',
+		title: 'Compress Video Online — Free, No Upload | Squash',
 		description:
-			'Compress MP4, WebM, and MOV videos instantly in your browser using WebCodecs. No uploads, no FFmpeg — hardware-accelerated and 100% private.',
+			'Compress MP4, WebM, and MOV videos in your browser — no uploads, no FFmpeg, 100% private. Hardware-accelerated via WebCodecs. Free forever.',
 	},
 	fr: {
-		title: 'Squash - Compresseur vidéo',
+		title: 'Compresser une vidéo en ligne — Gratuit, sans envoi | Squash',
 		description:
-			'Compressez des vidéos MP4, WebM et MOV instantanément dans votre navigateur via WebCodecs. Sans téléchargement, sans FFmpeg — accélération matérielle et 100 % privé.',
+			'Compressez des vidéos MP4, WebM et MOV dans votre navigateur — sans téléchargement, sans FFmpeg, 100 % privé. Accélération matérielle via WebCodecs. Gratuit.',
 	},
 	ru: {
-		title: 'Squash - Сжатие видео',
+		title: 'Сжать видео онлайн — бесплатно, без загрузки | Squash',
 		description:
-			'Мгновенно сжимайте видео MP4, WebM и MOV прямо в браузере с WebCodecs. Без загрузки на сервер, без FFmpeg — аппаратное ускорение и полная приватность.',
+			'Сжимайте видео MP4, WebM и MOV прямо в браузере — без загрузки на сервер, без FFmpeg, полная приватность. Аппаратное ускорение через WebCodecs. Бесплатно.',
 	},
 	pl: {
-		title: 'Squash - Kompresor wideo',
+		title: 'Kompresja wideo online — bezpłatnie, bez przesyłania | Squash',
 		description:
-			'Kompresuj filmy MP4, WebM i MOV natychmiastowo w przeglądarce z WebCodecs. Bez przesyłania plików, bez FFmpeg — akceleracja sprzętowa i 100% prywatności.',
+			'Kompresuj filmy MP4, WebM i MOV w przeglądarce — bez przesyłania plików, bez FFmpeg, 100% prywatności. Akceleracja sprzętowa przez WebCodecs. Za darmo.',
 	},
 	pt: {
-		title: 'Squash - Compressor de vídeo',
+		title: 'Comprimir vídeo online — Grátis, sem upload | Squash',
 		description:
-			'Comprima vídeos MP4, WebM e MOV instantaneamente no navegador com WebCodecs. Sem uploads, sem FFmpeg — aceleração por hardware e 100% privado.',
+			'Comprima vídeos MP4, WebM e MOV no navegador — sem uploads, sem FFmpeg, 100% privado. Aceleração por hardware via WebCodecs. Gratuito.',
 	},
 	es: {
-		title: 'Squash - Compresor de vídeo',
+		title: 'Comprimir vídeo online — Gratis, sin subida | Squash',
 		description:
-			'Comprime vídeos MP4, WebM y MOV al instante en tu navegador con WebCodecs. Sin subidas, sin FFmpeg — acelerado por hardware y 100% privado.',
+			'Comprime vídeos MP4, WebM y MOV en tu navegador — sin subidas, sin FFmpeg, 100% privado. Acelerado por hardware mediante WebCodecs. Gratis.',
 	},
 	de: {
-		title: 'Squash - Video-Kompressor',
+		title: 'Video online komprimieren — Kostenlos, kein Upload | Squash',
 		description:
-			'Komprimiere MP4-, WebM- und MOV-Videos sofort im Browser mit WebCodecs. Kein Upload, kein FFmpeg — hardwarebeschleunigt und 100% privat.',
+			'Komprimiere MP4-, WebM- und MOV-Videos im Browser — kein Upload, kein FFmpeg, 100% privat. Hardwarebeschleunigt über WebCodecs. Kostenlos.',
 	},
 	it: {
-		title: 'Squash - Compressore video',
+		title: 'Comprimi video online — Gratis, senza upload | Squash',
 		description:
-			'Comprimi video MP4, WebM e MOV istantaneamente nel browser con WebCodecs. Nessun upload, nessun FFmpeg — accelerazione hardware e 100% privato.',
+			'Comprimi video MP4, WebM e MOV nel browser — senza upload, senza FFmpeg, 100% privato. Accelerazione hardware via WebCodecs. Gratuito.',
 	},
 	nl: {
-		title: 'Squash - Videocompressor',
+		title: 'Video online comprimeren — Gratis, geen upload | Squash',
 		description:
-			"Comprimeer MP4-, WebM- en MOV-video's direct in je browser met WebCodecs. Geen uploads, geen FFmpeg — hardwareversneld en 100% privé.",
+			"Comprimeer MP4-, WebM- en MOV-video's in je browser — geen uploads, geen FFmpeg, 100% privé. Hardwareversneld via WebCodecs. Gratis.",
 	},
 	tr: {
-		title: 'Squash - Video Sıkıştırıcı',
+		title: 'Videoyu çevrimiçi sıkıştır — Ücretsiz, yükleme yok | Squash',
 		description:
-			'WebCodecs kullanarak MP4, WebM ve MOV videolarını tarayıcınızda anında sıkıştırın. Yükleme yok, FFmpeg yok — donanım hızlandırmalı ve %100 gizli.',
+			'MP4, WebM ve MOV videolarını tarayıcınızda sıkıştırın — yükleme yok, FFmpeg yok, %100 gizli. WebCodecs ile donanım hızlandırmalı. Ücretsiz.',
 	},
 	uk: {
-		title: 'Squash - Стиснення відео',
+		title: 'Стиснути відео онлайн — безкоштовно, без завантаження | Squash',
 		description:
-			'Миттєво стискайте відео MP4, WebM і MOV прямо у браузері за допомогою WebCodecs. Без завантаження на сервер, без FFmpeg — апаратне прискорення та повна приватність.',
+			'Стискайте відео MP4, WebM і MOV прямо у браузері — без завантаження на сервер, без FFmpeg, повна приватність. Апаратне прискорення через WebCodecs. Безкоштовно.',
 	},
 };

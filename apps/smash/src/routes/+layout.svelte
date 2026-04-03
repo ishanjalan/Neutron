@@ -6,8 +6,46 @@
 	import { onMount } from 'svelte';
 	import { detectLocale, type Locale } from '@neutron/utils/seo';
 	import { smashLayoutMeta } from '$lib/seo';
+	import { page } from '$app/state';
 
 	let { children } = $props();
+
+	const BASE_URL = 'https://ishanjalan.github.io/Smash';
+
+	const routeLabels: Record<string, string> = {
+		compress: 'Compress PDF',
+		merge: 'Merge PDFs',
+		split: 'Split PDF',
+		ocr: 'OCR PDF',
+		'to-images': 'PDF to Images',
+		'from-images': 'Images to PDF',
+		rotate: 'Rotate Pages',
+		delete: 'Delete Pages',
+		reorder: 'Reorder Pages',
+		'add-page-numbers': 'Add Page Numbers',
+		watermark: 'Watermark PDF',
+		protect: 'Protect PDF',
+		unlock: 'Unlock PDF',
+		'reverse-pages': 'Reverse Pages',
+		'edit-metadata': 'Edit Metadata',
+		'remove-blank-pages': 'Remove Blank Pages',
+		workspace: 'Workspace',
+	};
+
+	let breadcrumbHtml = $derived.by(() => {
+		const segment = page.url.pathname.split('/').filter(Boolean).at(-1) ?? '';
+		const label = routeLabels[segment];
+		if (!label) return null;
+		const schema = {
+			'@context': 'https://schema.org',
+			'@type': 'BreadcrumbList',
+			itemListElement: [
+				{ '@type': 'ListItem', position: 1, name: 'Home', item: `${BASE_URL}/` },
+				{ '@type': 'ListItem', position: 2, name: label, item: `${BASE_URL}/${segment}` },
+			],
+		};
+		return '<script type="application/ld+json">' + JSON.stringify(schema) + '<' + '/script>';
+	});
 
 	let locale = $state<Locale>('en');
 	let meta = $derived(smashLayoutMeta[locale]);
@@ -58,6 +96,12 @@
 		type="application/xml"
 		href="https://ishanjalan.github.io/Smash/sitemap.xml"
 	/>
+
+	<!-- BreadcrumbList JSON-LD (tool pages only) -->
+	{#if breadcrumbHtml}
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+		{@html breadcrumbHtml}
+	{/if}
 
 	<!-- JSON-LD -->
 	<script type="application/ld+json">

@@ -28,7 +28,7 @@
 	let resultBlobs = $state<Blob[]>([]);
 	let resultBlobUrls = $state<string[]>([]);
 	let progress = $state(0);
-	let fileInput: HTMLInputElement;
+	let fileInput = $state<HTMLInputElement | null>(null);
 	let isDragging = $state(false);
 
 	const hasFile = $derived(pdfFile !== null);
@@ -307,7 +307,7 @@
 					</h3>
 					<div class="space-y-4">
 						<div>
-							<label class="text-surface-300 mb-2 block text-sm font-medium">Format</label>
+							<p class="text-surface-300 mb-2 block text-sm font-medium">Format</p>
 							<div class="grid grid-cols-3 gap-2">
 								{#each ['png', 'jpg', 'webp'] as fmt (fmt)}
 									<button
@@ -322,8 +322,7 @@
 							</div>
 						</div>
 						<div>
-							<label class="text-surface-300 mb-2 block text-sm font-medium">DPI (Resolution)</label
-							>
+							<p class="text-surface-300 mb-2 block text-sm font-medium">DPI (Resolution)</p>
 							<div class="grid grid-cols-3 gap-2">
 								{#each [72, 150, 300] as dpi (dpi)}
 									<button
@@ -338,10 +337,11 @@
 						</div>
 						{#if imageFormat !== 'png'}
 							<div>
-								<label class="text-surface-300 mb-2 block text-sm font-medium"
+								<label for="image-quality" class="text-surface-300 mb-2 block text-sm font-medium"
 									>Quality: {imageQuality}%</label
 								>
 								<input
+									id="image-quality"
 									type="range"
 									min="10"
 									max="100"
