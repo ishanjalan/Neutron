@@ -11,11 +11,11 @@ export const compressSEO: PageSEO = {
 	faqs: [
 		{
 			q: 'How much can I reduce my PDF file size?',
-			a: 'Typically 50–90% depending on the content. The Screen preset reduces most PDFs to under 1 MB; eBook and Printer presets balance size against image quality.',
+			a: 'Typically 50–90% depending on the content. The Email/Web preset reduces most PDFs to under 1 MB; Reading and Print-Ready presets balance size against image quality.',
 		},
 		{
 			q: 'Will compressing reduce image quality in my PDF?',
-			a: 'The Screen and eBook presets downsample embedded images. The Printer and Prepress presets preserve higher resolution. Choose based on whether the PDF is for screen or print.',
+			a: 'The Email/Web and Reading presets downsample embedded images. The Print-Ready and Professional presets preserve higher resolution. Choose based on whether the PDF is for screen or print.',
 		},
 		{
 			q: 'Is my PDF safe — do you upload it anywhere?',

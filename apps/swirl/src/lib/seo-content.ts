@@ -11,7 +11,7 @@ export const swirlHomeSEO: PageSEO = {
 	faqs: [
 		{
 			q: 'What GIF tools does Swirl include?',
-			a: 'Video to GIF, GIF from images, optimise, resize, crop, reverse, adjust speed, and add text — 10 tools in total, all browser-based.',
+			a: 'Video to GIF, GIF from images, optimise, resize, crop, reverse, adjust speed, and add text — 8 tools in total, all browser-based.',
 		},
 		{
 			q: 'Are there file size limits?',
@@ -34,11 +34,11 @@ export const swirlHomeSEO: PageSEO = {
 
 export const videoToGifSEO: PageSEO = {
 	intro:
-		'Convert MP4, WebM, or MOV videos to animated GIF in your browser — trim the clip, set frame rate and output dimensions, no upload needed.',
+		'Convert MP4, WebM, MOV, or AVI videos to animated GIF in your browser — trim the clip, set frame rate and output dimensions, no upload needed.',
 	faqs: [
 		{
 			q: 'What video formats can I convert to GIF?',
-			a: 'MP4, WebM, and MOV. The video must be a format your browser can natively play.',
+			a: 'MP4, WebM, MOV, and AVI. The video must be a format your browser can natively decode.',
 		},
 		{
 			q: 'How do I make a short GIF from a long video?',
