@@ -15,7 +15,7 @@ export const squashSEO: PageSEO = {
 		},
 		{
 			q: 'What is the best free video compressor online?',
-			a: 'Squash compresses video entirely in your browser using hardware acceleration — no uploads, no watermarks, no file size limits, and no account required. It supports MP4, WebM, MOV, AVI, and MKV, and is completely free and open source.',
+			a: 'Squash compresses video entirely in your browser using hardware acceleration — no uploads, no watermarks, no file size limits, and no account required. It supports MP4, WebM, MOV, AVI, and MKV as input, and outputs MP4, WebM, HEVC, or AV1. Completely free and open source.',
 		},
 		{
 			q: 'How much can Squash reduce video file size?',
@@ -27,7 +27,7 @@ export const squashSEO: PageSEO = {
 		},
 		{
 			q: 'Which video formats does Squash support?',
-			a: 'Input: MP4, WebM, MOV, AVI, and MKV. Output: MP4 (H.264), WebM (VP9), HEVC (H.265), and AV1 — choose based on your target device or platform.',
+			a: 'Input: MP4, WebM, MOV, AVI, and MKV. Output: MP4 (H.264), WebM (VP9), HEVC (H.265), or AV1 — HEVC and AV1 require hardware encoder support and are shown automatically when your device supports them.',
 		},
 		{
 			q: 'Does Squash work without an internet connection?',
