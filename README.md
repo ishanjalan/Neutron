@@ -9,12 +9,12 @@ Free, open-source file processing tools that run entirely in your browser. No up
 
 ## 🛠️ Tools
 
-| App                       | Description                                                        | Live URL                                                                          |
-| ------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
-| **[Squish](apps/squish)** | Compress JPEG, PNG, WebP, AVIF, JXL, SVG, GIF, HEIC images         | [ishanjalan.github.io/Squish](https://ishanjalan.github.io/Squish/)               |
-| **[Smash](apps/smash)**   | Full PDF toolkit — compress, merge, split, OCR, protect, and more  | [ishanjalan.github.io/Smash](https://ishanjalan.github.io/Smash/)                 |
-| **[Squash](apps/squash)** | Compress MP4, WebM, MOV videos using WebCodecs in the browser      | [ishanjalan.github.io/Squash](https://ishanjalan.github.io/Squash/)               |
-| **[Swirl](apps/swirl)**   | GIF tools — convert, optimize, resize, reverse, add text, and more | [ishanjalan.github.io/Swirl](https://ishanjalan.github.io/Swirl/)                 |
+| App                       | Description                                                        | Live URL                                                            |
+| ------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| **[Squish](apps/squish)** | Compress JPEG, PNG, WebP, AVIF, JXL, SVG, GIF, HEIC images         | [ishanjalan.github.io/Squish](https://ishanjalan.github.io/Squish/) |
+| **[Smash](apps/smash)**   | Full PDF toolkit — compress, merge, split, OCR, protect, and more  | [ishanjalan.github.io/Smash](https://ishanjalan.github.io/Smash/)   |
+| **[Squash](apps/squash)** | Compress MP4, WebM, MOV videos using WebCodecs in the browser      | [ishanjalan.github.io/Squash](https://ishanjalan.github.io/Squash/) |
+| **[Swirl](apps/swirl)**   | GIF tools — convert, optimize, resize, reverse, add text, and more | [ishanjalan.github.io/Swirl](https://ishanjalan.github.io/Swirl/)   |
 
 > **HEIC Converter** (`apps/heic`) is deprecated — it now redirects to [Squish's /heic route](https://ishanjalan.github.io/Squish/heic) and is no longer deployed separately.
 

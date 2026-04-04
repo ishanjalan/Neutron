@@ -211,16 +211,7 @@
 				<p class="text-surface-500 mt-2 text-center text-xs">
 					Save to Folder writes files directly (faster for large batches)
 				</p>
-				<p class="text-surface-600 mt-3 text-center text-xs">
-					Have HEIC photos from iPhone? <a
-						href="https://ishanjalan.github.io/HEICConverter/"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="text-surface-400 hover:text-accent-start underline underline-offset-2 transition-colors"
-						>Try HEIC Converter →</a
-					>
-				</p>
-			{:else}
+		{:else}
 				<div class="flex justify-end gap-3">
 					<button
 						onclick={handleDownloadAll}
@@ -230,16 +221,7 @@
 						Download All ({completedItems.length})
 					</button>
 				</div>
-				<p class="text-surface-600 mt-3 text-center text-xs">
-					Have HEIC photos from iPhone? <a
-						href="https://ishanjalan.github.io/HEICConverter/"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="text-surface-400 hover:text-accent-start underline underline-offset-2 transition-colors"
-						>Try HEIC Converter →</a
-					>
-				</p>
-			{/if}
+		{/if}
 		</div>
 	</div>
 {/if}

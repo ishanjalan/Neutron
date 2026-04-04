@@ -331,7 +331,10 @@
 			faqs={removeBlankPagesSEO.faqs}
 			breadcrumbs={[
 				{ name: 'Smash', item: 'https://ishanjalan.github.io/Smash/' },
-				{ name: 'Remove Blank Pages', item: 'https://ishanjalan.github.io/Smash/remove-blank-pages' },
+				{
+					name: 'Remove Blank Pages',
+					item: 'https://ishanjalan.github.io/Smash/remove-blank-pages',
+				},
 			]}
 		/>
 	</main>

@@ -75,7 +75,7 @@
 	const currentPreset = $derived(presets.find((p) => p.value === images.settings.quality));
 
 	function handlePresetClick(value: number) {
-		images.updateSettings({ quality: value });
+		images.updateSettings({ quality: value, lossless: false });
 	}
 
 	function handleFormatChange(format: 'same' | OutputFormat) {
@@ -90,10 +90,6 @@
 
 	function handleMetadataToggle() {
 		images.updateSettings({ stripMetadata: !images.settings.stripMetadata });
-	}
-
-	function handleLosslessToggle() {
-		images.updateSettings({ lossless: !images.settings.lossless });
 	}
 
 	function toggleAdvanced() {
@@ -178,37 +174,40 @@
 			<div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
 				<span class="text-surface-500 text-xs font-semibold tracking-wider uppercase">Quality</span>
 
-				{#if !isLossless}
-					<div class="bg-surface-800/50 flex items-center gap-1 rounded-xl p-1">
-						{#each presets as preset (preset.value)}
-							<button
-								onclick={() => handlePresetClick(preset.value)}
-								class="relative flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all {images
-									.settings.quality === preset.value
-									? 'bg-accent-start text-white shadow-md'
-									: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700/50'}"
-								title="{preset.desc} ({preset.value}%)"
-							>
-								<span class="text-base">{preset.icon}</span>
-								<span>{preset.label}</span>
-								{#if preset.recommended && images.settings.quality !== preset.value}
-									<span
-										class="bg-accent-start absolute -top-1 -right-1 h-2 w-2 animate-pulse rounded-full"
-									></span>
-								{/if}
-							</button>
-						{/each}
-					</div>
-					{#if currentPreset}
-						<span class="text-surface-500 hidden text-xs tabular-nums sm:inline"
-							>{currentPreset.value}%</span
+				<div class="bg-surface-800/50 flex items-center gap-1 rounded-xl p-1">
+					{#each presets as preset (preset.value)}
+						<button
+							onclick={() => handlePresetClick(preset.value)}
+							class="relative flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all {!isLossless &&
+							images.settings.quality === preset.value
+								? 'bg-accent-start text-white shadow-md'
+								: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700/50'}"
+							title="{preset.desc} ({preset.value}%)"
 						>
-					{/if}
-				{:else}
-					<div class="bg-surface-800/50 flex items-center gap-2 rounded-xl px-4 py-2.5">
-						<Sparkles class="text-accent-start h-4 w-4" />
-						<span class="text-surface-300 text-sm">Lossless mode — perfect quality</span>
-					</div>
+							<span class="text-base">{preset.icon}</span>
+							<span>{preset.label}</span>
+							{#if preset.recommended && (isLossless || images.settings.quality !== preset.value)}
+								<span
+									class="bg-accent-start absolute -top-1 -right-1 h-2 w-2 animate-pulse rounded-full"
+								></span>
+							{/if}
+						</button>
+					{/each}
+					<button
+						onclick={() => images.updateSettings({ lossless: true })}
+						class="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all {isLossless
+							? 'bg-accent-start text-white shadow-md'
+							: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700/50'}"
+						title="No quality loss — larger files. Best for WebP, AVIF, JXL."
+					>
+						<Sparkles class="h-4 w-4" />
+						<span>Lossless</span>
+					</button>
+				</div>
+				{#if currentPreset && !isLossless}
+					<span class="text-surface-500 hidden text-xs tabular-nums sm:inline"
+						>{currentPreset.value}%</span
+					>
 				{/if}
 			</div>
 
@@ -274,9 +273,9 @@
 				<span class="tracking-wider uppercase">Advanced Options</span>
 				{#if !showAdvanced}
 					<span class="text-surface-500 hidden sm:inline">
-						({images.settings.stripMetadata ? 'Metadata stripped' : 'Metadata kept'}{isLossless
-							? ', Lossless'
-							: ''}{resizeEnabled ? ', Resize' : ''})
+						({images.settings.stripMetadata ? 'Metadata stripped' : 'Metadata kept'}{resizeEnabled
+							? ', Resize'
+							: ''})
 					</span>
 				{/if}
 			</button>
@@ -304,7 +303,7 @@
 					<span class="text-surface-600 text-[10px] font-semibold tracking-widest uppercase"
 						>Processing</span
 					>
-					<div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+					<div>
 						<!-- Strip Metadata Toggle -->
 						<button
 							onclick={handleMetadataToggle}
@@ -330,36 +329,6 @@
 								<span
 									class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform {images
 										.settings.stripMetadata
-										? 'translate-x-4'
-										: 'translate-x-0'}"
-								></span>
-							</div>
-						</button>
-
-						<!-- Lossless Toggle -->
-						<button
-							onclick={handleLosslessToggle}
-							class="flex items-center gap-3 rounded-xl px-4 py-3 transition-all {isLossless
-								? 'text-accent-start bg-accent-start/10'
-								: 'text-surface-400 bg-surface-800/30 hover:bg-surface-700/30'}"
-							title={isLossless
-								? 'No quality loss, larger files'
-								: 'Smaller files, slight quality reduction'}
-						>
-							<Sparkles class="h-4 w-4 shrink-0" />
-							<div class="flex flex-col items-start">
-								<span class="text-sm font-medium">Lossless</span>
-								<span class="text-surface-500 text-[10px]"
-									>{isLossless ? 'Perfect quality' : 'Larger files'}</span
-								>
-							</div>
-							<div
-								class="relative ml-auto h-5 w-9 shrink-0 rounded-full transition-colors {isLossless
-									? 'bg-accent-start'
-									: 'bg-surface-600'}"
-							>
-								<span
-									class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform {isLossless
 										? 'translate-x-4'
 										: 'translate-x-0'}"
 								></span>
