@@ -580,7 +580,14 @@
 			{/if}
 		</div>
 		<RelatedTools tools={smashRelated['compress']} />
-		<SEOSection intro={compressSEO.intro} faqs={compressSEO.faqs} />
+		<SEOSection
+			intro={compressSEO.intro}
+			faqs={compressSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Smash', item: 'https://ishanjalan.github.io/Smash/' },
+				{ name: 'Compress PDF', item: 'https://ishanjalan.github.io/Smash/compress' },
+			]}
+		/>
 	</main>
 
 	<Footer currentApp="smash" />

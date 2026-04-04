@@ -644,7 +644,14 @@
 			</div>
 		</div>
 		<RelatedTools tools={swirlRelated['resize']} />
-		<SEOSection intro={resizeGifSEO.intro} faqs={resizeGifSEO.faqs} />
+		<SEOSection
+			intro={resizeGifSEO.intro}
+			faqs={resizeGifSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Swirl', item: 'https://ishanjalan.github.io/Swirl/' },
+				{ name: 'Resize GIF', item: 'https://ishanjalan.github.io/Swirl/resize' },
+			]}
+		/>
 	</main>
 
 	<Footer currentApp="swirl" />

@@ -676,7 +676,14 @@
 			</div>
 		</div>
 		<RelatedTools tools={swirlRelated['text']} />
-		<SEOSection intro={textGifSEO.intro} faqs={textGifSEO.faqs} />
+		<SEOSection
+			intro={textGifSEO.intro}
+			faqs={textGifSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Swirl', item: 'https://ishanjalan.github.io/Swirl/' },
+				{ name: 'Add Text to GIF', item: 'https://ishanjalan.github.io/Swirl/text' },
+			]}
+		/>
 	</main>
 
 	<Footer currentApp="swirl" />

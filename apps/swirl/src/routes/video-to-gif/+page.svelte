@@ -613,7 +613,14 @@
 			{/if}
 		</div>
 		<RelatedTools tools={swirlRelated['video-to-gif']} />
-		<SEOSection intro={videoToGifSEO.intro} faqs={videoToGifSEO.faqs} />
+		<SEOSection
+			intro={videoToGifSEO.intro}
+			faqs={videoToGifSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Swirl', item: 'https://ishanjalan.github.io/Swirl/' },
+				{ name: 'Video to GIF', item: 'https://ishanjalan.github.io/Swirl/video-to-gif' },
+			]}
+		/>
 	</main>
 
 	<Footer currentApp="swirl" />

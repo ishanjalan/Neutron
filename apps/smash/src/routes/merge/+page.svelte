@@ -403,7 +403,14 @@
 			{/if}
 		</div>
 		<RelatedTools tools={smashRelated['merge']} />
-		<SEOSection intro={mergeSEO.intro} faqs={mergeSEO.faqs} />
+		<SEOSection
+			intro={mergeSEO.intro}
+			faqs={mergeSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Smash', item: 'https://ishanjalan.github.io/Smash/' },
+				{ name: 'Merge PDFs', item: 'https://ishanjalan.github.io/Smash/merge' },
+			]}
+		/>
 	</main>
 
 	<Footer currentApp="smash" />

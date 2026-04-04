@@ -496,7 +496,14 @@
 			{/if}
 		</div>
 		<RelatedTools tools={smashRelated['split']} />
-		<SEOSection intro={splitSEO.intro} faqs={splitSEO.faqs} />
+		<SEOSection
+			intro={splitSEO.intro}
+			faqs={splitSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Smash', item: 'https://ishanjalan.github.io/Smash/' },
+				{ name: 'Split PDF', item: 'https://ishanjalan.github.io/Smash/split' },
+			]}
+		/>
 	</main>
 
 	<Footer currentApp="smash" />

@@ -326,7 +326,14 @@
 			</div>
 		</div>
 		<RelatedTools tools={smashRelated['remove-blank-pages']} />
-		<SEOSection intro={removeBlankPagesSEO.intro} faqs={removeBlankPagesSEO.faqs} />
+		<SEOSection
+			intro={removeBlankPagesSEO.intro}
+			faqs={removeBlankPagesSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Smash', item: 'https://ishanjalan.github.io/Smash/' },
+				{ name: 'Remove Blank Pages', item: 'https://ishanjalan.github.io/Smash/remove-blank-pages' },
+			]}
+		/>
 	</main>
 	<Footer currentApp="smash" />
 </div>

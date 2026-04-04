@@ -342,7 +342,14 @@
 			</div>
 		</div>
 		<RelatedTools tools={smashRelated['edit-metadata']} />
-		<SEOSection intro={editMetadataSEO.intro} faqs={editMetadataSEO.faqs} />
+		<SEOSection
+			intro={editMetadataSEO.intro}
+			faqs={editMetadataSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Smash', item: 'https://ishanjalan.github.io/Smash/' },
+				{ name: 'Edit Metadata', item: 'https://ishanjalan.github.io/Smash/edit-metadata' },
+			]}
+		/>
 	</main>
 	<Footer currentApp="smash" />
 </div>

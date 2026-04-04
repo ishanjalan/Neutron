@@ -603,7 +603,14 @@
 			</div>
 		</div>
 		<RelatedTools tools={swirlRelated['speed']} />
-		<SEOSection intro={speedGifSEO.intro} faqs={speedGifSEO.faqs} />
+		<SEOSection
+			intro={speedGifSEO.intro}
+			faqs={speedGifSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Swirl', item: 'https://ishanjalan.github.io/Swirl/' },
+				{ name: 'GIF Speed', item: 'https://ishanjalan.github.io/Swirl/speed' },
+			]}
+		/>
 	</main>
 
 	<Footer currentApp="swirl" />

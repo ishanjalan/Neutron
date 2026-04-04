@@ -1,8 +1,8 @@
-# HEIC Converter — Free Unlimited iPhone Photo Converter
+# HEIC Converter — Deprecated
+
+> **This app is deprecated.** It redirects to [Squish's /heic route](https://ishanjalan.github.io/Squish/heic), which provides the same functionality alongside Squish's full image optimization suite. This app is no longer deployed in CI.
 
 Convert HEIC and HEIF photos to JPG, PNG, WebP, or AVIF instantly in your browser. No file limits, no uploads, no account required — 100% private.
-
-🔗 **Live**: [ishanjalan.github.io/HEICConverter](https://ishanjalan.github.io/HEICConverter/)
 
 ## ✨ Features
 
@@ -34,14 +34,9 @@ Convert HEIC and HEIF photos to JPG, PNG, WebP, or AVIF instantly in your browse
 ## 🛠️ Development
 
 ```bash
-# From the monorepo root
-pnpm dev:heic
-
-# Or from this directory
+# From this directory only (no monorepo script — app is deprecated)
 pnpm dev
 ```
-
-The app will be available at `http://localhost:5178`
 
 ## 📦 Build
 

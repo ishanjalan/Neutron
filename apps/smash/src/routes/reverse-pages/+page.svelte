@@ -261,7 +261,14 @@
 			{/if}
 		</div>
 		<RelatedTools tools={smashRelated['reverse-pages']} />
-		<SEOSection intro={reversePagesSEO.intro} faqs={reversePagesSEO.faqs} />
+		<SEOSection
+			intro={reversePagesSEO.intro}
+			faqs={reversePagesSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Smash', item: 'https://ishanjalan.github.io/Smash/' },
+				{ name: 'Reverse Pages', item: 'https://ishanjalan.github.io/Smash/reverse-pages' },
+			]}
+		/>
 	</main>
 	<Footer currentApp="smash" />
 </div>

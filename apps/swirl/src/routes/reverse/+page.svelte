@@ -521,7 +521,14 @@
 			</div>
 		</div>
 		<RelatedTools tools={swirlRelated['reverse']} />
-		<SEOSection intro={reverseGifSEO.intro} faqs={reverseGifSEO.faqs} />
+		<SEOSection
+			intro={reverseGifSEO.intro}
+			faqs={reverseGifSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Swirl', item: 'https://ishanjalan.github.io/Swirl/' },
+				{ name: 'Reverse GIF', item: 'https://ishanjalan.github.io/Swirl/reverse' },
+			]}
+		/>
 	</main>
 
 	<Footer currentApp="swirl" />

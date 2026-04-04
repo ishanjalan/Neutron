@@ -168,7 +168,14 @@
 			</div>
 		</div>
 		<RelatedTools tools={smashRelated['reorder']} />
-		<SEOSection intro={reorderSEO.intro} faqs={reorderSEO.faqs} />
+		<SEOSection
+			intro={reorderSEO.intro}
+			faqs={reorderSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Smash', item: 'https://ishanjalan.github.io/Smash/' },
+				{ name: 'Reorder Pages', item: 'https://ishanjalan.github.io/Smash/reorder' },
+			]}
+		/>
 		<Footer currentApp="smash" />
 	{/if}
 </div>

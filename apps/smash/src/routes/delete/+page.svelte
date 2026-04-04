@@ -168,7 +168,14 @@
 			</div>
 		</div>
 		<RelatedTools tools={smashRelated['delete']} />
-		<SEOSection intro={deleteSEO.intro} faqs={deleteSEO.faqs} />
+		<SEOSection
+			intro={deleteSEO.intro}
+			faqs={deleteSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Smash', item: 'https://ishanjalan.github.io/Smash/' },
+				{ name: 'Delete Pages', item: 'https://ishanjalan.github.io/Smash/delete' },
+			]}
+		/>
 		<Footer currentApp="smash" />
 	{/if}
 </div>

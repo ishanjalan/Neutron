@@ -4,14 +4,20 @@
 		a: string;
 	}
 
+	export interface BreadcrumbItem {
+		name: string;
+		item: string;
+	}
+
 	interface Props {
 		intro: string;
 		faqs: FAQ[];
+		breadcrumbs?: BreadcrumbItem[];
 	}
 
-	let { intro, faqs }: Props = $props();
+	let { intro, faqs, breadcrumbs }: Props = $props();
 
-	const jsonLd = $derived(
+	const faqJsonLd = $derived(
 		JSON.stringify({
 			'@context': 'https://schema.org',
 			'@type': 'FAQPage',
@@ -22,11 +28,30 @@
 			})),
 		})
 	);
+
+	const breadcrumbJsonLd = $derived(
+		breadcrumbs
+			? JSON.stringify({
+					'@context': 'https://schema.org',
+					'@type': 'BreadcrumbList',
+					itemListElement: breadcrumbs.map(({ name, item }, i) => ({
+						'@type': 'ListItem',
+						position: i + 1,
+						name,
+						item,
+					})),
+				})
+			: null
+	);
 </script>
 
 <svelte:head>
 	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-	{@html `<script type="application/ld+json">${jsonLd}</` + 'script>'}
+	{@html `<script type="application/ld+json">${faqJsonLd}</` + 'script>'}
+	{#if breadcrumbJsonLd}
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+		{@html `<script type="application/ld+json">${breadcrumbJsonLd}</` + 'script>'}
+	{/if}
 </svelte:head>
 
 <section class="border-surface-800 mt-16 border-t pt-12 pb-8">

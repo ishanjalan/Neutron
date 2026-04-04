@@ -310,7 +310,14 @@
 			{/if}
 		</div>
 		<RelatedTools tools={smashRelated['from-images']} />
-		<SEOSection intro={fromImagesSEO.intro} faqs={fromImagesSEO.faqs} />
+		<SEOSection
+			intro={fromImagesSEO.intro}
+			faqs={fromImagesSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Smash', item: 'https://ishanjalan.github.io/Smash/' },
+				{ name: 'PDF from Images', item: 'https://ishanjalan.github.io/Smash/from-images' },
+			]}
+		/>
 	</main>
 	<Footer currentApp="smash" />
 </div>

@@ -37,7 +37,7 @@ Compress JPEG, PNG, WebP, AVIF, JPEG XL, SVG, GIF, and HEIC images using best-in
 ### Utilities
 
 - **[Comlink](https://github.com/GoogleChromeLabs/comlink)** — Type-safe Web Worker communication
-- **[JSZip](https://stuk.github.io/jszip/)** — Batch download as ZIP
+- **[fflate](https://101arrowz.github.io/fflate/)** — Batch download as ZIP
 
 ## 🛠️ Development
 

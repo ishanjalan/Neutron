@@ -9,27 +9,26 @@ Free, open-source file processing tools that run entirely in your browser. No up
 
 ## 🛠️ Tools
 
-| App                             | Description                                                        | Live URL                                                                          |
-| ------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
-| **[HEIC Converter](apps/heic)** | Convert iPhone HEIC/HEIF photos to JPG, PNG, WebP, AVIF            | [ishanjalan.github.io/HEICConverter](https://ishanjalan.github.io/HEICConverter/) |
-| **[Squish](apps/squish)**       | Compress JPEG, PNG, WebP, AVIF, JXL, SVG, GIF, HEIC images         | [ishanjalan.github.io/Squish](https://ishanjalan.github.io/Squish/)               |
-| **[Smash](apps/smash)**         | Full PDF toolkit — compress, merge, split, OCR, protect, and more  | [ishanjalan.github.io/Smash](https://ishanjalan.github.io/Smash/)                 |
-| **[Squash](apps/squash)**       | Compress MP4, WebM, MOV videos using WebCodecs in the browser      | [ishanjalan.github.io/Squash](https://ishanjalan.github.io/Squash/)               |
-| **[Swirl](apps/swirl)**         | GIF tools — convert, optimize, resize, reverse, add text, and more | [ishanjalan.github.io/Swirl](https://ishanjalan.github.io/Swirl/)                 |
+| App                       | Description                                                        | Live URL                                                                          |
+| ------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| **[Squish](apps/squish)** | Compress JPEG, PNG, WebP, AVIF, JXL, SVG, GIF, HEIC images         | [ishanjalan.github.io/Squish](https://ishanjalan.github.io/Squish/)               |
+| **[Smash](apps/smash)**   | Full PDF toolkit — compress, merge, split, OCR, protect, and more  | [ishanjalan.github.io/Smash](https://ishanjalan.github.io/Smash/)                 |
+| **[Squash](apps/squash)** | Compress MP4, WebM, MOV videos using WebCodecs in the browser      | [ishanjalan.github.io/Squash](https://ishanjalan.github.io/Squash/)               |
+| **[Swirl](apps/swirl)**   | GIF tools — convert, optimize, resize, reverse, add text, and more | [ishanjalan.github.io/Swirl](https://ishanjalan.github.io/Swirl/)                 |
+
+> **HEIC Converter** (`apps/heic`) is deprecated — it now redirects to [Squish's /heic route](https://ishanjalan.github.io/Squish/heic) and is no longer deployed separately.
 
 ---
 
 ## ✨ What Makes Each Tool Unique
 
-**HEIC Converter** — No file limit (most online tools cap at 20/month), true batch processing, outputs to modern formats like AVIF and WebP, works offline as a PWA.
-
 **Squish** — Supports 8+ formats including JPEG XL and HEIC input, per-file quality sliders, before/after preview, lossless toggle, and a batch stats bar. The most full-featured browser image optimizer available.
 
-**Smash** — 13 independent PDF tools in one app, each prerendered to its own URL. Uses Ghostscript WASM for best-in-class compression and qpdf for structural operations. Visual page picker for split/delete/reorder.
+**Smash** — 17 independent PDF tools in one app, each prerendered to its own URL. Uses Ghostscript WASM for best-in-class compression and qpdf for structural operations. Visual page picker for split/delete/reorder.
 
 **Squash** — Uses the browser's native WebCodecs API and Mediabunny (not FFmpeg) for fast, low-overhead video compression. No WASM binary to download — hardware-accelerated where available.
 
-**Swirl** — 10 GIF tools powered by gifsicle-wasm and gifski-wasm. Includes one-click size targets for Discord, Twitter, Slack, and WhatsApp. Boomerang loop, frame extraction, caption overlays.
+**Swirl** — 8 GIF tools powered by gifsicle-wasm and gifski-wasm. Includes one-click size targets for Discord, Twitter, Slack, and WhatsApp. Boomerang loop, frame extraction, caption overlays.
 
 ---
 
@@ -72,13 +71,12 @@ Free, open-source file processing tools that run entirely in your browser. No up
 - **[Comlink](https://github.com/GoogleChromeLabs/comlink)** — Type-safe Web Worker communication
 - **WebAssembly** — Near-native performance for heavy processing
 
-| App            | Processing Libraries                                               |
-| -------------- | ------------------------------------------------------------------ |
-| HEIC Converter | heic2any (libheif WASM), icodec (JPEG, PNG, WebP, AVIF)            |
-| Squish         | icodec (MozJPEG, WebP, AVIF, JXL), heic2any, svgo                  |
-| Smash          | Ghostscript WASM (compression), qpdf WASM (structural operations)  |
-| Squash         | WebCodecs API, Mediabunny                                          |
-| Swirl          | gifsicle-wasm (optimize/resize), gifski-wasm (high-quality encode) |
+| App    | Processing Libraries                                               |
+| ------ | ------------------------------------------------------------------ |
+| Squish | icodec (MozJPEG, WebP, AVIF, JXL), heic2any, svgo                  |
+| Smash  | Ghostscript WASM (compression), qpdf WASM (structural operations)  |
+| Squash | WebCodecs API, Mediabunny                                          |
+| Swirl  | gifsicle-wasm (optimize/resize), gifski-wasm (high-quality encode) |
 
 ---
 
@@ -87,11 +85,11 @@ Free, open-source file processing tools that run entirely in your browser. No up
 ```
 neutron/
 ├── apps/
-│   ├── heic/            # HEIC Converter
+│   ├── heic/            # HEIC Converter (deprecated — redirects to squish /heic)
 │   ├── squish/          # Image compressor (8+ formats)
-│   ├── smash/           # PDF toolkit (13 tools)
+│   ├── smash/           # PDF toolkit (17 tools)
 │   ├── squash/          # Video compressor
-│   └── swirl/           # GIF tools (10 tools)
+│   └── swirl/           # GIF tools (8 tools)
 ├── packages/
 │   ├── ui/              # Shared UI components (Toast, Modal, Animations)
 │   ├── utils/           # Shared utilities (validation, formatting, Comlink)
@@ -125,11 +123,10 @@ pnpm install
 pnpm dev
 
 # Or start a specific app
-pnpm dev:heic     # http://localhost:5178
 pnpm dev:squish   # http://localhost:5176
-pnpm dev:smash    # http://localhost:5177
-pnpm dev:squash   # http://localhost:5179
-pnpm dev:swirl    # http://localhost:5180
+pnpm dev:smash    # http://localhost:5174
+pnpm dev:squash   # http://localhost:5175
+pnpm dev:swirl    # http://localhost:5177
 ```
 
 ### Testing
@@ -152,7 +149,6 @@ pnpm test:e2e:ui
 pnpm build
 
 # Build a specific app
-pnpm --filter heic build
 pnpm --filter smash build
 pnpm --filter squash build
 pnpm --filter squish build
@@ -165,13 +161,12 @@ pnpm --filter swirl build
 
 The apps are automatically deployed to GitHub Pages when changes are pushed to the `main` branch.
 
-| App            | Source                        | Live URL                                                                          |
-| -------------- | ----------------------------- | --------------------------------------------------------------------------------- |
-| HEIC Converter | [`apps/heic/`](apps/heic)     | [ishanjalan.github.io/HEICConverter](https://ishanjalan.github.io/HEICConverter/) |
-| Squish         | [`apps/squish/`](apps/squish) | [ishanjalan.github.io/Squish](https://ishanjalan.github.io/Squish/)               |
-| Smash          | [`apps/smash/`](apps/smash)   | [ishanjalan.github.io/Smash](https://ishanjalan.github.io/Smash/)                 |
-| Squash         | [`apps/squash/`](apps/squash) | [ishanjalan.github.io/Squash](https://ishanjalan.github.io/Squash/)               |
-| Swirl          | [`apps/swirl/`](apps/swirl)   | [ishanjalan.github.io/Swirl](https://ishanjalan.github.io/Swirl/)                 |
+| App    | Source                        | Live URL                                                            |
+| ------ | ----------------------------- | ------------------------------------------------------------------- |
+| Squish | [`apps/squish/`](apps/squish) | [ishanjalan.github.io/Squish](https://ishanjalan.github.io/Squish/) |
+| Smash  | [`apps/smash/`](apps/smash)   | [ishanjalan.github.io/Smash](https://ishanjalan.github.io/Smash/)   |
+| Squash | [`apps/squash/`](apps/squash) | [ishanjalan.github.io/Squash](https://ishanjalan.github.io/Squash/) |
+| Swirl  | [`apps/swirl/`](apps/swirl)   | [ishanjalan.github.io/Swirl](https://ishanjalan.github.io/Swirl/)   |
 
 ---
 
@@ -183,8 +178,7 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 Built with amazing open-source tools:
 
-- **Image Processing**: [icodec](https://github.com/nicholashollandmoore/icodec) (MozJPEG, WebP, AVIF, JXL encoders)
-- **HEIC Conversion**: [heic2any](https://github.com/alexcorvi/heic2any) (libheif WASM wrapper)
+- **Image Processing**: [icodec](https://github.com/nicholashollandmoore/icodec) (MozJPEG, WebP, AVIF, JXL encoders), [heic2any](https://github.com/alexcorvi/heic2any) (libheif WASM for HEIC input)
 - **PDF Processing**: [Ghostscript WASM](https://github.com/nickaknudson/ghostscript-wasm), [qpdf](https://qpdf.sourceforge.io/)
 - **GIF Processing**: [gifsicle](https://www.lcdf.org/gifsicle/), [gifski](https://gif.ski/)
 - **Icons**: [Lucide](https://lucide.dev/)

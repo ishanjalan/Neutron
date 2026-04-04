@@ -762,7 +762,14 @@
 			{/if}
 		</div>
 		<RelatedTools tools={swirlRelated['crop']} />
-		<SEOSection intro={cropGifSEO.intro} faqs={cropGifSEO.faqs} />
+		<SEOSection
+			intro={cropGifSEO.intro}
+			faqs={cropGifSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Swirl', item: 'https://ishanjalan.github.io/Swirl/' },
+				{ name: 'Crop GIF', item: 'https://ishanjalan.github.io/Swirl/crop' },
+			]}
+		/>
 	</main>
 
 	<Footer currentApp="swirl" />

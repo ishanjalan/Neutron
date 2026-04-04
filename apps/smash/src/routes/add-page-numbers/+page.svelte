@@ -336,7 +336,14 @@
 			</div>
 		</div>
 		<RelatedTools tools={smashRelated['add-page-numbers']} />
-		<SEOSection intro={addPageNumbersSEO.intro} faqs={addPageNumbersSEO.faqs} />
+		<SEOSection
+			intro={addPageNumbersSEO.intro}
+			faqs={addPageNumbersSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Smash', item: 'https://ishanjalan.github.io/Smash/' },
+				{ name: 'Add Page Numbers', item: 'https://ishanjalan.github.io/Smash/add-page-numbers' },
+			]}
+		/>
 	</main>
 	<Footer currentApp="smash" />
 </div>

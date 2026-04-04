@@ -637,7 +637,14 @@
 			</div>
 		</div>
 		<RelatedTools tools={swirlRelated['optimize']} />
-		<SEOSection intro={optimizeGifSEO.intro} faqs={optimizeGifSEO.faqs} />
+		<SEOSection
+			intro={optimizeGifSEO.intro}
+			faqs={optimizeGifSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Swirl', item: 'https://ishanjalan.github.io/Swirl/' },
+				{ name: 'Optimize GIF', item: 'https://ishanjalan.github.io/Swirl/optimize' },
+			]}
+		/>
 	</main>
 
 	<Footer currentApp="swirl" />

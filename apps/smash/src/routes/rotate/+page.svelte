@@ -168,7 +168,14 @@
 			</div>
 		</div>
 		<RelatedTools tools={smashRelated['rotate']} />
-		<SEOSection intro={rotateSEO.intro} faqs={rotateSEO.faqs} />
+		<SEOSection
+			intro={rotateSEO.intro}
+			faqs={rotateSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Smash', item: 'https://ishanjalan.github.io/Smash/' },
+				{ name: 'Rotate PDF', item: 'https://ishanjalan.github.io/Smash/rotate' },
+			]}
+		/>
 		<Footer currentApp="smash" />
 	{/if}
 </div>

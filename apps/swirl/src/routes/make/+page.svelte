@@ -783,7 +783,14 @@
 			</div>
 		</div>
 		<RelatedTools tools={swirlRelated['make']} />
-		<SEOSection intro={makeGifSEO.intro} faqs={makeGifSEO.faqs} />
+		<SEOSection
+			intro={makeGifSEO.intro}
+			faqs={makeGifSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Swirl', item: 'https://ishanjalan.github.io/Swirl/' },
+				{ name: 'Make GIF', item: 'https://ishanjalan.github.io/Swirl/make' },
+			]}
+		/>
 	</main>
 
 	<Footer currentApp="swirl" />

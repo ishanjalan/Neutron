@@ -365,7 +365,14 @@
 			</div>
 		</div>
 		<RelatedTools tools={smashRelated['to-images']} />
-		<SEOSection intro={toImagesSEO.intro} faqs={toImagesSEO.faqs} />
+		<SEOSection
+			intro={toImagesSEO.intro}
+			faqs={toImagesSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Smash', item: 'https://ishanjalan.github.io/Smash/' },
+				{ name: 'PDF to Images', item: 'https://ishanjalan.github.io/Smash/to-images' },
+			]}
+		/>
 	</main>
 	<Footer currentApp="smash" />
 </div>

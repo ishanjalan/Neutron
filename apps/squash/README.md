@@ -42,7 +42,7 @@ Squash uses the WebCodecs API, which requires a modern browser:
 ### Utilities
 
 - **[Comlink](https://github.com/GoogleChromeLabs/comlink)** — Type-safe Web Worker communication
-- **[JSZip](https://stuk.github.io/jszip/)** — Batch download as ZIP
+- **[fflate](https://101arrowz.github.io/fflate/)** — Batch download as ZIP
 
 ## 🛠️ Development
 

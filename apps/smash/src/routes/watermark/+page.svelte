@@ -340,7 +340,14 @@
 			</div>
 		</div>
 		<RelatedTools tools={smashRelated['watermark']} />
-		<SEOSection intro={watermarkSEO.intro} faqs={watermarkSEO.faqs} />
+		<SEOSection
+			intro={watermarkSEO.intro}
+			faqs={watermarkSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Smash', item: 'https://ishanjalan.github.io/Smash/' },
+				{ name: 'Watermark PDF', item: 'https://ishanjalan.github.io/Smash/watermark' },
+			]}
+		/>
 	</main>
 	<Footer currentApp="smash" />
 </div>

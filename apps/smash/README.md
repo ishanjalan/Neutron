@@ -1,6 +1,6 @@
 # Smash — Free Browser-Based PDF Tools
 
-A complete PDF toolkit with 11 independent tools — compress, merge, split, rotate, OCR, protect, and more. Powered by Ghostscript WASM. All processing runs locally in your browser — no uploads, no limits, 100% private.
+A complete PDF toolkit with 17 independent tools — compress, merge, split, rotate, OCR, protect, watermark, and more. Powered by Ghostscript WASM. All processing runs locally in your browser — no uploads, no limits, 100% private.
 
 🔗 **Live**: [ishanjalan.github.io/Smash](https://ishanjalan.github.io/Smash/)
 
@@ -18,7 +18,13 @@ A complete PDF toolkit with 11 independent tools — compress, merge, split, rot
 | **Images to PDF** | [/from-images](https://ishanjalan.github.io/Smash/from-images) | Create a PDF from JPG, PNG, or WebP images                 |
 | **Protect PDF**   | [/protect](https://ishanjalan.github.io/Smash/protect)         | Encrypt with AES-128 password protection                   |
 | **Unlock PDF**    | [/unlock](https://ishanjalan.github.io/Smash/unlock)           | Remove password protection                                 |
-| **OCR PDF**       | [/ocr](https://ishanjalan.github.io/Smash/ocr)                 | Extract searchable text from scanned PDFs (100+ languages) |
+| **OCR PDF**           | [/ocr](https://ishanjalan.github.io/Smash/ocr)                             | Extract searchable text from scanned PDFs (100+ languages) |
+| **Watermark**         | [/watermark](https://ishanjalan.github.io/Smash/watermark)                 | Add text watermarks with custom opacity and position       |
+| **Add Page Numbers**  | [/add-page-numbers](https://ishanjalan.github.io/Smash/add-page-numbers)   | Stamp page numbers with configurable position and style    |
+| **Edit Metadata**     | [/edit-metadata](https://ishanjalan.github.io/Smash/edit-metadata)         | Edit title, author, subject, and other PDF metadata        |
+| **Remove Blank Pages**| [/remove-blank-pages](https://ishanjalan.github.io/Smash/remove-blank-pages) | Auto-detect and remove blank pages                       |
+| **Reverse Pages**     | [/reverse-pages](https://ishanjalan.github.io/Smash/reverse-pages)         | Reverse the page order of a PDF                            |
+| **Workspace**         | [/workspace](https://ishanjalan.github.io/Smash/workspace)                 | Multi-tool workspace for chaining operations               |
 
 ## 🏗️ Tech Stack
 
@@ -39,7 +45,7 @@ A complete PDF toolkit with 11 independent tools — compress, merge, split, rot
 ### Utilities
 
 - **[Comlink](https://github.com/GoogleChromeLabs/comlink)** — Type-safe Web Worker communication
-- **[JSZip](https://stuk.github.io/jszip/)** — Batch download as ZIP
+- **[fflate](https://101arrowz.github.io/fflate/)** — Batch download as ZIP
 
 ## 🛠️ Development
 
@@ -59,7 +65,7 @@ The app will be available at `http://localhost:5174`
 pnpm build
 ```
 
-Each of the 11 tool routes is prerendered to its own `index.html` at build time, enabling direct indexing by search engines.
+Each of the 17 tool routes is prerendered to its own `index.html` at build time, enabling direct indexing by search engines.
 
 ## 🔒 Privacy
 

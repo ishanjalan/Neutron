@@ -328,7 +328,14 @@
 			</div>
 		</div>
 		<RelatedTools tools={smashRelated['protect']} />
-		<SEOSection intro={protectSEO.intro} faqs={protectSEO.faqs} />
+		<SEOSection
+			intro={protectSEO.intro}
+			faqs={protectSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Smash', item: 'https://ishanjalan.github.io/Smash/' },
+				{ name: 'Protect PDF', item: 'https://ishanjalan.github.io/Smash/protect' },
+			]}
+		/>
 	</main>
 	<Footer currentApp="smash" />
 </div>

@@ -483,7 +483,14 @@
 			</div>
 		</div>
 		<RelatedTools tools={smashRelated['ocr']} />
-		<SEOSection intro={ocrSEO.intro} faqs={ocrSEO.faqs} />
+		<SEOSection
+			intro={ocrSEO.intro}
+			faqs={ocrSEO.faqs}
+			breadcrumbs={[
+				{ name: 'Smash', item: 'https://ishanjalan.github.io/Smash/' },
+				{ name: 'PDF OCR', item: 'https://ishanjalan.github.io/Smash/ocr' },
+			]}
+		/>
 	</main>
 
 	<Footer currentApp="smash" />
