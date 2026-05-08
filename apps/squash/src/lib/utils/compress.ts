@@ -124,8 +124,11 @@ async function compressVideo(item: VideoItem) {
 		const { video: videoCodec } = getRecommendedCodecs(outputFormat);
 
 		if (!capabilities.supportedVideoCodecs.includes(videoCodec)) {
+			const isWebmVp9 = outputFormat === 'webm' && videoCodec === 'vp9';
 			throw new Error(
-				`${videoCodec.toUpperCase()} codec not supported by your hardware. Try a different output format.`
+				isWebmVp9
+					? 'WebM/VP9 encoding is not supported in this browser. Try Chrome, or switch to MP4.'
+					: `${videoCodec.toUpperCase()} codec not supported by your hardware. Try a different output format.`
 			);
 		}
 

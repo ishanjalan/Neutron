@@ -166,32 +166,36 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 					// Hardware not available for this codec
 				}
 			} else {
-				// For H.264 and VP9, software encoding is acceptable
-				const isSupported = await canEncodeVideo(test.mediabunnyCodec, {
-					width: 1920,
-					height: 1080,
-					bitrate: QUALITY_MEDIUM,
-				});
+				// For H.264 and VP9, software encoding is acceptable.
+				// We verify support using 'no-preference' so the check matches the actual
+				// encoding path — VP9 uses 'no-preference' because macOS VideoToolbox has
+				// no VP9 hardware encoder, and 'prefer-hardware' causes Chrome to reject
+				// the config entirely even when software libvpx is available.
+				const hwPref =
+					test.codec === 'vp9'
+						? ('no-preference' as const)
+						: ('prefer-hardware' as const);
 
-				if (isSupported) {
-					supportedVideoCodecs.push(test.codec);
+				try {
+					const support = await VideoEncoder.isConfigSupported({
+						codec: getCodecString(test.codec),
+						width: 1920,
+						height: 1080,
+						bitrate: 3_000_000,
+						framerate: 30,
+						hardwareAcceleration: hwPref,
+					});
 
-					// Check if hardware acceleration is available
-					try {
-						const support = await VideoEncoder.isConfigSupported({
-							codec: getCodecString(test.codec),
-							width: 1920,
-							height: 1080,
-							bitrate: 5_000_000,
-							framerate: 30,
-							hardwareAcceleration: 'prefer-hardware',
-						});
-						if (support.supported && support.config?.hardwareAcceleration === 'prefer-hardware') {
+					if (support.supported) {
+						supportedVideoCodecs.push(test.codec);
+
+						// Mark hardware acceleration if the browser confirmed it
+						if (support.config?.hardwareAcceleration === 'prefer-hardware') {
 							hardwareAcceleration = true;
 						}
-					} catch {
-						// Hardware detection failed, continue
 					}
+				} catch {
+					// Codec not encodable on this platform
 				}
 			}
 		} catch {
@@ -354,6 +358,12 @@ export async function encodeWithWebCodecs(
 			totalFrames = Math.ceil(effectiveDuration * fps);
 		}
 
+		// VP9 must use 'no-preference': macOS VideoToolbox has no VP9 hardware encoder,
+		// and both Chrome and Safari reject 'prefer-hardware' for VP9 on macOS rather
+		// than gracefully falling back to software (libvpx). All other codecs prefer
+		// hardware when available.
+		const hwAccel = config.videoCodec === 'vp9' ? 'no-preference' : 'prefer-hardware';
+
 		// Create conversion with hardware acceleration
 		const conversion = await Conversion.init({
 			input,
@@ -363,7 +373,7 @@ export async function encodeWithWebCodecs(
 				bitrate: quality, // Use Quality enum for smart bitrate calculation
 				keyFrameInterval: 2, // Keyframe every 2 seconds
 				fit: 'contain', // Maintain aspect ratio with letterboxing if needed
-				hardwareAcceleration: 'prefer-hardware',
+				hardwareAcceleration: hwAccel,
 				width: config.width,
 				height: config.height,
 				forceTranscode: true, // Ensure re-encoding with our settings

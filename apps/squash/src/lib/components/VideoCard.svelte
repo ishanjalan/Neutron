@@ -50,6 +50,11 @@
 		return caps?.supportedVideoCodecs.includes('hevc') ?? false;
 	});
 
+	const vp9Available = $derived(() => {
+		const caps = getCapabilitiesSync();
+		return caps?.supportedVideoCodecs.includes('vp9') ?? false;
+	});
+
 	const savings = $derived(
 		item.compressedSize ? Math.round((1 - item.compressedSize / item.originalSize) * 100) : 0
 	);
@@ -385,7 +390,8 @@
 								{#each availableFormats as format (format.value)}
 									{@const isDisabled =
 										(format.value === 'av1' && !av1Available()) ||
-										(format.value === 'hevc' && !hevcAvailable())}
+										(format.value === 'hevc' && !hevcAvailable()) ||
+										(format.value === 'webm' && !vp9Available())}
 									{@const isHardwareCodec = format.value === 'av1' || format.value === 'hevc'}
 									{@const isAvailable =
 										(format.value === 'av1' && av1Available()) ||
@@ -398,7 +404,11 @@
 											: 'hover:bg-surface-700'} {item.outputFormat === format.value
 											? 'bg-surface-700/50'
 											: ''}"
-										title={isDisabled ? `${format.label} not available on this device` : ''}
+										title={isDisabled
+											? format.value === 'webm'
+												? 'WebM/VP9 not supported in this browser. Try Chrome, or use MP4.'
+												: `${format.label} not available on this device`
+											: ''}
 									>
 										<span
 											class="h-2 w-2 rounded-full bg-gradient-to-r {format.color} {isDisabled
@@ -460,7 +470,8 @@
 								{#each availableFormats as format (format.value)}
 									{@const isDisabled =
 										(format.value === 'av1' && !av1Available()) ||
-										(format.value === 'hevc' && !hevcAvailable())}
+										(format.value === 'hevc' && !hevcAvailable()) ||
+										(format.value === 'webm' && !vp9Available())}
 									{@const isHardwareCodec = format.value === 'av1' || format.value === 'hevc'}
 									{@const isAvailable =
 										(format.value === 'av1' && av1Available()) ||
@@ -473,7 +484,11 @@
 											: 'hover:bg-surface-700'} {item.outputFormat === format.value
 											? 'bg-surface-700/50'
 											: ''}"
-										title={isDisabled ? `${format.label} not available on this device` : ''}
+										title={isDisabled
+											? format.value === 'webm'
+												? 'WebM/VP9 not supported in this browser. Try Chrome, or use MP4.'
+												: `${format.label} not available on this device`
+											: ''}
 									>
 										<span
 											class="h-2 w-2 rounded-full bg-gradient-to-r {format.color} {isDisabled

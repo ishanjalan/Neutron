@@ -143,7 +143,7 @@ async function processRequest(request: WorkerRequest): Promise<WorkerResponse> {
 		const encoded = encodeImage(imageData, outputFormat, quality);
 		self.postMessage({ id, progress: 80 } as WorkerResponse);
 
-		const result = encoded.buffer;
+		const result = encoded.buffer as ArrayBuffer;
 		const mimeType = getMimeType(outputFormat);
 
 		return {
@@ -167,5 +167,5 @@ async function processRequest(request: WorkerRequest): Promise<WorkerResponse> {
 // Message handler
 self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
 	const response = await processRequest(e.data);
-	self.postMessage(response, response.result ? [response.result] : []);
+	self.postMessage(response, { transfer: response.result ? [response.result as ArrayBuffer] : [] });
 };

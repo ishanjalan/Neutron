@@ -211,7 +211,7 @@
 				<p class="text-surface-500 mt-2 text-center text-xs">
 					Save to Folder writes files directly (faster for large batches)
 				</p>
-		{:else}
+			{:else}
 				<div class="flex justify-end gap-3">
 					<button
 						onclick={handleDownloadAll}
@@ -221,7 +221,7 @@
 						Download All ({completedItems.length})
 					</button>
 				</div>
-		{/if}
+			{/if}
 		</div>
 	</div>
 {/if}

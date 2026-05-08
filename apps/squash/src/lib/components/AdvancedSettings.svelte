@@ -34,11 +34,13 @@
 	// Check codec availability (hardware support required for some)
 	let av1Available = $state(false);
 	let hevcAvailable = $state(false);
+	let vp9Available = $state(false);
 
 	onMount(async () => {
 		const capabilities = await initWebCodecs();
 		av1Available = capabilities.supportedVideoCodecs.includes('av1');
 		hevcAvailable = capabilities.supportedVideoCodecs.includes('hevc');
+		vp9Available = capabilities.supportedVideoCodecs.includes('vp9');
 	});
 
 	const formats: {
@@ -48,7 +50,7 @@
 		requiresHardware?: boolean;
 	}[] = [
 		{ value: 'mp4', label: 'MP4', desc: 'H.264 • Universal compatibility' },
-		{ value: 'webm', label: 'WebM', desc: 'VP9 • Modern browsers' },
+		{ value: 'webm', label: 'WebM', desc: 'VP9 • Modern browsers', requiresHardware: false },
 		{ value: 'hevc', label: 'HEVC', desc: 'H.265 • Better compression', requiresHardware: true },
 		{ value: 'av1', label: 'AV1', desc: 'Best compression • Newest', requiresHardware: true },
 	];
@@ -289,7 +291,8 @@
 				{#each formats as format (format.value)}
 					{@const isDisabled =
 						(format.value === 'av1' && !av1Available) ||
-						(format.value === 'hevc' && !hevcAvailable)}
+						(format.value === 'hevc' && !hevcAvailable) ||
+						(format.value === 'webm' && !vp9Available)}
 					{@const isHardwareCodec = format.value === 'av1' || format.value === 'hevc'}
 					{@const isAvailable =
 						(format.value === 'av1' && av1Available) || (format.value === 'hevc' && hevcAvailable)}
@@ -303,7 +306,9 @@
 								? 'text-surface-600 cursor-not-allowed line-through opacity-40'
 								: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700/50'}"
 						title={isDisabled
-							? `${format.label} requires hardware encoder (not available on this device)`
+							? format.value === 'webm'
+								? 'WebM/VP9 encoding is not supported in this browser. Try Chrome, or use MP4.'
+								: `${format.label} requires hardware encoder (not available on this device)`
 							: format.desc}
 					>
 						{format.label}
@@ -313,7 +318,7 @@
 							>
 								GPU
 							</span>
-						{:else if isHardwareCodec && isDisabled}
+						{:else if (isHardwareCodec || format.value === 'webm') && isDisabled}
 							<span
 								class="bg-surface-600 text-surface-400 absolute -top-1.5 -right-1.5 rounded px-1 py-0.5 text-[9px] font-bold"
 							>
