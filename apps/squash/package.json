@@ -17,26 +17,26 @@
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-static": "^3.0.10",
-		"@sveltejs/kit": "^2.59.1",
-		"@sveltejs/vite-plugin-svelte": "^7.0.0",
-		"@tailwindcss/vite": "^4.2.4",
+		"@sveltejs/kit": "^2.70.2",
+		"@sveltejs/vite-plugin-svelte": "^7.2.0",
+		"@tailwindcss/vite": "^4.3.3",
 		"@testing-library/jest-dom": "^6.9.1",
-		"@testing-library/svelte": "^5.3.1",
-		"@vitest/coverage-v8": "^4.1.5",
-		"happy-dom": "^20.9.0",
+		"@testing-library/svelte": "^5.4.2",
+		"@vitest/coverage-v8": "^4.1.10",
+		"happy-dom": "^20.11.1",
 		"lucide-svelte": "^0.577.0",
-		"svelte": "^5.55.5",
-		"svelte-check": "^4.4.6",
-		"tailwindcss": "^4.2.4",
+		"svelte": "^5.56.8",
+		"svelte-check": "^4.7.4",
+		"tailwindcss": "^4.3.3",
 		"typescript": "^5.9.3",
-		"vite": "^8.0.11",
-		"vitest": "^4.1.5"
+		"vite": "^8.2.0",
+		"vitest": "^4.1.10"
 	},
 	"dependencies": {
 		"@neutron/config": "workspace:*",
 		"@neutron/ui": "workspace:*",
 		"@neutron/utils": "workspace:*",
 		"idb": "^8.0.3",
-		"mediabunny": "^1.44.1"
+		"mediabunny": "^1.52.2"
 	}
 }

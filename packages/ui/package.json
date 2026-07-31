@@ -43,12 +43,12 @@
 		"svelte": "^5.0.0"
 	},
 	"devDependencies": {
-		"svelte": "^5.55.5",
+		"svelte": "^5.56.8",
 		"typescript": "^5.9.3"
 	},
 	"dependencies": {
 		"@neutron/utils": "workspace:*",
 		"lucide-svelte": "^0.577.0",
-		"motion": "^12.38.0"
+		"motion": "^12.43.0"
 	}
 }
