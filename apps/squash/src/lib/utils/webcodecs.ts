@@ -172,9 +172,7 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 				// no VP9 hardware encoder, and 'prefer-hardware' causes Chrome to reject
 				// the config entirely even when software libvpx is available.
 				const hwPref =
-					test.codec === 'vp9'
-						? ('no-preference' as const)
-						: ('prefer-hardware' as const);
+					test.codec === 'vp9' ? ('no-preference' as const) : ('prefer-hardware' as const);
 
 				try {
 					const support = await VideoEncoder.isConfigSupported({
