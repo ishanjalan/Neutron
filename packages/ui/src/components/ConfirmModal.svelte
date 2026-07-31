@@ -76,7 +76,7 @@
 			<!-- Close button -->
 			<button
 				onclick={oncancel}
-				class="text-surface-400 hover:bg-surface-800 absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg transition-colors"
+				class="text-surface-400 hover:bg-surface-800 absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-lg transition-colors"
 				aria-label="Close"
 			>
 				<X class="h-5 w-5" />

@@ -329,14 +329,12 @@ let theme = $state<'default' | 'enterprise'>('default');
 ## 🚀 Next Steps
 
 1. **Apply to All Components:**
-
    - Settings panel (data table style)
    - Image cards (technical grid)
    - Batch summary (metrics dashboard)
    - Header (mission control)
 
 2. **Add More Data Viz:**
-
    - Live compression graphs
    - Batch processing timeline
    - Format distribution charts

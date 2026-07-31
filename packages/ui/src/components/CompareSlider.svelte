@@ -84,7 +84,7 @@
 	<!-- Close button -->
 	<button
 		onclick={onclose}
-		class="absolute right-4 top-4 z-10 rounded-full bg-white/10 p-3 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+		class="absolute top-4 right-4 z-10 rounded-full bg-white/10 p-3 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
 		aria-label="Close comparison"
 	>
 		<X class="h-6 w-6" />
@@ -92,7 +92,7 @@
 
 	<!-- Instructions -->
 	<div
-		class="absolute left-1/2 top-4 -translate-x-1/2 rounded-full bg-white/10 px-4 py-2 text-sm text-white backdrop-blur-sm"
+		class="absolute top-4 left-1/2 -translate-x-1/2 rounded-full bg-white/10 px-4 py-2 text-sm text-white backdrop-blur-sm"
 	>
 		Drag slider to compare • Use arrow keys • Press Esc to close
 	</div>
@@ -100,7 +100,7 @@
 	<!-- Comparison container -->
 	<div
 		bind:this={containerRef}
-		class="relative aspect-auto w-[95vw] max-w-5xl touch-none select-none overflow-hidden rounded-2xl shadow-2xl"
+		class="relative aspect-auto w-[95vw] max-w-5xl touch-none overflow-hidden rounded-2xl shadow-2xl select-none"
 		onpointerdown={handlePointerDown}
 		onpointermove={handlePointerMove}
 		onpointerup={handlePointerUp}
@@ -136,12 +136,12 @@
 
 		<!-- Slider line -->
 		<div
-			class="pointer-events-none absolute bottom-0 top-0 -ml-0.5 w-1 bg-white shadow-[0_0_10px_rgba(0,0,0,0.5)]"
+			class="pointer-events-none absolute top-0 bottom-0 -ml-0.5 w-1 bg-white shadow-[0_0_10px_rgba(0,0,0,0.5)]"
 			style="left: {sliderPosition}%"
 		>
 			<!-- Handle circle -->
 			<div
-				class="absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-xl"
+				class="absolute top-1/2 left-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-xl"
 			>
 				<svg
 					class="text-surface-600 h-6 w-6"
@@ -163,7 +163,7 @@
 			Original
 		</div>
 		<div
-			class="pointer-events-none absolute bottom-4 right-4 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm"
+			class="pointer-events-none absolute right-4 bottom-4 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm"
 		>
 			Compressed
 		</div>

@@ -691,7 +691,7 @@
 				<div
 					bind:this={sidebarScrollContainer}
 					onscroll={handleSidebarScroll}
-					class="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-2 py-3"
+					class="min-h-0 flex-1 scrollbar-thin overflow-y-auto px-2 py-3"
 				>
 					<div class="flex flex-col items-center gap-3">
 						{#each allPages as pageNum (pageNum)}

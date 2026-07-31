@@ -49,13 +49,11 @@ pnpm test:e2e --project=chromium
 ### Unit Tests
 
 1. **Filename Generation**
-
    - Template token replacement
    - Custom filename patterns
    - Extension mapping
 
 2. **Settings Management**
-
    - Quality presets
    - Format selection
    - Resize configuration
@@ -68,29 +66,24 @@ pnpm test:e2e --project=chromium
 ### E2E Tests
 
 1. **Homepage Load**
-
    - Hero section visibility
    - Drop zone rendering
    - Format badges display
 
 2. **Settings Panel**
-
    - Quality preset interaction
    - Advanced options toggle
    - Format selection
 
 3. **Sample Images**
-
    - Demo image cards
    - Interactive sample loading
 
 4. **Keyboard Shortcuts**
-
    - Shortcut popover
    - Keyboard navigation
 
 5. **Accessibility**
-
    - ARIA labels
    - Keyboard navigation
    - Focus management
@@ -184,20 +177,17 @@ test('should perform user action', async ({ page }) => {
 ## Best Practices
 
 1. **Unit Tests**
-
    - Test pure functions and business logic
    - Mock external dependencies
    - Keep tests fast (<100ms each)
 
 2. **E2E Tests**
-
    - Test critical user flows
    - Verify real browser behavior
    - Test across multiple browsers
    - Keep tests independent and idempotent
 
 3. **Test Organization**
-
    - Group related tests with `describe`
    - Use descriptive test names
    - Setup/teardown in `beforeEach`/`afterEach`

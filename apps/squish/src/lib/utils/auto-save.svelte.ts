@@ -1,11 +1,12 @@
 import type { ImageItem } from '$lib/stores/images.svelte';
 import { getOutputFilename } from './compress';
+import { SvelteMap } from 'svelte/reactivity';
 
 let autoSaveDirHandle: FileSystemDirectoryHandle | null = null;
 let autoSaveEnabled = $state(false);
 let autoSaveFolderName = $state<string | null>(null);
 let autoSavedCount = $state(0);
-const autoSaveUsedNames = new Map<string, number>();
+const autoSaveUsedNames = new SvelteMap<string, number>();
 
 function isFileSystemAccessSupported(): boolean {
 	return typeof window !== 'undefined' && 'showDirectoryPicker' in window;

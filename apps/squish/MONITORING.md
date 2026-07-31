@@ -168,17 +168,14 @@ console.log('Memory usage:', stats.current.usagePercent);
 Configure Sentry alerts for:
 
 1. **High Error Rate**
-
    - > 10 errors per minute
    - Email/Slack notification
 
 2. **Memory Warnings**
-
    - > 80% heap usage
    - > 100 unreleased blobs
 
 3. **Performance Degradation**
-
    - > 1000ms average compression time
    - > 5s batch processing
 
@@ -191,19 +188,16 @@ Configure Sentry alerts for:
 Key metrics to track in Sentry:
 
 1. **Error Volume**
-
    - Total errors
    - Errors by type
    - Affected users
 
 2. **Performance**
-
    - P50, P75, P95, P99 latency
    - Apdex score
    - Throughput (ops/sec)
 
 3. **Memory**
-
    - Average heap usage
    - Leak frequency
    - Blob URL count
