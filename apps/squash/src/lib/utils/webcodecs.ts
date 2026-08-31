@@ -19,11 +19,11 @@ import {
 	QUALITY_MEDIUM,
 	QUALITY_HIGH,
 	QUALITY_VERY_HIGH,
+	Quality,
 	canEncodeVideo,
 	canEncodeAudio,
 	type VideoCodec,
 	type AudioCodec,
-	type Quality,
 } from 'mediabunny';
 
 // Supported WebCodecs codecs
@@ -68,15 +68,6 @@ const QUALITY_MAP: Record<string, Quality> = {
 	social: QUALITY_MEDIUM,
 	high: QUALITY_HIGH,
 	lossless: QUALITY_VERY_HIGH,
-};
-
-// Bitrate fallback values (when using numeric bitrates)
-const BITRATE_MAP: Record<string, number> = {
-	tiny: 500_000,
-	web: 1_500_000,
-	social: 3_000_000,
-	high: 6_000_000,
-	lossless: 20_000_000,
 };
 
 // Check if WebCodecs API is available
@@ -212,7 +203,7 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 			const isSupported = await canEncodeAudio(test.mediabunnyCodec, {
 				sampleRate: 48000,
 				numberOfChannels: 2,
-				bitrate: 128000,
+				quality: new Quality({ bitrate: 128000 }),
 			});
 
 			if (isSupported) {
@@ -237,7 +228,7 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 			const isSupported = await canEncodeVideo('avc', {
 				width: res.width,
 				height: res.height,
-				bitrate: QUALITY_HIGH,
+				quality: QUALITY_HIGH,
 			});
 
 			if (isSupported) {
@@ -368,7 +359,7 @@ export async function encodeWithWebCodecs(
 			output,
 			video: {
 				codec: videoCodec,
-				bitrate: quality, // Use Quality enum for smart bitrate calculation
+				quality, // Subjective Quality → CQ/quantizer encoding when available
 				keyFrameInterval: 2, // Keyframe every 2 seconds
 				fit: 'contain', // Maintain aspect ratio with letterboxing if needed
 				hardwareAcceleration: hwAccel,
@@ -378,7 +369,7 @@ export async function encodeWithWebCodecs(
 			},
 			audio: {
 				codec: audioCodec,
-				bitrate: config.audioBitrate || 128000,
+				quality: new Quality({ bitrate: config.audioBitrate || 128000 }),
 				sampleRate: config.sampleRate || 48000,
 				numberOfChannels: config.channels || 2,
 			},
@@ -461,13 +452,13 @@ export async function isEncodingSupported(
 		const videoSupported = await canEncodeVideo(mediabunnyVideoCodec, {
 			width,
 			height,
-			bitrate: QUALITY_MEDIUM,
+			quality: QUALITY_MEDIUM,
 		});
 
 		const audioSupported = await canEncodeAudio(mediabunnyAudioCodec, {
 			sampleRate: 48000,
 			numberOfChannels: 2,
-			bitrate: 128000,
+			quality: new Quality({ bitrate: 128000 }),
 		});
 
 		return videoSupported && audioSupported;
