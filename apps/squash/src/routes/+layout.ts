@@ -1,3 +1,3 @@
-// This tells SvelteKit to prerender all pages as static HTML
+// Prerender with SSR so <svelte:head> titles/meta are baked into static HTML for crawlers.
 export const prerender = true;
-export const ssr = false;
+export const ssr = true;

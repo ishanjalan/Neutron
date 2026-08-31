@@ -56,7 +56,11 @@
 	});
 
 	onMount(() => {
-		if (data.initialTool) {
+		// ?tool= is read client-side — searchParams aren't available during prerender
+		const tool = new URL(window.location.href).searchParams.get('tool');
+		if (tool) {
+			pdfs.setTool(tool as any);
+		} else if (data.initialTool) {
 			pdfs.setTool(data.initialTool as any);
 		}
 	});

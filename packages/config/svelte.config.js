@@ -14,7 +14,10 @@ export function createSvelteConfig(productionBasePath) {
 			adapter: adapter({
 				pages: 'build',
 				assets: 'build',
-				fallback: 'index.html',
+				// Use 404.html (not index.html) so prerendered homepage HTML —
+				// including <title>/meta from SSR — is not overwritten by the SPA shell.
+				// GitHub Pages serves 404.html for unknown paths, enabling client routing.
+				fallback: '404.html',
 				precompress: false,
 				strict: true,
 			}),
