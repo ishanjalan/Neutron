@@ -193,9 +193,12 @@
 			}
 		</script>
 
-		<!-- GoatCounter analytics (free for open source, no cookies) -->
+		<!-- GoatCounter analytics (free for open source, no cookies).
+		     no_onload: pageviews are sent from the root +layout.svelte instead, so the
+		     route's title is in place first and client-side navigations are counted. -->
 		<script
 			data-goatcounter="https://ishanjalan.goatcounter.com/count"
+			data-goatcounter-settings='{"no_onload": true}'
 			async
 			src="//gc.zgo.at/count.js"
 		></script>

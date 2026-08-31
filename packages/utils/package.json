@@ -55,6 +55,10 @@
 		"./seo": {
 			"types": "./src/seo.ts",
 			"default": "./src/seo.ts"
+		},
+		"./analytics": {
+			"types": "./src/analytics.ts",
+			"default": "./src/analytics.ts"
 		}
 	},
 	"devDependencies": {

@@ -2,7 +2,9 @@
 	import '../app.css';
 	import { base } from '$app/paths';
 	import { Toast } from '@neutron/ui';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
+	import { afterNavigate } from '$app/navigation';
+	import { countPageview } from '@neutron/utils/analytics';
 	import { detectLocale, type Locale } from '@neutron/utils/seo';
 	import { swirlMeta } from '$lib/seo';
 	import { page } from '$app/state';
@@ -47,6 +49,17 @@
 
 	let locale = $state<Locale>('en');
 	let meta = $derived(swirlMeta[locale]);
+
+	// GoatCounter counts nothing on its own (no_onload in app.html) — send one
+	// pageview per navigation, once this route's <svelte:head> has applied its
+	// <title>. This also covers client-side navigations, which fire no page load.
+	afterNavigate(async () => {
+		await tick();
+		countPageview({
+			path: location.pathname + location.search,
+			title: document.title,
+		});
+	});
 
 	onMount(() => {
 		locale = detectLocale();
