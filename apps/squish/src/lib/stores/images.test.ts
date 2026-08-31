@@ -26,7 +26,7 @@ describe('images store', () => {
 		it('should have default settings', () => {
 			expect(images.settings.quality).toBe(80);
 			expect(images.settings.outputFormat).toBe('webp');
-			expect(images.settings.stripMetadata).toBe(true);
+			expect(images.settings.stripMetadata).toBe(false);
 			expect(images.settings.lossless).toBe(false);
 		});
 

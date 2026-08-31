@@ -91,7 +91,14 @@
 			duration = videoElement.duration;
 			videoWidth = videoElement.videoWidth;
 			videoHeight = videoElement.videoHeight;
-			endTime = Math.min(duration, 10); // Default to first 10 seconds
+			const defaultEnd = Math.min(duration, 10);
+			endTime = defaultEnd;
+
+			if (duration > 10) {
+				toast.info(
+					`Using first 10 seconds of ${duration.toFixed(0)}s video — adjust the trim handles for more`
+				);
+			}
 
 			// Auto-set width based on video aspect ratio
 			const aspectRatio = videoHeight / videoWidth;

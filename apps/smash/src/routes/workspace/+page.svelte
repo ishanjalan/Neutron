@@ -22,7 +22,7 @@
 	import { fade } from 'svelte/transition';
 	import { resolve } from '$app/paths';
 	import { downloadMultipleFiles } from '$lib/utils/download';
-	import { ThemeToggle } from '@neutron/ui';
+	import { ThemeToggle, ConfirmModal } from '@neutron/ui';
 
 	interface Props {
 		data: { initialTool: string | null };
@@ -33,6 +33,7 @@
 	let selectedItemId = $state<string | null>(null);
 	let fileInput = $state<HTMLInputElement | null>(null);
 	let commandPaletteOpen = $state(false);
+	let showClearConfirm = $state(false);
 
 	const hasItems = $derived(pdfs.items.length > 0);
 	const selectedItem = $derived(
@@ -65,6 +66,12 @@
 		fileInput.accept = currentTool?.accepts ?? '.pdf';
 		fileInput.multiple = !isSingleFileTool || pdfs.settings.tool === 'compress';
 		fileInput.click();
+	}
+
+	function handleClearConfirm() {
+		pdfs.clearAll();
+		selectedItemId = null;
+		showClearConfirm = false;
 	}
 
 	async function handleFileInputChange(e: Event) {
@@ -125,8 +132,8 @@
 	onClose={() => (commandPaletteOpen = false)}
 	onDownload={handleDownloadAll}
 	onClear={() => {
-		pdfs.clearAll();
-		selectedItemId = null;
+		commandPaletteOpen = false;
+		showClearConfirm = true;
 	}}
 	onOpenFile={openFilePicker}
 />
@@ -188,10 +195,7 @@
 
 			{#if hasItems}
 				<button
-					onclick={() => {
-						pdfs.clearAll();
-						selectedItemId = null;
-					}}
+					onclick={() => (showClearConfirm = true)}
 					class="text-surface-600 hover:text-surface-400 hover:bg-surface-800 rounded-lg p-1.5 transition-colors"
 					title="Close document"
 				>
@@ -379,3 +383,12 @@
 		{/if}
 	</div>
 </div>
+
+<ConfirmModal
+	open={showClearConfirm}
+	title="Close document?"
+	message="This will remove all loaded PDFs from the workspace."
+	confirmText="Close"
+	onconfirm={handleClearConfirm}
+	oncancel={() => (showClearConfirm = false)}
+/>

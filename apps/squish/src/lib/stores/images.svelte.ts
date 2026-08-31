@@ -1,5 +1,4 @@
 import { SvelteSet } from 'svelte/reactivity';
-import { toast } from '@neutron/ui';
 import { detectSvgEmbeddedRaster } from '$lib/utils/svg-analyze';
 
 export type ImageFormat = 'jpeg' | 'png' | 'webp' | 'avif' | 'jxl' | 'svg' | 'heic';
@@ -91,7 +90,7 @@ function getDefaultSettings(): CompressionSettings {
 	return {
 		quality: 80, // "Balanced" preset - best of both worlds
 		outputFormat: 'webp', // Best compression + universal support (web, Android, iOS 14+)
-		stripMetadata: true,
+		stripMetadata: false, // Opt-in — stripping EXIF/GPS is irreversible on output
 		lossless: false,
 		targetSizeMode: false, // Quality mode by default
 		targetSizeKB: 500, // Default target: 500KB
@@ -106,6 +105,13 @@ function getDefaultSettings(): CompressionSettings {
 		filenameTemplate: '{name}-optimized.{ext}',
 	};
 }
+
+export type PendingSuggestion = {
+	suggested: Partial<CompressionSettings>;
+	reasons: string[];
+	/** Human-readable summary for the banner, e.g. "resize to 2048px" */
+	summary: string;
+};
 
 const THUMB_MAX = 400;
 
@@ -174,6 +180,7 @@ function createImagesStore() {
 	let settings = $state<CompressionSettings>(loadSettings());
 	let batchStats = $state<BatchStats>({ startTime: null, endTime: null, totalImages: 0 });
 	let selectedIds = $state<Set<string>>(new Set());
+	let pendingSuggestion = $state<PendingSuggestion | null>(null);
 
 	function getFormatFromMime(mimeType: string): ImageFormat {
 		const map: Record<string, ImageFormat> = {
@@ -207,6 +214,9 @@ function createImagesStore() {
 		get selectedIds() {
 			return selectedIds;
 		},
+		get pendingSuggestion() {
+			return pendingSuggestion;
+		},
 
 		startBatch(count: number) {
 			batchStats = { startTime: Date.now(), endTime: null, totalImages: count };
@@ -220,78 +230,54 @@ function createImagesStore() {
 			batchStats = { startTime: null, endTime: null, totalImages: 0 };
 		},
 
-		suggestSettings(
-			newItems: ImageItem[]
-		): { suggested: Partial<CompressionSettings>; reasons: string[] } | null {
-			if (newItems.length === 0) return null;
+		/**
+		 * Suggest resize for oversized images — never auto-applied.
+		 * Callers show an opt-in banner; Accept must call acceptPendingSuggestion().
+		 */
+		suggestResize(newItems: ImageItem[]): PendingSuggestion | null {
+			if (newItems.length === 0 || settings.resizeEnabled) return null;
 
-			const suggested: Partial<CompressionSettings> = {};
-			const reasons: string[] = [];
-
-			// Quality based on median file size
-			const sizes = newItems.map((i) => i.originalSize).sort((a, b) => a - b);
-			const medianSize = sizes[Math.floor(sizes.length / 2)];
-
-			if (medianSize > 10 * 1024 * 1024) {
-				suggested.quality = 60;
-				reasons.push('quality 60 (large files)');
-			} else if (medianSize > 2 * 1024 * 1024) {
-				suggested.quality = 70;
-				reasons.push('quality 70');
-			} else if (medianSize < 100 * 1024) {
-				suggested.quality = 95;
-				reasons.push('quality 95 (already small)');
-			}
-			// 100KB–2MB stays at default 80
-
-			// Format based on input content
-			const formats = newItems.map((i) => i.format);
-			const uniqueFormats = new Set(formats);
-			const allSvg = uniqueFormats.size === 1 && uniqueFormats.has('svg');
-			const allJpeg = uniqueFormats.size === 1 && uniqueFormats.has('jpeg');
-			const allPng = uniqueFormats.size === 1 && uniqueFormats.has('png');
-			const hasHeic = uniqueFormats.has('heic');
-			const hasSvgEmbeddedRaster = newItems.some((i) => i.svgEmbeddedRaster);
-
-			if (allSvg && hasSvgEmbeddedRaster) {
-				suggested.outputFormat = 'webp';
-				reasons.push('WebP — SVG contains embedded bitmap images');
-			} else if (allSvg) {
-				suggested.outputFormat = 'same';
-				reasons.push('keeping SVG');
-			} else if (allJpeg) {
-				suggested.outputFormat = 'same';
-				reasons.push('keeping JPEG');
-			} else if (allPng) {
-				suggested.outputFormat = 'webp';
-				reasons.push('WebP for PNG inputs');
-			} else if (hasHeic) {
-				suggested.outputFormat = 'webp';
-				reasons.push('WebP for HEIC');
-			}
-
-			// Auto-resize for oversized images
 			const maxDim = Math.max(
 				...newItems.filter((i) => i.width && i.height).flatMap((i) => [i.width!, i.height!]),
 				0
 			);
 
 			if (maxDim > 8000) {
-				suggested.resizeEnabled = true;
-				suggested.resizeMode = 'fit';
-				suggested.resizeMaxWidth = 4096;
-				suggested.resizeMaxHeight = 4096;
-				reasons.push('resize to 4096px (very large images)');
-			} else if (maxDim > 4096) {
-				suggested.resizeEnabled = true;
-				suggested.resizeMode = 'fit';
-				suggested.resizeMaxWidth = 2048;
-				suggested.resizeMaxHeight = 2048;
-				reasons.push('resize to 2048px');
+				return {
+					suggested: {
+						resizeEnabled: true,
+						resizeMode: 'fit',
+						resizeMaxWidth: 4096,
+						resizeMaxHeight: 4096,
+					},
+					reasons: ['resize to 4096px (very large images)'],
+					summary: `Images up to ${maxDim.toLocaleString()}px — resize to 4096px for better compression and to avoid browser memory issues?`,
+				};
 			}
+			if (maxDim > 4096) {
+				return {
+					suggested: {
+						resizeEnabled: true,
+						resizeMode: 'fit',
+						resizeMaxWidth: 2048,
+						resizeMaxHeight: 2048,
+					},
+					reasons: ['resize to 2048px'],
+					summary: `Images up to ${maxDim.toLocaleString()}px — resize to 2048px for smaller files? Original dimensions are kept unless you opt in.`,
+				};
+			}
+			return null;
+		},
 
-			if (reasons.length === 0) return null;
-			return { suggested, reasons };
+		acceptPendingSuggestion() {
+			if (!pendingSuggestion) return false;
+			this.updateSettings(pendingSuggestion.suggested);
+			pendingSuggestion = null;
+			return true;
+		},
+
+		dismissPendingSuggestion() {
+			pendingSuggestion = null;
 		},
 
 		async addFiles(files: FileList | File[]) {
@@ -369,36 +355,9 @@ function createImagesStore() {
 
 			items = [...items, ...newItems];
 
-			// Suggest smart defaults on first batch only
+			// Opt-in resize suggestion only — never silently mutate settings
 			if (wasEmpty && newItems.length > 0) {
-				const result = this.suggestSettings(newItems);
-				if (result) {
-					this.updateSettings(result.suggested);
-
-					// Re-apply output format to the just-added items
-					if (result.suggested.outputFormat !== undefined) {
-						items = items.map((item) => {
-							if (item.status !== 'pending') return item;
-							const fmt = result.suggested.outputFormat!;
-							// Embedded-raster SVGs always get WebP regardless of suggested format
-							if (item.format === 'svg' && item.svgEmbeddedRaster) {
-								return { ...item, outputFormat: 'webp' as OutputFormat };
-							}
-							if (item.format === 'svg' && fmt === 'same') {
-								return { ...item, outputFormat: 'svg' as OutputFormat };
-							}
-							if (item.format === 'heic' && fmt === 'same') {
-								return { ...item, outputFormat: 'webp' as OutputFormat };
-							}
-							return {
-								...item,
-								outputFormat: fmt === 'same' ? (item.format as OutputFormat) : fmt,
-							};
-						});
-					}
-
-					toast.info(`Settings adjusted: ${result.reasons.join(', ')}`);
-				}
+				pendingSuggestion = this.suggestResize(newItems);
 			}
 
 			return newItems;
@@ -433,6 +392,7 @@ function createImagesStore() {
 			items = [];
 			selectedIds = new Set();
 			batchStats = { startTime: null, endTime: null, totalImages: 0 };
+			pendingSuggestion = null;
 		},
 
 		// Clear all without revoking URLs (for undo support)
@@ -441,6 +401,7 @@ function createImagesStore() {
 			items = [];
 			selectedIds = new Set();
 			batchStats = { startTime: null, endTime: null, totalImages: 0 };
+			pendingSuggestion = null;
 			return clearedItems;
 		},
 

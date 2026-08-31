@@ -13,7 +13,7 @@
 	import { images, formatBytes } from '$lib';
 	import { processImages, cancelProcessing, reprocessImage } from '$lib/utils/compress';
 	import { terminatePool } from '$lib/utils/worker-pool';
-	import { Download, Trash2, Sparkles, XCircle, RotateCcw } from 'lucide-svelte';
+	import { Download, Trash2, Sparkles, XCircle, RotateCcw, Maximize2 } from 'lucide-svelte';
 	import { downloadAllAsZip } from '$lib/utils/download';
 	import { fade } from 'svelte/transition';
 	import type { ImageItem } from '$lib/stores/images.svelte';
@@ -289,6 +289,30 @@
 		terminatePool();
 		images.clearAll();
 	}
+
+	async function handleAcceptResizeSuggestion() {
+		const accepted = images.acceptPendingSuggestion();
+		if (!accepted) return;
+
+		cancelProcessing();
+
+		// Reset every item so resize applies to the whole batch
+		for (const item of images.items) {
+			if (item.compressedUrl) URL.revokeObjectURL(item.compressedUrl);
+			images.updateItem(item.id, {
+				status: 'pending',
+				progress: 0,
+				compressedSize: undefined,
+				compressedUrl: undefined,
+				compressedBlob: undefined,
+				resizedWidth: undefined,
+				resizedHeight: undefined,
+			});
+		}
+
+		await processImages(images.items.map((i) => i.id));
+		toast.success('Resize enabled — re-optimizing with new dimensions');
+	}
 </script>
 
 <svelte:window
@@ -332,6 +356,41 @@
 					<p class="text-surface-400 text-sm">
 						JPEG, PNG, WebP, AVIF, SVG, HEIC — all processed locally in your browser.
 					</p>
+				</div>
+			{/if}
+
+			<!-- Opt-in resize suggestion (never auto-applied) -->
+			{#if images.pendingSuggestion}
+				<div
+					class="border-accent-start/30 bg-accent-start/5 mb-6 flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-5"
+					in:fade={{ duration: 200 }}
+					role="status"
+				>
+					<div class="flex items-start gap-3">
+						<div
+							class="bg-accent-start/15 text-accent-start flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+						>
+							<Maximize2 class="h-5 w-5" aria-hidden="true" />
+						</div>
+						<div>
+							<p class="text-surface-100 text-sm font-semibold">Resize recommended</p>
+							<p class="text-surface-400 mt-0.5 text-sm">{images.pendingSuggestion.summary}</p>
+						</div>
+					</div>
+					<div class="flex shrink-0 items-center gap-2 self-end sm:self-auto">
+						<button
+							onclick={() => images.dismissPendingSuggestion()}
+							class="text-surface-400 hover:bg-surface-800 hover:text-surface-200 rounded-xl px-4 py-2 text-sm font-medium transition-colors"
+						>
+							Keep original size
+						</button>
+						<button
+							onclick={handleAcceptResizeSuggestion}
+							class="from-accent-start to-accent-end rounded-xl bg-gradient-to-r px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+						>
+							Resize & re-optimize
+						</button>
+					</div>
 				</div>
 			{/if}
 

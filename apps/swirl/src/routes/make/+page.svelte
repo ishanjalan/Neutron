@@ -3,7 +3,7 @@
 	import { Footer } from '@neutron/ui';
 	import DropZone from '$lib/components/DropZone.svelte';
 	import CompareSlider from '$lib/components/CompareSlider.svelte';
-	import { toast, SEOSection, RelatedTools } from '@neutron/ui';
+	import { toast, SEOSection, RelatedTools, ConfirmModal } from '@neutron/ui';
 	import { makeGifSEO } from '$lib/seo-content';
 	import { swirlRelated } from '$lib/related-tools';
 	import {
@@ -38,6 +38,7 @@
 	// State
 	let frames = $state<Frame[]>([]);
 	let isProcessing = $state(false);
+	let showClearConfirm = $state(false);
 	let progress = $state(0);
 	let progressStage = $state('');
 	let resultUrl = $state<string | null>(null);
@@ -358,6 +359,7 @@
 			resultUrl = null;
 		}
 		currentFrameIndex = 0;
+		showClearConfirm = false;
 	}
 
 	// Derived
@@ -476,7 +478,7 @@
 							<div class="mb-2 flex items-center justify-between">
 								<h3 class="text-surface-300 text-sm font-medium">Frames ({frames.length})</h3>
 								<button
-									onclick={clearAll}
+									onclick={() => (showClearConfirm = true)}
 									class="text-surface-500 text-xs transition-colors hover:text-red-400"
 								>
 									Clear all
@@ -795,6 +797,15 @@
 
 	<Footer currentApp="swirl" />
 </div>
+
+<ConfirmModal
+	open={showClearConfirm}
+	title="Clear all frames?"
+	message="This will remove all {frames.length} frames from the sequence."
+	confirmText="Clear All"
+	onconfirm={clearAll}
+	oncancel={() => (showClearConfirm = false)}
+/>
 
 <!-- Comparison Modal -->
 {#if showComparison && frames.length > 0 && resultUrl}

@@ -66,7 +66,7 @@
 	let targetWidth = $state(480);
 	let targetHeight = $state(480);
 	let maintainAspectRatio = $state(true);
-	let optimizeAfterResize = $state(true);
+	let optimizeAfterResize = $state(false);
 	let colors = $state(256);
 
 	// Comparison modal
@@ -625,7 +625,8 @@
 								Resizing...
 							{:else}
 								<Scaling class="h-5 w-5" />
-								Resize {files.length} GIF{files.length !== 1 ? 's' : ''}
+								{optimizeAfterResize ? 'Resize & optimize' : 'Resize'}
+								{files.length} GIF{files.length !== 1 ? 's' : ''}
 							{/if}
 						</button>
 

@@ -1,19 +1,58 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import { AppHeader } from '@neutron/ui';
+	import { AppHeader, ConfirmModal, toast } from '@neutron/ui';
 	import { images } from '$lib/stores/images.svelte';
-	import { toast } from '@neutron/ui';
 	import { Command, Download, Keyboard, X, Zap } from 'lucide-svelte';
 	import { scale } from 'svelte/transition';
+	import type { ImageItem } from '$lib/stores/images.svelte';
 
 	const FIRST_VISIT_KEY = 'squish-first-visit-shown';
 
+	let showLogoClearConfirm = $state(false);
+	let deletedItems: ImageItem[] = [];
+	let undoTimeout: ReturnType<typeof setTimeout> | null = null;
+
 	function handleLogoClick() {
-		const hadImages = images.items.length > 0;
-		images.clearAll();
-		if (hadImages) {
-			toast.info('All images cleared');
+		if (images.items.length === 0) return;
+		showLogoClearConfirm = true;
+	}
+
+	function handleLogoClearConfirm() {
+		const count = images.items.length;
+
+		if (undoTimeout) {
+			clearTimeout(undoTimeout);
+			deletedItems.forEach((item) => {
+				URL.revokeObjectURL(item.originalUrl);
+				if (item.compressedUrl) URL.revokeObjectURL(item.compressedUrl);
+				if (item.thumbnailUrl) URL.revokeObjectURL(item.thumbnailUrl);
+			});
 		}
+
+		deletedItems = images.clearAllForUndo();
+		showLogoClearConfirm = false;
+
+		toast.info(`Cleared ${count} image${count === 1 ? '' : 's'}`, {
+			action: {
+				label: 'Undo',
+				onClick: () => {
+					if (undoTimeout) clearTimeout(undoTimeout);
+					images.restoreItems(deletedItems);
+					deletedItems = [];
+					undoTimeout = null;
+				},
+			},
+		});
+
+		undoTimeout = setTimeout(() => {
+			deletedItems.forEach((item) => {
+				URL.revokeObjectURL(item.originalUrl);
+				if (item.compressedUrl) URL.revokeObjectURL(item.compressedUrl);
+				if (item.thumbnailUrl) URL.revokeObjectURL(item.thumbnailUrl);
+			});
+			deletedItems = [];
+			undoTimeout = null;
+		}, 5000);
 	}
 
 	let showShortcuts = $state(false);
@@ -211,3 +250,13 @@
 		{/if}
 	</div>
 </AppHeader>
+
+<ConfirmModal
+	open={showLogoClearConfirm}
+	title="Clear all images?"
+	message="This will remove all {images.items
+		.length} images from the list. You can undo this action for 5 seconds."
+	confirmText="Clear All"
+	onconfirm={handleLogoClearConfirm}
+	oncancel={() => (showLogoClearConfirm = false)}
+/>
