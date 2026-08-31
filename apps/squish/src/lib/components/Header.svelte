@@ -33,6 +33,7 @@
 		showLogoClearConfirm = false;
 
 		toast.info(`Cleared ${count} image${count === 1 ? '' : 's'}`, {
+			duration: 5000,
 			action: {
 				label: 'Undo',
 				onClick: () => {
