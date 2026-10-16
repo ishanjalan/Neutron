@@ -23,7 +23,6 @@
 		ChevronUp,
 		Volume2,
 		Maximize,
-		Zap,
 		Info,
 		Play,
 	} from 'lucide-svelte';
@@ -57,18 +56,13 @@
 	];
 
 	const audioCodecs: { value: AudioCodec; label: string; desc: string }[] = [
-		{ value: 'aac', label: 'AAC', desc: 'Standard' },
-		{ value: 'opus', label: 'Opus', desc: 'Modern' },
-		{ value: 'mp3', label: 'MP3', desc: 'Legacy' },
+		{ value: 'aac', label: 'Auto', desc: 'Re-encode' },
 		{ value: 'copy', label: 'Keep Original', desc: 'No re-encode' },
-		{ value: 'none', label: 'None', desc: 'Remove audio' },
+		{ value: 'none', label: 'Remove', desc: 'No audio' },
 	];
 
-	const encodingPresets = [
-		{ value: 'veryfast', label: 'Fast', speed: 4, desc: 'Quick encoding, slightly larger files' },
-		{ value: 'medium', label: 'Balanced', speed: 2, desc: 'Good balance of speed and quality' },
-		{ value: 'slow', label: 'Quality', speed: 0, desc: 'Best quality, slower encoding' },
-	] as const;
+	// Older saved settings may hold opus/mp3, which are now handled as Auto
+	const isAutoAudio = (codec: AudioCodec) => codec !== 'copy' && codec !== 'none';
 
 	const presets = Object.entries(QUALITY_PRESETS).map(([key, value]) => ({
 		key: key as keyof typeof QUALITY_PRESETS,
@@ -139,10 +133,6 @@
 
 	function handleAudioBitrateChange(bitrate: (typeof AUDIO_BITRATE_OPTIONS)[number]['value']) {
 		videos.updateSettings({ audioBitrate: bitrate });
-	}
-
-	function handleEncodingPresetChange(preset: (typeof encodingPresets)[number]['value']) {
-		videos.updateSettings({ preset });
 	}
 
 	async function handleCompressAll() {
@@ -378,7 +368,7 @@
 			class="border-surface-700/50 bg-surface-900/50 rounded-b-2xl border-t p-4 sm:p-6"
 			transition:slide={{ duration: 200 }}
 		>
-			<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+			<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 				<!-- Resolution -->
 				<div>
 					<div class="mb-3 flex items-center gap-2">
@@ -404,23 +394,32 @@
 							</button>
 						{/each}
 					</div>
+					{#if hasTargetSize}
+						<p class="text-surface-500 mt-2 text-xs">
+							With a target size, “Original” lets Squash lower the resolution automatically when the
+							file wouldn’t otherwise look good at that size.
+						</p>
+					{/if}
 				</div>
 
 				<!-- Audio -->
 				<div>
 					<div class="mb-3 flex items-center gap-2">
 						<Volume2 class="text-surface-400 h-4 w-4" />
-						<span class="text-surface-300 text-sm font-medium">Audio Codec</span>
+						<span class="text-surface-300 text-sm font-medium">Audio</span>
 						<Tooltip
-							content="AAC is most compatible with all devices. Opus offers better quality at lower bitrates. Keep Original skips re-encoding for fastest processing."
+							content="Auto re-encodes audio in the best format for your output (AAC for MP4, Opus for WebM). Keep Original skips re-encoding. Remove drops the audio track entirely — handy for screen recordings and for squeezing into a size limit."
 						/>
 					</div>
 					<div class="grid grid-cols-2 gap-1.5">
 						{#each audioCodecs as codec (codec.value)}
 							<button
 								onclick={() => handleAudioCodecChange(codec.value)}
-								class="rounded-lg px-3 py-2 text-left text-sm transition-all {videos.settings
-									.audioCodec === codec.value
+								class="rounded-lg px-3 py-2 text-left text-sm transition-all {(
+									codec.value === 'aac'
+										? isAutoAudio(videos.settings.audioCodec)
+										: videos.settings.audioCodec === codec.value
+								)
 									? 'bg-accent-start/20 text-accent-start ring-accent-start/50 ring-1'
 									: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700/50'}"
 							>
@@ -431,7 +430,7 @@
 					</div>
 
 					<!-- Audio Bitrate -->
-					{#if videos.settings.audioCodec !== 'none' && videos.settings.audioCodec !== 'copy'}
+					{#if isAutoAudio(videos.settings.audioCodec)}
 						<div class="mt-3">
 							<span class="text-surface-500 mb-2 block text-xs">Bitrate</span>
 							<div class="flex gap-1">
@@ -450,42 +449,6 @@
 							</div>
 						</div>
 					{/if}
-				</div>
-
-				<!-- Encoding Speed -->
-				<div>
-					<div class="mb-3 flex items-center gap-2">
-						<Zap class="text-surface-400 h-4 w-4" />
-						<span class="text-surface-300 text-sm font-medium">Encoding Speed</span>
-						<Tooltip
-							content="Faster encoding produces larger files. Slower encoding achieves better compression at the same quality level. Use 'Quality' for final exports."
-						/>
-					</div>
-					<div class="space-y-1.5">
-						{#each encodingPresets as preset (preset.value)}
-							<button
-								onclick={() => handleEncodingPresetChange(preset.value)}
-								class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-all {videos
-									.settings.preset === preset.value
-									? 'bg-accent-start/20 text-accent-start ring-accent-start/50 ring-1'
-									: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700/50'}"
-							>
-								<div class="text-left">
-									<div class="font-medium">{preset.label}</div>
-									<div class="text-xs opacity-70">{preset.desc}</div>
-								</div>
-								<div class="flex gap-0.5">
-									{#each Array(4) as _, i (i)}
-										<div
-											class="h-3 w-1.5 rounded-sm {i < preset.speed
-												? 'bg-green-500'
-												: 'bg-surface-600'}"
-										></div>
-									{/each}
-								</div>
-							</button>
-						{/each}
-					</div>
 				</div>
 
 				<!-- Options -->
@@ -510,33 +473,6 @@
 									Remove Location Data
 								</div>
 								<div class="text-surface-500 text-xs">Strip GPS, camera info, and metadata</div>
-							</div>
-						</label>
-
-						<!-- Two-Pass Encoding -->
-						<label class="group flex cursor-pointer items-center gap-3">
-							<input
-								type="checkbox"
-								checked={videos.settings.twoPass}
-								onchange={(e) => videos.updateSettings({ twoPass: e.currentTarget.checked })}
-								class="bg-surface-700 border-surface-600 text-accent-start focus:ring-accent-start focus:ring-offset-surface-900 h-5 w-5 rounded"
-								disabled={videos.settings.outputFormat === 'webm'}
-							/>
-							<div>
-								<div
-									class="text-surface-300 group-hover:text-surface-100 text-sm font-medium transition-colors {videos
-										.settings.outputFormat === 'webm'
-										? 'opacity-50'
-										: ''}"
-								>
-									Two-Pass Encoding
-								</div>
-								<div class="text-surface-500 text-xs">
-									Better quality, ~2x slower
-									{#if videos.settings.outputFormat === 'webm'}
-										<span class="text-amber-500">(N/A for WebM)</span>
-									{/if}
-								</div>
 							</div>
 						</label>
 					</div>

@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
 	videos,
 	estimateFileSize,
-	calculateBitrateForSize,
 	getEffectiveDuration,
 	suggestOptimalSettings,
 	QUALITY_PRESETS,
@@ -166,25 +165,6 @@ describe('estimateFileSize', () => {
 		const video = makeVideo({ originalSize: 50_000_000, duration: 60 });
 		const result = estimateFileSize(video, { ...defaultSettings, quality: 'lossless' });
 		expect(result).toBe(Math.round(50_000_000 * 0.9));
-	});
-});
-
-describe('calculateBitrateForSize', () => {
-	it('returns a positive bitrate for normal inputs', () => {
-		const video = makeVideo({ duration: 60 });
-		const result = calculateBitrateForSize(video, 5, defaultSettings);
-		expect(result).toBeGreaterThan(0);
-	});
-
-	it('returns default bitrate when duration is 0', () => {
-		const video = makeVideo({ duration: 0 });
-		expect(calculateBitrateForSize(video, 5, defaultSettings)).toBe(2000000);
-	});
-
-	it('returns minimum bitrate when target is tiny', () => {
-		const video = makeVideo({ duration: 3600 });
-		const result = calculateBitrateForSize(video, 0.001, defaultSettings);
-		expect(result).toBe(100000);
 	});
 });
 

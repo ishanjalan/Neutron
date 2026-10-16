@@ -35,8 +35,12 @@ export interface WebCodecsConfig {
 	audioCodec: WebCodecsAudioCodec;
 	width: number;
 	height: number;
-	bitrate: number;
-	framerate: number;
+	/** Target video bitrate (bps). When set it replaces the quality preset. */
+	bitrate?: number;
+	/** Cap the output frame rate (e.g. 30 for a 60 fps source). Applied only if the source is faster. */
+	maxFrameRate?: number;
+	/** How to treat the audio track. Defaults to 're-encode'. */
+	audioMode?: 'encode' | 'copy' | 'none';
 	audioBitrate: number;
 	sampleRate: number;
 	channels: number;
@@ -353,26 +357,42 @@ export async function encodeWithWebCodecs(
 		// hardware when available.
 		const hwAccel = config.videoCodec === 'vp9' ? 'no-preference' : 'prefer-hardware';
 
+		// Only cap the frame rate when the source is actually faster than the cap
+		const frameRate =
+			config.maxFrameRate && fps > config.maxFrameRate + 0.5 ? config.maxFrameRate : undefined;
+
+		// With a bitrate we encode to a size budget; otherwise a subjective quality preset
+		const rateControl = config.bitrate ? { bitrate: config.bitrate } : { quality };
+
+		const audioMode = config.audioMode ?? 'encode';
+		const audio =
+			audioMode === 'none'
+				? { discard: true as const }
+				: audioMode === 'copy'
+					? {}
+					: {
+							codec: audioCodec,
+							quality: new Quality({ bitrate: config.audioBitrate || 128000 }),
+							sampleRate: config.sampleRate || 48000,
+							numberOfChannels: config.channels || 2,
+						};
+
 		// Create conversion with hardware acceleration
 		const conversion = await Conversion.init({
 			input,
 			output,
 			video: {
 				codec: videoCodec,
-				quality, // Subjective Quality → CQ/quantizer encoding when available
+				...rateControl,
 				keyFrameInterval: 2, // Keyframe every 2 seconds
-				fit: 'contain', // Maintain aspect ratio with letterboxing if needed
+				fit: 'contain', // Dimensions already preserve aspect ratio; this is just a safeguard
 				hardwareAcceleration: hwAccel,
 				width: config.width,
 				height: config.height,
+				...(frameRate ? { frameRate } : {}),
 				forceTranscode: true, // Ensure re-encoding with our settings
 			},
-			audio: {
-				codec: audioCodec,
-				quality: new Quality({ bitrate: config.audioBitrate || 128000 }),
-				sampleRate: config.sampleRate || 48000,
-				numberOfChannels: config.channels || 2,
-			},
+			audio,
 			// Trim parameters
 			trim: {
 				start: trimStart,

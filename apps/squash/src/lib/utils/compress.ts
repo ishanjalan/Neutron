@@ -4,8 +4,20 @@ import {
 	type VideoItem,
 	type OutputFormat,
 	estimateCompressionTime,
-	calculateBitrateForSize,
+	getEffectiveDuration,
+	type FitReport,
 } from '$lib/stores/videos.svelte';
+import {
+	planForTarget,
+	nextBudget,
+	nextBudgetUp,
+	FILL_GOAL,
+	fitDimensions,
+	shortSideFromResolution,
+	MIN_VIDEO_BITRATE,
+	RETRY_FLOOR,
+	type TargetPlan,
+} from './target-plan';
 import { getOutputFilename as getOutputFilenameShared } from '@neutron/utils';
 import {
 	isWebCodecsSupported,
@@ -149,6 +161,7 @@ async function compressVideo(item: VideoItem) {
 			compressedUrl,
 			compressedBlob: result.blob,
 			compressionDuration: result.duration,
+			fit: result.fit,
 			eta: undefined,
 		});
 	} catch (error) {
@@ -162,86 +175,146 @@ async function compressVideo(item: VideoItem) {
 	}
 }
 
+const MAX_FIT_PASSES = 3;
+
+const AUDIO_BITRATES: Record<string, number> = {
+	'64k': 64000,
+	'128k': 128000,
+	'192k': 192000,
+	'256k': 256000,
+	'320k': 320000,
+};
+
 // Compress using WebCodecs (hardware acceleration via Mediabunny)
-async function compressWithWebCodecs(item: VideoItem): Promise<{ blob: Blob; duration: number }> {
+async function compressWithWebCodecs(
+	item: VideoItem
+): Promise<{ blob: Blob; duration: number; fit?: FitReport }> {
 	const startTime = Date.now();
-	const quality = videos.settings.quality;
+	const settings = videos.settings;
 	const outputFormat = item.outputFormat;
-
-	// Map quality to bitrate
-	const bitrateMap: Record<string, number> = {
-		tiny: 500_000,
-		web: 1_500_000,
-		social: 3_000_000,
-		high: 6_000_000,
-		lossless: 20_000_000,
-	};
-
-	// Calculate bitrate - either from target size or quality preset
-	let targetBitrate = bitrateMap[quality] || 2_000_000;
-	if (videos.settings.targetSizeMB) {
-		targetBitrate = calculateBitrateForSize(item, videos.settings.targetSizeMB, videos.settings);
-	}
-
-	// Get resolution settings
-	const resolutionMap: Record<string, { width: number; height: number }> = {
-		original: { width: item.width || 1920, height: item.height || 1080 },
-		'2160p': { width: 3840, height: 2160 },
-		'1440p': { width: 2560, height: 1440 },
-		'1080p': { width: 1920, height: 1080 },
-		'720p': { width: 1280, height: 720 },
-		'480p': { width: 854, height: 480 },
-		'360p': { width: 640, height: 360 },
-	};
-
-	const resolution = resolutionMap[videos.settings.resolution] || resolutionMap['original'];
 	const { video: videoCodec, audio: audioCodec } = getRecommendedCodecs(outputFormat);
 
-	// Audio bitrate mapping
-	const audioBitrateMap: Record<string, number> = {
-		'64k': 64000,
-		'128k': 128000,
-		'192k': 192000,
-		'256k': 256000,
-		'320k': 320000,
-	};
-
-	// Determine actual output format for container (AV1 and HEVC use MP4 container)
+	// AV1 and HEVC use MP4 container
 	const containerFormat = outputFormat === 'av1' || outputFormat === 'hevc' ? 'mp4' : outputFormat;
 
-	const blob = await encodeWithWebCodecs(
-		item.file,
-		{
-			videoCodec,
-			audioCodec,
-			width: resolution.width,
-			height: resolution.height,
-			bitrate: targetBitrate,
-			framerate: 30,
-			audioBitrate: audioBitrateMap[videos.settings.audioBitrate] || 128000,
-			sampleRate: 48000,
-			channels: 2,
-			trimStart: item.trimStart,
-			trimEnd: item.trimEnd,
-		},
-		containerFormat as 'mp4' | 'webm',
-		quality,
-		videos.settings.stripMetadata,
-		(progress) => {
-			videos.updateItem(item.id, {
-				progress: progress.progress,
-				progressStage: `${progress.stage} (${progress.framesProcessed}/${progress.totalFrames} frames)`,
-				eta:
-					progress.fps > 0
-						? Math.round((progress.totalFrames - progress.framesProcessed) / progress.fps)
-						: undefined,
+	const srcWidth = item.width || 1920;
+	const srcHeight = item.height || 1080;
+	const requestedShortSide = shortSideFromResolution(settings.resolution);
+	const audioMode =
+		settings.audioCodec === 'none' ? 'none' : settings.audioCodec === 'copy' ? 'copy' : 'encode';
+	const audioBitrate = AUDIO_BITRATES[settings.audioBitrate] || 128000;
+
+	// A target size needs a known duration to turn into a bitrate
+	const effectiveDuration = getEffectiveDuration(item);
+	const targetBytes =
+		settings.targetSizeMB && effectiveDuration > 0
+			? Math.round(settings.targetSizeMB * 1024 * 1024)
+			: undefined;
+
+	let budget = targetBytes ?? 0;
+	let plan: TargetPlan | undefined;
+	let blob: Blob | undefined;
+	let passes = 0;
+	// Largest encode that fits under the target so far — what we return if later passes overshoot
+	let best: { blob: Blob; plan: TargetPlan } | undefined;
+
+	while (passes < (targetBytes ? MAX_FIT_PASSES : 1)) {
+		passes++;
+
+		if (targetBytes) {
+			plan = planForTarget({
+				width: srcWidth,
+				height: srcHeight,
+				duration: effectiveDuration,
+				targetBytes: budget,
+				codec: videoCodec,
+				audio: audioMode,
+				audioBitrate,
+				requestedShortSide,
+				sourceBitrate: item.bitrate,
+				// If an earlier pass overshot, allow going lower than the usual quality floor
+				minShortSide: passes > 1 ? RETRY_FLOOR : undefined,
 			});
 		}
-	);
+
+		const dims = plan
+			? { width: plan.width, height: plan.height }
+			: requestedShortSide
+				? fitDimensions(srcWidth, srcHeight, requestedShortSide)
+				: { width: srcWidth, height: srcHeight };
+
+		blob = await encodeWithWebCodecs(
+			item.file,
+			{
+				videoCodec,
+				audioCodec,
+				audioMode,
+				width: dims.width,
+				height: dims.height,
+				bitrate: plan?.videoBitrate,
+				// Cap high-frame-rate sources only when we're squeezing into a size budget
+				maxFrameRate: plan ? 30 : undefined,
+				audioBitrate: plan?.audioBitrate || audioBitrate,
+				sampleRate: 48000,
+				channels: 2,
+				trimStart: item.trimStart,
+				trimEnd: item.trimEnd,
+			},
+			containerFormat as 'mp4' | 'webm',
+			settings.quality,
+			settings.stripMetadata,
+			(progress) => {
+				videos.updateItem(item.id, {
+					progress: progress.progress,
+					progressStage:
+						passes > 1
+							? `Fitting to ${settings.targetSizeMB} MB — pass ${passes} of ${MAX_FIT_PASSES} (${progress.progress}%)`
+							: `${progress.stage} (${progress.framesProcessed}/${progress.totalFrames} frames)`,
+					eta:
+						progress.fps > 0
+							? Math.round((progress.totalFrames - progress.framesProcessed) / progress.fps)
+							: undefined,
+				});
+			}
+		);
+
+		if (!targetBytes || !plan) break;
+
+		if (blob.size <= targetBytes) {
+			if (!best || blob.size > best.blob.size) best = { blob, plan };
+			// Filled most of the target — good enough
+			if (blob.size >= targetBytes * FILL_GOAL) break;
+			// Came in well under: the encoder under-delivered, so ask for more — unless the
+			// plan is already as high as the source's own bitrate (nothing more to give)
+			if (item.bitrate && plan.videoBitrate >= Math.round(item.bitrate * 0.95) - 1) break;
+			budget = nextBudgetUp(targetBytes, budget, blob.size);
+		} else {
+			// Over the target — already at the bitrate floor, another pass can't shrink it
+			if (plan.videoBitrate <= MIN_VIDEO_BITRATE) break;
+			budget = nextBudget(targetBytes, budget, blob.size);
+		}
+	}
+
+	const chosen = best ?? (blob && plan ? { blob, plan } : undefined);
+
+	const fit: FitReport | undefined =
+		targetBytes && chosen
+			? {
+					targetBytes,
+					ok: chosen.blob.size <= targetBytes,
+					passes,
+					width: chosen.plan.width,
+					height: chosen.plan.height,
+					scaledDown: chosen.plan.scaledDown,
+					frameRateCapped: chosen.plan.frameRate !== undefined,
+					feasibility: chosen.plan.feasibility,
+				}
+			: undefined;
 
 	return {
-		blob,
+		blob: (chosen?.blob ?? blob)!,
 		duration: Date.now() - startTime,
+		fit,
 	};
 }
 

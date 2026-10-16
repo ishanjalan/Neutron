@@ -5,6 +5,23 @@ export type VideoStatus = 'pending' | 'processing' | 'completed' | 'error';
 export type Resolution = 'original' | '2160p' | '1440p' | '1080p' | '720p' | '480p' | '360p';
 export type AudioCodec = 'aac' | 'opus' | 'mp3' | 'copy' | 'none';
 
+/** How a "compress to X MB" run turned out. */
+export interface FitReport {
+	targetBytes: number;
+	/** Output is at or under the target. */
+	ok: boolean;
+	/** Encode passes it took (re-encodes happen when the first lands over). */
+	passes: number;
+	width: number;
+	height: number;
+	/** Resolution was lowered from the source to keep quality at this bitrate. */
+	scaledDown: boolean;
+	/** A high-frame-rate source was capped to 30 fps. */
+	frameRateCapped: boolean;
+	/** Whether the bitrate was enough for acceptable quality at the chosen resolution. */
+	feasibility: 'ok' | 'tight' | 'poor';
+}
+
 export interface VideoItem {
 	id: string;
 	file: File;
@@ -30,6 +47,7 @@ export interface VideoItem {
 	// Trim settings
 	trimStart?: number; // Start time in seconds
 	trimEnd?: number; // End time in seconds
+	fit?: FitReport; // Set when compressing to a target size
 }
 
 export interface CompressionSettings {
@@ -206,44 +224,6 @@ export function estimateFileSize(video: VideoItem, settings: CompressionSettings
 	const estimatedBytes = (totalBitrate * duration) / 8;
 
 	return Math.round(estimatedBytes);
-}
-
-// Calculate required bitrate for a target file size
-export function calculateBitrateForSize(
-	video: VideoItem,
-	targetSizeMB: number,
-	settings: CompressionSettings
-): number {
-	const duration = getEffectiveDuration(video);
-	if (!duration || duration <= 0) return 2000000; // Default 2Mbps
-
-	const targetBytes = targetSizeMB * 1024 * 1024;
-
-	// Reserve some bytes for audio
-	let audioBitrate = 0;
-	if (settings.audioCodec !== 'none') {
-		const audioBitrateMap: Record<string, number> = {
-			'64k': 64000,
-			'128k': 128000,
-			'192k': 192000,
-			'256k': 256000,
-			'320k': 320000,
-		};
-		audioBitrate = audioBitrateMap[settings.audioBitrate] || 128000;
-	}
-
-	const audioBytes = (audioBitrate * duration) / 8;
-	const availableBytesForVideo = targetBytes - audioBytes;
-
-	if (availableBytesForVideo <= 0) {
-		return 100000; // Minimum bitrate
-	}
-
-	// Calculate video bitrate: (bytes * 8) / duration
-	const videoBitrate = (availableBytesForVideo * 8) / duration;
-
-	// Clamp to reasonable range
-	return Math.max(100000, Math.min(20000000, Math.round(videoBitrate)));
 }
 
 // Get effective duration considering trim settings

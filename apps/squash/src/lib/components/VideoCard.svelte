@@ -305,6 +305,26 @@
 			</span>
 		</div>
 
+		{#if item.status === 'completed' && item.fit}
+			<p class="mb-2 text-xs {item.fit.ok ? 'text-emerald-400' : 'text-amber-400'}">
+				{#if item.fit.ok}
+					✓ Under {formatBytes(item.fit.targetBytes)}
+				{:else}
+					Couldn’t get under {formatBytes(item.fit.targetBytes)} — trim the clip, remove audio, or raise
+					the target
+				{/if}
+				{#if item.fit.scaledDown}
+					<span class="text-surface-400"> · resized to {item.fit.width}×{item.fit.height}</span>
+				{/if}
+				{#if item.fit.frameRateCapped}
+					<span class="text-surface-400"> · 30 fps</span>
+				{/if}
+				{#if item.fit.ok && item.fit.feasibility !== 'ok'}
+					<span class="text-amber-400"> · tight fit, quality may look soft</span>
+				{/if}
+			</p>
+		{/if}
+
 		<!-- Status-specific content -->
 		{#if item.status === 'pending'}
 			<!-- Pending: Show trim option inline -->
