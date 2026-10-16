@@ -16,7 +16,16 @@
 		bgClass = 'bg-surface-950',
 		accentClass = 'bg-sky-500/10 text-sky-400 hover:bg-sky-500/20',
 	}: Props = $props();
+
+	// Overrides the layout's homepage <title>/description so stray URLs aren't
+	// recorded (or indexed) as the home page.
+	let heading = $derived(status === 404 ? 'Page not found' : 'Something went wrong');
 </script>
+
+<svelte:head>
+	<title>{status} — {heading}</title>
+	<meta name="robots" content="noindex" />
+</svelte:head>
 
 <div class="flex min-h-screen items-center justify-center {bgClass}">
 	<div class="text-center">
