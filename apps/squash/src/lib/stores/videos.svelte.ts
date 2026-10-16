@@ -48,7 +48,7 @@ export interface CompressionSettings {
 export const SIZE_PRESETS = {
 	whatsapp: { label: 'WhatsApp', sizeMB: 16, icon: '📱' },
 	email: { label: 'Email', sizeMB: 25, icon: '📧' },
-	discord: { label: 'Discord', sizeMB: 50, icon: '💬' },
+	discord: { label: 'Discord', sizeMB: 20, icon: '💬' },
 	telegram: { label: 'Telegram', sizeMB: 100, icon: '✈️' },
 } as const;
 
@@ -534,9 +534,10 @@ function createVideosStore() {
 			items = [];
 		},
 
-		updateSettings(newSettings: Partial<CompressionSettings>) {
+		/** `persist: false` applies a setting for this session only (e.g. a landing page's preset). */
+		updateSettings(newSettings: Partial<CompressionSettings>, { persist = true } = {}) {
 			settings = { ...settings, ...newSettings };
-			saveSettings(settings);
+			if (persist) saveSettings(settings);
 
 			// Update output format for pending items
 			if (newSettings.outputFormat !== undefined) {
