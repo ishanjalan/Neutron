@@ -13,6 +13,7 @@ export {
 	type ZipProgressCallback,
 } from './download';
 export { trapFocus, releaseFocus, focusTrap, createFocusTrap } from './focus-trap';
+export { clickOutside } from './click-outside';
 export { createTrackedUrl, revokeTrackedUrl, revokeAll, getTrackedUrlCount } from './blob-url';
 export {
 	createWorkerPool,

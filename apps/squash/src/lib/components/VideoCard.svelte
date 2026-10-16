@@ -8,7 +8,7 @@
 	} from '$lib/stores/videos.svelte';
 	import { downloadVideo } from '$lib/utils/download';
 	import { reprocessVideo, getOutputFilename, getCapabilitiesSync } from '$lib/utils/compress';
-	import { formatBytes } from '@neutron/utils';
+	import { formatBytes, clickOutside } from '@neutron/utils';
 	import { formatDuration, formatETA, formatTimeInput, parseTimeInput } from '$lib/utils/format';
 	import {
 		Download,
@@ -163,6 +163,7 @@
 
 <div
 	class="glass group relative overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-xl hover:shadow-black/20"
+	class:z-30={showFormatMenu}
 	in:scale={{ duration: 200, start: 0.95 }}
 	out:fade={{ duration: 150 }}
 	draggable={item.status === 'completed' && !!item.compressedBlob}
@@ -368,7 +369,7 @@
 				<!-- Retry options -->
 				<div class="flex items-center justify-between">
 					<!-- Format selector for retry -->
-					<div class="relative">
+					<div class="relative" use:clickOutside={() => (showFormatMenu = false)}>
 						<button
 							onclick={() => (showFormatMenu = !showFormatMenu)}
 							class="flex items-center gap-1 rounded bg-gradient-to-r {getCurrentFormatColor()} px-2 py-0.5 text-xs font-bold text-white uppercase transition-all hover:opacity-90"
@@ -378,11 +379,6 @@
 						</button>
 
 						{#if showFormatMenu}
-							<button
-								class="fixed inset-0 z-40"
-								onclick={() => (showFormatMenu = false)}
-								aria-label="Close"
-							></button>
 							<div
 								class="bg-surface-800 absolute bottom-full left-0 z-50 mb-1 min-w-[100px] overflow-hidden rounded-lg shadow-xl ring-1 ring-white/10"
 								transition:scale={{ duration: 100, start: 0.95 }}
@@ -446,7 +442,7 @@
 					<span class="text-surface-500 text-xs">{item.format}</span>
 					<ArrowRight class="text-surface-600 h-3 w-3" />
 					<!-- Format dropdown -->
-					<div class="relative">
+					<div class="relative" use:clickOutside={() => (showFormatMenu = false)}>
 						<button
 							onclick={() => (showFormatMenu = !showFormatMenu)}
 							class="flex items-center gap-1 rounded bg-gradient-to-r {getCurrentFormatColor()} px-2 py-0.5 text-xs font-bold text-white uppercase transition-all hover:opacity-90"
@@ -458,11 +454,6 @@
 						</button>
 
 						{#if showFormatMenu}
-							<button
-								class="fixed inset-0 z-40"
-								onclick={() => (showFormatMenu = false)}
-								aria-label="Close"
-							></button>
 							<div
 								class="bg-surface-800 absolute bottom-full left-0 z-50 mb-1 min-w-[100px] overflow-hidden rounded-lg shadow-xl ring-1 ring-white/10"
 								transition:scale={{ duration: 100, start: 0.95 }}

@@ -30,6 +30,7 @@
 	import { slide } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import { Tooltip } from '@neutron/ui';
+	import { clickOutside } from '@neutron/utils';
 
 	// Check codec availability (hardware support required for some)
 	let av1Available = $state(false);
@@ -159,7 +160,7 @@
 	}
 </script>
 
-<div class="glass mb-6 rounded-2xl sm:mb-8">
+<div class="glass relative mb-6 rounded-2xl sm:mb-8" class:z-30={showSizePresets}>
 	<!-- Main settings row -->
 	<div class="p-4 sm:p-6">
 		<div class="flex flex-wrap items-center gap-3 sm:gap-4">
@@ -198,7 +199,7 @@
 				<span class="text-surface-500 hidden text-[10px] tracking-wider uppercase sm:block"
 					>Target Size</span
 				>
-				<div class="relative">
+				<div class="relative" use:clickOutside={() => (showSizePresets = false)}>
 					<button
 						onclick={() => (showSizePresets = !showSizePresets)}
 						class="flex items-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-all sm:py-1.5 {hasTargetSize
@@ -210,11 +211,6 @@
 					</button>
 
 					{#if showSizePresets}
-						<button
-							class="fixed inset-0 z-40"
-							onclick={() => (showSizePresets = false)}
-							aria-label="Close"
-						></button>
 						<div
 							class="bg-surface-800 absolute top-full left-0 z-50 mt-2 w-48 overflow-hidden rounded-xl shadow-xl ring-1 ring-white/10"
 							transition:slide={{ duration: 150 }}

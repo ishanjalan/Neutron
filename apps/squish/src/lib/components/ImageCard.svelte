@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { clickOutside } from '@neutron/utils';
 	import { images, formatBytes, type ImageItem, type OutputFormat } from '$lib';
 	import { downloadImage } from '$lib/utils/download';
 	import { reprocessImage, getOutputFilename } from '$lib/utils/compress';
@@ -190,6 +191,7 @@
 		: 'hover:shadow-accent-start/10 hover:scale-[1.02] hover:shadow-2xl'} {isFocused
 		? 'ring-accent-start ring-offset-surface-900 shadow-accent-start/20 shadow-xl ring-2 ring-offset-2'
 		: ''} {item.status === 'completed' ? 'hover:-translate-y-1' : ''}"
+	class:z-30={showFormatMenu}
 	in:scale={{ duration: 300, start: 0.9 }}
 	out:scale={{ duration: 200, start: 1, opacity: 0 }}
 	onclick={handleCardClick}
@@ -479,7 +481,7 @@
 					</span>
 					<ArrowRight class="text-surface-400 h-3.5 w-3.5" />
 					<!-- Format dropdown for all images (including SVG now) -->
-					<div class="relative">
+					<div class="relative" use:clickOutside={() => (showFormatMenu = false)}>
 						<button
 							onclick={() => (showFormatMenu = !showFormatMenu)}
 							class="flex items-center gap-1.5 rounded-lg bg-gradient-to-r {getCurrentFormatColor()} px-2.5 py-1 text-xs font-bold text-white uppercase transition-all hover:opacity-90"
@@ -489,11 +491,6 @@
 						</button>
 
 						{#if showFormatMenu}
-							<button
-								class="fixed inset-0 z-40 cursor-default"
-								onclick={() => (showFormatMenu = false)}
-								aria-label="Close menu"
-							></button>
 							<div
 								class="bg-surface-800 absolute bottom-full left-0 z-50 mb-2 min-w-[120px] overflow-hidden rounded-xl shadow-xl ring-1 ring-white/10"
 								in:scale={{ duration: 150, start: 0.95 }}
