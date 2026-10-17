@@ -147,26 +147,29 @@
 		previewTime = null;
 	}
 
-	function handleKeyDown(e: KeyboardEvent) {
-		const step = e.shiftKey ? 1 : 0.1; // 1s with Shift, 0.1s without
+	/** Move one trim handle from the keyboard: arrows nudge 0.1s, Shift+arrows 1s. */
+	function handleHandleKeyDown(handle: 'start' | 'end', e: KeyboardEvent) {
+		const direction =
+			e.key === 'ArrowRight' || e.key === 'ArrowUp'
+				? 1
+				: e.key === 'ArrowLeft' || e.key === 'ArrowDown'
+					? -1
+					: 0;
+		if (direction === 0) return;
+		e.preventDefault();
 
-		if (e.key === 'ArrowLeft') {
-			e.preventDefault();
-			if (e.target === document.activeElement) {
-				const newStart = Math.max(0, localStart - step);
-				if (newStart < localEnd - 0.5) {
-					localStart = newStart;
-					onchange(localStart, localEnd);
-				}
+		const step = e.shiftKey ? 1 : 0.1;
+		if (handle === 'start') {
+			const next = Math.max(0, Math.min(localStart + direction * step, localEnd - 0.5));
+			if (next !== localStart) {
+				localStart = next;
+				onchange(localStart, localEnd);
 			}
-		} else if (e.key === 'ArrowRight') {
-			e.preventDefault();
-			if (e.target === document.activeElement) {
-				const newEnd = Math.min(duration, localEnd + step);
-				if (newEnd > localStart + 0.5) {
-					localEnd = newEnd;
-					onchange(localStart, localEnd);
-				}
+		} else {
+			const next = Math.min(duration, Math.max(localEnd + direction * step, localStart + 0.5));
+			if (next !== localEnd) {
+				localEnd = next;
+				onchange(localStart, localEnd);
 			}
 		}
 	}
@@ -190,7 +193,6 @@
 		aria-valuemin={0}
 		aria-valuemax={Math.round(duration)}
 		tabindex="0"
-		onkeydown={handleKeyDown}
 	>
 		<!-- Thumbnail strip -->
 		{#if thumbnails.length > 0}
@@ -230,7 +232,10 @@
 			role="slider"
 			aria-label="Trim start"
 			aria-valuenow={Math.round(localStart * 10) / 10}
+			aria-valuemin={0}
+			aria-valuemax={Math.round(localEnd * 10) / 10}
 			tabindex="0"
+			onkeydown={(e) => handleHandleKeyDown('start', e)}
 		>
 			<div class="h-6 w-0.5 rounded-full bg-white/80"></div>
 		</div>
@@ -245,7 +250,10 @@
 			role="slider"
 			aria-label="Trim end"
 			aria-valuenow={Math.round(localEnd * 10) / 10}
+			aria-valuemin={Math.round(localStart * 10) / 10}
+			aria-valuemax={Math.round(duration * 10) / 10}
 			tabindex="0"
+			onkeydown={(e) => handleHandleKeyDown('end', e)}
 		>
 			<div class="h-6 w-0.5 rounded-full bg-white/80"></div>
 		</div>
