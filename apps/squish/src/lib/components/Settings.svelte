@@ -88,10 +88,6 @@
 		images.updateSettings({ outputFormat: format });
 	}
 
-	function handleMetadataToggle() {
-		images.updateSettings({ stripMetadata: !images.settings.stripMetadata });
-	}
-
 	function toggleAdvanced() {
 		showAdvanced = !showAdvanced;
 		if (typeof localStorage !== 'undefined') {
@@ -174,7 +170,7 @@
 			<div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
 				<span class="text-surface-500 text-xs font-semibold tracking-wider uppercase">Quality</span>
 
-				<div class="bg-surface-800/50 flex items-center gap-1 rounded-xl p-1">
+				<div class="bg-surface-800/50 flex max-w-full flex-wrap items-center gap-1 rounded-xl p-1">
 					{#each presets as preset (preset.value)}
 						<button
 							onclick={() => handlePresetClick(preset.value)}
@@ -273,9 +269,7 @@
 				<span class="tracking-wider uppercase">Advanced Options</span>
 				{#if !showAdvanced}
 					<span class="text-surface-500 hidden sm:inline">
-						({images.settings.stripMetadata ? 'Metadata stripped' : 'Metadata kept'}{resizeEnabled
-							? ', Resize'
-							: ''})
+						({resizeEnabled ? 'Resize on' : 'Resize off'})
 					</span>
 				{/if}
 			</button>
@@ -298,42 +292,21 @@
 				class="border-surface-700/30 flex flex-col gap-5 border-t pt-4"
 				transition:slide={{ duration: 200 }}
 			>
-				<!-- Group: Processing -->
+				<!-- Group: Privacy (metadata is always dropped by the re-encode, so there's no toggle) -->
 				<div class="flex flex-col gap-2">
 					<span class="text-surface-600 text-[10px] font-semibold tracking-widest uppercase"
-						>Processing</span
+						>Privacy</span
 					>
-					<div>
-						<!-- Strip Metadata Toggle -->
-						<button
-							onclick={handleMetadataToggle}
-							class="flex items-center gap-3 rounded-xl px-4 py-3 transition-all {images.settings
-								.stripMetadata
-								? 'text-accent-start bg-accent-start/10'
-								: 'text-surface-400 bg-surface-800/30 hover:bg-surface-700/30'}"
-							title={images.settings.stripMetadata
-								? 'Location, camera info, timestamps will be removed'
-								: 'Metadata will be preserved (may include location)'}
-						>
-							<Shield class="h-4 w-4 shrink-0" />
-							<div class="flex flex-col items-start">
-								<span class="text-sm font-medium">Strip Metadata</span>
-								<span class="text-surface-500 text-[10px]">Location, camera, timestamps</span>
-							</div>
-							<div
-								class="relative ml-auto h-5 w-9 shrink-0 rounded-full transition-colors {images
-									.settings.stripMetadata
-									? 'bg-accent-start'
-									: 'bg-surface-600'}"
-							>
-								<span
-									class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform {images
-										.settings.stripMetadata
-										? 'translate-x-4'
-										: 'translate-x-0'}"
-								></span>
-							</div>
-						</button>
+					<div
+						class="text-surface-400 bg-surface-800/30 flex items-center gap-3 rounded-xl px-4 py-3"
+					>
+						<Shield class="text-accent-start h-4 w-4 shrink-0" />
+						<div class="flex flex-col items-start">
+							<span class="text-sm font-medium">Metadata is removed</span>
+							<span class="text-surface-500 text-[10px]">
+								Location, camera info and timestamps never make it into compressed files
+							</span>
+						</div>
 					</div>
 				</div>
 

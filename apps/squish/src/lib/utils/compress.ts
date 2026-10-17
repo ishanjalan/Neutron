@@ -8,6 +8,10 @@ import { optimize } from 'svgo';
 import { processImage as processImageInWorker, initPool } from './worker-pool';
 import { autoSaveFile, getAutoSaveState } from './download';
 import { getOutputFilename as getOutputFilenameShared } from '@neutron/utils';
+import { readJpegOrientation } from './detect-format';
+
+/** An error whose message is already user-facing and which retrying won't fix. */
+class FatalImageError extends Error {}
 
 // Processing state
 let isProcessing = false;
@@ -95,13 +99,24 @@ async function processQueue() {
 	}
 }
 
-// Convert HEIC to PNG using the browser's native image decoder (createImageBitmap).
+// Convert HEIC (or an EXIF-rotated JPEG) to an upright PNG using the browser's native image decoder (createImageBitmap).
 // Supported on Safari (all), Chrome 104+ on macOS/iOS. HEIC originates from Apple
 // devices, so Firefox users essentially never encounter these files.
 async function convertHeicToPng(
-	file: File
+	file: File,
+	isHeic = true
 ): Promise<{ blob: Blob; width: number; height: number }> {
-	const bitmap = await createImageBitmap(file);
+	let bitmap: ImageBitmap;
+	try {
+		bitmap = await createImageBitmap(file);
+	} catch (error) {
+		throw new FatalImageError(
+			isHeic
+				? "This browser can't open HEIC photos. Use Safari, or Chrome on a Mac, or convert the photo to JPEG first."
+				: 'The browser could not read this photo. The file may be damaged.',
+			{ cause: error }
+		);
+	}
 	const { width, height } = bitmap;
 
 	const canvas = document.createElement('canvas');
@@ -121,6 +136,15 @@ async function convertHeicToPng(
 			}
 		}, 'image/png');
 	});
+}
+
+/**
+ * The WASM decoders ignore EXIF orientation, so a phone photo stored as "rotate 90°" would come
+ * out sideways. For those JPEGs, let the browser decode (it applies the rotation) and hand the
+ * worker an upright PNG instead.
+ */
+async function needsUprightDecode(file: File): Promise<boolean> {
+	return readJpegOrientation(await file.arrayBuffer()) > 1;
 }
 
 // Calculate resized dimensions based on settings
@@ -247,7 +271,14 @@ async function compressAtQuality(
 		return { blob: new Blob([result], { type: mimeType }), width: outWidth, height: outHeight };
 	} else {
 		// Standard raster image processing
-		const imageBuffer = await item.file.arrayBuffer();
+		let imageBuffer: ArrayBuffer;
+		let inputFormat = item.format;
+		if (item.format === 'jpeg' && (await needsUprightDecode(item.file))) {
+			imageBuffer = await (await convertHeicToPng(item.file, false)).blob.arrayBuffer();
+			inputFormat = 'png';
+		} else {
+			imageBuffer = await item.file.arrayBuffer();
+		}
 
 		const {
 			result,
@@ -257,7 +288,7 @@ async function compressAtQuality(
 		} = await processImageInWorker(
 			`${item.id}-q${quality}`,
 			imageBuffer,
-			item.format,
+			inputFormat,
 			outputFormat,
 			quality,
 			lossless,
@@ -495,6 +526,11 @@ async function compressImage(item: ImageItem) {
 			let sourceBlob: Blob = item.file;
 			let sourceFormat = item.format;
 
+			if (item.format === 'jpeg' && (await needsUprightDecode(item.file))) {
+				sourceBlob = (await convertHeicToPng(item.file, false)).blob;
+				sourceFormat = 'png';
+			}
+
 			// Apply resize if enabled and we have dimensions
 			if (resizeEnabled && item.width && item.height) {
 				images.updateItem(item.id, { progress: 10 });
@@ -591,8 +627,12 @@ async function compressImage(item: ImageItem) {
 		console.error(`[compress] ${item.name}: Failed after ${errorTime}s:`, error);
 
 		let message = 'Compression failed';
+		let retryable = true;
 
-		if (error instanceof Error) {
+		if (error instanceof FatalImageError) {
+			message = error.message;
+			retryable = false;
+		} else if (error instanceof Error) {
 			const errorMsg = error.message.toLowerCase();
 
 			if (
@@ -601,14 +641,17 @@ async function compressImage(item: ImageItem) {
 				errorMsg.includes('corrupt')
 			) {
 				message = 'Image appears corrupted. Try re-saving the original file.';
+				retryable = false;
 			} else if (
 				errorMsg.includes('memory') ||
 				errorMsg.includes('oom') ||
 				errorMsg.includes('allocation')
 			) {
 				message = 'Image too large for browser memory. Try a smaller image.';
+				retryable = false;
 			} else if (errorMsg.includes('format') || errorMsg.includes('unsupported')) {
 				message = 'Unsupported image format or encoding.';
+				retryable = false;
 			} else if (errorMsg.includes('network') || errorMsg.includes('fetch')) {
 				message = 'Network error loading image. Check your connection.';
 			} else if (errorMsg.includes('timed out') || errorMsg.includes('timeout')) {
@@ -629,6 +672,7 @@ async function compressImage(item: ImageItem) {
 		images.updateItem(item.id, {
 			status: 'error',
 			error: message,
+			retryable,
 		});
 	}
 }

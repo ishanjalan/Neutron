@@ -457,13 +457,15 @@
 						<AlertCircle class="h-4 w-4 flex-shrink-0" />
 						<span>Failed</span>
 					</div>
-					<button
-						onclick={handleRetry}
-						class="flex items-center gap-1.5 rounded-lg bg-red-900/30 px-3 py-1.5 text-sm font-medium text-red-400 hover:bg-red-900/50"
-					>
-						<RotateCcw class="h-4 w-4" />
-						Retry
-					</button>
+					{#if item.retryable !== false}
+						<button
+							onclick={handleRetry}
+							class="flex items-center gap-1.5 rounded-lg bg-red-900/30 px-3 py-1.5 text-sm font-medium text-red-400 hover:bg-red-900/50"
+						>
+							<RotateCcw class="h-4 w-4" />
+							Retry
+						</button>
+					{/if}
 				</div>
 				{#if item.error}
 					<p class="text-xs leading-relaxed text-red-500">

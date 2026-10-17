@@ -7,11 +7,11 @@ interface PageSEO {
 
 export const squishSEO: PageSEO = {
 	intro:
-		'Compress and convert images in your browser without any upload — supports HEIC (iPhone photos), JPEG, PNG, WebP, AVIF, JPEG XL, and SVG. All processing runs locally on your device.',
+		'Compress and convert images in your browser without any upload — supports HEIC (iPhone photos, in Safari and Chrome on Mac), JPEG, PNG, WebP, AVIF, JPEG XL, and SVG. All processing runs locally on your device.',
 	faqs: [
 		{
 			q: 'What image formats can Squish compress?',
-			a: 'HEIC, JPEG, PNG, WebP, AVIF, JPEG XL, and SVG. It can also convert between most of these formats in a single step.',
+			a: 'HEIC, JPEG, PNG, WebP, AVIF, JPEG XL, and SVG. It can also convert between most of these formats in a single step. HEIC needs a browser that can open it natively: Safari, or Chrome on a Mac. Elsewhere, convert HEIC to JPEG first.',
 		},
 		{
 			q: 'How much can Squish reduce image file size?',
@@ -23,11 +23,15 @@ export const squishSEO: PageSEO = {
 		},
 		{
 			q: 'Is there a file size limit?',
-			a: "No server-side limits — all processing runs in your browser. Very large images may take longer on low-powered devices, but there's no cap.",
+			a: 'No server-side limits — all processing runs in your browser. Very large images (tens of megapixels) take longer and can run out of browser memory on low-powered devices; if that happens, resize them first.',
 		},
 		{
 			q: 'Can I compress multiple images at once?',
 			a: 'Yes — drop multiple files at once and Squish processes them all in parallel, then lets you download individually or as a ZIP.',
+		},
+		{
+			q: 'Does Squish remove EXIF and location data?',
+			a: 'Yes. Images are decoded and re-encoded, so camera details, GPS location, and timestamps are not carried into the compressed file. Photo rotation is applied to the pixels first, so images stay upright.',
 		},
 		{
 			q: 'Are my images safe?',
