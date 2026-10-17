@@ -40,5 +40,9 @@
 		"@okathira/ghostpdl-wasm": "^1.1.0",
 		"comlink": "^4.4.2",
 		"tesseract.js": "^7.0.0"
+	},
+	"imports": {
+		"#lib": "./src/lib/index.js",
+		"#lib/*": "./src/lib/*"
 	}
 }

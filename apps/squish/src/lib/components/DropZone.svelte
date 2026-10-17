@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Upload, FileImage, AlertCircle, Link, Loader2, X, FolderOpen } from 'lucide-svelte';
-	import { images } from '$lib/stores/images.svelte';
-	import { processImages } from '$lib/utils/compress';
+	import { images } from '#lib/stores/images.svelte.ts';
+	import { processImages } from '#lib/utils/compress.ts';
 	import { fade } from 'svelte/transition';
 
 	let isDragging = $state(false);

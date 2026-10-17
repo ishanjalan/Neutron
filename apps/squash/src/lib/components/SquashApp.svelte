@@ -1,24 +1,24 @@
 <script lang="ts">
-	import Header from '$lib/components/Header.svelte';
+	import Header from '#lib/components/Header.svelte';
 	import { Footer } from '@neutron/ui';
-	import DropZone from '$lib/components/DropZone.svelte';
-	import DraggableVideoList from '$lib/components/DraggableVideoList.svelte';
-	import AdvancedSettings from '$lib/components/AdvancedSettings.svelte';
-	import KeyboardShortcuts from '$lib/components/KeyboardShortcuts.svelte';
-	import PerformanceMonitor from '$lib/components/PerformanceMonitor.svelte';
-	import OnboardingModal from '$lib/components/OnboardingModal.svelte';
+	import DropZone from '#lib/components/DropZone.svelte';
+	import DraggableVideoList from '#lib/components/DraggableVideoList.svelte';
+	import AdvancedSettings from '#lib/components/AdvancedSettings.svelte';
+	import KeyboardShortcuts from '#lib/components/KeyboardShortcuts.svelte';
+	import PerformanceMonitor from '#lib/components/PerformanceMonitor.svelte';
+	import OnboardingModal from '#lib/components/OnboardingModal.svelte';
 	import { Toast, toast, ConfirmModal, SEOSection, RelatedTools } from '@neutron/ui';
-	import { squashSEO } from '$lib/seo-content';
+	import { squashSEO } from '#lib/seo-content.ts';
 	import {
 		SIZE_TARGETS,
 		LENGTH_TABLE_PROFILES,
 		minutesThatFit,
 		formatMinutes,
 		type SizeTarget,
-	} from '$lib/size-targets';
+	} from '#lib/size-targets.ts';
 	import { resolve } from '$app/paths';
-	import { squashRelated } from '$lib/related-tools';
-	import { videos, QUALITY_PRESETS } from '$lib/stores/videos.svelte';
+	import { squashRelated } from '#lib/related-tools.ts';
+	import { videos, QUALITY_PRESETS } from '#lib/stores/videos.svelte.ts';
 	import {
 		Download,
 		Trash2,
@@ -28,8 +28,8 @@
 		Clipboard,
 		AlertTriangle,
 	} from 'lucide-svelte';
-	import { downloadAllAsZip } from '$lib/utils/download';
-	import { preloadEncoder, checkBrowserSupport } from '$lib/utils/compress';
+	import { downloadAllAsZip } from '#lib/utils/download.ts';
+	import { preloadEncoder, checkBrowserSupport } from '#lib/utils/compress.ts';
 	import { formatBytes } from '@neutron/utils';
 	import { fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
@@ -64,6 +64,7 @@
 			.filter((i) => i.status === 'completed' && i.compressedSize)
 			.reduce((acc, i) => acc + (i.originalSize - (i.compressedSize || 0)), 0)
 	);
+
 	const savingsPercent = $derived(
 		videos.items.length > 0
 			? Math.round(
@@ -475,7 +476,9 @@
 				</ul>
 			</section>
 		{/if}
+
 		<SEOSection intro={seo.intro} faqs={seo.faqs} {breadcrumbs} />
+
 		<nav class="mx-auto mt-10 max-w-3xl px-4 sm:px-6" aria-label="Compress video for…">
 			<h2 class="text-surface-300 mb-3 text-sm font-medium">Compress video for…</h2>
 			<ul class="flex flex-wrap gap-2">
@@ -490,7 +493,7 @@
 				{/each}
 				<li>
 					<a
-						href={resolve('/video-to-mp3')}
+						href={resolve('video-to-mp3')}
 						class="bg-surface-800 text-surface-300 hover:bg-surface-700 rounded-full px-3 py-1.5 text-sm transition"
 						>Video to MP3</a
 					>
@@ -519,9 +522,11 @@
 />
 
 <!-- Keyboard Shortcuts Modal -->
+
 <KeyboardShortcuts open={showShortcuts} onclose={() => (showShortcuts = false)} />
 
 <!-- Performance Monitor -->
+
 <PerformanceMonitor open={showPerformance} onclose={() => (showPerformance = false)} />
 
 <!-- Onboarding Modal -->

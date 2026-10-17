@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { clickOutside } from '@neutron/utils';
-	import { images, formatBytes, type ImageItem, type OutputFormat } from '$lib';
-	import { downloadImage } from '$lib/utils/download';
-	import { reprocessImage, getOutputFilename } from '$lib/utils/compress';
+	import { images, formatBytes, type ImageItem, type OutputFormat } from '#lib';
+	import { downloadImage } from '#lib/utils/download.ts';
+	import { reprocessImage, getOutputFilename } from '#lib/utils/compress.ts';
 	import { toast } from '@neutron/ui';
 	import { CompareSlider } from '@neutron/ui';
 	import PreviewModal from './PreviewModal.svelte';

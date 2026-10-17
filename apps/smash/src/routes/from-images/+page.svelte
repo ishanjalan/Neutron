@@ -1,12 +1,12 @@
 <script lang="ts">
-	import Header from '$lib/components/Header.svelte';
+	import Header from '#lib/components/Header.svelte';
 	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
-	import { fromImagesSEO } from '$lib/seo-content';
-	import { smashRelated } from '$lib/related-tools';
+	import { fromImagesSEO } from '#lib/seo-content.ts';
+	import { smashRelated } from '#lib/related-tools.ts';
 	import { downloadBlob } from '@neutron/utils';
-	import { imagesToPDF, getOutputFilename } from '$lib/utils/pdf';
-	import { formatBytes } from '$lib/stores/pdfs.svelte';
+	import { imagesToPDF, getOutputFilename } from '#lib/utils/pdf.ts';
+	import { formatBytes } from '#lib/stores/pdfs.svelte.ts';
 	import {
 		FileText,
 		Upload,

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
-	import { formatBytes } from '$lib/stores/pdfs.svelte';
+	import { formatBytes } from '#lib/stores/pdfs.svelte.ts';
 	import { PDFDocument } from '@cantoo/pdf-lib';
-	import { renderPageGS } from '$lib/utils/ghostscript';
+	import { renderPageGS } from '#lib/utils/ghostscript.ts';
 	import {
 		rotateSinglePage,
 		deleteSinglePage,
@@ -11,7 +11,7 @@
 		insertBlankPage,
 		movePage,
 		downloadFile,
-	} from '$lib/utils/pdf';
+	} from '#lib/utils/pdf.ts';
 	import {
 		ZoomIn,
 		ZoomOut,

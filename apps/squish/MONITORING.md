@@ -49,7 +49,7 @@ PUBLIC_ENVIRONMENT=production
 ### Error Capture
 
 ```typescript
-import { captureError, captureMessage } from '$lib/utils/monitoring';
+import { captureError, captureMessage } from '#lib/utils/monitoring.ts';
 
 try {
 	await riskyOperation();
@@ -67,7 +67,7 @@ captureMessage('User reached batch limit', 'warning');
 ### Performance Monitoring
 
 ```typescript
-import { perfMonitor } from '$lib/utils/monitoring';
+import { perfMonitor } from '#lib/utils/monitoring.ts';
 
 // Manual timing
 perfMonitor.start('image-compression');
@@ -83,7 +83,7 @@ const result = await perfMonitor.measure('batch-processing', () => processBatch(
 ### Memory Monitoring
 
 ```typescript
-import { memoryMonitor } from '$lib/utils/memory-monitor';
+import { memoryMonitor } from '#lib/utils/memory-monitor.ts';
 
 // Take snapshots
 memoryMonitor.takeSnapshot(imageStore.items.length);

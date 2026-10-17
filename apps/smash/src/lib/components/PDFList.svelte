@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { pdfs } from '$lib/stores/pdfs.svelte';
+	import { pdfs } from '#lib/stores/pdfs.svelte.ts';
 	import PDFCard from './PDFCard.svelte';
 	import { flip } from 'svelte/animate';
 

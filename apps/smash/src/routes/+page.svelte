@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import Header from '$lib/components/Header.svelte';
+	import Header from '#lib/components/Header.svelte';
 	import { Footer } from '@neutron/ui';
 	import {
 		Minimize2,
@@ -25,7 +25,7 @@
 	import { fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import { detectLocale, type Locale } from '@neutron/utils/seo';
-	import { smashHomeMeta } from '$lib/seo';
+	import { smashHomeMeta } from '#lib/seo.ts';
 
 	let locale = $state<Locale>('en');
 	let pageMeta = $derived(smashHomeMeta[locale]);

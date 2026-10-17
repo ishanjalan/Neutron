@@ -6,16 +6,16 @@
 		type Rotation,
 		estimateFileSize,
 		getEffectiveDuration,
-	} from '$lib/stores/videos.svelte';
-	import { downloadVideo } from '$lib/utils/download';
+	} from '#lib/stores/videos.svelte.ts';
+	import { downloadVideo } from '#lib/utils/download.ts';
 	import {
 		reprocessVideo,
 		cancelCompression,
 		getOutputFilename,
 		getCapabilitiesSync,
-	} from '$lib/utils/compress';
+	} from '#lib/utils/compress.ts';
 	import { formatBytes, clickOutside } from '@neutron/utils';
-	import { formatDuration, formatETA, formatTimeInput, parseTimeInput } from '$lib/utils/format';
+	import { formatDuration, formatETA, formatTimeInput, parseTimeInput } from '#lib/utils/format.ts';
 	import {
 		Download,
 		X,

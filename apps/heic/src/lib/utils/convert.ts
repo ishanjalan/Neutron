@@ -1,4 +1,4 @@
-import { filesStore, type FileItem, type OutputFormat } from '$lib/stores/files.svelte';
+import { filesStore, type FileItem, type OutputFormat } from '#lib/stores/files.svelte.ts';
 import { processImage as processImageInWorker, initPool } from './worker-pool';
 import { downloadBlob, downloadAllAsZip } from '@neutron/utils';
 

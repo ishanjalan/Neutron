@@ -3,7 +3,7 @@
 	import { fade, scale } from 'svelte/transition';
 	import { X, Eye, Loader2 } from 'lucide-svelte';
 	import { createFocusTrap } from '@neutron/utils';
-	import { QUALITY_PRESETS, type VideoItem } from '$lib/stores/videos.svelte';
+	import { QUALITY_PRESETS, type VideoItem } from '#lib/stores/videos.svelte.ts';
 
 	interface Props {
 		item: VideoItem;

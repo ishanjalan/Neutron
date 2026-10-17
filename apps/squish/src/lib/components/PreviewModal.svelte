@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { X, ZoomIn, ZoomOut, RotateCcw, Download } from 'lucide-svelte';
 	import { scale } from 'svelte/transition';
-	import { images, type ImageItem } from '$lib/stores/images.svelte';
-	import { downloadImage } from '$lib/utils/download';
+	import { images, type ImageItem } from '#lib/stores/images.svelte.ts';
+	import { downloadImage } from '#lib/utils/download.ts';
 
 	let {
 		item,

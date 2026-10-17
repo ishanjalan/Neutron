@@ -5,7 +5,7 @@
  */
 
 import { captureMessage, addBreadcrumb } from './monitoring';
-import { dev } from '$app/environment';
+import { dev } from '$app/env';
 
 interface MemorySnapshot {
 	timestamp: number;

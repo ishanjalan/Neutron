@@ -3,7 +3,7 @@ import {
 	type OutputFormat,
 	type ImageItem,
 	type ResizeMode,
-} from '$lib/stores/images.svelte';
+} from '#lib/stores/images.svelte.ts';
 import { optimize } from 'svgo';
 import { processImage as processImageInWorker, initPool } from './worker-pool';
 import { autoSaveFile, getAutoSaveState } from './download';

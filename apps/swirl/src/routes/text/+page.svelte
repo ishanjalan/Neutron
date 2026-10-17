@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { acceptGifFiles } from '$lib/utils/files';
-	import Header from '$lib/components/Header.svelte';
+	import { acceptGifFiles } from '#lib/utils/files.ts';
+	import Header from '#lib/components/Header.svelte';
 	import { Footer } from '@neutron/ui';
-	import DropZone from '$lib/components/DropZone.svelte';
+	import DropZone from '#lib/components/DropZone.svelte';
 	import { toast, SEOSection, RelatedTools } from '@neutron/ui';
-	import { textGifSEO } from '$lib/seo-content';
-	import { swirlRelated } from '$lib/related-tools';
+	import { textGifSEO } from '#lib/seo-content.ts';
+	import { swirlRelated } from '#lib/related-tools.ts';
 	import {
 		Type,
 		Settings,
@@ -29,15 +29,15 @@
 		validateOptions,
 		type TextPosition,
 		DEFAULT_OPTIONS,
-	} from '$lib/utils/gif-text';
-	import { parseGifFile, formatDuration, type GifMetadata } from '$lib/utils/gif-parser';
+	} from '#lib/utils/gif-text.ts';
+	import { parseGifFile, formatDuration, type GifMetadata } from '#lib/utils/gif-parser.ts';
 	import {
 		formatBytes,
 		downloadBlob,
 		copyBlobToClipboard,
 		isClipboardWriteSupported,
 	} from '@neutron/utils';
-	import { downloadAllAsZip } from '$lib/utils/download';
+	import { downloadAllAsZip } from '#lib/utils/download.ts';
 
 	interface GifFile {
 		id: string;

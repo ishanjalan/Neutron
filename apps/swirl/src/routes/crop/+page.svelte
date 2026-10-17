@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { acceptGifFiles } from '$lib/utils/files';
-	import Header from '$lib/components/Header.svelte';
+	import { acceptGifFiles } from '#lib/utils/files.ts';
+	import Header from '#lib/components/Header.svelte';
 	import { Footer } from '@neutron/ui';
-	import DropZone from '$lib/components/DropZone.svelte';
-	import CompareSlider from '$lib/components/CompareSlider.svelte';
+	import DropZone from '#lib/components/DropZone.svelte';
+	import CompareSlider from '#lib/components/CompareSlider.svelte';
 	import { toast, SEOSection, RelatedTools } from '@neutron/ui';
-	import { cropGifSEO } from '$lib/seo-content';
-	import { swirlRelated } from '$lib/related-tools';
+	import { cropGifSEO } from '#lib/seo-content.ts';
+	import { swirlRelated } from '#lib/related-tools.ts';
 	import {
 		Crop,
 		Settings,
@@ -22,8 +22,8 @@
 		RefreshCw,
 	} from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
-	import { cropGif } from '$lib/utils/gifsicle';
-	import { parseGifFile, formatDuration, type GifMetadata } from '$lib/utils/gif-parser';
+	import { cropGif } from '#lib/utils/gifsicle.ts';
+	import { parseGifFile, formatDuration, type GifMetadata } from '#lib/utils/gif-parser.ts';
 	import {
 		formatBytes,
 		downloadBlob,

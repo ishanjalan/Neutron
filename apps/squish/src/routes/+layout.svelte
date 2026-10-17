@@ -1,12 +1,12 @@
 <script lang="ts">
 	import '../app.css';
-	import favicon from '$lib/assets/favicon.svg';
+	import favicon from '#lib/assets/favicon.svg';
 	import { Toast } from '@neutron/ui';
 	import { onMount, tick } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
 	import { countPageview } from '@neutron/utils/analytics';
 	import { detectLocale, type Locale } from '@neutron/utils/seo';
-	import { squishMeta } from '$lib/seo';
+	import { squishMeta } from '#lib/seo.ts';
 
 	let { children } = $props();
 
@@ -19,7 +19,9 @@
 	// GoatCounter counts nothing on its own (no_onload in app.html) — send one
 	// pageview per navigation, once this route's <svelte:head> has applied its
 	// <title>. This also covers client-side navigations, which fire no page load.
-	afterNavigate(async () => {
+	afterNavigate(async ({ shallow, type }) => {
+		if (shallow && type === 'goto') return;
+
 		await tick();
 		countPageview({
 			path: location.pathname + location.search,
@@ -57,7 +59,9 @@
 	<!-- Additional SEO -->
 	<meta name="robots" content="index, follow" />
 	<link rel="canonical" href={siteUrl} />
+
 	<link rel="alternate" hreflang="x-default" href={siteUrl} />
+
 	<link
 		rel="sitemap"
 		type="application/xml"

@@ -2,7 +2,7 @@
 	import { SvelteSet } from 'svelte/reactivity';
 	import { onMount, onDestroy } from 'svelte';
 	import { GripVertical, Check, X } from 'lucide-svelte';
-	import { renderAllPagesGS } from '$lib/utils/ghostscript';
+	import { renderAllPagesGS } from '#lib/utils/ghostscript.ts';
 
 	interface Props {
 		file: File;

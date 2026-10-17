@@ -5,9 +5,9 @@
 		DPI_OPTIONS,
 		IMAGE_FORMAT_OPTIONS,
 		TOOLS,
-	} from '$lib/stores/pdfs.svelte';
-	import { processFiles, signPDF, downloadFile } from '$lib/utils/pdf';
-	import { isGhostscriptReady, onInitStart, onInitComplete } from '$lib/utils/ghostscript';
+	} from '#lib/stores/pdfs.svelte.ts';
+	import { processFiles, signPDF, downloadFile } from '#lib/utils/pdf.ts';
+	import { isGhostscriptReady, onInitStart, onInitComplete } from '#lib/utils/ghostscript.ts';
 	import { onMount } from 'svelte';
 	import {
 		Monitor,
@@ -750,7 +750,7 @@
 										const sigH = sigW * (height / width);
 										const sigX = 206;
 										const sigY = 40;
-										const { signPDF: doSign } = await import('$lib/utils/pdf');
+										const { signPDF: doSign } = await import('#lib/utils/pdf.ts');
 										const blob = await doSign(targetItem.file, capturedSignatureDataUrl!, {
 											pageNum: signPlacementPage,
 											x: sigX,

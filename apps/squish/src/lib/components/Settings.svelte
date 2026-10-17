@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { images, type OutputFormat, type ResizeMode } from '$lib/stores/images.svelte';
+	import { images, type OutputFormat, type ResizeMode } from '#lib/stores/images.svelte.ts';
 	import { toast } from '@neutron/ui';
-	import { reprocessAllImages } from '$lib/utils/compress';
+	import { reprocessAllImages } from '#lib/utils/compress.ts';
 	import {
 		enableAutoSave,
 		disableAutoSave,
 		getAutoSaveState,
 		isFileSystemAccessSupported,
-	} from '$lib/utils/download';
+	} from '#lib/utils/download.ts';
 	import {
 		Shield,
 		RefreshCw,

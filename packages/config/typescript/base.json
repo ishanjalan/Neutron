@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"rewriteRelativeImportExtensions": true,
+		"allowImportingTsExtensions": true,
 		"allowJs": true,
 		"checkJs": true,
 		"esModuleInterop": true,

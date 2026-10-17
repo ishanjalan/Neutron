@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { acceptPdfFiles } from '$lib/utils/pdf-files';
+	import { acceptPdfFiles } from '#lib/utils/pdf-files.ts';
 	import { SvelteSet } from 'svelte/reactivity';
-	import Header from '$lib/components/Header.svelte';
+	import Header from '#lib/components/Header.svelte';
 	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
-	import { splitSEO } from '$lib/seo-content';
-	import { smashRelated } from '$lib/related-tools';
+	import { splitSEO } from '#lib/seo-content.ts';
+	import { smashRelated } from '#lib/related-tools.ts';
 	import { downloadBlob, downloadAllAsZip } from '@neutron/utils';
-	import { splitPDF, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
-	import { formatBytes } from '$lib/stores/pdfs.svelte';
+	import { splitPDF, getOutputFilename, generateThumbnail, getPageCount } from '#lib/utils/pdf.ts';
+	import { formatBytes } from '#lib/stores/pdfs.svelte.ts';
 	import {
 		Scissors,
 		Upload,
@@ -19,7 +19,7 @@
 		CheckCircle,
 	} from 'lucide-svelte';
 	import { fade, fly, slide } from 'svelte/transition';
-	import PDFViewer from '$lib/components/PDFViewer.svelte';
+	import PDFViewer from '#lib/components/PDFViewer.svelte';
 
 	interface PDFFile {
 		id: string;

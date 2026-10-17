@@ -5,7 +5,7 @@ import {
 	estimateCompressionTime,
 	getEffectiveDuration,
 	type FitReport,
-} from '$lib/stores/videos.svelte';
+} from '#lib/stores/videos.svelte.ts';
 import {
 	planForTarget,
 	nextBudget,

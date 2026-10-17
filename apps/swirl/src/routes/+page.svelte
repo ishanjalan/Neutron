@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import Header from '$lib/components/Header.svelte';
+	import Header from '#lib/components/Header.svelte';
 	import { Footer, SEOSection } from '@neutron/ui';
-	import { swirlHomeSEO } from '$lib/seo-content';
+	import { swirlHomeSEO } from '#lib/seo-content.ts';
 	import { Film, Gauge, Maximize2, ArrowRight, Rewind, Images, Crop, Type } from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
 
@@ -121,7 +121,7 @@
 					<span class="text-surface-500 text-sm">One-click presets for:</span>
 					{#each presets as preset (preset.id)}
 						<a
-							href={resolve(`/optimize?preset=${preset.id}`)}
+							href={resolve(`optimize?preset=${preset.id}`)}
 							class="bg-surface-800 text-surface-300 hover:bg-surface-700 hover:text-surface-100 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm transition-colors"
 						>
 							<span>{preset.icon}</span>

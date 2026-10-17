@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { images, formatBytes } from '$lib';
+	import { images, formatBytes } from '#lib';
 	import ImageCard from './ImageCard.svelte';
 	import { flip } from 'svelte/animate';
 	import { GripVertical, CheckSquare, Square, Download, Trash2 } from 'lucide-svelte';
-	import { downloadAllAsZip, downloadImage } from '$lib/utils/download';
+	import { downloadAllAsZip, downloadImage } from '#lib/utils/download.ts';
 	import { toast } from '@neutron/ui';
 
 	let draggedId = $state<string | null>(null);

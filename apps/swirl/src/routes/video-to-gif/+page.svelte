@@ -1,12 +1,12 @@
 <script lang="ts">
-	import Header from '$lib/components/Header.svelte';
+	import Header from '#lib/components/Header.svelte';
 	import { Footer } from '@neutron/ui';
-	import DropZone from '$lib/components/DropZone.svelte';
-	import CompareSlider from '$lib/components/CompareSlider.svelte';
+	import DropZone from '#lib/components/DropZone.svelte';
+	import CompareSlider from '#lib/components/CompareSlider.svelte';
 	import { toast, SEOSection, RelatedTools } from '@neutron/ui';
-	import { videoToGifSEO } from '$lib/seo-content';
-	import { swirlRelated } from '$lib/related-tools';
-	import TimelineSlider from '$lib/components/TimelineSlider.svelte';
+	import { videoToGifSEO } from '#lib/seo-content.ts';
+	import { swirlRelated } from '#lib/related-tools.ts';
+	import TimelineSlider from '#lib/components/TimelineSlider.svelte';
 	import {
 		Film,
 		Download,
@@ -22,9 +22,9 @@
 	} from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 	import encode from 'gifski-wasm';
-	import { extractFramesFromVideo, countFrames } from '$lib/utils/webcodecs';
+	import { extractFramesFromVideo, countFrames } from '#lib/utils/webcodecs.ts';
 	import { formatBytes, copyBlobToClipboard, isClipboardWriteSupported } from '@neutron/utils';
-	import { optimizeGif } from '$lib/utils/gifsicle';
+	import { optimizeGif } from '#lib/utils/gifsicle.ts';
 
 	// State
 	let videoFile = $state<File | null>(null);

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { base } from '$app/paths';
-	import { page } from '$app/stores';
+	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 	import { AppHeader } from '@neutron/ui';
 	import { Disc3 } from 'lucide-svelte';
 
@@ -8,17 +8,17 @@
 		{
 			label: 'Create',
 			links: [
-				{ href: `${base}/video-to-gif`, label: 'Video to GIF' },
-				{ href: `${base}/make`, label: 'GIF Maker' },
+				{ href: resolve(`video-to-gif`), label: 'Video to GIF' },
+				{ href: resolve(`make`), label: 'GIF Maker' },
 			],
 		},
 		{
 			label: 'Edit',
 			links: [
-				{ href: `${base}/optimize`, label: 'Optimize' },
-				{ href: `${base}/resize`, label: 'Resize' },
-				{ href: `${base}/crop`, label: 'Crop' },
-				{ href: `${base}/speed`, label: 'Speed' },
+				{ href: resolve(`optimize`), label: 'Optimize' },
+				{ href: resolve(`resize`), label: 'Resize' },
+				{ href: resolve(`crop`), label: 'Crop' },
+				{ href: resolve(`speed`), label: 'Speed' },
 			],
 		},
 	];
@@ -26,10 +26,10 @@
 
 <AppHeader
 	appName="Swirl"
-	homeHref={`${base}/`}
+	homeHref={resolve('/')}
 	offlineMessage="Don't worry, Swirl works offline!"
 	{navGroups}
-	currentPath={$page.url.pathname}
+	currentPath={page.url.pathname}
 	githubUrl="https://github.com/ishanjalan/Neutron/tree/main/apps/swirl"
 >
 	{#snippet icon()}

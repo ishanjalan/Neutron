@@ -1,4 +1,4 @@
-import type { ImageFormat } from '$lib/stores/images.svelte';
+import type { ImageFormat } from '#lib/stores/images.svelte.ts';
 
 const EXTENSION_FORMATS: Record<string, ImageFormat> = {
 	jpg: 'jpeg',

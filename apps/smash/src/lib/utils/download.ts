@@ -1,4 +1,4 @@
-import type { PDFItem } from '$lib/stores/pdfs.svelte';
+import type { PDFItem } from '#lib/stores/pdfs.svelte.ts';
 import { getOutputFilename } from './pdf';
 import {
 	downloadBlob,

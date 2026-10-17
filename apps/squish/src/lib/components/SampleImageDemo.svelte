@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { images } from '$lib/stores/images.svelte';
-	import { processImages } from '$lib/utils/compress';
+	import { images } from '#lib/stores/images.svelte.ts';
+	import { processImages } from '#lib/utils/compress.ts';
 	import { Image, FileImage, Palette, Sparkles } from 'lucide-svelte';
 	import { scale, fly } from 'svelte/transition';
 

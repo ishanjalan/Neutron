@@ -1,0 +1,4 @@
+{
+	"extends": ["../../../../packages/config/typescript/base.json", "$app/tsconfig/service-worker"],
+	"include": ["./*.ts"]
+}

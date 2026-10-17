@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { acceptGifFiles } from '$lib/utils/files';
-	import Header from '$lib/components/Header.svelte';
+	import { acceptGifFiles } from '#lib/utils/files.ts';
+	import Header from '#lib/components/Header.svelte';
 	import { Footer } from '@neutron/ui';
-	import DropZone from '$lib/components/DropZone.svelte';
-	import CompareSlider from '$lib/components/CompareSlider.svelte';
-	import BatchSummary from '$lib/components/BatchSummary.svelte';
+	import DropZone from '#lib/components/DropZone.svelte';
+	import CompareSlider from '#lib/components/CompareSlider.svelte';
+	import BatchSummary from '#lib/components/BatchSummary.svelte';
 	import { toast, SEOSection, RelatedTools } from '@neutron/ui';
-	import { resizeGifSEO } from '$lib/seo-content';
-	import { swirlRelated } from '$lib/related-tools';
+	import { resizeGifSEO } from '#lib/seo-content.ts';
+	import { swirlRelated } from '#lib/related-tools.ts';
 	import {
 		Scaling,
 		Download,
@@ -23,15 +23,15 @@
 		Check,
 	} from 'lucide-svelte';
 	import { fade, fly, slide } from 'svelte/transition';
-	import { resizeGif } from '$lib/utils/gifsicle';
-	import { parseGifFile, formatDuration, type GifMetadata } from '$lib/utils/gif-parser';
+	import { resizeGif } from '#lib/utils/gifsicle.ts';
+	import { parseGifFile, formatDuration, type GifMetadata } from '#lib/utils/gif-parser.ts';
 	import {
 		formatBytes,
 		downloadBlob,
 		copyBlobToClipboard,
 		isClipboardWriteSupported,
 	} from '@neutron/utils';
-	import { downloadAllAsZip } from '$lib/utils/download';
+	import { downloadAllAsZip } from '#lib/utils/download.ts';
 
 	interface GifFile {
 		id: string;

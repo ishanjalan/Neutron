@@ -11,13 +11,13 @@
 		type Resolution,
 		type MaxFrameRate,
 		type AudioCodec,
-	} from '$lib/stores/videos.svelte';
+	} from '#lib/stores/videos.svelte.ts';
 	import {
 		reprocessAllVideos,
 		processVideos,
 		initWebCodecs,
 		getCapabilitiesSync,
-	} from '$lib/utils/compress';
+	} from '#lib/utils/compress.ts';
 	import {
 		Settings2,
 		RefreshCw,

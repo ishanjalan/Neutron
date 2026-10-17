@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { acceptGifFiles } from '$lib/utils/files';
-	import Header from '$lib/components/Header.svelte';
+	import { acceptGifFiles } from '#lib/utils/files.ts';
+	import Header from '#lib/components/Header.svelte';
 	import { Footer } from '@neutron/ui';
-	import DropZone from '$lib/components/DropZone.svelte';
-	import CompareSlider from '$lib/components/CompareSlider.svelte';
-	import BatchSummary from '$lib/components/BatchSummary.svelte';
+	import DropZone from '#lib/components/DropZone.svelte';
+	import CompareSlider from '#lib/components/CompareSlider.svelte';
+	import BatchSummary from '#lib/components/BatchSummary.svelte';
 	import { toast, SEOSection, RelatedTools } from '@neutron/ui';
-	import { optimizeGifSEO } from '$lib/seo-content';
-	import { swirlRelated } from '$lib/related-tools';
+	import { optimizeGifSEO } from '#lib/seo-content.ts';
+	import { swirlRelated } from '#lib/related-tools.ts';
 	import {
 		Gauge,
 		Settings,
@@ -26,16 +26,16 @@
 		Check,
 	} from 'lucide-svelte';
 	import { fade, fly, slide } from 'svelte/transition';
-	import { optimizeGif } from '$lib/utils/gifsicle';
-	import { parseGifFile, formatDuration, type GifMetadata } from '$lib/utils/gif-parser';
+	import { optimizeGif } from '#lib/utils/gifsicle.ts';
+	import { parseGifFile, formatDuration, type GifMetadata } from '#lib/utils/gif-parser.ts';
 	import {
 		formatBytes,
 		downloadBlob,
 		copyBlobToClipboard,
 		isClipboardWriteSupported,
 	} from '@neutron/utils';
-	import { downloadAllAsZip } from '$lib/utils/download';
-	import { page } from '$app/stores';
+	import { downloadAllAsZip } from '#lib/utils/download.ts';
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 
 	interface GifFile {
@@ -82,7 +82,7 @@
 
 	// Handle URL preset parameter
 	onMount(() => {
-		const presetParam = $page.url.searchParams.get('preset');
+		const presetParam = page.url.searchParams.get('preset');
 		if (presetParam) {
 			const preset = sizePresets.find((p) => p.id === presetParam);
 			if (preset) {
@@ -169,7 +169,7 @@
 					{
 						targetSizeKB: targetSizeMB * 1024,
 						colors: colorReduction,
-						lossy: lossy,
+						lossy,
 					},
 					(progress) => {
 						files = files.map((f) => (f.id === gifFile.id ? { ...f, progress } : f));
@@ -308,7 +308,9 @@
 		name="description"
 		content="Compress GIFs for Discord, Twitter, Slack, or WhatsApp with one-click size targets. Free."
 	/>
+
 	<meta property="og:title" content="Compress & Optimize GIF Online — Free | Swirl" />
+
 	<meta
 		property="og:description"
 		content="Compress GIFs for Discord, Twitter, Slack, or WhatsApp with one-click size targets. Free."

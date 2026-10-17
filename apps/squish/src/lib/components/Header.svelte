@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { AppHeader, ConfirmModal, toast } from '@neutron/ui';
-	import { images } from '$lib/stores/images.svelte';
+	import { images } from '#lib/stores/images.svelte.ts';
 	import { Command, Download, Keyboard, X, Zap } from 'lucide-svelte';
 	import { scale } from 'svelte/transition';
-	import type { ImageItem } from '$lib/stores/images.svelte';
+	import type { ImageItem } from '#lib/stores/images.svelte.ts';
 
 	const FIRST_VISIT_KEY = 'squish-first-visit-shown';
 

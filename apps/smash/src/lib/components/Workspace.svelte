@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { pdfs, formatBytes, TOOLS } from '$lib/stores/pdfs.svelte';
-	import { processFiles, downloadFile, getOutputFilename } from '$lib/utils/pdf';
-	import { downloadMultipleFiles } from '$lib/utils/download';
+	import { pdfs, formatBytes, TOOLS } from '#lib/stores/pdfs.svelte.ts';
+	import { processFiles, downloadFile, getOutputFilename } from '#lib/utils/pdf.ts';
+	import { downloadMultipleFiles } from '#lib/utils/download.ts';
 	import PDFViewer from './PDFViewer.svelte';
 	import DropZone from './DropZone.svelte';
 	import ToolSelector from './ToolSelector.svelte';

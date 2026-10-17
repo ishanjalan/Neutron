@@ -1,11 +1,11 @@
 <script lang="ts">
-	import Header from '$lib/components/Header.svelte';
+	import Header from '#lib/components/Header.svelte';
 	import { Footer } from '@neutron/ui';
-	import DropZone from '$lib/components/DropZone.svelte';
-	import CompareSlider from '$lib/components/CompareSlider.svelte';
+	import DropZone from '#lib/components/DropZone.svelte';
+	import CompareSlider from '#lib/components/CompareSlider.svelte';
 	import { toast, SEOSection, RelatedTools, ConfirmModal } from '@neutron/ui';
-	import { makeGifSEO } from '$lib/seo-content';
-	import { swirlRelated } from '$lib/related-tools';
+	import { makeGifSEO } from '#lib/seo-content.ts';
+	import { swirlRelated } from '#lib/related-tools.ts';
 	import {
 		Images,
 		Download,
@@ -24,7 +24,7 @@
 	import { flip } from 'svelte/animate';
 	import encode from 'gifski-wasm';
 	import { formatBytes, copyBlobToClipboard, isClipboardWriteSupported } from '@neutron/utils';
-	import { optimizeGif } from '$lib/utils/gifsicle';
+	import { optimizeGif } from '#lib/utils/gifsicle.ts';
 
 	interface Frame {
 		id: string;

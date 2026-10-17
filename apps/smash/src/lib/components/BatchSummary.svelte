@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { pdfs, formatBytes } from '$lib/stores/pdfs.svelte';
+	import { pdfs, formatBytes } from '#lib/stores/pdfs.svelte.ts';
 	import { Check, Clock, TrendingDown, Download, X, Zap } from 'lucide-svelte';
 	import { fly, fade } from 'svelte/transition';
-	import { downloadAll } from '$lib/utils/download';
+	import { downloadAll } from '#lib/utils/download.ts';
 	import { AnimatedNumber } from '@neutron/ui';
 
 	interface Props {

@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { pdfs, formatBytes, TOOLS, type PDFItem } from '$lib/stores/pdfs.svelte';
-	import { processFiles, downloadFile, getOutputFilename } from '$lib/utils/pdf';
+	import { pdfs, formatBytes, TOOLS, type PDFItem } from '#lib/stores/pdfs.svelte.ts';
+	import { processFiles, downloadFile, getOutputFilename } from '#lib/utils/pdf.ts';
 	import { downloadAllAsZip } from '@neutron/utils';
-	import PDFViewer from '$lib/components/PDFViewer.svelte';
-	import DropZone from '$lib/components/DropZone.svelte';
-	import WorkspaceToolPanel from '$lib/components/WorkspaceToolPanel.svelte';
-	import WorkspaceToolbar from '$lib/components/WorkspaceToolbar.svelte';
-	import CommandPalette from '$lib/components/CommandPalette.svelte';
+	import PDFViewer from '#lib/components/PDFViewer.svelte';
+	import DropZone from '#lib/components/DropZone.svelte';
+	import WorkspaceToolPanel from '#lib/components/WorkspaceToolPanel.svelte';
+	import WorkspaceToolbar from '#lib/components/WorkspaceToolbar.svelte';
+	import CommandPalette from '#lib/components/CommandPalette.svelte';
 	import {
 		FileText,
 		X,
@@ -21,7 +21,7 @@
 	} from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
 	import { resolve } from '$app/paths';
-	import { downloadMultipleFiles } from '$lib/utils/download';
+	import { downloadMultipleFiles } from '#lib/utils/download.ts';
 	import { ThemeToggle, ConfirmModal } from '@neutron/ui';
 
 	interface Props {

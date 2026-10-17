@@ -1,3 +1,5 @@
 {
-	"extends": ["../../packages/config/typescript/base.json", "./.svelte-kit/tsconfig.json"]
+	"extends": ["../../packages/config/typescript/base.json", "$app/tsconfig"],
+	"include": ["src", "vite.config.ts"],
+	"exclude": ["src/service-worker"]
 }

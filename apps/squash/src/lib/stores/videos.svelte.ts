@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { toast } from '@neutron/ui';
-import { isSupportedVideo, rejectionMessage } from '$lib/utils/file-rejection';
+import { isSupportedVideo, rejectionMessage } from '#lib/utils/file-rejection.ts';
 
 export type VideoFormat = 'mp4' | 'webm' | 'mov' | 'mkv';
 export type OutputFormat = 'mp4' | 'webm' | 'av1' | 'hevc';

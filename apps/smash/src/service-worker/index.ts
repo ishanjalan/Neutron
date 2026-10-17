@@ -1,9 +1,7 @@
-/// <reference types="@sveltejs/kit" />
-/// <reference no-default-lib="true"/>
-/// <reference lib="esnext" />
-/// <reference lib="webworker" />
-
-import { build, files, version, base } from '$service-worker';
+import { self } from '$app/service-worker';
+import { version } from '$app/env';
+import { immutable, assets } from '$app/manifest';
+import { asset } from '$app/paths';
 import {
 	cacheFirst,
 	networkFirst,
@@ -11,16 +9,14 @@ import {
 	handleMessage,
 } from '@neutron/utils/service-worker';
 
-declare let self: ServiceWorkerGlobalScope;
-
 const CACHE_NAME = `smash-cache-${version}`;
 const WASM_CACHE = 'smash-wasm-v1';
 
 // WASM files to cache separately (they're large and rarely change)
-const WASM_FILES = [`${base}/gs.wasm`];
+const WASM_FILES = [asset('gs.wasm')];
 
 // All app files to cache
-const APP_FILES = [...build, ...files];
+const APP_FILES = [...immutable, ...assets].map((f) => asset(f.path));
 
 // Install event - cache app files
 self.addEventListener('install', (event) => {

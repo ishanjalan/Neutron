@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { toast } from '@neutron/ui';
-import { isPdfFile } from '$lib/utils/pdf-files';
+import { isPdfFile } from '#lib/utils/pdf-files.ts';
 export { formatBytes } from '@neutron/utils';
 
 export type PDFStatus = 'pending' | 'processing' | 'completed' | 'error';

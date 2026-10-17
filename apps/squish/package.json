@@ -46,5 +46,9 @@
 		"@sentry/sveltekit": "^10.72.0",
 		"icodec": "^0.6.0",
 		"svgo": "^4.1.0"
+	},
+	"imports": {
+		"#lib": "./src/lib/index.js",
+		"#lib/*": "./src/lib/*"
 	}
 }

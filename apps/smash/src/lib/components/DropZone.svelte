@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { DropZone as SharedDropZone } from '@neutron/ui';
-	import { pdfs, TOOLS, formatBytes, LARGE_FILE_THRESHOLD_BYTES } from '$lib/stores/pdfs.svelte';
+	import { pdfs, TOOLS, formatBytes, LARGE_FILE_THRESHOLD_BYTES } from '#lib/stores/pdfs.svelte.ts';
 	import { FileText, Image, AlertTriangle } from 'lucide-svelte';
 
 	interface Props {

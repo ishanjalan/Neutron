@@ -1,4 +1,6 @@
+import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import tailwindcss from '@tailwindcss/vite';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, type Plugin, type UserConfig } from 'vite';
@@ -9,6 +11,10 @@ const COOP_COEP_HEADERS = {
 } as const;
 
 export interface ViteConfigOptions {
+	/**
+	 * Production base path (GitHub Pages repo name), e.g. '/Squish'. Dev uses no base.
+	 */
+	basePath: `/${string}`;
 	/**
 	 * Add COOP/COEP headers required for SharedArrayBuffer (WebCodecs, WASM threads).
 	 * Use for apps that need cross-origin isolation: smash, squash, swirl.
@@ -32,8 +38,9 @@ export interface ViteConfigOptions {
 /**
  * Create a standard Vite config for Neutron SvelteKit apps.
  */
-export function createViteConfig(opts: ViteConfigOptions = {}) {
+export function createViteConfig(opts: ViteConfigOptions) {
 	const {
+		basePath,
 		crossOriginIsolation = false,
 		optimizeDepsExclude = [],
 		wasmWorkers = false,
@@ -43,7 +50,22 @@ export function createViteConfig(opts: ViteConfigOptions = {}) {
 	const config: UserConfig = {
 		plugins: [
 			tailwindcss(),
-			sveltekit(),
+			sveltekit({
+				preprocess: vitePreprocess(),
+				adapter: adapter({
+					pages: 'build',
+					assets: 'build',
+					// Use 404.html (not index.html) so prerendered homepage HTML —
+					// including <title>/meta from SSR — is not overwritten by the SPA shell.
+					// GitHub Pages serves 404.html for unknown paths, enabling client routing.
+					fallback: '404.html',
+					precompress: false,
+					strict: true,
+				}),
+				paths: {
+					base: process.env.NODE_ENV === 'production' ? basePath : '',
+				},
+			}),
 			...(process.env.ANALYZE === 'true'
 				? [visualizer({ open: false, filename: 'stats.html' })]
 				: []),

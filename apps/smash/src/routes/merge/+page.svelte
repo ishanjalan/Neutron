@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { acceptPdfFiles } from '$lib/utils/pdf-files';
-	import Header from '$lib/components/Header.svelte';
+	import { acceptPdfFiles } from '#lib/utils/pdf-files.ts';
+	import Header from '#lib/components/Header.svelte';
 	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
-	import { mergeSEO } from '$lib/seo-content';
-	import { smashRelated } from '$lib/related-tools';
+	import { mergeSEO } from '#lib/seo-content.ts';
+	import { smashRelated } from '#lib/related-tools.ts';
 	import { downloadBlob } from '@neutron/utils';
-	import { mergePDFs, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
-	import { formatBytes } from '$lib/stores/pdfs.svelte';
+	import { mergePDFs, getOutputFilename, generateThumbnail, getPageCount } from '#lib/utils/pdf.ts';
+	import { formatBytes } from '#lib/stores/pdfs.svelte.ts';
 	import {
 		Layers,
 		Upload,

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { pdfs, formatBytes, type PDFItem } from '$lib/stores/pdfs.svelte';
-	import { downloadFile, getOutputFilename, processFiles } from '$lib/utils/pdf';
-	import { downloadMultipleFiles } from '$lib/utils/download';
+	import { pdfs, formatBytes, type PDFItem } from '#lib/stores/pdfs.svelte.ts';
+	import { downloadFile, getOutputFilename, processFiles } from '#lib/utils/pdf.ts';
+	import { downloadMultipleFiles } from '#lib/utils/download.ts';
 	import {
 		X,
 		Download,

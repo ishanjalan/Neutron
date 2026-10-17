@@ -6,7 +6,6 @@
 	"exports": {
 		"./tailwind/base.css": "./tailwind/base.css",
 		"./typescript/base.json": "./typescript/base.json",
-		"./svelte.config.js": "./svelte.config.js",
 		"./vite.config": {
 			"types": "./vite.config.ts",
 			"default": "./vite.config.ts"

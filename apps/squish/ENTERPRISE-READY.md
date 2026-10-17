@@ -68,7 +68,7 @@ PUBLIC_ENVIRONMENT=production
 **APIs:**
 
 ```typescript
-import { captureError, captureMessage } from '$lib/utils/monitoring';
+import { captureError, captureMessage } from '#lib/utils/monitoring.ts';
 
 captureError(error, { context: 'batch-processing' });
 captureMessage('User action completed', 'info');
@@ -91,7 +91,7 @@ captureMessage('User action completed', 'info');
 **APIs:**
 
 ```typescript
-import { perfMonitor } from '$lib/utils/monitoring';
+import { perfMonitor } from '#lib/utils/monitoring.ts';
 
 // Manual timing
 perfMonitor.start('operation');
@@ -128,7 +128,7 @@ const result = await perfMonitor.measure('batch-process', () => processBatch(fil
 **APIs:**
 
 ```typescript
-import { memoryMonitor } from '$lib/utils/memory-monitor';
+import { memoryMonitor } from '#lib/utils/memory-monitor.ts';
 
 // Take snapshot
 memoryMonitor.takeSnapshot(itemCount);

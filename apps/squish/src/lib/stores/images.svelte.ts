@@ -1,6 +1,6 @@
 import { SvelteSet } from 'svelte/reactivity';
-import { detectSvgEmbeddedRaster } from '$lib/utils/svg-analyze';
-import { detectImageFormat } from '$lib/utils/detect-format';
+import { detectSvgEmbeddedRaster } from '#lib/utils/svg-analyze.ts';
+import { detectImageFormat } from '#lib/utils/detect-format.ts';
 import { toast } from '@neutron/ui';
 
 export type ImageFormat = 'jpeg' | 'png' | 'webp' | 'avif' | 'jxl' | 'svg' | 'heic';

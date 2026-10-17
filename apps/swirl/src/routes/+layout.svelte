@@ -1,12 +1,12 @@
 <script lang="ts">
 	import '../app.css';
-	import { base } from '$app/paths';
+	import { asset } from '$app/paths';
 	import { Toast } from '@neutron/ui';
 	import { onMount, tick } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
 	import { countPageview } from '@neutron/utils/analytics';
 	import { detectLocale, type Locale } from '@neutron/utils/seo';
-	import { swirlMeta } from '$lib/seo';
+	import { swirlMeta } from '#lib/seo.ts';
 	import { page } from '$app/state';
 
 	let { children } = $props();
@@ -53,7 +53,9 @@
 	// GoatCounter counts nothing on its own (no_onload in app.html) — send one
 	// pageview per navigation, once this route's <svelte:head> has applied its
 	// <title>. This also covers client-side navigations, which fire no page load.
-	afterNavigate(async () => {
+	afterNavigate(async ({ shallow, type }) => {
+		if (shallow && type === 'goto') return;
+
 		await tick();
 		countPageview({
 			path: location.pathname + location.search,
@@ -68,7 +70,8 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href="{base}/favicon.svg" type="image/svg+xml" />
+	<link rel="icon" href={asset('favicon.svg')} type="image/svg+xml" />
+
 	<meta property="og:type" content="website" />
 	<meta property="og:image" content={ogImage} />
 	<meta property="og:image:width" content="1200" />
@@ -77,7 +80,9 @@
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:image" content={ogImage} />
 	<meta name="robots" content="index, follow" />
+
 	<link rel="alternate" hreflang="x-default" href={siteUrl} />
+
 	<link
 		rel="sitemap"
 		type="application/xml"

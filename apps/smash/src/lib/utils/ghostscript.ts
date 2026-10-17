@@ -3,7 +3,7 @@
  *
  * @example
  * ```ts
- * import { createGhostscriptClient } from '$lib/utils/ghostscript';
+ * import { createGhostscriptClient } from '#lib/utils/ghostscript.ts';
  *
  * const gs = createGhostscriptClient('/Smash');
  *

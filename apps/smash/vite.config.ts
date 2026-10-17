@@ -1,3 +1,6 @@
 import { createViteConfig } from '@neutron/config/vite.config';
 
-export default createViteConfig({ crossOriginIsolation: true });
+export default createViteConfig({
+	basePath: '/Smash',
+	crossOriginIsolation: true,
+});

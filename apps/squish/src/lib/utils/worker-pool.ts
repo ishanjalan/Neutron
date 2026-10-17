@@ -1,5 +1,5 @@
 import { createWorkerPool, type WorkerPoolJob } from '@neutron/utils';
-import type { ImageFormat } from '$lib/workers/compress.worker';
+import type { ImageFormat } from '#lib/workers/compress.worker.ts';
 
 export interface CompressionJob extends WorkerPoolJob {
 	imageBuffer: ArrayBuffer;

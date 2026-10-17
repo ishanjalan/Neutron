@@ -1,5 +1,5 @@
 import { getOutputFilename } from './compress';
-import type { VideoItem } from '$lib/stores/videos.svelte';
+import type { VideoItem } from '#lib/stores/videos.svelte.ts';
 import { downloadBlob, downloadAllAsZip as downloadAllAsZipGeneric } from '@neutron/utils';
 
 export function downloadVideo(item: VideoItem) {

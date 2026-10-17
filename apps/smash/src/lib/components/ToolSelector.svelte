@@ -7,9 +7,9 @@
 		DPI_OPTIONS,
 		IMAGE_FORMAT_OPTIONS,
 		type PDFTool,
-	} from '$lib/stores/pdfs.svelte';
-	import { processFiles } from '$lib/utils/pdf';
-	import { isGhostscriptReady, onInitStart, onInitComplete } from '$lib/utils/ghostscript';
+	} from '#lib/stores/pdfs.svelte.ts';
+	import { processFiles } from '#lib/utils/pdf.ts';
+	import { isGhostscriptReady, onInitStart, onInitComplete } from '#lib/utils/ghostscript.ts';
 	import { onMount } from 'svelte';
 	import {
 		Minimize2,

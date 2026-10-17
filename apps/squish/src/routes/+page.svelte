@@ -1,22 +1,22 @@
 <script lang="ts">
-	import Header from '$lib/components/Header.svelte';
+	import Header from '#lib/components/Header.svelte';
 	import { Footer } from '@neutron/ui';
-	import DropZone from '$lib/components/DropZone.svelte';
-	import ImageList from '$lib/components/ImageList.svelte';
-	import Settings from '$lib/components/Settings.svelte';
-	import BatchSummary from '$lib/components/BatchSummary.svelte';
-	import LiveSavingsTicker from '$lib/components/LiveSavingsTicker.svelte';
-	import MobileOptimizations from '$lib/components/MobileOptimizations.svelte';
+	import DropZone from '#lib/components/DropZone.svelte';
+	import ImageList from '#lib/components/ImageList.svelte';
+	import Settings from '#lib/components/Settings.svelte';
+	import BatchSummary from '#lib/components/BatchSummary.svelte';
+	import LiveSavingsTicker from '#lib/components/LiveSavingsTicker.svelte';
+	import MobileOptimizations from '#lib/components/MobileOptimizations.svelte';
 	import { ConfirmModal, AnimatedNumber, toast, SEOSection, RelatedTools } from '@neutron/ui';
-	import { squishRelated } from '$lib/related-tools';
-	import { squishSEO } from '$lib/seo-content';
-	import { images, formatBytes } from '$lib';
-	import { processImages, cancelProcessing, reprocessImage } from '$lib/utils/compress';
-	import { terminatePool } from '$lib/utils/worker-pool';
+	import { squishRelated } from '#lib/related-tools.ts';
+	import { squishSEO } from '#lib/seo-content.ts';
+	import { images, formatBytes } from '#lib';
+	import { processImages, cancelProcessing, reprocessImage } from '#lib/utils/compress.ts';
+	import { terminatePool } from '#lib/utils/worker-pool.ts';
 	import { Download, Trash2, Sparkles, XCircle, RotateCcw, Maximize2 } from 'lucide-svelte';
-	import { downloadAllAsZip } from '$lib/utils/download';
+	import { downloadAllAsZip } from '#lib/utils/download.ts';
 	import { fade } from 'svelte/transition';
-	import type { ImageItem } from '$lib/stores/images.svelte';
+	import type { ImageItem } from '#lib/stores/images.svelte.ts';
 
 	let showClearConfirm = $state(false);
 	let showBatchSummary = $state(false);

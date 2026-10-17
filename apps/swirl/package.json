@@ -40,5 +40,9 @@
 		"gifski-wasm": "^2.2.0",
 		"idb": "^8.0.4",
 		"mediabunny": "^1.61.6"
+	},
+	"imports": {
+		"#lib": "./src/lib/index.js",
+		"#lib/*": "./src/lib/*"
 	}
 }

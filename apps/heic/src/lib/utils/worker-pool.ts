@@ -1,5 +1,5 @@
 import { createWorkerPool, type WorkerPoolJob } from '@neutron/utils';
-import type { OutputFormat } from '$lib/workers/convert.worker';
+import type { OutputFormat } from '#lib/workers/convert.worker.ts';
 
 export interface ConversionJob extends WorkerPoolJob {
 	imageBuffer: ArrayBuffer;

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { images, formatBytes } from '$lib';
+	import { images, formatBytes } from '#lib';
 	import { AnimatedNumber } from '@neutron/ui';
 	import { TrendingDown, Zap, Clock, CheckCircle2, X } from 'lucide-svelte';
 	import { fly } from 'svelte/transition';

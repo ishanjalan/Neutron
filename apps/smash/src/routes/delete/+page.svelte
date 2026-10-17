@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { acceptPdfFiles } from '$lib/utils/pdf-files';
-	import Header from '$lib/components/Header.svelte';
-	import PDFViewer from '$lib/components/PDFViewer.svelte';
+	import { acceptPdfFiles } from '#lib/utils/pdf-files.ts';
+	import Header from '#lib/components/Header.svelte';
+	import PDFViewer from '#lib/components/PDFViewer.svelte';
 	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
-	import { deleteSEO } from '$lib/seo-content';
-	import { smashRelated } from '$lib/related-tools';
+	import { deleteSEO } from '#lib/seo-content.ts';
+	import { smashRelated } from '#lib/related-tools.ts';
 	import { downloadBlob } from '@neutron/utils';
-	import { getOutputFilename } from '$lib/utils/pdf';
+	import { getOutputFilename } from '#lib/utils/pdf.ts';
 	import { Trash2, Upload, Download, X } from 'lucide-svelte';
 
 	let currentFile = $state<File | null>(null);

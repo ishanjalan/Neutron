@@ -1,4 +1,4 @@
-import type { ImageItem } from '$lib/stores/images.svelte';
+import type { ImageItem } from '#lib/stores/images.svelte.ts';
 import { getOutputFilename } from './compress';
 import { SvelteMap } from 'svelte/reactivity';
 

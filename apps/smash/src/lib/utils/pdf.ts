@@ -19,7 +19,7 @@ import {
 	type PDFItem,
 	type ImageFormat,
 	type CompressionPreset,
-} from '$lib/stores/pdfs.svelte';
+} from '#lib/stores/pdfs.svelte.ts';
 import { parsePageRangeHelper, getUserFriendlyError } from './pdf-utils';
 
 // ============================================

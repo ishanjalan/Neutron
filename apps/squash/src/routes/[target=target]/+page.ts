@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { SIZE_TARGETS, getSizeTarget } from '$lib/size-targets';
+import { SIZE_TARGETS, getSizeTarget } from '#lib/size-targets.ts';
 import type { EntryGenerator, PageLoad } from './$types';
 
 export const entries: EntryGenerator = () => SIZE_TARGETS.map((t) => ({ target: t.slug }));

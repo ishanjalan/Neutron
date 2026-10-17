@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { images, formatBytes } from '$lib';
+	import { images, formatBytes } from '#lib';
 	import {
 		downloadAllAsZip,
 		isFileSystemAccessSupported,
 		downloadWithFileSystemAPI,
-	} from '$lib/utils/download';
+	} from '#lib/utils/download.ts';
 	import { toast } from '@neutron/ui';
 	import { AnimatedNumber } from '@neutron/ui';
 	import { Download, Clock, Zap, HardDrive, TrendingDown, X, FolderDown } from 'lucide-svelte';

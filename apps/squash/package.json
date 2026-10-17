@@ -39,5 +39,9 @@
 		"@neutron/utils": "workspace:*",
 		"idb": "^8.0.4",
 		"mediabunny": "^1.61.6"
+	},
+	"imports": {
+		"#lib": "./src/lib/index.js",
+		"#lib/*": "./src/lib/*"
 	}
 }

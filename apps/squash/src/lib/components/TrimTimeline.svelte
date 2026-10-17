@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy, untrack } from 'svelte';
-	import { formatTimeInput } from '$lib/utils/format';
+	import { formatTimeInput } from '#lib/utils/format.ts';
 
 	interface Props {
 		videoUrl: string;

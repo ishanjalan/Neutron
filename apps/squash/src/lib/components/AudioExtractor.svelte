@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Header from '$lib/components/Header.svelte';
+	import Header from '#lib/components/Header.svelte';
 	import { DropZone, Footer, Toast, toast, SEOSection, RelatedTools } from '@neutron/ui';
 	import { downloadAllAsZip, downloadBlob } from '@neutron/utils/download';
 	import { formatBytes } from '@neutron/utils';
@@ -8,10 +8,10 @@
 	import { SvelteMap } from 'svelte/reactivity';
 	import { Music, Download, X, Loader2, Check } from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
-	import { audioSEO } from '$lib/seo-content';
-	import { squashRelated } from '$lib/related-tools';
-	import { isSupportedVideo, rejectionMessage } from '$lib/utils/file-rejection';
-	import { CompressionCancelledError, isUnsupportedInputError } from '$lib/utils/webcodecs';
+	import { audioSEO } from '#lib/seo-content.ts';
+	import { squashRelated } from '#lib/related-tools.ts';
+	import { isSupportedVideo, rejectionMessage } from '#lib/utils/file-rejection.ts';
+	import { CompressionCancelledError, isUnsupportedInputError } from '#lib/utils/webcodecs.ts';
 	import {
 		AUDIO_FORMATS,
 		AUDIO_FORMAT_ORDER,
@@ -22,7 +22,7 @@
 		detectAudioFormats,
 		extractAudio,
 		type AudioFormat,
-	} from '$lib/utils/audio-extract';
+	} from '#lib/utils/audio-extract.ts';
 
 	const siteUrl = 'https://ishanjalan.github.io/Squash';
 

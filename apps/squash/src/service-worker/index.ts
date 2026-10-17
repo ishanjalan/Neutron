@@ -1,8 +1,7 @@
-/// <reference lib="webworker" />
-
-declare let self: ServiceWorkerGlobalScope;
-
-import { build, files, version } from '$service-worker';
+import { self } from '$app/service-worker';
+import { version } from '$app/env';
+import { immutable, assets } from '$app/manifest';
+import { asset } from '$app/paths';
 import {
 	cacheFirst,
 	networkFirst,
@@ -16,8 +15,8 @@ const RUNTIME_CACHE = 'squash-runtime-v1';
 
 // Assets to cache immediately (app shell)
 const PRECACHE_ASSETS = [
-	...build, // App build files (JS, CSS bundles)
-	...files, // Static files (icons, manifest, etc.)
+	...immutable.map((f) => asset(f.path)), // App build files (JS, CSS bundles)
+	...assets.map((f) => asset(f.path)), // Static files (icons, manifest, etc.)
 ];
 
 // External libraries to cache via stale-while-revalidate

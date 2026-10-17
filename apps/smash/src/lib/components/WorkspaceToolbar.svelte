@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { pdfs, TOOLS, type PDFTool } from '$lib/stores/pdfs.svelte';
+	import { pdfs, TOOLS, type PDFTool } from '#lib/stores/pdfs.svelte.ts';
 	import { ConfirmModal } from '@neutron/ui';
 	import {
 		Minimize2,

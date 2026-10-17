@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { videos } from '$lib/stores/videos.svelte';
-	import { getCapabilities } from '$lib/utils/compress';
+	import { videos } from '#lib/stores/videos.svelte.ts';
+	import { getCapabilities } from '#lib/utils/compress.ts';
 	import { onMount } from 'svelte';
 	import { formatBytes } from '@neutron/utils';
 	import { Activity, Cpu, HardDrive, Zap, Check, X as XIcon, Gpu, Server } from 'lucide-svelte';

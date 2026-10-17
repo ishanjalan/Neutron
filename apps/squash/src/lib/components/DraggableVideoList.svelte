@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { videos, type VideoItem } from '$lib/stores/videos.svelte';
+	import { videos, type VideoItem } from '#lib/stores/videos.svelte.ts';
 	import VideoCard from './VideoCard.svelte';
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
