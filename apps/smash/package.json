@@ -29,11 +29,11 @@
 		"svelte-check": "^4.7.7",
 		"tailwindcss": "^4.3.3",
 		"typescript": "^5.9.3",
-		"vite": "^8.2.2",
+		"vite": "^8.3.4",
 		"vitest": "^4.1.11"
 	},
 	"dependencies": {
-		"@cantoo/pdf-lib": "^2.9.1",
+		"@cantoo/pdf-lib": "^2.11.1",
 		"@neutron/config": "workspace:*",
 		"@neutron/ui": "workspace:*",
 		"@neutron/utils": "workspace:*",

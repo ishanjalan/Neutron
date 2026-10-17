@@ -20,7 +20,7 @@
 		"test:e2e:debug": "playwright test --debug"
 	},
 	"devDependencies": {
-		"@playwright/test": "^1.62.1",
+		"@playwright/test": "^1.64.1",
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.70.3",
 		"@sveltejs/vite-plugin-svelte": "^7.3.1",
@@ -31,12 +31,12 @@
 		"@vitest/ui": "^4.1.11",
 		"happy-dom": "^20.12.0",
 		"lucide-svelte": "^0.577.0",
-		"playwright": "^1.62.1",
+		"playwright": "^1.64.1",
 		"svelte": "^5.57.2",
 		"svelte-check": "^4.7.7",
 		"tailwindcss": "^4.3.3",
 		"typescript": "^5.9.3",
-		"vite": "^8.2.2",
+		"vite": "^8.3.4",
 		"vitest": "^4.1.11"
 	},
 	"dependencies": {
