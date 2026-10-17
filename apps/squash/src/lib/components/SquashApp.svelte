@@ -488,6 +488,13 @@
 						>
 					</li>
 				{/each}
+				<li>
+					<a
+						href={resolve('/video-to-mp3')}
+						class="bg-surface-800 text-surface-300 hover:bg-surface-700 rounded-full px-3 py-1.5 text-sm transition"
+						>Video to MP3</a
+					>
+				</li>
 			</ul>
 		</nav>
 		<RelatedTools tools={squashRelated} />

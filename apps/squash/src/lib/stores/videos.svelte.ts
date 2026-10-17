@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { toast } from '@neutron/ui';
-import { rejectionMessage } from '$lib/utils/file-rejection';
+import { isSupportedVideo, rejectionMessage } from '$lib/utils/file-rejection';
 
 export type VideoFormat = 'mp4' | 'webm' | 'mov' | 'mkv';
 export type OutputFormat = 'mp4' | 'webm' | 'av1' | 'hevc';
@@ -405,21 +405,11 @@ function createVideosStore() {
 		},
 
 		async addFiles(files: FileList | File[]) {
-			const validMimeTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-matroska'];
-
-			const validExtensions = ['mp4', 'm4v', 'webm', 'mov', 'mkv'];
-
 			const newItems: VideoItem[] = [];
 			const rejected: File[] = [];
 
 			for (const file of files) {
-				// Check MIME type first, then fall back to extension
-				// (MKV files often have empty or generic MIME types in browsers)
-				const ext = file.name.toLowerCase().split('.').pop() || '';
-				const isValidMime = validMimeTypes.includes(file.type);
-				const isValidExt = validExtensions.includes(ext);
-
-				if (!isValidMime && !isValidExt) {
+				if (!isSupportedVideo(file)) {
 					rejected.push(file);
 					continue;
 				}

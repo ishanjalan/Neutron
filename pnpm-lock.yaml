@@ -205,6 +205,9 @@ importers:
 
   apps/squash:
     dependencies:
+      '@mediabunny/mp3-encoder':
+        specifier: 1.61.6
+        version: 1.61.6(mediabunny@1.61.6)
       '@neutron/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -708,6 +711,11 @@ packages:
 
   '@keyv/serialize@1.1.1':
     resolution: {integrity: sha512-dXn3FZhPv0US+7dtJsIi2R+c7qWYiReoEh5zUntWCf4oSpMNib8FDhSoed6m3QyZdx5hK7iLFkYk3rNxwt8vTA==}
+
+  '@mediabunny/mp3-encoder@1.61.6':
+    resolution: {integrity: sha512-QiXZY9e7+LhM/R+1rnQSKD+l53jRu+ku3OPVDcIHffDMSA0bjkRr1Dw2BY68AhBV5qibLoBiQeH+pToWjasxYA==}
+    peerDependencies:
+      mediabunny: ^1.0.0
 
   '@okathira/ghostpdl-wasm@1.1.0':
     resolution: {integrity: sha512-BX0Y8B0G/c0nsf7pZGHPQTZ8IiT4w0IEbZGDnziN4pkcmxU1eEaWI/LA0bfE5Y+uSP3Qj1oZ6JhITOJbJsyE0w==}
@@ -3324,6 +3332,10 @@ snapshots:
       keyv: 5.6.0
 
   '@keyv/serialize@1.1.1': {}
+
+  '@mediabunny/mp3-encoder@1.61.6(mediabunny@1.61.6)':
+    dependencies:
+      mediabunny: 1.61.6
 
   '@okathira/ghostpdl-wasm@1.1.0':
     dependencies:
