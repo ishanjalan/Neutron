@@ -7,7 +7,12 @@
 		getEffectiveDuration,
 	} from '$lib/stores/videos.svelte';
 	import { downloadVideo } from '$lib/utils/download';
-	import { reprocessVideo, getOutputFilename, getCapabilitiesSync } from '$lib/utils/compress';
+	import {
+		reprocessVideo,
+		cancelCompression,
+		getOutputFilename,
+		getCapabilitiesSync,
+	} from '$lib/utils/compress';
 	import { formatBytes, clickOutside } from '@neutron/utils';
 	import { formatDuration, formatETA, formatTimeInput, parseTimeInput } from '$lib/utils/format';
 	import {
@@ -373,11 +378,20 @@
 				</div>
 			{/if}
 		{:else if item.status === 'processing'}
-			<div class="bg-surface-700 h-1.5 w-full overflow-hidden rounded-full">
-				<div
-					class="from-accent-start to-accent-end h-full rounded-full bg-gradient-to-r transition-all duration-300"
-					style="width: {item.progress}%"
-				></div>
+			<div class="flex items-center gap-3">
+				<div class="bg-surface-700 h-1.5 flex-1 overflow-hidden rounded-full">
+					<div
+						class="from-accent-start to-accent-end h-full rounded-full bg-gradient-to-r transition-all duration-300"
+						style="width: {item.progress}%"
+					></div>
+				</div>
+				<button
+					onclick={() => cancelCompression(item.id)}
+					class="text-surface-400 flex-shrink-0 rounded-lg px-2.5 py-1.5 text-xs transition-colors hover:bg-red-500/10 hover:text-red-400 sm:py-1"
+					aria-label="Cancel compression of {item.name}"
+				>
+					Cancel
+				</button>
 			</div>
 		{:else if item.status === 'error'}
 			<div class="space-y-2">
@@ -386,74 +400,76 @@
 					<AlertCircle class="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
 					<span class="break-words">{item.error || 'Compression failed'}</span>
 				</div>
-				<!-- Retry options -->
-				<div class="flex items-center justify-between">
-					<!-- Format selector for retry -->
-					<div class="relative" use:clickOutside={() => (showFormatMenu = false)}>
-						<button
-							onclick={() => (showFormatMenu = !showFormatMenu)}
-							class="flex items-center gap-1 rounded bg-gradient-to-r {getCurrentFormatColor()} px-2 py-0.5 text-xs font-bold text-white uppercase transition-all hover:opacity-90"
-						>
-							{item.outputFormat.toUpperCase()}
-							<ChevronDown class="h-3 w-3" />
-						</button>
-
-						{#if showFormatMenu}
-							<div
-								class="bg-surface-800 absolute bottom-full left-0 z-50 mb-1 min-w-[100px] overflow-hidden rounded-lg shadow-xl ring-1 ring-white/10"
-								transition:scale={{ duration: 100, start: 0.95 }}
+				{#if item.retryable !== false}
+					<!-- Retry options -->
+					<div class="flex items-center justify-between">
+						<!-- Format selector for retry -->
+						<div class="relative" use:clickOutside={() => (showFormatMenu = false)}>
+							<button
+								onclick={() => (showFormatMenu = !showFormatMenu)}
+								class="flex items-center gap-1 rounded bg-gradient-to-r {getCurrentFormatColor()} px-2 py-0.5 text-xs font-bold text-white uppercase transition-all hover:opacity-90"
 							>
-								{#each availableFormats as format (format.value)}
-									{@const isDisabled =
-										(format.value === 'av1' && !av1Available()) ||
-										(format.value === 'hevc' && !hevcAvailable()) ||
-										(format.value === 'webm' && !vp9Available())}
-									{@const isHardwareCodec = format.value === 'av1' || format.value === 'hevc'}
-									{@const isAvailable =
-										(format.value === 'av1' && av1Available()) ||
-										(format.value === 'hevc' && hevcAvailable())}
-									<button
-										onclick={() => !isDisabled && handleFormatChange(format.value)}
-										disabled={isDisabled}
-										class="flex w-full items-center gap-2 px-3 py-2 text-xs transition-colors {isDisabled
-											? 'cursor-not-allowed opacity-40'
-											: 'hover:bg-surface-700'} {item.outputFormat === format.value
-											? 'bg-surface-700/50'
-											: ''}"
-										title={isDisabled
-											? format.value === 'webm'
-												? 'WebM/VP9 not supported in this browser. Try Chrome, or use MP4.'
-												: `${format.label} not available on this device`
-											: ''}
-									>
-										<span
-											class="h-2 w-2 rounded-full bg-gradient-to-r {format.color} {isDisabled
-												? 'opacity-50'
+								{item.outputFormat.toUpperCase()}
+								<ChevronDown class="h-3 w-3" />
+							</button>
+
+							{#if showFormatMenu}
+								<div
+									class="bg-surface-800 absolute bottom-full left-0 z-50 mb-1 min-w-[100px] overflow-hidden rounded-lg shadow-xl ring-1 ring-white/10"
+									transition:scale={{ duration: 100, start: 0.95 }}
+								>
+									{#each availableFormats as format (format.value)}
+										{@const isDisabled =
+											(format.value === 'av1' && !av1Available()) ||
+											(format.value === 'hevc' && !hevcAvailable()) ||
+											(format.value === 'webm' && !vp9Available())}
+										{@const isHardwareCodec = format.value === 'av1' || format.value === 'hevc'}
+										{@const isAvailable =
+											(format.value === 'av1' && av1Available()) ||
+											(format.value === 'hevc' && hevcAvailable())}
+										<button
+											onclick={() => !isDisabled && handleFormatChange(format.value)}
+											disabled={isDisabled}
+											class="flex w-full items-center gap-2 px-3 py-2 text-xs transition-colors {isDisabled
+												? 'cursor-not-allowed opacity-40'
+												: 'hover:bg-surface-700'} {item.outputFormat === format.value
+												? 'bg-surface-700/50'
 												: ''}"
-										></span>
-										<span
-											class="font-medium {isDisabled
-												? 'text-surface-500 line-through'
-												: 'text-surface-300'}">{format.label}</span
+											title={isDisabled
+												? format.value === 'webm'
+													? 'WebM/VP9 not supported in this browser. Try Chrome, or use MP4.'
+													: `${format.label} not available on this device`
+												: ''}
 										>
-										{#if isHardwareCodec && isAvailable}
-											<span class="ml-auto text-[9px] text-purple-400">GPU</span>
-										{:else if isHardwareCodec && isDisabled}
-											<span class="text-surface-500 ml-auto text-[9px]">N/A</span>
-										{/if}
-									</button>
-								{/each}
-							</div>
-						{/if}
+											<span
+												class="h-2 w-2 rounded-full bg-gradient-to-r {format.color} {isDisabled
+													? 'opacity-50'
+													: ''}"
+											></span>
+											<span
+												class="font-medium {isDisabled
+													? 'text-surface-500 line-through'
+													: 'text-surface-300'}">{format.label}</span
+											>
+											{#if isHardwareCodec && isAvailable}
+												<span class="ml-auto text-[9px] text-purple-400">GPU</span>
+											{:else if isHardwareCodec && isDisabled}
+												<span class="text-surface-500 ml-auto text-[9px]">N/A</span>
+											{/if}
+										</button>
+									{/each}
+								</div>
+							{/if}
+						</div>
+						<button
+							onclick={handleRetry}
+							class="flex items-center gap-1.5 rounded-lg bg-red-500/20 px-4 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/30 sm:py-1.5 sm:text-xs"
+						>
+							<RotateCcw class="h-4 w-4 sm:h-3 sm:w-3" />
+							Retry
+						</button>
 					</div>
-					<button
-						onclick={handleRetry}
-						class="flex items-center gap-1.5 rounded-lg bg-red-500/20 px-4 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/30 sm:py-1.5 sm:text-xs"
-					>
-						<RotateCcw class="h-4 w-4 sm:h-3 sm:w-3" />
-						Retry
-					</button>
-				</div>
+				{/if}
 			</div>
 		{:else if item.status === 'completed'}
 			<!-- Completed: Format selector + actions -->

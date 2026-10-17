@@ -13,7 +13,6 @@
 		{ name: 'MP4', color: 'from-orange-500 to-red-500' },
 		{ name: 'WebM', color: 'from-green-500 to-emerald-500' },
 		{ name: 'MOV', color: 'from-blue-500 to-indigo-500' },
-		{ name: 'AVI', color: 'from-purple-500 to-pink-500' },
 		{ name: 'MKV', color: 'from-cyan-500 to-teal-500' },
 	];
 </script>
@@ -27,7 +26,7 @@
 {/snippet}
 
 <SharedDropZone
-	accept=".mp4,.webm,.mov,.avi,.mkv"
+	accept=".mp4,.webm,.mov,.mkv"
 	{compact}
 	{onfiles}
 	{formatBadges}

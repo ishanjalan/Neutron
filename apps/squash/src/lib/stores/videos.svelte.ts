@@ -1,5 +1,8 @@
 /* eslint-disable */
-export type VideoFormat = 'mp4' | 'webm' | 'mov' | 'avi' | 'mkv';
+import { toast } from '@neutron/ui';
+import { rejectionMessage } from '$lib/utils/file-rejection';
+
+export type VideoFormat = 'mp4' | 'webm' | 'mov' | 'mkv';
 export type OutputFormat = 'mp4' | 'webm' | 'av1' | 'hevc';
 export type VideoStatus = 'pending' | 'processing' | 'completed' | 'error';
 export type Resolution = 'original' | '2160p' | '1440p' | '1080p' | '720p' | '480p' | '360p';
@@ -38,6 +41,8 @@ export interface VideoItem {
 	progressStage?: string;
 	eta?: number; // Estimated time remaining in seconds
 	error?: string;
+	/** False when retrying can't help (e.g. the file isn't readable). */
+	retryable?: boolean;
 	width?: number;
 	height?: number;
 	duration?: number; // in seconds
@@ -393,8 +398,6 @@ function createVideosStore() {
 			'video/mp4': 'mp4',
 			'video/webm': 'webm',
 			'video/quicktime': 'mov',
-			'video/x-msvideo': 'avi',
-			'video/avi': 'avi',
 			'video/x-matroska': 'mkv',
 		};
 
@@ -410,7 +413,6 @@ function createVideosStore() {
 			m4v: 'mp4',
 			webm: 'webm',
 			mov: 'mov',
-			avi: 'avi',
 			mkv: 'mkv',
 		};
 
@@ -430,18 +432,12 @@ function createVideosStore() {
 		},
 
 		async addFiles(files: FileList | File[]) {
-			const validMimeTypes = [
-				'video/mp4',
-				'video/webm',
-				'video/quicktime',
-				'video/x-msvideo',
-				'video/avi',
-				'video/x-matroska',
-			];
+			const validMimeTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-matroska'];
 
-			const validExtensions = ['mp4', 'm4v', 'webm', 'mov', 'avi', 'mkv'];
+			const validExtensions = ['mp4', 'm4v', 'webm', 'mov', 'mkv'];
 
 			const newItems: VideoItem[] = [];
+			const rejected: File[] = [];
 
 			for (const file of files) {
 				// Check MIME type first, then fall back to extension
@@ -450,7 +446,10 @@ function createVideosStore() {
 				const isValidMime = validMimeTypes.includes(file.type);
 				const isValidExt = validExtensions.includes(ext);
 
-				if (!isValidMime && !isValidExt) continue;
+				if (!isValidMime && !isValidExt) {
+					rejected.push(file);
+					continue;
+				}
 
 				const format = getFormatFromMime(file.type, file.name);
 
@@ -488,6 +487,7 @@ function createVideosStore() {
 			}
 
 			items = [...items, ...newItems];
+			if (rejected.length > 0) toast.error(rejectionMessage(rejected));
 			return newItems;
 		},
 

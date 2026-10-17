@@ -23,7 +23,7 @@
 		{
 			icon: Upload,
 			title: 'Drop your videos',
-			desc: 'Drag files onto the drop zone, click to browse, or paste with Cmd+V. Supports MP4, WebM, MOV, and AVI.',
+			desc: 'Drag files onto the drop zone, click to browse, or paste with Cmd+V. Supports MP4, WebM, MOV, and MKV.',
 			color: 'from-orange-500 to-red-500',
 		},
 		{

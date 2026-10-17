@@ -321,8 +321,8 @@
 				<!-- Drop Zone -->
 				<div in:fade={{ duration: 200 }}>
 					<DropZone
-						accept=".mp4,.webm,.mov,.avi,.mkv,video/*"
-						acceptLabel="MP4, WebM, MOV, AVI"
+						accept=".mp4,.webm,.mov,.mkv,video/*"
+						acceptLabel="MP4, WebM, MOV"
 						onfiles={handleFiles}
 					/>
 				</div>

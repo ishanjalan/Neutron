@@ -11,7 +11,6 @@
 		JPG: 'from-orange-500 to-red-500',
 		JPEG: 'from-orange-500 to-red-500',
 		MOV: 'from-blue-500 to-indigo-500',
-		AVI: 'from-cyan-500 to-teal-500',
 		APNG: 'from-violet-500 to-purple-500',
 	};
 

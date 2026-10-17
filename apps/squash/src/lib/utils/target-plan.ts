@@ -55,8 +55,6 @@ export interface TargetPlan {
 	height: number;
 	videoBitrate: number;
 	audioBitrate: number;
-	/** Frame-rate cap to apply, or undefined to keep the source rate. */
-	frameRate?: number;
 	scaledDown: boolean;
 	feasibility: Feasibility;
 }
@@ -135,8 +133,6 @@ export function planForTarget(input: PlanInput): TargetPlan {
 		...dims,
 		videoBitrate,
 		audioBitrate: Math.round(audioBitrate),
-		frameRate:
-			input.sourceFps && input.sourceFps > MAX_PLANNED_FPS + 0.5 ? MAX_PLANNED_FPS : undefined,
 		scaledDown: dims.width < even(width) || dims.height < even(height),
 		feasibility,
 	};

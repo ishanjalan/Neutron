@@ -22,6 +22,8 @@ import {
 	Quality,
 	canEncodeVideo,
 	canEncodeAudio,
+	ConversionCanceledError,
+	UnsupportedInputFormatError,
 	type VideoCodec,
 	type AudioCodec,
 } from 'mediabunny';
@@ -270,6 +272,37 @@ function getCodecString(codec: WebCodecsVideoCodec): string {
 	}
 }
 
+/** Thrown when the user cancels an in-progress compression. Not a failure. */
+export class CompressionCancelledError extends Error {
+	constructor() {
+		super('Compression cancelled');
+		this.name = 'CompressionCancelledError';
+	}
+}
+
+/** True when the input file's container/codec isn't something we can read. */
+export function isUnsupportedInputError(error: unknown): boolean {
+	let current: unknown = error;
+	for (let depth = 0; current && depth < 5; depth++) {
+		if (current instanceof UnsupportedInputFormatError) return true;
+		if (current instanceof Error) {
+			if (/unsupported or unrecognizable format/i.test(current.message)) return true;
+			current = current.cause;
+		} else {
+			break;
+		}
+	}
+	return false;
+}
+
+export interface EncodeResult {
+	blob: Blob;
+	/** Frame rate measured from the source (best effort; defaults to 30 if unknown). */
+	sourceFps: number;
+	/** The output frame rate was capped below the source's. */
+	frameRateCapped: boolean;
+}
+
 // Main encoding function using Mediabunny's Conversion API
 export async function encodeWithWebCodecs(
 	file: File,
@@ -277,13 +310,16 @@ export async function encodeWithWebCodecs(
 	outputFormat: 'mp4' | 'webm',
 	qualityPreset: string = 'web',
 	stripMetadata: boolean = false,
-	onProgress?: (progress: EncodingProgress) => void
-): Promise<Blob> {
+	onProgress?: (progress: EncodingProgress) => void,
+	signal?: AbortSignal
+): Promise<EncodeResult> {
 	const startTime = performance.now();
 	let framesProcessed = 0;
 	let totalFrames = 0;
 
 	try {
+		if (signal?.aborted) throw new CompressionCancelledError();
+
 		onProgress?.({
 			stage: 'decoding',
 			progress: 0,
@@ -403,6 +439,14 @@ export async function encodeWithWebCodecs(
 			showWarnings: false,
 		});
 
+		// Cancel support: abort stops the conversion mid-encode
+		const onAbort = () => void conversion.cancel();
+		if (signal?.aborted) {
+			await conversion.cancel();
+			throw new CompressionCancelledError();
+		}
+		signal?.addEventListener('abort', onAbort, { once: true });
+
 		// Track progress
 		let lastProgressTime = performance.now();
 		let lastFrames = 0;
@@ -427,7 +471,16 @@ export async function encodeWithWebCodecs(
 		};
 
 		// Execute conversion
-		await conversion.execute();
+		try {
+			await conversion.execute();
+		} catch (error) {
+			if (error instanceof ConversionCanceledError || signal?.aborted) {
+				throw new CompressionCancelledError();
+			}
+			throw error;
+		} finally {
+			signal?.removeEventListener('abort', onAbort);
+		}
 
 		// Get output buffer - handle null case
 		const outputBuffer = target.buffer;
@@ -445,8 +498,13 @@ export async function encodeWithWebCodecs(
 
 		// Create output blob
 		const mimeType = outputFormat === 'mp4' ? 'video/mp4' : 'video/webm';
-		return new Blob([outputBuffer], { type: mimeType });
+		return {
+			blob: new Blob([outputBuffer], { type: mimeType }),
+			sourceFps: fps,
+			frameRateCapped: frameRate !== undefined,
+		};
 	} catch (error) {
+		if (error instanceof CompressionCancelledError) throw error;
 		console.error('WebCodecs encoding error:', error);
 		throw new Error(
 			`WebCodecs encoding failed: ${error instanceof Error ? error.message : 'Unknown error'}`,

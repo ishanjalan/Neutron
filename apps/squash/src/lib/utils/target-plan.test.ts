@@ -88,10 +88,11 @@ describe('planForTarget', () => {
 		expect(plan.feasibility).toBe('poor');
 	});
 
-	it('caps frame rate only for sources faster than 30 fps', () => {
-		expect(planForTarget(input({ sourceFps: 60 })).frameRate).toBe(30);
-		expect(planForTarget(input({ sourceFps: 30 })).frameRate).toBeUndefined();
-		expect(planForTarget(input({ sourceFps: 24 })).frameRate).toBeUndefined();
+	it('judges quality at the capped frame rate, not the source rate', () => {
+		// A 60 fps source is encoded at 30 fps, so it shouldn't be penalised for the extra frames
+		const at60 = planForTarget(input({ duration: 120, sourceFps: 60 }));
+		const at30 = planForTarget(input({ duration: 120, sourceFps: 30 }));
+		expect(at60.height).toBe(at30.height);
 	});
 
 	it('only drops below the 360p floor when asked to', () => {

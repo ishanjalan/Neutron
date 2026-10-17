@@ -24,6 +24,8 @@ import {
 	getWebCodecsCapabilities,
 	encodeWithWebCodecs,
 	getRecommendedCodecs,
+	CompressionCancelledError,
+	isUnsupportedInputError,
 	type WebCodecsCapabilities,
 } from './webcodecs';
 
@@ -33,6 +35,26 @@ let webCodecsCapabilities: WebCodecsCapabilities | null = null;
 // Processing queue
 let isProcessing = false;
 const queue: string[] = [];
+// One controller per video currently being encoded, so it can be cancelled
+const controllers = new Map<string, AbortController>();
+
+/** Stop compressing a video (or take it out of the queue). It returns to "pending". */
+export function cancelCompression(id: string) {
+	const queued = queue.indexOf(id);
+	if (queued !== -1) queue.splice(queued, 1);
+
+	const controller = controllers.get(id);
+	if (controller) {
+		controller.abort();
+	} else {
+		videos.updateItem(id, {
+			status: 'pending',
+			progress: 0,
+			progressStage: undefined,
+			eta: undefined,
+		});
+	}
+}
 
 // Initialize and cache WebCodecs capabilities
 export async function initWebCodecs(): Promise<WebCodecsCapabilities> {
@@ -120,7 +142,12 @@ async function processQueue() {
 	isProcessing = false;
 }
 
+const UNSUPPORTED_INPUT_MESSAGE =
+	'Squash can’t read this file — its format or codec isn’t supported by your browser. Try converting it to MP4 (H.264) first.';
+
 async function compressVideo(item: VideoItem) {
+	const controller = new AbortController();
+	controllers.set(item.id, controller);
 	try {
 		videos.updateItem(item.id, {
 			status: 'processing',
@@ -149,7 +176,7 @@ async function compressVideo(item: VideoItem) {
 			progressStage: `Encoding with ${videoCodec.toUpperCase()}${accelNote}...`,
 		});
 
-		const result = await compressWithWebCodecs(item);
+		const result = await compressWithWebCodecs(item, controller.signal);
 
 		const compressedUrl = URL.createObjectURL(result.blob);
 
@@ -165,13 +192,33 @@ async function compressVideo(item: VideoItem) {
 			eta: undefined,
 		});
 	} catch (error) {
+		if (error instanceof CompressionCancelledError) {
+			// Not a failure — put it back so it can be run again
+			videos.updateItem(item.id, {
+				status: 'pending',
+				progress: 0,
+				progressStage: undefined,
+				eta: undefined,
+			});
+			return;
+		}
+
 		console.error('Compression error:', error);
+		const unreadable = isUnsupportedInputError(error);
 		videos.updateItem(item.id, {
 			status: 'error',
-			error: error instanceof Error ? error.message : 'Compression failed',
+			error: unreadable
+				? UNSUPPORTED_INPUT_MESSAGE
+				: error instanceof Error
+					? error.message
+					: 'Compression failed',
+			// Retrying a file we can't read just fails the same way
+			retryable: !unreadable,
 			progressStage: undefined,
 			eta: undefined,
 		});
+	} finally {
+		controllers.delete(item.id);
 	}
 }
 
@@ -187,7 +234,8 @@ const AUDIO_BITRATES: Record<string, number> = {
 
 // Compress using WebCodecs (hardware acceleration via Mediabunny)
 async function compressWithWebCodecs(
-	item: VideoItem
+	item: VideoItem,
+	signal: AbortSignal
 ): Promise<{ blob: Blob; duration: number; fit?: FitReport }> {
 	const startTime = Date.now();
 	const settings = videos.settings;
@@ -215,10 +263,14 @@ async function compressWithWebCodecs(
 	let plan: TargetPlan | undefined;
 	let blob: Blob | undefined;
 	let passes = 0;
+	// Measured from the source on the first pass; refines later passes and the fit report
+	let sourceFps: number | undefined;
+	let frameRateCapped = false;
 	// Largest encode that fits under the target so far — what we return if later passes overshoot
 	let best: { blob: Blob; plan: TargetPlan } | undefined;
 
 	while (passes < (targetBytes ? MAX_FIT_PASSES : 1)) {
+		if (signal.aborted) throw new CompressionCancelledError();
 		passes++;
 
 		if (targetBytes) {
@@ -232,6 +284,7 @@ async function compressWithWebCodecs(
 				audioBitrate,
 				requestedShortSide,
 				sourceBitrate: item.bitrate,
+				sourceFps,
 				// If an earlier pass overshot, allow going lower than the usual quality floor
 				minShortSide: passes > 1 ? RETRY_FLOOR : undefined,
 			});
@@ -243,7 +296,7 @@ async function compressWithWebCodecs(
 				? fitDimensions(srcWidth, srcHeight, requestedShortSide)
 				: { width: srcWidth, height: srcHeight };
 
-		blob = await encodeWithWebCodecs(
+		const encoded = await encodeWithWebCodecs(
 			item.file,
 			{
 				videoCodec,
@@ -275,8 +328,12 @@ async function compressWithWebCodecs(
 							? Math.round((progress.totalFrames - progress.framesProcessed) / progress.fps)
 							: undefined,
 				});
-			}
+			},
+			signal
 		);
+		blob = encoded.blob;
+		sourceFps = encoded.sourceFps;
+		frameRateCapped = encoded.frameRateCapped;
 
 		if (!targetBytes || !plan) break;
 
@@ -306,7 +363,7 @@ async function compressWithWebCodecs(
 					width: chosen.plan.width,
 					height: chosen.plan.height,
 					scaledDown: chosen.plan.scaledDown,
-					frameRateCapped: chosen.plan.frameRate !== undefined,
+					frameRateCapped,
 					feasibility: chosen.plan.feasibility,
 				}
 			: undefined;
@@ -354,6 +411,7 @@ export async function reprocessVideo(id: string) {
 		previewUrl: undefined,
 		eta: undefined,
 		error: undefined,
+		retryable: undefined,
 	});
 
 	// Get fresh item reference
