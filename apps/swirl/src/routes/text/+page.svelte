@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { acceptGifFiles } from '$lib/utils/files';
 	import Header from '$lib/components/Header.svelte';
 	import { Footer } from '@neutron/ui';
 	import DropZone from '$lib/components/DropZone.svelte';
@@ -92,11 +93,8 @@
 	}
 
 	async function handleFiles(newFiles: File[]) {
-		const gifFiles = newFiles.filter((f) => f.type === 'image/gif' || f.name.endsWith('.gif'));
-		if (gifFiles.length === 0) {
-			toast.error('Please select GIF files');
-			return;
-		}
+		const gifFiles = await acceptGifFiles(newFiles);
+		if (gifFiles.length === 0) return;
 
 		const newGifFiles: GifFile[] = [];
 
@@ -600,7 +598,7 @@
 									type="text"
 									value={textColor}
 									onchange={(e) => (textColor = (e.target as HTMLInputElement).value)}
-									class="bg-surface-800 border-surface-700 text-surface-100 flex-1 rounded-lg border px-3 py-2 text-sm uppercase"
+									class="bg-surface-800 border-surface-700 text-surface-100 min-w-0 flex-1 rounded-lg border px-3 py-2 text-sm uppercase"
 								/>
 							</div>
 						</div>
@@ -619,7 +617,7 @@
 									type="text"
 									value={strokeColor}
 									onchange={(e) => (strokeColor = (e.target as HTMLInputElement).value)}
-									class="bg-surface-800 border-surface-700 text-surface-100 flex-1 rounded-lg border px-3 py-2 text-sm uppercase"
+									class="bg-surface-800 border-surface-700 text-surface-100 min-w-0 flex-1 rounded-lg border px-3 py-2 text-sm uppercase"
 								/>
 							</div>
 						</div>

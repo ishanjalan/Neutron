@@ -7,7 +7,7 @@ interface PageSEO {
 
 export const swirlHomeSEO: PageSEO = {
 	intro:
-		'A suite of browser-based GIF tools — convert, optimise, resize, crop, reverse, and more. All processing runs locally using WebAssembly. No upload, no account, no file size limit.',
+		'A suite of browser-based GIF tools — convert, optimise, resize, crop, reverse, and more. All processing runs locally using WebAssembly. No upload and no account.',
 	faqs: [
 		{
 			q: 'What GIF tools does Swirl include?',
@@ -65,7 +65,7 @@ export const makeGifSEO: PageSEO = {
 	faqs: [
 		{
 			q: 'What image formats can I use as frames?',
-			a: 'JPEG and PNG. For best results, all images should be the same dimensions.',
+			a: 'JPEG, PNG, and WebP. For best results, all images should be the same dimensions — otherwise they are stretched to match the first frame.',
 		},
 		{
 			q: 'How do I control animation speed?',
@@ -90,6 +90,10 @@ export const optimizeGifSEO: PageSEO = {
 	intro:
 		'Compress and optimise GIF files using Gifsicle — reduce file size while keeping the animation intact, entirely in your browser using WebAssembly.',
 	faqs: [
+		{
+			q: 'How do I hit a specific size like 10 MB for Discord?',
+			a: 'Pick a platform preset or set a target size. Swirl starts from your colour and lossy settings and tightens them step by step until the GIF fits. If it still cannot fit, it tells you — then try the Resize tool.',
+		},
 		{
 			q: 'How much can Swirl reduce GIF file size?',
 			a: 'Typically 20–60% depending on the GIF content and how it was originally created. GIFs with repetitive areas compress the most.',
@@ -123,19 +127,19 @@ export const textGifSEO: PageSEO = {
 		},
 		{
 			q: 'What fonts are available?',
-			a: 'System fonts — sans-serif, serif, and monospace. Custom font upload is not yet supported.',
+			a: 'Impact (meme style), Arial Black, Comic Sans, Georgia, and Courier. These are system fonts, so they depend on your device. Custom font upload is not supported.',
 		},
 		{
 			q: 'Can I position the text anywhere?',
-			a: 'Choose from preset positions (top, centre, bottom) and adjust the offset to fine-tune placement.',
+			a: 'Choose top, centre, or bottom. Multi-line captions are supported by pressing Enter in the text box.',
 		},
 		{
 			q: 'Does adding text increase file size?',
 			a: 'Yes, slightly — each frame has additional pixel data where the text is rendered.',
 		},
 		{
-			q: 'Can I add a background behind the text to improve readability?',
-			a: 'Yes — an optional semi-transparent background box makes text legible over any image content.',
+			q: 'How do I keep the text readable over busy images?',
+			a: 'Text is drawn with an outline. Pick a contrasting outline colour and increase its width to keep the caption legible on any background.',
 		},
 	],
 };
@@ -177,7 +181,7 @@ export const cropGifSEO: PageSEO = {
 		},
 		{
 			q: 'Can I crop to a specific aspect ratio?',
-			a: 'Enter exact pixel values for X offset, Y offset, width, and height to achieve any crop area you need.',
+			a: 'Yes — drag the crop handles freely, or choose 1:1, 16:9, 4:3, 9:16, or 3:4 to lock the shape while you drag.',
 		},
 		{
 			q: 'Does cropping reduce file size?',
@@ -204,11 +208,11 @@ export const reverseGifSEO: PageSEO = {
 		},
 		{
 			q: 'Can I make a boomerang GIF that plays forward and backward?',
-			a: 'Export the reversed GIF, then use the Make GIF tool to combine the original and reversed frames into a single looping animation.',
+			a: 'Yes — switch to Boomerang mode. Swirl plays the frames forward then back (without repeating the end frames) so the loop is seamless.',
 		},
 		{
 			q: 'Does reversing affect image quality?',
-			a: 'No — frames are reordered but never re-encoded. Quality is identical to the original.',
+			a: 'No — frames are reordered and re-packed losslessly, so colours and sharpness match the original.',
 		},
 		{
 			q: 'When would I need to reverse a GIF?',
@@ -234,16 +238,16 @@ export const speedGifSEO: PageSEO = {
 			a: 'Increase the frame delay. 200 ms per frame gives a slow, deliberate animation; 500 ms makes it very slow.',
 		},
 		{
-			q: 'Can I set different speeds for different frames?',
-			a: 'Yes — adjust individual frame delays to create variable-speed animation, such as pausing on a key moment.',
+			q: 'Does speed change keep the original timing rhythm?',
+			a: 'Yes — every frame delay is scaled by the same factor, so a GIF that pauses on one frame still pauses there, just for a shorter or longer time. Per-frame editing is not supported.',
 		},
 		{
 			q: 'Does changing speed affect file size?',
 			a: 'No — frame delay is stored as a small metadata value. The pixel data and therefore the file size are unchanged.',
 		},
 		{
-			q: "What's the fastest frame delay I can set?",
-			a: '10 ms is the minimum (100 fps). In practice, most browsers clamp very short delays to around 20 ms.',
+			q: "What's the fastest speed I can set?",
+			a: '5×. Frame delays are never shorter than 20 ms, because most browsers play anything faster at the same capped rate anyway.',
 		},
 	],
 };

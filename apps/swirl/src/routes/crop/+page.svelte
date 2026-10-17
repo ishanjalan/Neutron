@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { acceptGifFiles } from '$lib/utils/files';
 	import Header from '$lib/components/Header.svelte';
 	import { Footer } from '@neutron/ui';
 	import DropZone from '$lib/components/DropZone.svelte';
@@ -88,11 +89,8 @@
 	let initialCrop = { x: 0, y: 0, width: 0, height: 0 };
 
 	async function handleFiles(files: File[]) {
-		const gifs = files.filter((f) => f.type === 'image/gif' || f.name.endsWith('.gif'));
-		if (gifs.length === 0) {
-			toast.error('Please select a GIF file');
-			return;
-		}
+		const gifs = await acceptGifFiles(files);
+		if (gifs.length === 0) return;
 
 		// Clean up previous
 		if (gifUrl) URL.revokeObjectURL(gifUrl);

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { acceptGifFiles } from '$lib/utils/files';
 	import Header from '$lib/components/Header.svelte';
 	import { Footer } from '@neutron/ui';
 	import DropZone from '$lib/components/DropZone.svelte';
@@ -25,7 +26,7 @@
 		Check,
 	} from 'lucide-svelte';
 	import { fade, fly, slide } from 'svelte/transition';
-	import { changeGifSpeed, reverseGif } from '$lib/utils/gifsicle';
+	import { changeGifSpeed } from '$lib/utils/gifsicle';
 	import { parseGifFile, formatDuration, type GifMetadata } from '$lib/utils/gif-parser';
 	import {
 		formatBytes,
@@ -85,11 +86,8 @@
 	}
 
 	async function handleFiles(newFiles: File[]) {
-		const gifFiles = newFiles.filter((f) => f.type === 'image/gif' || f.name.endsWith('.gif'));
-		if (gifFiles.length === 0) {
-			toast.error('Please select GIF files');
-			return;
-		}
+		const gifFiles = await acceptGifFiles(newFiles);
+		if (gifFiles.length === 0) return;
 
 		const newGifFiles: GifFile[] = [];
 
@@ -150,10 +148,7 @@
 			try {
 				const buffer = await gifFile.file.arrayBuffer();
 
-				// Determine which function to use
-				const processFn = reverse || boomerang ? reverseGif : changeGifSpeed;
-
-				const { result, stats } = await processFn(
+				const { result, stats } = await changeGifSpeed(
 					buffer,
 					{
 						speedMultiplier,
@@ -369,15 +364,15 @@
 													<span class="flex items-center gap-1">
 														<Clock class="h-3 w-3" />
 														{formatDuration(gifFile.metadata.duration)}
-														{#if speedMultiplier !== 1 && !reverse && !boomerang}
+														{#if speedMultiplier !== 1 || boomerang}
 															<span class="text-orange-400"
 																>→ {formatDuration(
-																	gifFile.metadata.duration / speedMultiplier
+																	(gifFile.metadata.duration *
+																		(boomerang
+																			? Math.max(1, 2 - 2 / gifFile.metadata.frameCount)
+																			: 1)) /
+																		speedMultiplier
 																)}</span
-															>
-														{:else if boomerang}
-															<span class="text-orange-400"
-																>→ {formatDuration(gifFile.metadata.duration * 2)}</span
 															>
 														{/if}
 													</span>
@@ -386,7 +381,10 @@
 														{gifFile.metadata.frameCount} frames
 														{#if boomerang}
 															<span class="text-orange-400"
-																>→ {gifFile.metadata.frameCount * 2}</span
+																>→ {Math.max(
+																	gifFile.metadata.frameCount,
+																	gifFile.metadata.frameCount * 2 - 2
+																)}</span
 															>
 														{/if}
 													</span>
@@ -404,6 +402,10 @@
 													<span>• {formatTime(gifFile.processingTime)}</span>
 												{/if}
 											</div>
+
+											{#if gifFile.status === 'error' && gifFile.error}
+												<p class="mt-1 text-xs text-red-400">{gifFile.error}</p>
+											{/if}
 
 											{#if gifFile.status === 'processing'}
 												<div class="bg-surface-700 mt-1 h-1 overflow-hidden rounded-full">
@@ -480,48 +482,46 @@
 						Speed Settings
 					</h3>
 
-					<!-- Speed Controls (hidden when effect is selected) -->
-					{#if !reverse && !boomerang}
-						<!-- Speed Presets -->
-						<div class="mb-6" transition:slide={{ duration: 200 }}>
-							<p class="text-surface-300 mb-3 block text-sm font-medium">Speed Multiplier</p>
-							<div class="grid grid-cols-3 gap-2">
-								{#each speedPresets as preset (preset.id)}
-									<button
-										onclick={() => selectPreset(preset.id)}
-										class="flex flex-col items-center gap-1 rounded-xl px-4 py-3 transition-all {selectedPreset ===
-										preset.id
-											? 'text-surface-100 border border-orange-500/50 bg-gradient-to-r from-orange-500/20 to-red-500/20'
-											: 'bg-surface-800 text-surface-400 hover:bg-surface-700'}"
-									>
-										<span class="text-lg">{preset.icon}</span>
-										<span class="text-sm font-medium">{preset.label}</span>
-									</button>
-								{/each}
-							</div>
+					<!-- Speed Controls (combine with reverse / boomerang) -->
+					<!-- Speed Presets -->
+					<div class="mb-6">
+						<p class="text-surface-300 mb-3 block text-sm font-medium">Speed Multiplier</p>
+						<div class="grid grid-cols-3 gap-2">
+							{#each speedPresets as preset (preset.id)}
+								<button
+									onclick={() => selectPreset(preset.id)}
+									class="flex flex-col items-center gap-1 rounded-xl px-4 py-3 transition-all {selectedPreset ===
+									preset.id
+										? 'text-surface-100 border border-orange-500/50 bg-gradient-to-r from-orange-500/20 to-red-500/20'
+										: 'bg-surface-800 text-surface-400 hover:bg-surface-700'}"
+								>
+									<span class="text-lg">{preset.icon}</span>
+									<span class="text-sm font-medium">{preset.label}</span>
+								</button>
+							{/each}
 						</div>
+					</div>
 
-						<!-- Custom Speed -->
-						<div class="mb-6" transition:slide={{ duration: 200 }}>
-							<label for="custom-speed" class="text-surface-300 mb-2 block text-sm font-medium">
-								Custom Speed: <span class="text-orange-400">{speedMultiplier}×</span>
-							</label>
-							<input
-								id="custom-speed"
-								type="range"
-								bind:value={speedMultiplier}
-								min="0.1"
-								max="5"
-								step="0.1"
-								class="w-full accent-orange-400"
-								oninput={() => (selectedPreset = '')}
-							/>
-							<div class="text-surface-500 mt-1 flex justify-between text-xs">
-								<span>0.1× (slow motion)</span>
-								<span>5× (super fast)</span>
-							</div>
+					<!-- Custom Speed -->
+					<div class="mb-6" transition:slide={{ duration: 200 }}>
+						<label for="custom-speed" class="text-surface-300 mb-2 block text-sm font-medium">
+							Custom Speed: <span class="text-orange-400">{speedMultiplier}×</span>
+						</label>
+						<input
+							id="custom-speed"
+							type="range"
+							bind:value={speedMultiplier}
+							min="0.1"
+							max="5"
+							step="0.1"
+							class="w-full accent-orange-400"
+							oninput={() => (selectedPreset = '')}
+						/>
+						<div class="text-surface-500 mt-1 flex justify-between text-xs">
+							<span>0.1× (slow motion)</span>
+							<span>5× (super fast)</span>
 						</div>
-					{/if}
+					</div>
 
 					<!-- Special Effects -->
 					<div class="mb-6 space-y-3">

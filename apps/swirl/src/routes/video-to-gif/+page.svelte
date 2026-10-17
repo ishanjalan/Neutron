@@ -17,10 +17,12 @@
 		Copy,
 		Check,
 		RefreshCw,
+		X,
+		TriangleAlert,
 	} from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 	import encode from 'gifski-wasm';
-	import { extractFramesFromVideo, checkBrowserSupport } from '$lib/utils/webcodecs';
+	import { extractFramesFromVideo, countFrames } from '$lib/utils/webcodecs';
 	import { formatBytes, copyBlobToClipboard, isClipboardWriteSupported } from '@neutron/utils';
 	import { optimizeGif } from '$lib/utils/gifsicle';
 
@@ -54,13 +56,15 @@
 	let resultSize = $state(0);
 	let processingTime = $state(0);
 	let justCopied = $state(false);
+	let videoError = $state(false);
+	let abortController: AbortController | null = null;
 
 	// Comparison modal
 	let showComparison = $state(false);
 
 	// Derived estimates
 	const clipDuration = $derived(endTime - startTime);
-	const estimatedFrames = $derived(Math.ceil(clipDuration * fps));
+	const estimatedFrames = $derived(Math.max(0, Math.ceil(clipDuration * fps)));
 	const estimatedHeight = $derived(
 		videoWidth > 0 ? Math.round(width * (videoHeight / videoWidth)) : 0
 	);
@@ -76,6 +80,8 @@
 		}
 
 		videoFile = videoFiles[0];
+		videoError = false;
+		duration = 0;
 		if (videoUrl) URL.revokeObjectURL(videoUrl);
 		videoUrl = URL.createObjectURL(videoFile);
 
@@ -100,12 +106,22 @@
 				);
 			}
 
-			// Auto-set width based on video aspect ratio
-			const aspectRatio = videoHeight / videoWidth;
+			// Don't upscale small videos
 			if (videoWidth < 480) {
 				width = videoWidth;
 			}
 		}
+	}
+
+	function handleVideoError() {
+		videoError = true;
+		toast.error(
+			"Your browser can't decode this video. Try an MP4 (H.264), WebM, or MOV file instead."
+		);
+	}
+
+	function cancelConvert() {
+		abortController?.abort();
 	}
 
 	function togglePlayback() {
@@ -132,8 +148,20 @@
 	}
 
 	async function handleConvert() {
-		if (!videoFile || !videoElement) return;
+		if (!videoFile || !videoElement || videoError || !(clipDuration > 0)) return;
 
+		const targetHeight = Math.round(width * (videoHeight / videoWidth));
+		const frameCount = countFrames(startTime, endTime, fps);
+		// Frames are held in memory as raw RGBA until encoding.
+		if (frameCount * width * targetHeight * 4 > 1.2e9) {
+			toast.error(
+				`${frameCount} frames at ${width}×${targetHeight} is too much to hold in memory. Lower the frame rate, width, or trim the clip.`
+			);
+			return;
+		}
+
+		abortController = new AbortController();
+		const { signal } = abortController;
 		isProcessing = true;
 		progress = 0;
 		progressStage = 'Initializing...';
@@ -150,10 +178,6 @@
 			videoElement.pause();
 			isPlaying = false;
 
-			// Calculate dimensions
-			const aspectRatio = videoHeight / videoWidth;
-			const targetHeight = Math.round(width * aspectRatio);
-
 			progressStage = 'Extracting frames...';
 
 			// Extract frames using WebCodecs-enhanced extraction
@@ -169,8 +193,10 @@
 				(frameProgress) => {
 					progress = Math.round(frameProgress.progress * 0.5); // 0-50% for extraction
 					progressStage = `Extracting frame ${frameProgress.currentFrame}/${frameProgress.totalFrames}`;
-				}
+				},
+				signal
 			);
+			if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
 
 			progressStage = 'Encoding GIF with gifski...';
 			progress = 55;
@@ -185,6 +211,7 @@
 				quality, // gifski quality 1-100
 			});
 
+			if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
 			let finalBuffer = gifBuffer;
 
 			// Optimize if enabled
@@ -219,10 +246,17 @@
 
 			toast.success(`Conversion complete in ${processingTime}s!`);
 		} catch (error) {
-			console.error('Conversion error:', error);
-			toast.error('Conversion failed. Please try again.');
+			if (error instanceof DOMException && error.name === 'AbortError') {
+				toast.info('Conversion cancelled');
+			} else {
+				console.error('Conversion error:', error);
+				toast.error(
+					`Conversion failed${error instanceof Error && error.message ? `: ${error.message}` : ''}. Try a shorter clip or a smaller width.`
+				);
+			}
 		} finally {
 			isProcessing = false;
+			abortController = null;
 		}
 	}
 
@@ -338,6 +372,7 @@
 								src={videoUrl}
 								class="h-full w-full object-contain"
 								onloadedmetadata={handleVideoLoaded}
+								onerror={handleVideoError}
 								ontimeupdate={handleTimeUpdate}
 								onended={() => (isPlaying = false)}
 							></video>
@@ -358,6 +393,19 @@
 								</div>
 							</button>
 						</div>
+
+						{#if videoError}
+							<div
+								class="mt-4 flex items-start gap-2 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300"
+								role="alert"
+							>
+								<TriangleAlert class="mt-0.5 h-4 w-4 shrink-0" />
+								<span>
+									This video can't be decoded by your browser (unsupported codec or a damaged file).
+									Try an MP4 (H.264), WebM, or MOV file.
+								</span>
+							</div>
+						{/if}
 
 						<!-- Timeline Scrubber -->
 						<div class="mt-4">
@@ -526,7 +574,7 @@
 							<!-- Convert Button -->
 							<button
 								onclick={handleConvert}
-								disabled={isProcessing}
+								disabled={isProcessing || videoError || !(clipDuration > 0)}
 								class="from-accent-start to-accent-end shadow-accent-start/30 hover:shadow-accent-start/40 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r px-6 py-3 text-base font-semibold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
 							>
 								{#if isProcessing}
@@ -543,6 +591,14 @@
 							<!-- Progress -->
 							{#if isProcessing}
 								<div class="space-y-2">
+									<button
+										type="button"
+										onclick={cancelConvert}
+										class="bg-surface-700 text-surface-200 hover:bg-surface-600 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors"
+									>
+										<X class="h-4 w-4" />
+										Cancel
+									</button>
 									<div class="bg-surface-800 h-2 overflow-hidden rounded-full">
 										<div
 											class="from-accent-start to-accent-end h-full bg-gradient-to-r transition-all duration-300"

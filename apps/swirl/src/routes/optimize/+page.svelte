@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { acceptGifFiles } from '$lib/utils/files';
 	import Header from '$lib/components/Header.svelte';
 	import { Footer } from '@neutron/ui';
 	import DropZone from '$lib/components/DropZone.svelte';
@@ -44,6 +45,7 @@
 		status: 'pending' | 'processing' | 'completed' | 'error';
 		progress: number;
 		error?: string;
+		note?: string;
 		compressedUrl?: string;
 		compressedBlob?: Blob;
 		compressedSize?: number;
@@ -100,11 +102,8 @@
 	}
 
 	async function handleFiles(newFiles: File[]) {
-		const gifFiles = newFiles.filter((f) => f.type === 'image/gif' || f.name.endsWith('.gif'));
-		if (gifFiles.length === 0) {
-			toast.error('Please select GIF files');
-			return;
-		}
+		const gifFiles = await acceptGifFiles(newFiles);
+		if (gifFiles.length === 0) return;
 
 		const newGifFiles: GifFile[] = [];
 
@@ -191,6 +190,10 @@
 								compressedBlob: blob,
 								compressedSize: blob.size,
 								processingTime,
+								note:
+									stats.targetReached === false
+										? `Couldn't reach ${targetSizeMB} MB — this is the smallest it got. Try Resize or a lower frame count.`
+										: undefined,
 							}
 						: f
 				);
@@ -395,8 +398,13 @@
 												{#if gifFile.compressedSize}
 													<span class="text-surface-600">→</span>
 													<span class="text-green-400">{formatBytes(gifFile.compressedSize)}</span>
-													<span class="font-medium text-green-400">
-														(-{Math.round((1 - gifFile.compressedSize / gifFile.file.size) * 100)}%)
+													{@const saved = Math.round(
+														(1 - gifFile.compressedSize / gifFile.file.size) * 100
+													)}
+													<span
+														class="font-medium {saved >= 0 ? 'text-green-400' : 'text-amber-400'}"
+													>
+														({saved >= 0 ? `-${saved}` : `+${-saved}`}%)
 													</span>
 													{#if gifFile.processingTime}
 														<span class="text-surface-500"
@@ -405,6 +413,14 @@
 													{/if}
 												{/if}
 											</div>
+
+											{#if gifFile.note}
+												<p class="mt-1 text-xs text-amber-400">{gifFile.note}</p>
+											{/if}
+
+											{#if gifFile.status === 'error' && gifFile.error}
+												<p class="mt-1 text-xs text-red-400">{gifFile.error}</p>
+											{/if}
 
 											{#if gifFile.status === 'processing'}
 												<div class="bg-surface-700 mt-1 h-1 overflow-hidden rounded-full">

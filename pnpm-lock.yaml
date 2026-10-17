@@ -366,6 +366,9 @@ importers:
       idb:
         specifier: ^8.0.4
         version: 8.0.4
+      mediabunny:
+        specifier: ^1.61.6
+        version: 1.61.6
     devDependencies:
       '@sveltejs/adapter-static':
         specifier: ^3.0.10

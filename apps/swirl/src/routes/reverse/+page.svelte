@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { acceptGifFiles } from '$lib/utils/files';
 	import Header from '$lib/components/Header.svelte';
 	import { Footer } from '@neutron/ui';
 	import DropZone from '$lib/components/DropZone.svelte';
@@ -71,11 +72,8 @@
 	}
 
 	async function handleFiles(newFiles: File[]) {
-		const gifFiles = newFiles.filter((f) => f.type === 'image/gif' || f.name.endsWith('.gif'));
-		if (gifFiles.length === 0) {
-			toast.error('Please select GIF files');
-			return;
-		}
+		const gifFiles = await acceptGifFiles(newFiles);
+		if (gifFiles.length === 0) return;
 
 		const newGifFiles: GifFile[] = [];
 
@@ -361,6 +359,10 @@
 													<span>• {formatTime(gifFile.processingTime)}</span>
 												{/if}
 											</div>
+
+											{#if gifFile.status === 'error' && gifFile.error}
+												<p class="mt-1 text-xs text-red-400">{gifFile.error}</p>
+											{/if}
 
 											{#if gifFile.status === 'processing'}
 												<div class="bg-surface-700 mt-1 h-1 overflow-hidden rounded-full">

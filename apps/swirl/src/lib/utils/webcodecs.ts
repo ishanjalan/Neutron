@@ -91,21 +91,87 @@ export async function getWebCodecsCapabilities(): Promise<WebCodecsCapabilities>
 	};
 }
 
-// Extract frames from video using canvas
-export async function extractFramesFromVideo(
+export interface FrameExtractionOptions {
+	startTime: number;
+	endTime: number;
+	fps: number;
+	width: number;
+	height?: number;
+}
+
+function throwIfAborted(signal?: AbortSignal) {
+	if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+}
+
+/** Number of frames a clip yields at the given frame rate (always at least one). */
+export function countFrames(startTime: number, endTime: number, fps: number): number {
+	return Math.max(1, Math.floor((endTime - startTime) * fps));
+}
+
+/**
+ * Extract frames with mediabunny's CanvasSink: packets are demuxed and decoded once,
+ * in order, instead of seeking an HTMLVideoElement for every frame.
+ */
+async function extractFramesWithMediabunny(
 	file: File,
-	options: {
-		startTime: number;
-		endTime: number;
-		fps: number;
-		width: number;
-		height?: number;
-	},
-	onProgress?: (progress: FrameExtractionProgress) => void
+	options: FrameExtractionOptions,
+	onProgress?: (progress: FrameExtractionProgress) => void,
+	signal?: AbortSignal
+): Promise<ImageData[]> {
+	const { Input, BlobSource, ALL_FORMATS, CanvasSink } = await import('mediabunny');
+	const input = new Input({ source: new BlobSource(file), formats: ALL_FORMATS });
+	try {
+		const track = await input.getPrimaryVideoTrack();
+		if (!track) throw new Error('No video track');
+		if (!(await track.canDecode())) throw new Error('Video codec not decodable');
+
+		const targetWidth = options.width;
+		const targetHeight =
+			options.height ?? Math.round(targetWidth * (track.displayHeight / track.displayWidth));
+		const sink = new CanvasSink(track, { width: targetWidth, height: targetHeight, fit: 'fill' });
+
+		const firstTimestamp = await track.getFirstTimestamp();
+		const totalFrames = countFrames(options.startTime, options.endTime, options.fps);
+		const timestamps: number[] = [];
+		for (let i = 0; i < totalFrames; i++) {
+			// A timestamp before the first frame yields null, so clamp to it.
+			timestamps.push(Math.max(firstTimestamp, options.startTime + i / options.fps));
+		}
+
+		const scratch = document.createElement('canvas');
+		scratch.width = targetWidth;
+		scratch.height = targetHeight;
+		const ctx = scratch.getContext('2d', { willReadFrequently: true })!;
+
+		const frames: ImageData[] = [];
+		for await (const wrapped of sink.canvasesAtTimestamps(timestamps)) {
+			throwIfAborted(signal);
+			if (wrapped) {
+				ctx.clearRect(0, 0, targetWidth, targetHeight);
+				ctx.drawImage(wrapped.canvas as CanvasImageSource, 0, 0, targetWidth, targetHeight);
+			}
+			// A null frame (gap in the track) repeats the previous pixels.
+			frames.push(ctx.getImageData(0, 0, targetWidth, targetHeight));
+			onProgress?.({
+				currentFrame: frames.length,
+				totalFrames,
+				progress: Math.round((frames.length / totalFrames) * 100),
+			});
+		}
+		return frames;
+	} finally {
+		input.dispose();
+	}
+}
+
+/** Legacy path: seek an HTMLVideoElement for every frame (slow, imprecise). */
+async function extractFramesWithVideoElement(
+	file: File,
+	options: FrameExtractionOptions,
+	onProgress?: (progress: FrameExtractionProgress) => void,
+	signal?: AbortSignal
 ): Promise<ImageData[]> {
 	const frames: ImageData[] = [];
-
-	// Create a video element for seeking
 	const videoUrl = URL.createObjectURL(file);
 	const video = document.createElement('video');
 	video.src = videoUrl;
@@ -113,41 +179,31 @@ export async function extractFramesFromVideo(
 	video.preload = 'auto';
 
 	try {
-		// Wait for video to load
 		await new Promise<void>((resolve, reject) => {
 			video.onloadedmetadata = () => resolve();
 			video.onerror = () => reject(new Error('Failed to load video'));
 		});
 
-		// Calculate dimensions maintaining aspect ratio
 		const aspectRatio = video.videoHeight / video.videoWidth;
 		const targetWidth = options.width;
 		const targetHeight = options.height || Math.round(targetWidth * aspectRatio);
 
-		// Create canvas for frame extraction
 		const canvas = document.createElement('canvas');
 		canvas.width = targetWidth;
 		canvas.height = targetHeight;
 		const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
 
-		// Calculate frame times
-		const clipDuration = options.endTime - options.startTime;
-		const frameInterval = 1 / options.fps;
-		const totalFrames = Math.floor(clipDuration * options.fps);
+		const totalFrames = countFrames(options.startTime, options.endTime, options.fps);
 
 		for (let i = 0; i < totalFrames; i++) {
-			const frameTime = options.startTime + i * frameInterval;
-
-			// Seek to frame time
-			video.currentTime = frameTime;
+			throwIfAborted(signal);
+			video.currentTime = options.startTime + i / options.fps;
 			await new Promise<void>((resolve) => {
 				video.onseeked = () => resolve();
 			});
 
-			// Draw frame to canvas
 			ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
-			const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
-			frames.push(imageData);
+			frames.push(ctx.getImageData(0, 0, targetWidth, targetHeight));
 
 			onProgress?.({
 				currentFrame: i + 1,
@@ -165,6 +221,29 @@ export async function extractFramesFromVideo(
 	}
 
 	return frames;
+}
+
+/**
+ * Extract evenly spaced frames from a video clip. Uses mediabunny when it can read the
+ * file, falling back to seeking a <video> element for anything it cannot decode.
+ */
+export async function extractFramesFromVideo(
+	file: File,
+	options: FrameExtractionOptions,
+	onProgress?: (progress: FrameExtractionProgress) => void,
+	signal?: AbortSignal
+): Promise<ImageData[]> {
+	if (isWebCodecsSupported()) {
+		try {
+			return await extractFramesWithMediabunny(file, options, onProgress, signal);
+		} catch (error) {
+			if (signal?.aborted || (error instanceof DOMException && error.name === 'AbortError')) {
+				throw error;
+			}
+			console.warn('mediabunny extraction failed, falling back to <video> seeking', error);
+		}
+	}
+	return extractFramesWithVideoElement(file, options, onProgress, signal);
 }
 
 // Capabilities cache
