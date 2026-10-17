@@ -174,7 +174,10 @@
 			if ('serviceWorker' in navigator) {
 				window.addEventListener('load', () => {
 					navigator.serviceWorker
-						.register('%sveltekit.assets%/service-worker.js', { scope: '%sveltekit.assets%/' })
+						.register('%sveltekit.assets%/service-worker.js', {
+							type: 'module',
+							scope: '%sveltekit.assets%/',
+						})
 						.then((registration) => {
 							console.log('SW registered:', registration.scope);
 							registration.addEventListener('updatefound', () => {

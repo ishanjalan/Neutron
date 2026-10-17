@@ -16,7 +16,8 @@ const RUNTIME_CACHE = 'squash-runtime-v1';
 // Assets to cache immediately (app shell)
 const PRECACHE_ASSETS = [
 	...immutable.map((f) => asset(f.path)), // App build files (JS, CSS bundles)
-	...assets.map((f) => asset(f.path)), // Static files (icons, manifest, etc.)
+	// Static files (icons, manifest, etc.), minus dotfiles like .nojekyll that GitHub Pages doesn't serve
+	...assets.filter((f) => !/(^|\/)\./.test(f.path)).map((f) => asset(f.path)),
 ];
 
 // External libraries to cache via stale-while-revalidate

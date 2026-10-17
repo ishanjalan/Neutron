@@ -16,7 +16,9 @@ const WASM_CACHE = 'smash-wasm-v1';
 const WASM_FILES = [asset('gs.wasm')];
 
 // All app files to cache
-const APP_FILES = [...immutable, ...assets].map((f) => asset(f.path));
+const APP_FILES = [...immutable, ...assets]
+	.filter((f) => !/(^|\/)\./.test(f.path))
+	.map((f) => asset(f.path));
 
 // Install event - cache app files
 self.addEventListener('install', (event) => {

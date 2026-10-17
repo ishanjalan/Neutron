@@ -50,21 +50,21 @@ Each app is a standalone SvelteKit static-site (deployed separately to GitHub Pa
 
 ### Shared config package (`@neutron/config`)
 
-All apps delegate entirely to two factory functions — **do not hand-write svelte or vite configs**:
+SvelteKit 3 no longer reads `svelte.config.js`; all apps delegate entirely to one factory function — **do not hand-write vite/svelte config**:
 
 ```ts
-// apps/*/svelte.config.js
-export default createSvelteConfig('/RepoName'); // sets production base path
-
 // apps/*/vite.config.ts
 export default createViteConfig({
+	basePath: '/RepoName', // production base path (GitHub Pages repo name)
 	crossOriginIsolation: true, // smash, squash, swirl — needed for SharedArrayBuffer / WASM threads
 	wasmWorkers: true, // squish, heic — enables WASM chunking in workers
 	optimizeDepsExclude: ['icodec'], // WASM packages that must not be pre-bundled
 });
 ```
 
-`createViteConfig` wires up Tailwind v4, SvelteKit, and optional bundle analysis (`ANALYZE=true pnpm build`). COOP/COEP headers are applied to both dev server and preview when `crossOriginIsolation: true`.
+`createViteConfig` wires up Tailwind v4, SvelteKit (adapter-static with `fallback: '404.html'`, `paths.base`, preprocess), and optional bundle analysis (`ANALYZE=true pnpm build`). COOP/COEP headers are applied to both dev server and preview (including SvelteKit's HTML responses, via a small plugin) when `crossOriginIsolation: true`.
+
+SvelteKit 3 conventions used here: `$lib` is gone — import with `#lib/...` (package.json `imports`, include file extensions, `.ts` for TypeScript files); use `$app/state` (not `$app/stores`), `resolve()`/`asset()` from `$app/paths` (no leading slash for pathnames), param matchers in a single `src/params.ts`, and service workers live in `src/service-worker/index.ts` with their own tsconfig (`$app/manifest`, `$app/env`). Requires Node ≥ 22.17 and TypeScript 6.
 
 ### Shared UI package (`@neutron/ui`)
 

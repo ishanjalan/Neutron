@@ -10,6 +10,22 @@ const COOP_COEP_HEADERS = {
 	'Cross-Origin-Embedder-Policy': 'require-corp',
 } as const;
 
+function crossOriginIsolationPlugin(): Plugin {
+	const middleware = (
+		_req: unknown,
+		res: { setHeader(name: string, value: string): void },
+		next: () => void
+	) => {
+		for (const [name, value] of Object.entries(COOP_COEP_HEADERS)) res.setHeader(name, value);
+		next();
+	};
+	return {
+		name: 'neutron:cross-origin-isolation',
+		configureServer: (server) => void server.middlewares.use(middleware),
+		configurePreviewServer: (server) => void server.middlewares.use(middleware),
+	};
+}
+
 export interface ViteConfigOptions {
 	/**
 	 * Production base path (GitHub Pages repo name), e.g. '/Squish'. Dev uses no base.
@@ -62,6 +78,8 @@ export function createViteConfig(opts: ViteConfigOptions) {
 					precompress: false,
 					strict: true,
 				}),
+				// Apps register their service worker themselves in app.html (to hook update events)
+				serviceWorker: { register: false },
 				paths: {
 					base: process.env.NODE_ENV === 'production' ? basePath : '',
 				},
@@ -71,6 +89,11 @@ export function createViteConfig(opts: ViteConfigOptions) {
 				: []),
 			...plugins,
 		],
+		// Workspace packages ship TypeScript source; Vite must transform them in SSR
+		// instead of externalizing them to Node.
+		ssr: {
+			noExternal: [/^@neutron\//],
+		},
 		build: {
 			target: 'esnext',
 		},
@@ -97,6 +120,9 @@ export function createViteConfig(opts: ViteConfigOptions) {
 	if (crossOriginIsolation) {
 		config.server = { headers: COOP_COEP_HEADERS };
 		config.preview = { headers: COOP_COEP_HEADERS };
+		// Vite's `headers` option only covers responses Vite itself serves; SvelteKit's
+		// document responses (SSR in dev, prerendered pages in preview) need them too.
+		config.plugins!.unshift(crossOriginIsolationPlugin());
 	}
 
 	return defineConfig(config);
