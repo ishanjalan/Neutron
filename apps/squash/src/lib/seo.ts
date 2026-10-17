@@ -56,4 +56,14 @@ export const squashMeta: Record<Locale, AppMeta> = {
 		description:
 			'Стискайте відео MP4, WebM, MOV і MKV прямо у браузері — без завантаження на сервер, без FFmpeg, повна приватність. Апаратне прискорення через WebCodecs. Безкоштовно.',
 	},
+	ar: {
+		title: 'ضغط الفيديو عبر الإنترنت — مجاني وبدون رفع | Squash',
+		description:
+			'اضغط فيديوهات MP4 وWebM وMOV وMKV داخل متصفحك — بدون رفع ملفات وبدون FFmpeg وبخصوصية تامة 100%. تسريع بالعتاد عبر WebCodecs. مجاني للأبد.',
+	},
+	id: {
+		title: 'Kompres Video Online — Gratis, Tanpa Unggah | Squash',
+		description:
+			'Kompres video MP4, WebM, MOV, dan MKV di browser Anda — tanpa unggah, tanpa FFmpeg, 100% privat. Dipercepat perangkat keras lewat WebCodecs. Gratis selamanya.',
+	},
 };

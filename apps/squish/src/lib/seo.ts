@@ -56,4 +56,14 @@ export const squishMeta: Record<Locale, AppMeta> = {
 		description:
 			'Стискайте та конвертуйте зображення HEIC, JPEG, PNG, WebP, AVIF, JPEG XL і SVG прямо у браузері. Повна конфіденційність — файли не залишають пристрій.',
 	},
+	ar: {
+		title: 'Squish — ضغط صور HEIC وJPEG وPNG وWebP وغيرها',
+		description:
+			'اضغط وحوّل صور HEIC وJPEG وPNG وWebP وAVIF وJPEG XL وSVG داخل متصفحك. خصوصية تامة 100% — ملفاتك لا تغادر جهازك أبدًا.',
+	},
+	id: {
+		title: 'Squish — Kompres HEIC, JPEG, PNG, WebP & Lainnya',
+		description:
+			'Kompres dan konversi gambar HEIC, JPEG, PNG, WebP, AVIF, JPEG XL, dan SVG di browser Anda. 100% privat — file tidak pernah meninggalkan perangkat Anda.',
+	},
 };

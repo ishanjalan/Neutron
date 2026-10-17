@@ -56,4 +56,14 @@ export const swirlMeta: Record<Locale, AppMeta> = {
 		description:
 			'Конвертуйте відео у GIF, оптимізуйте, змінюйте розмір, перевертайте, обрізайте та розбивайте анімації. 10 інструментів для GIF прямо у браузері. Повна приватність.',
 	},
+	ar: {
+		title: 'Swirl - أدوات GIF عصرية',
+		description:
+			'حوّل الفيديو إلى GIF، وحسّن الصور المتحركة وغيّر حجمها واعكسها واقتصّها وقسّمها. 10 أدوات GIF تعمل في المتصفح. خصوصية تامة 100% — ملفاتك لا تغادر جهازك.',
+	},
+	id: {
+		title: 'Swirl - Alat GIF Modern',
+		description:
+			'Ubah video menjadi GIF, optimalkan, ubah ukuran, balik, potong, dan pisahkan animasi. 10 alat GIF berbasis browser. 100% privat — file tidak pernah meninggalkan perangkat Anda.',
+	},
 };

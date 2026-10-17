@@ -57,6 +57,16 @@ export const smashLayoutMeta: Record<Locale, AppMeta> = {
 		description:
 			"Безкоштовні онлайн-інструменти для PDF — стиснення, об'єднання, розділення, захист, OCR та інше. Всі 13 інструментів працюють у браузері. Повна конфіденційність.",
 	},
+	ar: {
+		title: 'Smash - أدوات PDF تحترم الخصوصية',
+		description:
+			'أدوات PDF مجانية عبر الإنترنت — ضغط ودمج وتقسيم وحماية وOCR وغير ذلك. جميع الأدوات الـ13 تعمل فورًا داخل متصفحك. خصوصية تامة 100%، ولا تغادر ملفاتك جهازك.',
+	},
+	id: {
+		title: 'Smash - Alat PDF yang Mengutamakan Privasi',
+		description:
+			'Alat PDF online gratis — kompres, gabungkan, pisahkan, proteksi, OCR, dan lainnya. Semua 13 alat berjalan instan di browser Anda. 100% privat, file tidak pernah meninggalkan perangkat Anda.',
+	},
 };
 
 /** Used by the homepage (+page.svelte). */
@@ -115,5 +125,15 @@ export const smashHomeMeta: Record<Locale, AppMeta> = {
 		title: 'Smash - Інструменти PDF',
 		description:
 			"Безкоштовні інструменти для PDF у браузері. Стискайте, об'єднуйте, розділяйте, захищайте та конвертуйте PDF — повна приватність, працює офлайн.",
+	},
+	ar: {
+		title: 'Smash - أدوات PDF',
+		description:
+			'أدوات PDF مجانية تعمل في المتصفح. اضغط ودمج وقسّم واحمِ وحوّل ملفات PDF — خصوصية تامة 100% وتعمل دون اتصال.',
+	},
+	id: {
+		title: 'Smash - Alat PDF',
+		description:
+			'Alat PDF gratis berbasis browser. Kompres, gabungkan, pisahkan, proteksi, dan konversi PDF - 100% privat, bisa digunakan offline.',
 	},
 };

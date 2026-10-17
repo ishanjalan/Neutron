@@ -1,4 +1,5 @@
-export type Locale = 'en' | 'fr' | 'ru' | 'pl' | 'pt' | 'es' | 'de' | 'it' | 'nl' | 'tr' | 'uk';
+export type Locale =
+	'en' | 'fr' | 'ru' | 'pl' | 'pt' | 'es' | 'de' | 'it' | 'nl' | 'tr' | 'uk' | 'ar' | 'id';
 
 export interface AppMeta {
 	title: string;
@@ -20,6 +21,9 @@ export function detectLocale(): Locale {
 		nl: 'nl',
 		tr: 'tr',
 		uk: 'uk',
+		ar: 'ar',
+		id: 'id',
+		in: 'id', // legacy code some browsers still report for Indonesian
 	};
 	return map[lang] ?? 'en';
 }
