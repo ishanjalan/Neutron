@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { fixture } from './fixtures';
+import { fixture, serveStaleHtml, expectHydrated } from './fixtures';
 
 test.beforeEach(async ({ page }) => {
 	await page.addInitScript(() => localStorage.setItem('squash-onboarding-seen', 'true'));
@@ -44,4 +44,21 @@ test('dropping an .avi shows the rejection toast and adds no card', async ({ pag
 	await expect(page.getByText(/AVI file, which browsers can’t decode/)).toBeVisible();
 	// No card was added: the empty-state hero is still showing.
 	await expect(page.getByRole('heading', { name: /Compress videos/ })).toBeVisible();
+});
+
+test('recovers with one reload when the page was cached from before a deploy', async ({ page }) => {
+	const stale = await serveStaleHtml(page, 1);
+	await page.goto('./');
+	await expect.poll(() => stale.navigations(), { timeout: 10_000 }).toBeGreaterThanOrEqual(2);
+	await expectHydrated(page);
+	// The recovery came from our reload guard, not from anything incidental
+	const guard = await page.evaluate(() => sessionStorage.getItem('neutron-stale-reload'));
+	expect(guard).not.toBeNull();
+});
+
+test('does not reload in a loop when the page stays stale', async ({ page }) => {
+	const stale = await serveStaleHtml(page, Infinity);
+	await page.goto('./');
+	await page.waitForTimeout(4000); // long enough for a loop to show itself
+	expect(stale.navigations()).toBe(2); // the stale load plus exactly one reload
 });
