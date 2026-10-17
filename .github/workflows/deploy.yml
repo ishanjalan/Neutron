@@ -23,6 +23,28 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter squish --filter smash --filter squash --filter swirl check
       - run: pnpm test:unit
+      # Each app's own vitest config (runes / $lib aliases); heic is deprecated and skipped.
+      - run: pnpm test
+
+  # ── Golden-path browser smoke tests (does NOT gate deploys; runs alongside them) ──
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:smoke
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-smoke-results
+          path: test-results/
 
   # ── Detect which apps need rebuilding ─────────────────────────────────────
   changes:
