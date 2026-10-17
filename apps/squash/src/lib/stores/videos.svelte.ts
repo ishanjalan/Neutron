@@ -62,17 +62,13 @@ export interface CompressionSettings {
 	audioBitrate: '64k' | '128k' | '192k' | '256k' | '320k';
 	audioCodec: AudioCodec;
 	stripMetadata: boolean;
-	twoPass: boolean;
-	preset: 'ultrafast' | 'veryfast' | 'fast' | 'medium' | 'slow' | 'veryslow';
 	targetSizeMB?: number; // Target file size in MB (mutually exclusive with quality presets)
 }
 
 // Common file size targets
 export const SIZE_PRESETS = {
-	whatsapp: { label: 'WhatsApp', sizeMB: 16, icon: '📱' },
-	email: { label: 'Email', sizeMB: 25, icon: '📧' },
 	discord: { label: 'Discord', sizeMB: 20, icon: '💬' },
-	telegram: { label: 'Telegram', sizeMB: 100, icon: '✈️' },
+	email: { label: 'Email', sizeMB: 25, icon: '📧' },
 } as const;
 
 // Quality presets - CRF values (lower = better quality, larger file)
@@ -82,35 +78,30 @@ export const QUALITY_PRESETS = {
 		label: 'Tiny',
 		desc: 'Max compression',
 		targetBitrate: '500k',
-		preset: 'fast',
 	},
 	web: {
 		crf: 28,
 		label: 'Web',
 		desc: 'Balanced',
 		targetBitrate: '1000k',
-		preset: 'medium',
 	},
 	social: {
 		crf: 23,
 		label: 'Social',
 		desc: 'Social media',
 		targetBitrate: '2000k',
-		preset: 'medium',
 	},
 	high: {
 		crf: 18,
 		label: 'High',
 		desc: 'High quality',
 		targetBitrate: '4000k',
-		preset: 'slow',
 	},
 	lossless: {
 		crf: 0,
 		label: 'Max Quality',
 		desc: 'Visually lossless',
 		targetBitrate: '0',
-		preset: 'veryslow',
 	},
 } as const;
 
@@ -166,8 +157,6 @@ function getDefaultSettings(): CompressionSettings {
 		audioBitrate: '128k',
 		audioCodec: 'aac',
 		stripMetadata: false,
-		twoPass: false,
-		preset: 'medium',
 		targetSizeMB: undefined,
 	};
 }
@@ -358,27 +347,11 @@ export function estimateCompressionTime(video: VideoItem, settings: CompressionS
 	const pixelFactor = pixels / (1920 * 1080);
 	baseMultiplier *= Math.sqrt(pixelFactor);
 
-	// Adjust for quality preset (slower = longer)
-	const presetMultipliers: Record<string, number> = {
-		ultrafast: 0.3,
-		veryfast: 0.5,
-		fast: 0.7,
-		medium: 1,
-		slow: 1.5,
-		veryslow: 2.5,
-	};
-	baseMultiplier *= presetMultipliers[settings.preset] || 1;
-
 	// Adjust for format
 	if (settings.outputFormat === 'webm') {
 		baseMultiplier *= 1.5; // VP9 is slower than H.264
 	} else if (settings.outputFormat === 'av1') {
 		baseMultiplier *= 0.8; // AV1 with hardware is fast
-	}
-
-	// Adjust for two-pass
-	if (settings.twoPass) {
-		baseMultiplier *= 1.8;
 	}
 
 	// Adjust for thread count (rough estimate)

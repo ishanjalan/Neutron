@@ -29,7 +29,7 @@
 		{
 			icon: Sliders,
 			title: 'Choose settings',
-			desc: 'Pick a quality preset or set a target file size for platforms like WhatsApp or Discord.',
+			desc: 'Pick a quality preset or set a target file size for places like Discord or email.',
 			color: 'from-blue-500 to-cyan-500',
 		},
 		{

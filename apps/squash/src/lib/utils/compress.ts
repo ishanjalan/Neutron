@@ -1,6 +1,5 @@
 import {
 	videos,
-	QUALITY_PRESETS,
 	type VideoItem,
 	type OutputFormat,
 	estimateCompressionTime,

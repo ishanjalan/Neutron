@@ -37,8 +37,6 @@ const defaultSettings: CompressionSettings = {
 	audioBitrate: '128k',
 	audioCodec: 'aac',
 	stripMetadata: false,
-	twoPass: false,
-	preset: 'medium',
 };
 
 describe('videos store', () => {
