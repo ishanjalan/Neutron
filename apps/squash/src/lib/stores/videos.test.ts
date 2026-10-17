@@ -34,6 +34,7 @@ const defaultSettings: CompressionSettings = {
 	quality: 'web',
 	outputFormat: 'mp4',
 	resolution: 'original',
+	maxFrameRate: 0,
 	audioBitrate: '128k',
 	audioCodec: 'aac',
 	stripMetadata: false,

@@ -41,6 +41,8 @@ export interface WebCodecsConfig {
 	bitrate?: number;
 	/** Cap the output frame rate (e.g. 30 for a 60 fps source). Applied only if the source is faster. */
 	maxFrameRate?: number;
+	/** Clockwise rotation baked into the frames (not just flagged in metadata). */
+	rotate?: 0 | 90 | 180 | 270;
 	/** How to treat the audio track. Defaults to 're-encode'. */
 	audioMode?: 'encode' | 'copy' | 'none';
 	audioBitrate: number;
@@ -426,6 +428,8 @@ export async function encodeWithWebCodecs(
 				width: config.width,
 				height: config.height,
 				...(frameRate ? { frameRate } : {}),
+				// Bake rotation into the pixels so every player shows it the same way
+				...(config.rotate ? { rotate: config.rotate, allowTransformationMetadata: false } : {}),
 				forceTranscode: true, // Ensure re-encoding with our settings
 			},
 			audio,
@@ -594,4 +598,64 @@ export async function getHardwareAcceleratedCodecs(): Promise<WebCodecsVideoCode
 	}
 
 	return hardwareCodecs;
+}
+
+/**
+ * Cut a time range as a "smart cut". Mediabunny copies the encoded packets wherever it can
+ * (verified byte-identical against the source) and re-encodes only the stretch from
+ * `trimStart` to the next keyframe, so it's near-instant, keeps the original quality for
+ * the copied part, and the cut stays frame-exact.
+ */
+export async function trimWithoutReencode(
+	file: File,
+	options: {
+		trimStart: number;
+		trimEnd: number;
+		container: 'mp4' | 'webm';
+		stripMetadata?: boolean;
+		signal?: AbortSignal;
+		onProgress?: (percent: number) => void;
+	}
+): Promise<Blob> {
+	const { trimStart, trimEnd, container, stripMetadata, signal, onProgress } = options;
+	if (signal?.aborted) throw new CompressionCancelledError();
+
+	const input = new Input({ source: new BlobSource(file), formats: ALL_FORMATS });
+	const target = new BufferTarget();
+	const output = new Output({
+		format:
+			container === 'mp4'
+				? new Mp4OutputFormat({ fastStart: 'in-memory' })
+				: new WebMOutputFormat(),
+		target,
+	});
+
+	const conversion = await Conversion.init({
+		input,
+		output,
+		trim: { start: trimStart, end: trimEnd },
+		tags: stripMetadata ? {} : undefined,
+		showWarnings: false,
+	});
+	if (!conversion.isValid) {
+		throw new Error('This video can’t be cut this way. Turn off “Fast cut” to trim it normally.');
+	}
+
+	const onAbort = () => void conversion.cancel();
+	signal?.addEventListener('abort', onAbort, { once: true });
+	conversion.onProgress = (progress: number) => onProgress?.(Math.round(progress * 100));
+
+	try {
+		await conversion.execute();
+	} catch (error) {
+		if (error instanceof ConversionCanceledError || signal?.aborted) {
+			throw new CompressionCancelledError();
+		}
+		throw error;
+	} finally {
+		signal?.removeEventListener('abort', onAbort);
+	}
+
+	if (!target.buffer) throw new Error('Trimming produced no output.');
+	return new Blob([target.buffer], { type: container === 'mp4' ? 'video/mp4' : 'video/webm' });
 }

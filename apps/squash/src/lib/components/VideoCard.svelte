@@ -3,6 +3,7 @@
 		videos,
 		type VideoItem,
 		type OutputFormat,
+		type Rotation,
 		estimateFileSize,
 		getEffectiveDuration,
 	} from '$lib/stores/videos.svelte';
@@ -28,6 +29,7 @@
 		SplitSquareHorizontal,
 		Gpu,
 		Scissors,
+		RotateCw,
 		GripVertical,
 	} from 'lucide-svelte';
 	import { fade, scale, slide } from 'svelte/transition';
@@ -68,7 +70,13 @@
 
 	// Estimated file size for pending items
 	const estimatedSize = $derived(
-		item.status === 'pending' ? estimateFileSize(item, videos.settings) : 0
+		item.status === 'pending'
+			? item.losslessTrim &&
+				(item.trimStart !== undefined || item.trimEnd !== undefined) &&
+				item.duration
+				? Math.round((item.originalSize * getEffectiveDuration(item)) / item.duration)
+				: estimateFileSize(item, videos.settings)
+			: 0
 	);
 
 	// Effective duration (considering trim)
@@ -76,6 +84,19 @@
 
 	// Whether item has custom trim settings
 	const hasTrim = $derived(item.trimStart !== undefined || item.trimEnd !== undefined);
+
+	// Rotation only shows on the thumbnail until the file has been processed
+	const previewRotation = $derived(item.status === 'pending' ? (item.rotation ?? 0) : 0);
+
+	function rotate() {
+		const next = (((item.rotation ?? 0) + 90) % 360) as Rotation;
+		// A rotated video has to be re-encoded, so it can't be a copied cut
+		videos.updateItem(item.id, { rotation: next || undefined, losslessTrim: undefined });
+	}
+
+	function setLosslessTrim(on: boolean) {
+		videos.updateItem(item.id, { losslessTrim: on || undefined });
+	}
 
 	// Initialize trim inputs when showing UI
 	$effect(() => {
@@ -115,6 +136,7 @@
 		videos.updateItem(item.id, {
 			trimStart: undefined,
 			trimEnd: undefined,
+			losslessTrim: undefined,
 		});
 		showTrimUI = false;
 	}
@@ -187,12 +209,25 @@
 	<!-- Thumbnail -->
 	<div class="bg-surface-800 relative aspect-video w-full overflow-hidden rounded-t-2xl">
 		<!-- svelte-ignore a11y_media_has_caption -->
-		<video
-			src={item.compressedUrl || item.originalUrl}
-			class="h-full w-full object-cover"
-			muted
-			preload="metadata"
-		></video>
+		{#if previewRotation === 0 || item.compressedUrl}
+			<video
+				src={item.compressedUrl || item.originalUrl}
+				class="h-full w-full object-cover"
+				muted
+				preload="metadata"
+			></video>
+		{:else}
+			<!-- Show the pending rotation: sideways turns swap the box's width and height -->
+			<video
+				src={item.originalUrl}
+				class="absolute object-contain"
+				style={previewRotation === 180
+					? 'inset:0;width:100%;height:100%;transform:rotate(180deg)'
+					: `left:50%;top:50%;width:56.25%;height:177.78%;transform:translate(-50%,-50%) rotate(${previewRotation}deg)`}
+				muted
+				preload="metadata"
+			></video>
+		{/if}
 
 		{#if item.status === 'processing'}
 			<div
@@ -337,6 +372,17 @@
 				<span class="text-surface-500 text-xs">
 					{item.format?.toUpperCase()} → {item.outputFormat.toUpperCase()}
 				</span>
+				<button
+					onclick={rotate}
+					aria-label="Rotate video 90 degrees clockwise"
+					title="Rotate 90° clockwise"
+					class="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all sm:py-1 sm:text-xs {item.rotation
+						? 'bg-sky-500/20 text-sky-400'
+						: 'text-surface-500 hover:text-surface-300 hover:bg-surface-700/50'}"
+				>
+					<RotateCw class="h-3.5 w-3.5 sm:h-3 sm:w-3" />
+					{item.rotation ? `${item.rotation}°` : 'Rotate'}
+				</button>
 				{#if item.duration}
 					<button
 						onclick={() => (showTrimUI = !showTrimUI)}
@@ -367,6 +413,28 @@
 						}}
 					/>
 					{#if hasTrim}
+						<label
+							class="mt-3 flex cursor-pointer items-start gap-2 text-xs {item.rotation
+								? 'opacity-50'
+								: ''}"
+						>
+							<input
+								type="checkbox"
+								checked={!!item.losslessTrim}
+								disabled={!!item.rotation}
+								onchange={(e) => setLosslessTrim(e.currentTarget.checked)}
+								class="bg-surface-700 border-surface-600 text-accent-start mt-0.5 h-4 w-4 rounded"
+							/>
+							<span>
+								<span class="text-surface-300 font-medium">Fast cut (keeps original quality)</span>
+								<span class="text-surface-500 block">
+									Copies most of the video untouched, so it’s near-instant with no quality loss.
+									Only the first few seconds are re-encoded to keep the cut exact. Quality and size
+									settings are skipped.
+									{#if item.rotation}Not available while rotated.{/if}
+								</span>
+							</span>
+						</label>
 						<button
 							onclick={clearTrim}
 							class="text-surface-500 mt-2 w-full rounded-lg py-1.5 text-xs transition-colors hover:bg-red-500/10 hover:text-red-400"

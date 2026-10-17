@@ -3,11 +3,13 @@
 		videos,
 		QUALITY_PRESETS,
 		RESOLUTION_OPTIONS,
+		FRAME_RATE_OPTIONS,
 		AUDIO_BITRATE_OPTIONS,
 		SIZE_PRESETS,
 		estimateFileSize,
 		type OutputFormat,
 		type Resolution,
+		type MaxFrameRate,
 		type AudioCodec,
 	} from '$lib/stores/videos.svelte';
 	import {
@@ -121,6 +123,10 @@
 	function clearTargetSize() {
 		videos.updateSettings({ targetSizeMB: undefined });
 		targetSizeInput = '';
+	}
+
+	function handleFrameRateChange(maxFrameRate: MaxFrameRate) {
+		videos.updateSettings({ maxFrameRate });
 	}
 
 	function handleResolutionChange(resolution: Resolution) {
@@ -400,6 +406,30 @@
 							file wouldn’t otherwise look good at that size.
 						</p>
 					{/if}
+
+					<!-- Frame rate: only ever lowers the source rate -->
+					<div class="mt-5">
+						<div class="mb-2 flex items-center gap-2">
+							<span class="text-surface-300 text-sm font-medium">Frame rate</span>
+							<Tooltip
+								content="Cap the frame rate to shrink the file — 30 fps looks smooth for most videos, and 60 fps footage roughly halves in size. It never raises the rate. With a target size, 60 fps sources are capped at 30 automatically."
+							/>
+						</div>
+						<div class="flex flex-wrap gap-1.5" role="group" aria-label="Frame rate">
+							{#each FRAME_RATE_OPTIONS as option (option.value)}
+								<button
+									onclick={() => handleFrameRateChange(option.value)}
+									aria-pressed={videos.settings.maxFrameRate === option.value}
+									class="rounded-lg px-3 py-1.5 text-sm transition-all {videos.settings
+										.maxFrameRate === option.value
+										? 'bg-accent-start/20 text-accent-start ring-accent-start/50 ring-1'
+										: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700/50'}"
+								>
+									{option.label}
+								</button>
+							{/each}
+						</div>
+					</div>
 				</div>
 
 				<!-- Audio -->

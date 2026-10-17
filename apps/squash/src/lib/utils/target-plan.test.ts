@@ -95,6 +95,14 @@ describe('planForTarget', () => {
 		expect(at60.height).toBe(at30.height);
 	});
 
+	it('judges quality at the user frame-rate ceiling', () => {
+		// Capping to 15 fps leaves twice the bits per frame, so a higher resolution is affordable
+		const base = { duration: 300, sourceFps: 30 };
+		const at30 = planForTarget(input({ ...base }));
+		const at15 = planForTarget(input({ ...base, maxFrameRate: 15 }));
+		expect(at15.height).toBeGreaterThanOrEqual(at30.height);
+	});
+
 	it('only drops below the 360p floor when asked to', () => {
 		const tight = { width: 640, height: 360, duration: 60, targetBytes: 1 * MB };
 		expect(planForTarget(input(tight)).height).toBe(360);

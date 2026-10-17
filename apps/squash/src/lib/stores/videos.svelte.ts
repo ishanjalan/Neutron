@@ -5,6 +5,9 @@ import { isSupportedVideo, rejectionMessage } from '$lib/utils/file-rejection';
 export type VideoFormat = 'mp4' | 'webm' | 'mov' | 'mkv';
 export type OutputFormat = 'mp4' | 'webm' | 'av1' | 'hevc';
 export type VideoStatus = 'pending' | 'processing' | 'completed' | 'error';
+export type Rotation = 0 | 90 | 180 | 270;
+/** Frame-rate ceiling in fps; 0 keeps the source rate. Only ever lowers it. */
+export type MaxFrameRate = 0 | 30 | 24 | 15;
 export type Resolution = 'original' | '2160p' | '1440p' | '1080p' | '720p' | '480p' | '360p';
 export type AudioCodec = 'aac' | 'opus' | 'mp3' | 'copy' | 'none';
 
@@ -53,12 +56,17 @@ export interface VideoItem {
 	trimStart?: number; // Start time in seconds
 	trimEnd?: number; // End time in seconds
 	fit?: FitReport; // Set when compressing to a target size
+	/** Clockwise rotation baked into the output, for this video only. */
+	rotation?: Rotation;
+	/** Cut the trim range without re-encoding (instant, original quality; snaps to keyframes). */
+	losslessTrim?: boolean;
 }
 
 export interface CompressionSettings {
 	quality: 'tiny' | 'web' | 'social' | 'high' | 'lossless';
 	outputFormat: OutputFormat;
 	resolution: Resolution;
+	maxFrameRate: MaxFrameRate;
 	audioBitrate: '64k' | '128k' | '192k' | '256k' | '320k';
 	audioCodec: AudioCodec;
 	stripMetadata: boolean;
@@ -115,6 +123,13 @@ export const RESOLUTION_OPTIONS: { value: Resolution; label: string; pixels: str
 	{ value: '360p', label: 'Low', pixels: '640×360' },
 ];
 
+export const FRAME_RATE_OPTIONS: { value: MaxFrameRate; label: string }[] = [
+	{ value: 0, label: 'Original' },
+	{ value: 30, label: '30 fps' },
+	{ value: 24, label: '24 fps' },
+	{ value: 15, label: '15 fps' },
+];
+
 export const AUDIO_BITRATE_OPTIONS = [
 	{ value: '64k', label: '64 kbps', desc: 'Low' },
 	{ value: '128k', label: '128 kbps', desc: 'Standard' },
@@ -154,6 +169,7 @@ function getDefaultSettings(): CompressionSettings {
 		quality: 'web',
 		outputFormat: 'mp4',
 		resolution: 'original',
+		maxFrameRate: 0,
 		audioBitrate: '128k',
 		audioCodec: 'aac',
 		stripMetadata: false,

@@ -22,6 +22,7 @@ import {
 	isWebCodecsSupported,
 	getWebCodecsCapabilities,
 	encodeWithWebCodecs,
+	trimWithoutReencode,
 	getRecommendedCodecs,
 	CompressionCancelledError,
 	isUnsupportedInputError,
@@ -141,6 +142,15 @@ async function processQueue() {
 	isProcessing = false;
 }
 
+/** A trim range is set and the user asked for a cut without re-encoding. */
+function usesLosslessTrim(item: VideoItem): boolean {
+	return (
+		!!item.losslessTrim &&
+		!item.rotation &&
+		(item.trimStart !== undefined || item.trimEnd !== undefined)
+	);
+}
+
 const UNSUPPORTED_INPUT_MESSAGE =
 	'Squash can’t read this file — its format or codec isn’t supported by your browser. Try converting it to MP4 (H.264) first.';
 
@@ -155,27 +165,47 @@ async function compressVideo(item: VideoItem) {
 			eta: estimateCompressionTime(item, videos.settings),
 		});
 
-		const capabilities = await initWebCodecs();
+		let result: { blob: Blob; duration: number; fit?: FitReport };
+		let outputFormat: OutputFormat | undefined;
 
-		// Check if the required codec is supported
-		const outputFormat = item.outputFormat;
-		const { video: videoCodec } = getRecommendedCodecs(outputFormat);
+		if (usesLosslessTrim(item)) {
+			// No encoder involved, so no codec/hardware checks. Keep the source's container.
+			const container = item.format === 'webm' ? 'webm' : 'mp4';
+			outputFormat = container;
+			videos.updateItem(item.id, { progressStage: 'Fast cut (copying, not re-encoding)...' });
+			const started = Date.now();
+			const blob = await trimWithoutReencode(item.file, {
+				trimStart: item.trimStart ?? 0,
+				trimEnd: item.trimEnd ?? item.duration ?? 0,
+				container,
+				stripMetadata: videos.settings.stripMetadata,
+				signal: controller.signal,
+				onProgress: (progress) => videos.updateItem(item.id, { progress }),
+			});
+			result = { blob, duration: Date.now() - started };
+		} else {
+			const capabilities = await initWebCodecs();
 
-		if (!capabilities.supportedVideoCodecs.includes(videoCodec)) {
-			const isWebmVp9 = outputFormat === 'webm' && videoCodec === 'vp9';
-			throw new Error(
-				isWebmVp9
-					? 'WebM/VP9 encoding is not supported in this browser. Try Chrome, or switch to MP4.'
-					: `${videoCodec.toUpperCase()} codec not supported by your hardware. Try a different output format.`
-			);
+			// Check if the required codec is supported
+			const requested = item.outputFormat;
+			const { video: videoCodec } = getRecommendedCodecs(requested);
+
+			if (!capabilities.supportedVideoCodecs.includes(videoCodec)) {
+				const isWebmVp9 = requested === 'webm' && videoCodec === 'vp9';
+				throw new Error(
+					isWebmVp9
+						? 'WebM/VP9 encoding is not supported in this browser. Try Chrome, or switch to MP4.'
+						: `${videoCodec.toUpperCase()} codec not supported by your hardware. Try a different output format.`
+				);
+			}
+
+			const accelNote = capabilities.hardwareAcceleration ? ' (GPU)' : '';
+			videos.updateItem(item.id, {
+				progressStage: `Encoding with ${videoCodec.toUpperCase()}${accelNote}...`,
+			});
+
+			result = await compressWithWebCodecs(item, controller.signal);
 		}
-
-		const accelNote = capabilities.hardwareAcceleration ? ' (GPU)' : '';
-		videos.updateItem(item.id, {
-			progressStage: `Encoding with ${videoCodec.toUpperCase()}${accelNote}...`,
-		});
-
-		const result = await compressWithWebCodecs(item, controller.signal);
 
 		const compressedUrl = URL.createObjectURL(result.blob);
 
@@ -188,6 +218,8 @@ async function compressVideo(item: VideoItem) {
 			compressedBlob: result.blob,
 			compressionDuration: result.duration,
 			fit: result.fit,
+			// A copied cut keeps the source's container, so the download extension must match
+			...(outputFormat ? { outputFormat } : {}),
 			eta: undefined,
 		});
 	} catch (error) {
@@ -244,8 +276,12 @@ async function compressWithWebCodecs(
 	// AV1 and HEVC use MP4 container
 	const containerFormat = outputFormat === 'av1' || outputFormat === 'hevc' ? 'mp4' : outputFormat;
 
-	const srcWidth = item.width || 1920;
-	const srcHeight = item.height || 1080;
+	// Rotating 90°/270° swaps width and height; everything downstream works in output space
+	const rotation = item.rotation ?? 0;
+	const sideways = rotation === 90 || rotation === 270;
+	const srcWidth = (sideways ? item.height : item.width) || (sideways ? 1080 : 1920);
+	const srcHeight = (sideways ? item.width : item.height) || (sideways ? 1920 : 1080);
+	const userMaxFps = settings.maxFrameRate || 0;
 	const requestedShortSide = shortSideFromResolution(settings.resolution);
 	const audioMode =
 		settings.audioCodec === 'none' ? 'none' : settings.audioCodec === 'copy' ? 'copy' : 'encode';
@@ -283,6 +319,7 @@ async function compressWithWebCodecs(
 				audioBitrate,
 				requestedShortSide,
 				sourceBitrate: item.bitrate,
+				maxFrameRate: userMaxFps || undefined,
 				sourceFps,
 				// If an earlier pass overshot, allow going lower than the usual quality floor
 				minShortSide: passes > 1 ? RETRY_FLOOR : undefined,
@@ -304,8 +341,9 @@ async function compressWithWebCodecs(
 				width: dims.width,
 				height: dims.height,
 				bitrate: plan?.videoBitrate,
-				// Cap high-frame-rate sources only when we're squeezing into a size budget
-				maxFrameRate: plan ? 30 : undefined,
+				rotate: rotation || undefined,
+				// The user's ceiling; when fitting to a size, 60 fps sources default to 30
+				maxFrameRate: userMaxFps || (plan ? 30 : undefined),
 				audioBitrate: plan?.audioBitrate || audioBitrate,
 				sampleRate: 48000,
 				channels: 2,

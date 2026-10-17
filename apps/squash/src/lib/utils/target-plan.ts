@@ -46,6 +46,8 @@ export interface PlanInput {
 	sourceBitrate?: number;
 	/** Source frame rate, if known. */
 	sourceFps?: number;
+	/** Frame-rate ceiling chosen by the user (fps). Defaults to 30 while fitting to a size. */
+	maxFrameRate?: number;
 	/** Lowest short side automatic mode may choose. Defaults to 360. */
 	minShortSide?: number;
 }
@@ -101,7 +103,7 @@ export function planForTarget(input: PlanInput): TargetPlan {
 
 	const fps = Math.min(
 		input.sourceFps && input.sourceFps > 0 ? input.sourceFps : 30,
-		MAX_PLANNED_FPS
+		input.maxFrameRate && input.maxFrameRate > 0 ? input.maxFrameRate : MAX_PLANNED_FPS
 	);
 	const threshold = MIN_BITS_PER_PIXEL[codec];
 	const srcShort = Math.min(width, height);
