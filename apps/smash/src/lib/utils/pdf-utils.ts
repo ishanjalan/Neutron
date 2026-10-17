@@ -46,6 +46,9 @@ export function getUserFriendlyError(error: unknown): string {
 
 	const lowerMessage = message.toLowerCase();
 
+	// Messages we wrote ourselves are already actionable
+	if (lowerMessage.includes('unlock pdf tool')) return message;
+
 	// Password errors
 	if (
 		lowerMessage.includes('password') ||

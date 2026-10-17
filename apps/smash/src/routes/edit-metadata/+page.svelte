@@ -1,11 +1,18 @@
 <script lang="ts">
+	import { acceptPdfFiles } from '$lib/utils/pdf-files';
 	import Header from '$lib/components/Header.svelte';
 	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
 	import { editMetadataSEO } from '$lib/seo-content';
 	import { smashRelated } from '$lib/related-tools';
 	import { downloadBlob } from '@neutron/utils';
-	import { editMetadata, getOutputFilename, generateThumbnail, getPageCount } from '$lib/utils/pdf';
+	import {
+		editMetadata,
+		readMetadata,
+		getOutputFilename,
+		generateThumbnail,
+		getPageCount,
+	} from '$lib/utils/pdf';
 	import { formatBytes } from '$lib/stores/pdfs.svelte';
 	import {
 		Tag,
@@ -41,8 +48,13 @@
 	let keywords = $state('');
 
 	const hasFile = $derived(pdfFile !== null);
+	// Values the PDF had when loaded; the form starts from these so blank fields can clear them
+	let original = $state({ title: '', author: '', subject: '', keywords: '' });
 	const hasChanges = $derived(
-		title.trim() !== '' || author.trim() !== '' || subject.trim() !== '' || keywords.trim() !== ''
+		title !== original.title ||
+			author !== original.author ||
+			subject !== original.subject ||
+			keywords !== original.keywords
 	);
 	const canProcess = $derived(hasFile && hasChanges);
 
@@ -51,11 +63,8 @@
 	}
 
 	async function handleFiles(newFiles: File[]) {
-		const file = newFiles.find((f) => f.type === 'application/pdf' || f.name.endsWith('.pdf'));
-		if (!file) {
-			toast.error('Please select a PDF file');
-			return;
-		}
+		const [file] = await acceptPdfFiles(newFiles);
+		if (!file) return;
 		if (pdfFile) URL.revokeObjectURL(pdfFile.originalUrl);
 
 		const newPdf: PDFFile = { id: generateId(), file, originalUrl: URL.createObjectURL(file) };
@@ -65,6 +74,14 @@
 		} catch (e) {
 			console.warn('Failed to get PDF metadata:', e);
 		}
+
+		try {
+			original = await readMetadata(file);
+		} catch (e) {
+			console.warn('Failed to read PDF properties:', e);
+			original = { title: '', author: '', subject: '', keywords: '' };
+		}
+		({ title, author, subject, keywords } = original);
 
 		pdfFile = newPdf;
 		resultBlob = null;
@@ -92,6 +109,7 @@
 				author,
 				subject,
 				keywords,
+				clearBlank: true,
 				onProgress: (p) => {
 					progress = p;
 				},

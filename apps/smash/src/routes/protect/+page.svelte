@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { acceptPdfFiles } from '$lib/utils/pdf-files';
 	import Header from '$lib/components/Header.svelte';
 	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
@@ -48,11 +49,8 @@
 	}
 
 	async function handleFiles(newFiles: File[]) {
-		const file = newFiles.find((f) => f.type === 'application/pdf' || f.name.endsWith('.pdf'));
-		if (!file) {
-			toast.error('Please select a PDF file');
-			return;
-		}
+		const [file] = await acceptPdfFiles(newFiles);
+		if (!file) return;
 		if (pdfFile) URL.revokeObjectURL(pdfFile.originalUrl);
 
 		const newPdf: PDFFile = { id: generateId(), file, originalUrl: URL.createObjectURL(file) };
@@ -90,7 +88,7 @@
 				},
 			});
 			resultBlob = result;
-			toast.success('PDF protected with AES-128 encryption!');
+			toast.success('PDF protected with AES-256 encryption!');
 		} catch (error) {
 			console.error('Protect error:', error);
 			toast.error(error instanceof Error ? error.message : 'Failed to protect PDF');
@@ -142,12 +140,12 @@
 	<title>Password Protect PDF Online — Free | Smash</title>
 	<meta
 		name="description"
-		content="Encrypt a PDF with AES-128 password protection. Free, private, no upload."
+		content="Encrypt a PDF with AES-256 password protection. Free, private, no upload."
 	/>
 	<meta property="og:title" content="Password Protect PDF Online — Free | Smash" />
 	<meta
 		property="og:description"
-		content="Encrypt a PDF with AES-128 password protection. Free, private, no upload."
+		content="Encrypt a PDF with AES-256 password protection. Free, private, no upload."
 	/>
 	<link rel="canonical" href="https://ishanjalan.github.io/Smash/protect" />
 </svelte:head>
@@ -169,7 +167,7 @@
 					<Lock class="h-4 w-4" /> Protect PDF
 				</div>
 				<h1 class="text-surface-100 text-3xl font-bold">Password protect your PDF</h1>
-				<p class="text-surface-500 mt-2">Secure with AES-128 encryption</p>
+				<p class="text-surface-500 mt-2">Secure with AES-256 encryption</p>
 			</div>
 
 			<div class="grid gap-6 lg:grid-cols-2">
@@ -249,7 +247,7 @@
 										<p class="flex items-center gap-2 font-medium text-green-400">
 											<Shield class="h-4 w-4" /> PDF protected!
 										</p>
-										<p class="text-surface-500 text-xs">Encrypted with AES-128</p>
+										<p class="text-surface-500 text-xs">Encrypted with AES-256</p>
 									</div>
 									<button
 										onclick={downloadResult}
@@ -310,7 +308,7 @@
 						</div>
 						<div class="bg-surface-800/50 border-surface-700/50 rounded-xl border p-4">
 							<p class="text-surface-400 text-xs">
-								<strong class="text-surface-300">Security:</strong> Your PDF will be encrypted with AES-128.
+								<strong class="text-surface-300">Security:</strong> Your PDF will be encrypted with AES-256.
 								Remember your password - it cannot be recovered!
 							</p>
 						</div>

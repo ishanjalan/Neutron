@@ -48,7 +48,9 @@ describe('pdfs store', () => {
 
 		it('clears items when switching between incompatible file types', async () => {
 			// Add a fake PDF item first
-			await pdfs.addFiles([new File(['%PDF'], 'test.pdf', { type: 'application/pdf' })]);
+			await pdfs.addFiles([
+				new File(['%PDF-1.4 fake test document'], 'test.pdf', { type: 'application/pdf' }),
+			]);
 			expect(pdfs.items.length).toBe(1);
 
 			// Switch to images-to-pdf (accepts images, not PDFs)
@@ -59,7 +61,9 @@ describe('pdfs store', () => {
 		it('does NOT clear items when switching between tools that accept the same type', async () => {
 			// Both compress and merge accept .pdf
 			pdfs.setTool('compress');
-			await pdfs.addFiles([new File(['%PDF'], 'test.pdf', { type: 'application/pdf' })]);
+			await pdfs.addFiles([
+				new File(['%PDF-1.4 fake test document'], 'test.pdf', { type: 'application/pdf' }),
+			]);
 			const countBefore = pdfs.items.length;
 
 			pdfs.setTool('merge');
@@ -71,7 +75,9 @@ describe('pdfs store', () => {
 	describe('addFiles', () => {
 		it('accepts PDF files for non-images-to-pdf tools', async () => {
 			pdfs.setTool('compress');
-			await pdfs.addFiles([new File(['%PDF'], 'doc.pdf', { type: 'application/pdf' })]);
+			await pdfs.addFiles([
+				new File(['%PDF-1.4 fake test document'], 'doc.pdf', { type: 'application/pdf' }),
+			]);
 			expect(pdfs.items.length).toBe(1);
 			expect(pdfs.items[0].name).toBe('doc.pdf');
 		});
@@ -92,8 +98,8 @@ describe('pdfs store', () => {
 		it('assigns unique IDs', async () => {
 			pdfs.setTool('compress');
 			await pdfs.addFiles([
-				new File(['%PDF'], 'a.pdf', { type: 'application/pdf' }),
-				new File(['%PDF'], 'b.pdf', { type: 'application/pdf' }),
+				new File(['%PDF-1.4 fake test document'], 'a.pdf', { type: 'application/pdf' }),
+				new File(['%PDF-1.4 fake test document'], 'b.pdf', { type: 'application/pdf' }),
 			]);
 			const ids = pdfs.items.map((i) => i.id);
 			expect(new Set(ids).size).toBe(2);
@@ -103,7 +109,9 @@ describe('pdfs store', () => {
 	describe('updateItem', () => {
 		it('updates item fields', async () => {
 			pdfs.setTool('compress');
-			await pdfs.addFiles([new File(['%PDF'], 'x.pdf', { type: 'application/pdf' })]);
+			await pdfs.addFiles([
+				new File(['%PDF-1.4 fake test document'], 'x.pdf', { type: 'application/pdf' }),
+			]);
 			const id = pdfs.items[0].id;
 
 			pdfs.updateItem(id, { status: 'completed', progress: 100 });
@@ -115,7 +123,9 @@ describe('pdfs store', () => {
 	describe('removeItem', () => {
 		it('removes item by id', async () => {
 			pdfs.setTool('compress');
-			await pdfs.addFiles([new File(['%PDF'], 'x.pdf', { type: 'application/pdf' })]);
+			await pdfs.addFiles([
+				new File(['%PDF-1.4 fake test document'], 'x.pdf', { type: 'application/pdf' }),
+			]);
 			const id = pdfs.items[0].id;
 
 			pdfs.removeItem(id);
@@ -127,9 +137,9 @@ describe('pdfs store', () => {
 		it('moves item from one index to another and updates order', async () => {
 			pdfs.setTool('merge');
 			await pdfs.addFiles([
-				new File(['%PDF'], 'first.pdf', { type: 'application/pdf' }),
-				new File(['%PDF'], 'second.pdf', { type: 'application/pdf' }),
-				new File(['%PDF'], 'third.pdf', { type: 'application/pdf' }),
+				new File(['%PDF-1.4 fake test document'], 'first.pdf', { type: 'application/pdf' }),
+				new File(['%PDF-1.4 fake test document'], 'second.pdf', { type: 'application/pdf' }),
+				new File(['%PDF-1.4 fake test document'], 'third.pdf', { type: 'application/pdf' }),
 			]);
 
 			pdfs.reorderItems(0, 2);
@@ -142,7 +152,9 @@ describe('pdfs store', () => {
 	describe('clearAll', () => {
 		it('clears all items', async () => {
 			pdfs.setTool('compress');
-			await pdfs.addFiles([new File(['%PDF'], 'x.pdf', { type: 'application/pdf' })]);
+			await pdfs.addFiles([
+				new File(['%PDF-1.4 fake test document'], 'x.pdf', { type: 'application/pdf' }),
+			]);
 			expect(pdfs.items.length).toBe(1);
 
 			pdfs.clearAll();
@@ -153,7 +165,9 @@ describe('pdfs store', () => {
 	describe('getItemById', () => {
 		it('returns the matching item', async () => {
 			pdfs.setTool('compress');
-			await pdfs.addFiles([new File(['%PDF'], 'find-me.pdf', { type: 'application/pdf' })]);
+			await pdfs.addFiles([
+				new File(['%PDF-1.4 fake test document'], 'find-me.pdf', { type: 'application/pdf' }),
+			]);
 			const id = pdfs.items[0].id;
 
 			expect(pdfs.getItemById(id)?.name).toBe('find-me.pdf');
@@ -212,5 +226,24 @@ describe('parsePageRange', () => {
 
 	it('returns deduplicated sorted pages', () => {
 		expect(parsePageRange('3,1,2,1-3', 10)).toEqual([1, 2, 3]);
+	});
+});
+
+describe('pdfs store: file validation', () => {
+	it('rejects files that are not PDFs by content, whatever their name or type', async () => {
+		pdfs.clearAll();
+		pdfs.setTool('compress');
+		await pdfs.addFiles([
+			new File(['just some text, not a pdf'], 'fake.pdf', { type: 'application/pdf' }),
+			new File([], 'empty.pdf', { type: 'application/pdf' }),
+		]);
+		expect(pdfs.items).toHaveLength(0);
+	});
+
+	it('accepts a real PDF even when the browser reports no MIME type', async () => {
+		pdfs.clearAll();
+		pdfs.setTool('compress');
+		await pdfs.addFiles([new File(['%PDF-1.7 real enough'], 'untyped.pdf')]);
+		expect(pdfs.items).toHaveLength(1);
 	});
 });

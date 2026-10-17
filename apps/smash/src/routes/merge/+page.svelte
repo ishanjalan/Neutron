@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { acceptPdfFiles } from '$lib/utils/pdf-files';
 	import Header from '$lib/components/Header.svelte';
 	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
@@ -59,13 +60,8 @@
 	}
 
 	async function handleFiles(newFiles: File[]) {
-		const pdfFiles = newFiles.filter(
-			(f) => f.type === 'application/pdf' || f.name.endsWith('.pdf')
-		);
-		if (pdfFiles.length === 0) {
-			toast.error('Please select PDF files');
-			return;
-		}
+		const pdfFiles = await acceptPdfFiles(newFiles);
+		if (pdfFiles.length === 0) return;
 
 		const startOrder = files.length;
 		const newPdfFiles: PDFFile[] = [];
@@ -304,7 +300,7 @@
 						<span>{formatBytes(totalSize)}</span>
 					</div>
 
-					{#each files.sort((a, b) => a.order - b.order) as pdfFile (pdfFile.id)}
+					{#each [...files].sort((a, b) => a.order - b.order) as pdfFile (pdfFile.id)}
 						<div
 							role="listitem"
 							class="glass flex cursor-grab items-center justify-between rounded-xl p-3 transition-transform active:cursor-grabbing {draggedItem ===

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { acceptPdfFiles } from '$lib/utils/pdf-files';
 	import { SvelteSet } from 'svelte/reactivity';
 	import Header from '$lib/components/Header.svelte';
 	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
@@ -47,11 +48,8 @@
 	}
 
 	async function handleFiles(newFiles: File[]) {
-		const file = newFiles.find((f) => f.type === 'application/pdf' || f.name.endsWith('.pdf'));
-		if (!file) {
-			toast.error('Please select a PDF file');
-			return;
-		}
+		const [file] = await acceptPdfFiles(newFiles);
+		if (!file) return;
 
 		if (pdfFile) {
 			URL.revokeObjectURL(pdfFile.originalUrl);

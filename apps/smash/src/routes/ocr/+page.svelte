@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { acceptPdfFiles } from '$lib/utils/pdf-files';
 	import Header from '$lib/components/Header.svelte';
 	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
@@ -8,6 +9,7 @@
 	import {
 		performOCR,
 		LANGUAGE_OPTIONS,
+		supportsSearchablePdf,
 		OUTPUT_MODE_OPTIONS,
 		estimateProcessingTime,
 		type OCRLanguage,
@@ -51,6 +53,11 @@
 	let isProcessing = $state(false);
 	let language = $state<OCRLanguage>('eng');
 	let outputMode = $state<OCROutputMode>('searchable-pdf');
+	const pdfOutputAvailable = $derived(supportsSearchablePdf(language));
+
+	$effect(() => {
+		if (!pdfOutputAvailable && outputMode !== 'text-only') outputMode = 'text-only';
+	});
 	let fileInput: HTMLInputElement;
 	let isDragging = $state(false);
 
@@ -66,13 +73,8 @@
 	}
 
 	async function handleFiles(newFiles: File[]) {
-		const pdfFiles = newFiles.filter(
-			(f) => f.type === 'application/pdf' || f.name.endsWith('.pdf')
-		);
-		if (pdfFiles.length === 0) {
-			toast.error('Please select PDF files');
-			return;
-		}
+		const pdfFiles = await acceptPdfFiles(newFiles);
+		if (pdfFiles.length === 0) return;
 
 		const newPdfFiles: PDFFile[] = [];
 
@@ -208,12 +210,12 @@
 	<title>OCR PDF Online — Extract Text from Scanned PDF | Smash</title>
 	<meta
 		name="description"
-		content="Extract searchable text from scanned PDFs using Tesseract. Supports 100+ languages. Free and private."
+		content="Extract searchable text from scanned PDFs using Tesseract. Supports 15 languages. Free, and your PDF never leaves your device."
 	/>
 	<meta property="og:title" content="OCR PDF Online — Extract Text from Scanned PDF | Smash" />
 	<meta
 		property="og:description"
-		content="Extract searchable text from scanned PDFs using Tesseract. Supports 100+ languages. Free and private."
+		content="Extract searchable text from scanned PDFs using Tesseract. Supports 15 languages. Free, and your PDF never leaves your device."
 	/>
 	<link rel="canonical" href="https://ishanjalan.github.io/Smash/ocr" />
 </svelte:head>
@@ -432,7 +434,8 @@
 							{#each OUTPUT_MODE_OPTIONS as opt (opt.value)}
 								<button
 									onclick={() => (outputMode = opt.value)}
-									class="flex w-full items-start gap-3 rounded-xl p-3 transition-all {outputMode ===
+									disabled={!pdfOutputAvailable && opt.value !== 'text-only'}
+									class="flex w-full items-start gap-3 rounded-xl p-3 transition-all disabled:cursor-not-allowed disabled:opacity-40 {outputMode ===
 									opt.value
 										? 'border border-sky-500/50 bg-sky-500/20'
 										: 'bg-surface-800 hover:bg-surface-700'}"
@@ -447,6 +450,12 @@
 								</button>
 							{/each}
 						</div>
+						{#if !pdfOutputAvailable}
+							<p class="text-surface-500 mt-2 text-xs">
+								Searchable PDF output supports Latin-script languages only. For this language, OCR
+								extracts the text as a .txt file.
+							</p>
+						{/if}
 					</div>
 
 					<!-- Estimated Time -->

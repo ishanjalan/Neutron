@@ -7,7 +7,7 @@
  * All processing happens locally in the browser - files never leave your device.
  */
 
-import { PDFDocument, degrees, rgb, StandardFonts } from '@cantoo/pdf-lib';
+import { PDFDocument, PDFDict, PDFName, degrees, rgb, StandardFonts } from '@cantoo/pdf-lib';
 import {
 	compressPDF as compressWithGS,
 	isGhostscriptReady,
@@ -49,6 +49,21 @@ export async function getBackendInfo(): Promise<{
 	};
 }
 
+/** PDFDocument.load with a message people can act on when the file is password-protected. */
+async function loadPdf(data: ArrayBuffer, name = 'This PDF'): Promise<PDFDocument> {
+	try {
+		return await PDFDocument.load(data);
+	} catch (error) {
+		if (error instanceof Error && /is encrypted/i.test(error.message)) {
+			throw new Error(
+				`${name} is password-protected. Remove the password with the Unlock PDF tool first.`,
+				{ cause: error }
+			);
+		}
+		throw error;
+	}
+}
+
 // ============================================
 // PDF COMPRESSION
 // ============================================
@@ -67,17 +82,26 @@ export async function compressPDF(file: File, options: CompressOptions): Promise
 
 	const arrayBuffer = await file.arrayBuffer();
 
+	let compressed: Blob;
 	// Try Ghostscript WASM first for best compression (50-90% reduction)
 	try {
 		onProgress?.(5);
 		const { result } = await compressWithGS(arrayBuffer, preset, onProgress);
-		return new Blob([result as unknown as Uint8Array<ArrayBuffer>], { type: 'application/pdf' });
+		compressed = new Blob([result as unknown as Uint8Array<ArrayBuffer>], {
+			type: 'application/pdf',
+		});
 	} catch (e) {
 		console.warn('Ghostscript WASM compression failed, falling back to pdf-lib:', e);
+		// Fall back to pdf-lib optimization (10-30% reduction)
+		compressed = await compressPDFWithPdfLib(file, options);
 	}
 
-	// Fall back to pdf-lib optimization (10-30% reduction)
-	return await compressPDFWithPdfLib(file, options);
+	// Re-writing an already-lean PDF (small or text-only) can make it bigger. Never hand back a
+	// larger file as the "compressed" result.
+	if (compressed.size >= file.size) {
+		return new Blob([arrayBuffer], { type: 'application/pdf' });
+	}
+	return compressed;
 }
 
 /**
@@ -134,7 +158,7 @@ export async function mergePDFs(
 
 	for (let i = 0; i < files.length; i++) {
 		const arrayBuffer = await files[i].arrayBuffer();
-		const pdf = await PDFDocument.load(arrayBuffer);
+		const pdf = await loadPdf(arrayBuffer, files[i].name);
 		const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
 		pages.forEach((page) => mergedPdf.addPage(page));
 
@@ -159,7 +183,7 @@ interface SplitOptions {
 
 export async function splitPDF(file: File, options: SplitOptions): Promise<Blob[]> {
 	const arrayBuffer = await file.arrayBuffer();
-	const pdf = await PDFDocument.load(arrayBuffer);
+	const pdf = await loadPdf(arrayBuffer);
 	const totalPages = pdf.getPageCount();
 	const results: Blob[] = [];
 
@@ -258,6 +282,73 @@ export async function pdfToImages(file: File, options: PDFToImagesOptions): Prom
 // IMAGES TO PDF (pdf-lib)
 // ============================================
 
+/** EXIF orientation (1–8) of a JPEG, or 1 when absent. pdf-lib's embedJpg ignores it. */
+function readJpegOrientation(buffer: ArrayBuffer): number {
+	const view = new DataView(buffer);
+	if (view.byteLength < 4 || view.getUint16(0) !== 0xffd8) return 1;
+	let offset = 2;
+	while (offset + 4 <= view.byteLength) {
+		if (view.getUint8(offset) !== 0xff) return 1;
+		const marker = view.getUint8(offset + 1);
+		if (marker === 0xda || marker === 0xd9) return 1;
+		const size = view.getUint16(offset + 2);
+		if (
+			marker === 0xe1 &&
+			offset + 10 <= view.byteLength &&
+			view.getUint32(offset + 4) === 0x45786966
+		) {
+			const tiff = offset + 10;
+			if (tiff + 8 > view.byteLength) return 1;
+			const little = view.getUint16(tiff) === 0x4949;
+			const ifd = tiff + view.getUint32(tiff + 4, little);
+			if (ifd + 2 > view.byteLength) return 1;
+			const entries = view.getUint16(ifd, little);
+			for (let i = 0; i < entries; i++) {
+				const entry = ifd + 2 + i * 12;
+				if (entry + 12 > view.byteLength) return 1;
+				if (view.getUint16(entry, little) === 0x0112) {
+					const value = view.getUint16(entry + 8, little);
+					return value >= 1 && value <= 8 ? value : 1;
+				}
+			}
+			return 1;
+		}
+		offset += 2 + size;
+	}
+	return 1;
+}
+
+/**
+ * Embed an image. Upright JPEGs and PNGs are embedded as-is (no re-encoding). Anything else
+ * (WebP, GIF, BMP, AVIF, SVG, EXIF-rotated JPEGs) is decoded by the browser and embedded as PNG,
+ * since pdf-lib only reads JPEG and PNG.
+ */
+async function embedImage(pdf: PDFDocument, file: File) {
+	const buffer = await file.arrayBuffer();
+	const head = new Uint8Array(buffer.slice(0, 4));
+	const isPng = head[0] === 0x89 && head[1] === 0x50 && head[2] === 0x4e && head[3] === 0x47;
+	const isJpeg = head[0] === 0xff && head[1] === 0xd8;
+
+	if (isPng) return pdf.embedPng(buffer);
+	if (isJpeg && readJpegOrientation(buffer) === 1) return pdf.embedJpg(buffer);
+
+	let img: HTMLImageElement;
+	try {
+		img = await loadImage(file);
+	} catch {
+		throw new Error(`${file.name} can't be read as an image by this browser.`);
+	}
+	const canvas = document.createElement('canvas');
+	canvas.width = img.naturalWidth || img.width;
+	canvas.height = img.naturalHeight || img.height;
+	canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+	const pngBlob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+	canvas.width = 0;
+	canvas.height = 0;
+	if (!pngBlob) throw new Error(`${file.name} can't be converted for the PDF.`);
+	return pdf.embedPng(await pngBlob.arrayBuffer());
+}
+
 export async function imagesToPDF(
 	files: File[],
 	onProgress?: (progress: number) => void
@@ -265,31 +356,7 @@ export async function imagesToPDF(
 	const pdf = await PDFDocument.create();
 
 	for (let i = 0; i < files.length; i++) {
-		const file = files[i];
-		const arrayBuffer = await file.arrayBuffer();
-
-		let image;
-		if (file.type === 'image/png') {
-			image = await pdf.embedPng(arrayBuffer);
-		} else if (file.type === 'image/webp') {
-			const img = await loadImage(file);
-			const canvas = document.createElement('canvas');
-			canvas.width = img.width;
-			canvas.height = img.height;
-			const ctx = canvas.getContext('2d')!;
-			ctx.drawImage(img, 0, 0);
-			const pngBlob = await new Promise<Blob>((resolve) => {
-				canvas.toBlob((blob) => {
-					canvas.width = 0;
-					canvas.height = 0;
-					resolve(blob!);
-				}, 'image/png');
-			});
-			const pngBuffer = await pngBlob.arrayBuffer();
-			image = await pdf.embedPng(pngBuffer);
-		} else {
-			image = await pdf.embedJpg(arrayBuffer);
-		}
+		const image = await embedImage(pdf, files[i]);
 
 		const page = pdf.addPage([image.width, image.height]);
 		page.drawImage(image, {
@@ -328,7 +395,7 @@ function loadImage(file: File): Promise<HTMLImageElement> {
 
 export async function getPageCount(file: File): Promise<number> {
 	const arrayBuffer = await file.arrayBuffer();
-	const pdf = await PDFDocument.load(arrayBuffer);
+	const pdf = await loadPdf(arrayBuffer);
 	return pdf.getPageCount();
 }
 
@@ -356,7 +423,7 @@ interface RotateOptions {
 
 export async function rotatePDF(file: File, options: RotateOptions): Promise<Blob> {
 	const arrayBuffer = await file.arrayBuffer();
-	const pdf = await PDFDocument.load(arrayBuffer);
+	const pdf = await loadPdf(arrayBuffer);
 	const totalPages = pdf.getPageCount();
 	const pagesToRotate = options.pages || Array.from({ length: totalPages }, (_, i) => i + 1);
 
@@ -381,7 +448,7 @@ interface DeletePagesOptions {
 
 export async function deletePages(file: File, options: DeletePagesOptions): Promise<Blob> {
 	const arrayBuffer = await file.arrayBuffer();
-	const pdf = await PDFDocument.load(arrayBuffer);
+	const pdf = await loadPdf(arrayBuffer);
 
 	const pagesToDelete = [...options.pages].sort((a, b) => b - a);
 
@@ -404,7 +471,7 @@ interface ReorderOptions {
 
 export async function reorderPages(file: File, options: ReorderOptions): Promise<Blob> {
 	const arrayBuffer = await file.arrayBuffer();
-	const srcPdf = await PDFDocument.load(arrayBuffer);
+	const srcPdf = await loadPdf(arrayBuffer);
 	const newPdf = await PDFDocument.create();
 
 	for (let i = 0; i < options.newOrder.length; i++) {
@@ -421,7 +488,7 @@ export async function reorderPages(file: File, options: ReorderOptions): Promise
 }
 
 // ============================================
-// PASSWORD PROTECTION (pdf-lib AES-128)
+// PASSWORD PROTECTION (pdf-lib, AES-256)
 // ============================================
 
 interface ProtectOptions {
@@ -431,7 +498,11 @@ interface ProtectOptions {
 }
 
 /**
- * Password protect a PDF using pdf-lib (AES-128 encryption)
+ * Password protect a PDF with AES-256 encryption.
+ *
+ * pdf-lib only encrypts when `encrypt()` is called before `save()` — passing the passwords to
+ * `save()` is silently ignored and yields an unprotected file. The owner password defaults to
+ * the user password, so whoever opens the file with it has full access.
  */
 export async function protectPDF(file: File, options: ProtectOptions): Promise<Blob> {
 	const { userPassword, ownerPassword = userPassword, onProgress } = options;
@@ -439,23 +510,38 @@ export async function protectPDF(file: File, options: ProtectOptions): Promise<B
 	onProgress?.(10);
 
 	const arrayBuffer = await file.arrayBuffer();
-	const pdf = await PDFDocument.load(arrayBuffer);
+	const pdf = await loadPdf(arrayBuffer);
 
 	onProgress?.(50);
 
-	const pdfBytes = await pdf.save({
+	// With a distinct owner password, people who only know the open password can view the file
+	// but not edit/copy it (enforced by the viewer). With a single password everything is allowed.
+	const restricted = ownerPassword !== userPassword;
+	pdf.encrypt({
 		userPassword,
 		ownerPassword,
-		permissions: {
-			printing: 'lowResolution',
-			modifying: false,
-			copying: false,
-			annotating: false,
-			fillingForms: false,
-			contentAccessibility: true,
-			documentAssembly: false,
-		},
-	} as any);
+		algorithm: 'AES-256',
+		permissions: restricted
+			? {
+					printing: 'lowResolution',
+					modifying: false,
+					copying: false,
+					annotating: false,
+					fillingForms: false,
+					contentAccessibility: true,
+					documentAssembly: false,
+				}
+			: {
+					printing: 'highResolution',
+					modifying: true,
+					copying: true,
+					annotating: true,
+					fillingForms: true,
+					contentAccessibility: true,
+					documentAssembly: true,
+				},
+	});
+	const pdfBytes = await pdf.save();
 
 	onProgress?.(100);
 
@@ -508,7 +594,7 @@ export async function addPageNumbers(file: File, options: PageNumberOptions): Pr
 	const { position, startAt, fontSize, onProgress } = options;
 
 	const arrayBuffer = await file.arrayBuffer();
-	const pdf = await PDFDocument.load(arrayBuffer);
+	const pdf = await loadPdf(arrayBuffer);
 	const font = await pdf.embedFont(StandardFonts.Helvetica);
 	const pages = pdf.getPages();
 
@@ -577,7 +663,7 @@ export async function addWatermark(file: File, options: WatermarkOptions): Promi
 	if (!text.trim()) throw new Error('Watermark text cannot be empty');
 
 	const arrayBuffer = await file.arrayBuffer();
-	const pdf = await PDFDocument.load(arrayBuffer);
+	const pdf = await loadPdf(arrayBuffer);
 	const font = await pdf.embedFont(StandardFonts.HelveticaBold);
 	const pages = pdf.getPages();
 
@@ -588,9 +674,13 @@ export async function addWatermark(file: File, options: WatermarkOptions): Promi
 		const { width, height } = page.getSize();
 		const textWidth = font.widthOfTextAtSize(text, fontSize);
 
+		// drawText rotates about the text's start point, so offset the origin to put the middle
+		// of the (rotated) text on the middle of the page.
+		const angle = Math.PI / 4;
+		const halfHeight = fontSize * 0.35; // ~half the cap height
 		page.drawText(text, {
-			x: (width - textWidth) / 2,
-			y: height / 2 - fontSize / 2,
+			x: width / 2 - ((textWidth / 2) * Math.cos(angle) - halfHeight * Math.sin(angle)),
+			y: height / 2 - ((textWidth / 2) * Math.sin(angle) + halfHeight * Math.cos(angle)),
 			size: fontSize,
 			font,
 			color: rgb(0.5, 0.5, 0.5),
@@ -616,7 +706,7 @@ export async function reversePages(
 	onProgress?: (progress: number) => void
 ): Promise<Blob> {
 	const arrayBuffer = await file.arrayBuffer();
-	const srcPdf = await PDFDocument.load(arrayBuffer);
+	const srcPdf = await loadPdf(arrayBuffer);
 	const newPdf = await PDFDocument.create();
 	const pageCount = srcPdf.getPageCount();
 
@@ -699,7 +789,7 @@ export async function removeBlankPages(
 		return new Blob([arrayBuffer], { type: 'application/pdf' });
 	}
 
-	const srcPdf = await PDFDocument.load(arrayBuffer);
+	const srcPdf = await loadPdf(arrayBuffer);
 	for (const idx of [...blankPageIndices].sort((a, b) => b - a)) {
 		srcPdf.removePage(idx);
 	}
@@ -722,21 +812,49 @@ interface EditMetadataOptions {
 	author: string;
 	subject: string;
 	keywords: string;
+	/** When true a blank field removes that property; otherwise blank fields are left untouched. */
+	clearBlank?: boolean;
 	onProgress?: (progress: number) => void;
 }
 
+export interface PDFMetadataFields {
+	title: string;
+	author: string;
+	subject: string;
+	keywords: string;
+}
+
+/** Read the current document properties so they can be shown (and edited) before saving. */
+export async function readMetadata(file: File): Promise<PDFMetadataFields> {
+	const pdf = await PDFDocument.load(await file.arrayBuffer(), { updateMetadata: false });
+	return {
+		title: pdf.getTitle() ?? '',
+		author: pdf.getAuthor() ?? '',
+		subject: pdf.getSubject() ?? '',
+		keywords: pdf.getKeywords() ?? '',
+	};
+}
+
 export async function editMetadata(file: File, options: EditMetadataOptions): Promise<Blob> {
-	const { title, author, subject, keywords, onProgress } = options;
+	const { title, author, subject, keywords, clearBlank = false, onProgress } = options;
 
 	const arrayBuffer = await file.arrayBuffer();
-	const pdf = await PDFDocument.load(arrayBuffer);
+	// Don't let pdf-lib overwrite Producer/Creator/dates we weren't asked to change
+	const pdf = await PDFDocument.load(arrayBuffer, { updateMetadata: false });
 
 	onProgress?.(30);
 
-	if (title !== '') pdf.setTitle(title);
-	if (author !== '') pdf.setAuthor(author);
-	if (subject !== '') pdf.setSubject(subject);
-	if (keywords !== '') pdf.setKeywords([keywords]);
+	const infoRef = pdf.context.trailerInfo.Info;
+	const info = infoRef ? pdf.context.lookupMaybe(infoRef, PDFDict) : undefined;
+	const apply = (key: string, value: string, set: (v: string) => void) => {
+		if (value.trim() !== '') set(value);
+		else if (clearBlank) info?.delete(PDFName.of(key));
+	};
+	apply('Title', title, (v) => pdf.setTitle(v));
+	apply('Author', author, (v) => pdf.setAuthor(v));
+	apply('Subject', subject, (v) => pdf.setSubject(v));
+	apply('Keywords', keywords, (v) => pdf.setKeywords([v]));
+	pdf.setModificationDate(new Date());
 
 	onProgress?.(80);
 
@@ -1142,7 +1260,7 @@ export async function signPDF(
 	placement: SignaturePlacement
 ): Promise<Blob> {
 	const arrayBuffer = await file.arrayBuffer();
-	const pdfDoc = await PDFDocument.load(arrayBuffer);
+	const pdfDoc = await loadPdf(arrayBuffer);
 
 	// Decode base64 data URL
 	const [header, base64Data] = signatureDataUrl.split(',');
@@ -1194,7 +1312,7 @@ export interface Annotation {
  */
 export async function saveAnnotations(file: File, annotations: Annotation[]): Promise<Blob> {
 	const arrayBuffer = await file.arrayBuffer();
-	const pdfDoc = await PDFDocument.load(arrayBuffer);
+	const pdfDoc = await loadPdf(arrayBuffer);
 	const pages = pdfDoc.getPages();
 
 	for (const ann of annotations) {
@@ -1251,7 +1369,7 @@ export async function rotateSinglePage(
 	pageNum: number,
 	angle: 90 | -90 | 180
 ): Promise<Blob> {
-	const pdfDoc = await PDFDocument.load(await file.arrayBuffer());
+	const pdfDoc = await loadPdf(await file.arrayBuffer(), file.name);
 	const pages = pdfDoc.getPages();
 	if (pageNum < 1 || pageNum > pages.length) throw new Error('Invalid page');
 	const page = pages[pageNum - 1];
@@ -1262,13 +1380,13 @@ export async function rotateSinglePage(
 }
 
 export async function deleteSinglePage(file: File, pageNum: number): Promise<Blob> {
-	const pdfDoc = await PDFDocument.load(await file.arrayBuffer());
+	const pdfDoc = await loadPdf(await file.arrayBuffer(), file.name);
 	pdfDoc.removePage(pageNum - 1);
 	return new Blob([(await pdfDoc.save()).buffer as ArrayBuffer], { type: 'application/pdf' });
 }
 
 export async function extractSinglePage(file: File, pageNum: number): Promise<Blob> {
-	const src = await PDFDocument.load(await file.arrayBuffer());
+	const src = await loadPdf(await file.arrayBuffer(), file.name);
 	const newDoc = await PDFDocument.create();
 	const [copied] = await newDoc.copyPages(src, [pageNum - 1]);
 	newDoc.addPage(copied);
@@ -1276,14 +1394,14 @@ export async function extractSinglePage(file: File, pageNum: number): Promise<Bl
 }
 
 export async function duplicatePage(file: File, pageNum: number): Promise<Blob> {
-	const pdfDoc = await PDFDocument.load(await file.arrayBuffer());
+	const pdfDoc = await loadPdf(await file.arrayBuffer(), file.name);
 	const [copied] = await pdfDoc.copyPages(pdfDoc, [pageNum - 1]);
 	pdfDoc.insertPage(pageNum, copied);
 	return new Blob([(await pdfDoc.save()).buffer as ArrayBuffer], { type: 'application/pdf' });
 }
 
 export async function insertBlankPage(file: File, afterPageNum: number): Promise<Blob> {
-	const pdfDoc = await PDFDocument.load(await file.arrayBuffer());
+	const pdfDoc = await loadPdf(await file.arrayBuffer(), file.name);
 	const pages = pdfDoc.getPages();
 	// Use same size as adjacent page
 	const refPage = pages[Math.min(afterPageNum - 1, pages.length - 1)];
@@ -1297,7 +1415,7 @@ export async function insertBlankPage(file: File, afterPageNum: number): Promise
  * fromPage and toPage are both 1-indexed page numbers.
  */
 export async function movePage(file: File, fromPage: number, toPage: number): Promise<Blob> {
-	const pdfDoc = await PDFDocument.load(await file.arrayBuffer());
+	const pdfDoc = await loadPdf(await file.arrayBuffer(), file.name);
 	const count = pdfDoc.getPageCount();
 	if (fromPage === toPage || fromPage < 1 || fromPage > count || toPage < 1 || toPage > count) {
 		return new Blob([await file.arrayBuffer()], { type: 'application/pdf' });

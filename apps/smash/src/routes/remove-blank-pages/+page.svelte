@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { acceptPdfFiles } from '$lib/utils/pdf-files';
 	import Header from '$lib/components/Header.svelte';
 	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
 	import { Toast, toast } from '@neutron/ui';
@@ -27,6 +28,7 @@
 	let isProcessing = $state(false);
 	let resultBlob = $state<Blob | null>(null);
 	let resultMessage = $state('');
+	let removedCount = $state(0);
 	let progress = $state(0);
 	let fileInput = $state<HTMLInputElement | null>(null);
 	let isDragging = $state(false);
@@ -41,11 +43,8 @@
 	}
 
 	async function handleFiles(newFiles: File[]) {
-		const file = newFiles.find((f) => f.type === 'application/pdf' || f.name.endsWith('.pdf'));
-		if (!file) {
-			toast.error('Please select a PDF file');
-			return;
-		}
+		const [file] = await acceptPdfFiles(newFiles);
+		if (!file) return;
 		if (pdfFile) URL.revokeObjectURL(pdfFile.originalUrl);
 
 		const newPdf: PDFFile = { id: generateId(), file, originalUrl: URL.createObjectURL(file) };
@@ -88,11 +87,15 @@
 				},
 			});
 
-			// Estimate removed pages from size difference (rough heuristic)
-			// We'll just show a success message
+			const remainingPages = await getPageCount(new File([result], pdfFile.file.name));
+			removedCount = Math.max(0, originalPageCount - remainingPages);
 			resultBlob = result;
-			resultMessage = originalPageCount > 0 ? `Processed ${originalPageCount} pages` : 'Done';
-			toast.success('Blank pages removed!');
+			resultMessage =
+				removedCount > 0
+					? `Removed ${removedCount} of ${originalPageCount} pages`
+					: `Scanned ${originalPageCount} pages — none were blank`;
+			if (removedCount > 0) toast.success(`Removed ${removedCount} blank page(s)`);
+			else toast.info('No blank pages found — the PDF is unchanged');
 		} catch (error) {
 			console.error('Remove blank pages error:', error);
 			toast.error(error instanceof Error ? error.message : 'Failed to remove blank pages');
@@ -263,7 +266,8 @@
 								<div class="flex items-center justify-between">
 									<div>
 										<p class="flex items-center gap-2 font-medium text-red-400">
-											<CheckCircle class="h-4 w-4" /> Blank pages removed!
+											<CheckCircle class="h-4 w-4" />
+											{removedCount > 0 ? 'Blank pages removed!' : 'No blank pages found'}
 										</p>
 										<p class="text-surface-500 text-xs">{resultMessage}</p>
 									</div>
@@ -307,8 +311,8 @@
 						<div class="bg-surface-800/50 border-surface-700/50 space-y-1.5 rounded-xl border p-4">
 							<p class="text-surface-400 text-xs font-medium">How it works</p>
 							<p class="text-surface-500 text-xs">
-								Pages are analysed for text and drawing operators. Pages with neither are treated as
-								blank. Higher thresholds also remove pages with very little content.
+								Each page is rendered and checked for visible content; pages with none are treated
+								as blank. Higher thresholds also remove pages with very little content.
 							</p>
 						</div>
 					</div>
