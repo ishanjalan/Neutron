@@ -378,7 +378,7 @@
 			<div class="space-y-3">
 				<div class="text-surface-400 flex items-center gap-2 text-xs">
 					<Lock class="h-3.5 w-3.5 text-green-400" />
-					<span>AES-128 encryption</span>
+					<span>AES-256 encryption</span>
 				</div>
 				<div class="space-y-1.5">
 					<label

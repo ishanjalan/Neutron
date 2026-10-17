@@ -16,7 +16,7 @@ A complete PDF toolkit with 17 independent tools — compress, merge, split, rot
 | **Reorder Pages**      | [/reorder](https://ishanjalan.github.io/Smash/reorder)                       | Drag and drop to rearrange pages                           |
 | **PDF to Images**      | [/to-images](https://ishanjalan.github.io/Smash/to-images)                   | Export pages as PNG, JPG, or WebP (up to 300 DPI)          |
 | **Images to PDF**      | [/from-images](https://ishanjalan.github.io/Smash/from-images)               | Create a PDF from JPG, PNG, or WebP images                 |
-| **Protect PDF**        | [/protect](https://ishanjalan.github.io/Smash/protect)                       | Encrypt with AES-128 password protection                   |
+| **Protect PDF**        | [/protect](https://ishanjalan.github.io/Smash/protect)                       | Encrypt with AES-256 password protection                   |
 | **Unlock PDF**         | [/unlock](https://ishanjalan.github.io/Smash/unlock)                         | Remove password protection                                 |
 | **OCR PDF**            | [/ocr](https://ishanjalan.github.io/Smash/ocr)                               | Extract searchable text from scanned PDFs (100+ languages) |
 | **Watermark**          | [/watermark](https://ishanjalan.github.io/Smash/watermark)                   | Add text watermarks with custom opacity and position       |
@@ -38,7 +38,7 @@ A complete PDF toolkit with 17 independent tools — compress, merge, split, rot
 ### PDF Processing
 
 - **[Ghostscript WASM](https://github.com/nicholasgasior/ghostscript-wasm)** — Professional PDF compression (50–90% size reduction)
-- **[pdf-lib](https://pdf-lib.js.org/)** — PDF manipulation and AES-128 encryption (merge, split, rotate, protect, reorder, watermark, page numbers)
+- **[pdf-lib](https://pdf-lib.js.org/)** — PDF manipulation and AES-256 encryption (merge, split, rotate, protect, reorder, watermark, page numbers)
 - **[pdfjs-dist](https://mozilla.github.io/pdf.js/)** — PDF rendering for visual page previews
 - **[Tesseract.js](https://tesseract.projectnaptha.com/)** — OCR text extraction (100+ language support)
 

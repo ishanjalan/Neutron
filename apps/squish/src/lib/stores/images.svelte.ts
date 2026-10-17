@@ -1,5 +1,7 @@
 import { SvelteSet } from 'svelte/reactivity';
 import { detectSvgEmbeddedRaster } from '$lib/utils/svg-analyze';
+import { detectImageFormat } from '$lib/utils/detect-format';
+import { toast } from '@neutron/ui';
 
 export type ImageFormat = 'jpeg' | 'png' | 'webp' | 'avif' | 'jxl' | 'svg' | 'heic';
 export type OutputFormat = 'jpeg' | 'png' | 'webp' | 'avif' | 'jxl' | 'svg'; // HEIC is input-only
@@ -20,6 +22,8 @@ export interface ImageItem {
 	status: ImageStatus;
 	progress: number;
 	error?: string;
+	/** False when retrying can't help (damaged file, unsupported by this browser). */
+	retryable?: boolean;
 	width?: number;
 	height?: number;
 	webpAlternativeSize?: number;
@@ -90,7 +94,7 @@ function getDefaultSettings(): CompressionSettings {
 	return {
 		quality: 80, // "Balanced" preset - best of both worlds
 		outputFormat: 'webp', // Best compression + universal support (web, Android, iOS 14+)
-		stripMetadata: false, // Opt-in — stripping EXIF/GPS is irreversible on output
+		stripMetadata: false, // Unused: re-encoding always drops metadata. Kept so saved settings still parse.
 		lossless: false,
 		targetSizeMode: false, // Quality mode by default
 		targetSizeKB: 500, // Default target: 500KB
@@ -115,9 +119,8 @@ export type PendingSuggestion = {
 
 const THUMB_MAX = 400;
 
-async function generateThumbnail(file: File): Promise<string | undefined> {
-	if (file.type === 'image/heic' || file.type === 'image/heif') return undefined;
-	if (file.type === 'image/svg+xml') return undefined;
+async function generateThumbnail(file: File, format: ImageFormat): Promise<string | undefined> {
+	if (format === 'heic' || format === 'svg') return undefined;
 
 	return new Promise((resolve) => {
 		const img = new Image();
@@ -154,9 +157,12 @@ async function generateThumbnail(file: File): Promise<string | undefined> {
 	});
 }
 
-async function getImageDimensions(file: File): Promise<{ width: number; height: number } | null> {
+async function getImageDimensions(
+	file: File,
+	format: ImageFormat
+): Promise<{ width: number; height: number } | null> {
 	// HEIC can't be loaded directly in most browsers
-	if (file.type === 'image/heic' || file.type === 'image/heif') {
+	if (format === 'heic') {
 		return null; // Dimensions will be set after conversion
 	}
 
@@ -181,21 +187,6 @@ function createImagesStore() {
 	let batchStats = $state<BatchStats>({ startTime: null, endTime: null, totalImages: 0 });
 	let selectedIds = $state<Set<string>>(new Set());
 	let pendingSuggestion = $state<PendingSuggestion | null>(null);
-
-	function getFormatFromMime(mimeType: string): ImageFormat {
-		const map: Record<string, ImageFormat> = {
-			'image/jpeg': 'jpeg',
-			'image/jpg': 'jpeg',
-			'image/png': 'png',
-			'image/webp': 'webp',
-			'image/avif': 'avif',
-			'image/jxl': 'jxl',
-			'image/svg+xml': 'svg',
-			'image/heic': 'heic',
-			'image/heif': 'heic',
-		};
-		return map[mimeType] || 'jpeg';
-	}
 
 	function generateId(): string {
 		return `img_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -283,24 +274,16 @@ function createImagesStore() {
 		async addFiles(files: FileList | File[]) {
 			const wasEmpty = items.length === 0;
 
-			const validTypes = [
-				'image/jpeg',
-				'image/jpg',
-				'image/png',
-				'image/webp',
-				'image/avif',
-				'image/jxl',
-				'image/svg+xml',
-				'image/heic',
-				'image/heif',
-			];
-
 			const newItems: ImageItem[] = [];
+			const rejected: File[] = [];
 
 			for (const file of files) {
-				if (!validTypes.includes(file.type)) continue;
-
-				const format = getFormatFromMime(file.type);
+				// Trust the file's contents, not its MIME type/extension (often empty or wrong)
+				const format = await detectImageFormat(file);
+				if (!format) {
+					rejected.push(file);
+					continue;
+				}
 
 				let outputFormat: OutputFormat;
 				if (format === 'svg') {
@@ -315,7 +298,7 @@ function createImagesStore() {
 				let width: number | undefined;
 				let height: number | undefined;
 				try {
-					const dims = await getImageDimensions(file);
+					const dims = await getImageDimensions(file, format);
 					if (dims) {
 						width = dims.width;
 						height = dims.height;
@@ -324,7 +307,7 @@ function createImagesStore() {
 					console.warn('Failed to get dimensions for', file.name);
 				}
 
-				const thumbnailUrl = await generateThumbnail(file);
+				const thumbnailUrl = await generateThumbnail(file, format);
 
 				// Detect embedded bitmaps in SVG files (e.g. Figma exports that wrap rasters in SVG)
 				let svgEmbeddedRaster: boolean | undefined;
@@ -351,6 +334,17 @@ function createImagesStore() {
 					height,
 					svgEmbeddedRaster,
 				});
+			}
+
+			if (rejected.length > 0) {
+				const first = rejected[0];
+				toast.error(
+					rejected.length === 1
+						? first.size === 0
+							? `${first.name} is empty.`
+							: `${first.name} isn't a readable JPEG, PNG, WebP, AVIF, JXL, SVG or HEIC image.`
+						: `${rejected.length} files weren't added — they're empty or not JPEG, PNG, WebP, AVIF, JXL, SVG or HEIC images.`
+				);
 			}
 
 			items = [...items, ...newItems];

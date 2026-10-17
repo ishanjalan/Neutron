@@ -196,19 +196,19 @@ export const reversePagesSEO: PageSEO = {
 
 export const protectSEO: PageSEO = {
 	intro:
-		'Encrypt your PDF with AES-128 password protection — secure sensitive documents before sharing, without uploading them anywhere.',
+		'Encrypt your PDF with AES-256 password protection — secure sensitive documents before sharing, without uploading them anywhere.',
 	faqs: [
 		{
 			q: 'What encryption standard does Smash use?',
-			a: 'AES-128, the same standard used by Adobe Acrobat and most professional PDF software.',
+			a: 'AES-256, the same standard used by Adobe Acrobat and most professional PDF software.',
 		},
 		{
 			q: 'Can I also restrict printing and copying?',
-			a: 'Yes. Set an owner password to configure custom permissions — restrict printing, copying text, and editing independently.',
+			a: 'Yes. Set an owner password that differs from the open password: people who only know the open password can view the document but cannot edit it, copy text from it, or print it in high resolution. These restrictions are enforced by the PDF viewer, so treat the open password as the real protection.',
 		},
 		{
 			q: 'Will all PDF readers accept the password protection?',
-			a: 'Yes — AES-128 is supported by all major PDF viewers including Adobe Acrobat, macOS Preview, and browser-based PDF viewers.',
+			a: 'Yes for current software — Adobe Acrobat X (2010) and later, macOS Preview, Chrome, Edge, and Firefox all open AES-256 files. Very old readers from before 2010 may not.',
 		},
 		{
 			q: 'What if I forget the password?',
@@ -216,7 +216,7 @@ export const protectSEO: PageSEO = {
 		},
 		{
 			q: 'Is this strong enough for sensitive documents?',
-			a: "AES-128 is considered secure for typical use cases. For classified or legally sensitive material, consult your organisation's information security policy.",
+			a: "AES-256 is considered secure for typical use cases. For classified or legally sensitive material, consult your organisation's information security policy.",
 		},
 	],
 };
@@ -270,7 +270,7 @@ export const editMetadataSEO: PageSEO = {
 		},
 		{
 			q: 'Can I clear all metadata fields?',
-			a: 'Leave any field blank and save — that removes the value for that property.',
+			a: "Clear the field and save — that removes the value for that property. Smash shows the PDF's current values when you open it.",
 		},
 	],
 };
@@ -316,11 +316,15 @@ export const ocrSEO: PageSEO = {
 		},
 		{
 			q: 'Which languages does OCR support?',
-			a: '100+ languages including English, French, German, Spanish, Russian, Chinese, Arabic, Japanese, and many more.',
+			a: '15 languages: English, Spanish, French, German, Italian, Portuguese, Dutch, Polish, Russian, Japanese, Chinese (Simplified and Traditional), Korean, Arabic, and Hindi. Searchable PDF output works for the Latin-script languages; for the others, OCR extracts the text as a .txt file.',
 		},
 		{
 			q: 'Will OCR increase my PDF file size?',
 			a: 'Yes — OCR adds a text layer on top of the existing scanned images. Expect a modest size increase.',
+		},
+		{
+			q: 'Does OCR work offline?',
+			a: 'Not on first use. The OCR engine and the language data (a few MB per language) are downloaded from a public CDN when you run OCR. Your PDF itself is never uploaded — recognition runs in your browser.',
 		},
 		{
 			q: 'How long does OCR take?',

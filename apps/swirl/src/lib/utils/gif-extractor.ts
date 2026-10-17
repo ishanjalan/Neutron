@@ -19,24 +19,25 @@ export interface ExtractionProgress {
 }
 
 /**
- * Extract frames from a GIF file using ImageDecoder API (modern browsers)
- * Falls back to canvas-based extraction if not supported
+ * Extract frames from a GIF file using the ImageDecoder API.
+ * There is no reliable fallback (a canvas can only show a GIF's first frame), so browsers
+ * without ImageDecoder get a clear error instead of a silently frozen result.
  */
 export async function extractGifFrames(
 	file: File,
 	onProgress?: (progress: ExtractionProgress) => void
 ): Promise<ExtractedFrame[]> {
-	// Check for ImageDecoder support
-	if ('ImageDecoder' in window) {
-		try {
-			return await extractWithImageDecoder(file, onProgress);
-		} catch (error) {
-			console.warn('ImageDecoder failed, falling back to canvas method:', error);
-		}
+	if (!('ImageDecoder' in window)) {
+		throw new Error(
+			'This tool needs a browser that supports ImageDecoder (Chrome, Edge, or Safari 17+). Firefox is not supported yet.'
+		);
 	}
-
-	// Fallback to canvas-based extraction
-	return await extractWithCanvas(file, onProgress);
+	try {
+		return await extractWithImageDecoder(file, onProgress);
+	} catch (error) {
+		console.error('GIF frame extraction failed:', error);
+		throw new Error("Couldn't decode this GIF. The file may be damaged.", { cause: error });
+	}
 }
 
 /**
@@ -104,242 +105,4 @@ async function extractWithImageDecoder(
 
 	decoder.close();
 	return frames;
-}
-
-/**
- * Extract frames using canvas (fallback method)
- * This method works by parsing the GIF binary format
- */
-async function extractWithCanvas(
-	file: File,
-	onProgress?: (progress: ExtractionProgress) => void
-): Promise<ExtractedFrame[]> {
-	const buffer = await file.arrayBuffer();
-	const bytes = new Uint8Array(buffer);
-
-	// Parse GIF header
-	const width = bytes[6] | (bytes[7] << 8);
-	const height = bytes[8] | (bytes[9] << 8);
-
-	// Create master canvas for compositing frames
-	const canvas = document.createElement('canvas');
-	canvas.width = width;
-	canvas.height = height;
-	const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
-
-	// Parse frames from GIF
-	const frameData = parseGifFrameData(bytes);
-	const frames: ExtractedFrame[] = [];
-
-	// We need to use a different approach - load the GIF as an image
-	// and use requestAnimationFrame to capture each frame
-	// This is more reliable than trying to decode LZW ourselves
-
-	const img = new Image();
-	const imageUrl = URL.createObjectURL(file);
-
-	await new Promise<void>((resolve, reject) => {
-		img.onload = () => resolve();
-		img.onerror = reject;
-		img.src = imageUrl;
-	});
-
-	// For animated GIFs, we need to use a more sophisticated approach
-	// Let's use the GIF frame data we parsed for timing info
-	// but render using canvas with the full image
-
-	// Simple approach: just capture the first frame appearance
-	// and use the parsed delays
-
-	// For proper frame extraction, we'll render the full GIF and step through
-	// using the SuperGif approach or similar
-
-	// Simplified: render GIF to canvas frame by frame
-	// This requires decoding LZW which is complex, so we'll use a workaround
-
-	// Actually, let's use a pragmatic approach:
-	// Create an OffscreenCanvas and use the parsed frame boundaries
-
-	// For now, use a reliable fallback: split based on frame count
-	// and capture using the image at different "time" states
-
-	// The most reliable cross-browser way is to use the gifuct-js library
-	// But since we don't have it, let's do a simpler capture
-
-	// Workaround: capture the static image as a single frame
-	// Then notify the user about browser limitations
-
-	ctx.drawImage(img, 0, 0);
-
-	for (let i = 0; i < frameData.length; i++) {
-		const frameInfo = frameData[i];
-
-		// For the fallback, we can only reliably capture each frame
-		// if we decode the GIF properly. Let's create a simpler version
-		// that at least shows the frame timing.
-
-		const blob = await new Promise<Blob>((resolve, reject) => {
-			canvas.toBlob((b) => {
-				if (b) resolve(b);
-				else reject(new Error('Failed to create blob'));
-			}, 'image/png');
-		});
-
-		frames.push({
-			index: i,
-			delay: frameInfo.delay,
-			blob,
-			url: URL.createObjectURL(blob),
-			width,
-			height,
-		});
-
-		onProgress?.({
-			current: i + 1,
-			total: frameData.length,
-			percentage: Math.round(((i + 1) / frameData.length) * 100),
-		});
-	}
-
-	canvas.width = 0;
-	canvas.height = 0;
-	URL.revokeObjectURL(imageUrl);
-
-	return frames;
-}
-
-/**
- * Parse GIF frame timing data
- */
-function parseGifFrameData(
-	bytes: Uint8Array
-): { delay: number; left: number; top: number; width: number; height: number }[] {
-	const frames: { delay: number; left: number; top: number; width: number; height: number }[] = [];
-
-	// Check GIF signature
-	const signature = String.fromCharCode(bytes[0], bytes[1], bytes[2]);
-	if (signature !== 'GIF') {
-		return frames;
-	}
-
-	// Skip header and logical screen descriptor
-	const packedField = bytes[10];
-	const hasGlobalColorTable = (packedField & 0x80) !== 0;
-	const colorTableSize = hasGlobalColorTable ? Math.pow(2, (packedField & 0x07) + 1) : 0;
-
-	let offset = 13;
-	if (hasGlobalColorTable) {
-		offset += colorTableSize * 3;
-	}
-
-	let currentDelay = 100;
-
-	while (offset < bytes.length) {
-		const blockType = bytes[offset];
-		offset++;
-
-		if (blockType === 0x21) {
-			// Extension
-			const extType = bytes[offset];
-			offset++;
-
-			if (extType === 0xf9) {
-				// Graphics Control Extension
-				const blockSize = bytes[offset];
-				offset++;
-
-				if (blockSize >= 4) {
-					const delayLow = bytes[offset + 1];
-					const delayHigh = bytes[offset + 2];
-					currentDelay = (delayLow | (delayHigh << 8)) * 10;
-					if (currentDelay === 0) currentDelay = 100;
-				}
-
-				offset += blockSize;
-				while (bytes[offset] !== 0 && offset < bytes.length) {
-					offset += bytes[offset] + 1;
-				}
-				offset++;
-			} else {
-				// Skip other extensions
-				while (bytes[offset] !== 0 && offset < bytes.length) {
-					offset += bytes[offset] + 1;
-				}
-				offset++;
-			}
-		} else if (blockType === 0x2c) {
-			// Image Descriptor
-			const left = bytes[offset] | (bytes[offset + 1] << 8);
-			const top = bytes[offset + 2] | (bytes[offset + 3] << 8);
-			const width = bytes[offset + 4] | (bytes[offset + 5] << 8);
-			const height = bytes[offset + 6] | (bytes[offset + 7] << 8);
-			const framePacked = bytes[offset + 8];
-			offset += 9;
-
-			const hasLocalColorTable = (framePacked & 0x80) !== 0;
-			if (hasLocalColorTable) {
-				const localColorTableSize = Math.pow(2, (framePacked & 0x07) + 1);
-				offset += localColorTableSize * 3;
-			}
-
-			frames.push({ delay: currentDelay, left, top, width, height });
-			currentDelay = 100;
-
-			// Skip LZW data
-			offset++; // LZW minimum code size
-			while (bytes[offset] !== 0 && offset < bytes.length) {
-				offset += bytes[offset] + 1;
-			}
-			offset++;
-		} else if (blockType === 0x3b) {
-			break;
-		} else {
-			offset++;
-		}
-	}
-
-	return frames;
-}
-
-/**
- * Download a single frame as PNG
- */
-export function downloadFrame(frame: ExtractedFrame, baseName: string): void {
-	const fileName = `${baseName}_frame_${String(frame.index + 1).padStart(3, '0')}.png`;
-	import('@neutron/utils/download').then(({ downloadBlob }) => {
-		downloadBlob(frame.blob, fileName);
-	});
-}
-
-/**
- * Download multiple frames as a ZIP file
- */
-export async function downloadFramesAsZip(
-	frames: ExtractedFrame[],
-	baseName: string,
-	onProgress?: (progress: ExtractionProgress) => void
-): Promise<void> {
-	const { downloadAllAsZip } = await import('@neutron/utils/download');
-
-	const files = frames.map((frame, i) => ({
-		name: `${baseName}_frame_${String(frame.index + 1).padStart(3, '0')}.png`,
-		blob: frame.blob,
-	}));
-
-	await downloadAllAsZip(files, `${baseName}_frames.zip`, (percent) => {
-		onProgress?.({
-			current: Math.round((percent / 100) * files.length),
-			total: files.length,
-			percentage: Math.round(percent),
-		});
-	});
-}
-
-/**
- * Cleanup extracted frame URLs
- */
-export function cleanupFrames(frames: ExtractedFrame[]): void {
-	frames.forEach((frame) => {
-		URL.revokeObjectURL(frame.url);
-	});
 }

@@ -33,7 +33,9 @@
 	const hasImages = $derived(images.items.length > 0);
 	const completedCount = $derived(images.items.filter((i) => i.status === 'completed').length);
 	const processingCount = $derived(images.items.filter((i) => i.status === 'processing').length);
-	const errorCount = $derived(images.items.filter((i) => i.status === 'error').length);
+	const errorCount = $derived(
+		images.items.filter((i) => i.status === 'error' && i.retryable !== false).length
+	);
 	const hasUndownloaded = $derived(
 		images.items.some((i) => i.status === 'completed' && i.compressedBlob)
 	);
@@ -171,7 +173,7 @@
 	}
 
 	async function retryAllFailed() {
-		const failedItems = images.items.filter((i) => i.status === 'error');
+		const failedItems = images.items.filter((i) => i.status === 'error' && i.retryable !== false);
 		if (failedItems.length === 0) return;
 		toast.info(
 			`Retrying ${failedItems.length} failed image${failedItems.length !== 1 ? 's' : ''}…`

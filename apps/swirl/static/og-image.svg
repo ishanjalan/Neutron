@@ -42,7 +42,7 @@
   <text x="580" y="495" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#f472b6" text-anchor="middle">No Upload</text>
 
   <rect x="660" y="470" width="130" height="40" rx="20" fill="#ec4899" opacity="0.2"/>
-  <text x="725" y="495" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#f472b6" text-anchor="middle">10 GIF Tools</text>
+  <text x="725" y="495" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#f472b6" text-anchor="middle">8 GIF Tools</text>
 
   <!-- Tagline -->
   <text x="350" y="560" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="#52525b">

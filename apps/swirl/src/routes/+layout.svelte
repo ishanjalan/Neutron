@@ -101,7 +101,7 @@
 				"operatingSystem": "Web",
 				"applicationCategory": "UtilityApplication",
 				"offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-				"description": "Convert videos to GIF, optimize, resize, reverse, crop, and split animations. 10 browser-based GIF tools. 100% private.",
+				"description": "Convert videos to GIF, optimize, resize, reverse, crop, and add text to animations. 8 browser-based GIF tools. 100% private.",
 				"url": "https://ishanjalan.github.io/Swirl",
 				"author": {
 					"@type": "Person",

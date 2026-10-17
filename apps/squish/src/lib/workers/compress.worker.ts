@@ -135,6 +135,10 @@ function encodeImage(
 			return pngCodec!.encode(imageDataLike, {
 				level: lossless ? 4 : 3,
 				quantize: !lossless, // Disable lossy quantization in lossless mode
+				// Quality drives pngquant-style palette reduction (lower = fewer colors). pngquant
+				// already uses a full 256-color palette above ~60, so rescale to keep the
+				// Compact / Balanced / Quality presets distinct.
+				...(lossless ? {} : { quality: Math.max(10, Math.round(quality * 0.7)) }),
 			});
 
 		case 'webp':

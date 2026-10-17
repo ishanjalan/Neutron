@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { acceptPdfFiles } from '$lib/utils/pdf-files';
 	import Header from '$lib/components/Header.svelte';
 	import PDFViewer from '$lib/components/PDFViewer.svelte';
 	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
@@ -93,13 +94,8 @@
 	}
 
 	async function handleFiles(newFiles: File[]) {
-		const pdfFiles = newFiles.filter(
-			(f) => f.type === 'application/pdf' || f.name.endsWith('.pdf')
-		);
-		if (pdfFiles.length === 0) {
-			toast.error('Please select PDF files');
-			return;
-		}
+		const pdfFiles = await acceptPdfFiles(newFiles);
+		if (pdfFiles.length === 0) return;
 
 		const newPdfFiles: PDFFile[] = [];
 
@@ -419,10 +415,19 @@
 												{/if}
 												{#if pdfFile.compressedSize}
 													<span class="text-surface-600">→</span>
-													<span class="text-green-400">{formatBytes(pdfFile.compressedSize)}</span>
-													<span class="font-medium text-green-400">
-														(-{Math.round((1 - pdfFile.compressedSize / pdfFile.file.size) * 100)}%)
-													</span>
+													{#if pdfFile.compressedSize < pdfFile.file.size}
+														<span class="text-green-400">{formatBytes(pdfFile.compressedSize)}</span
+														>
+														<span class="font-medium text-green-400">
+															(-{Math.round(
+																(1 - pdfFile.compressedSize / pdfFile.file.size) * 100
+															)}%)
+														</span>
+													{:else}
+														<span class="text-amber-400">
+															Already optimized — this preset can't make it smaller
+														</span>
+													{/if}
 												{/if}
 											</div>
 											{#if pdfFile.status === 'processing'}

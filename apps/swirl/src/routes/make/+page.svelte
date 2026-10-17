@@ -73,26 +73,41 @@
 	}
 
 	async function handleFiles(files: File[]) {
-		const imageFiles = files.filter((f) => f.type.startsWith('image/') && !f.type.includes('gif'));
-		if (imageFiles.length === 0) {
-			toast.error('Please select image files (PNG, JPG, WebP)');
-			return;
-		}
-
-		// Load images and get dimensions
+		const rejected: string[] = [];
 		const newFrames: Frame[] = [];
-		for (const file of imageFiles) {
+		for (const file of files) {
+			if (!file.type.startsWith('image/') || file.type.includes('gif') || file.size === 0) {
+				rejected.push(file.name);
+				continue;
+			}
 			const url = URL.createObjectURL(file);
-			const { width, height } = await getImageDimensions(url);
+			const size = await getImageDimensions(url);
+			if (!size) {
+				// Not decodable by the browser (corrupt, or mislabelled)
+				URL.revokeObjectURL(url);
+				rejected.push(file.name);
+				continue;
+			}
 			newFrames.push({
 				id: generateId(),
 				file,
 				url,
 				delay: globalDelay,
-				width,
-				height,
+				width: size.width,
+				height: size.height,
 			});
 		}
+
+		if (rejected.length > 0) {
+			const names =
+				rejected.slice(0, 2).join(', ') + (rejected.length > 2 ? ` +${rejected.length - 2}` : '');
+			toast.error(
+				newFrames.length > 0
+					? `Skipped ${rejected.length} file(s) that aren't usable PNG/JPG/WebP images: ${names}`
+					: `Couldn't read ${names}. Please choose PNG, JPG, or WebP images.`
+			);
+		}
+		if (newFrames.length === 0) return;
 
 		frames = [...frames, ...newFrames];
 
@@ -110,11 +125,11 @@
 		}
 	}
 
-	function getImageDimensions(url: string): Promise<{ width: number; height: number }> {
+	function getImageDimensions(url: string): Promise<{ width: number; height: number } | null> {
 		return new Promise((resolve) => {
 			const img = new Image();
 			img.onload = () => resolve({ width: img.width, height: img.height });
-			img.onerror = () => resolve({ width: 480, height: 480 });
+			img.onerror = () => resolve(null);
 			img.src = url;
 		});
 	}
@@ -269,6 +284,7 @@
 				height: outputHeight,
 				frameDurations, // Per-frame durations in ms
 				quality, // gifski quality 1-100
+				...(loop > 0 ? { repeat: loop } : {}),
 			});
 
 			let finalBuffer = gifBuffer;

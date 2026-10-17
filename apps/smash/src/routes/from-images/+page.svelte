@@ -43,10 +43,14 @@
 	}
 
 	async function handleFiles(newFiles: File[]) {
-		const imageFiles = newFiles.filter((f) => f.type.startsWith('image/'));
+		const imageFiles = newFiles.filter((f) => f.type.startsWith('image/') && f.size > 0);
+		const skipped = newFiles.length - imageFiles.length;
 		if (imageFiles.length === 0) {
 			toast.error('Please select image files');
 			return;
+		}
+		if (skipped > 0) {
+			toast.error(`Skipped ${skipped} file${skipped === 1 ? '' : 's'} that aren't images`);
 		}
 
 		const startOrder = images.length;
@@ -230,7 +234,7 @@
 						Drag to reorder • {images.length} images • {formatBytes(totalSize)}
 					</p>
 					<div class="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
-						{#each images.sort((a, b) => a.order - b.order) as img (img.id)}
+						{#each [...images].sort((a, b) => a.order - b.order) as img (img.id)}
 							<div
 								role="listitem"
 								class="group relative cursor-grab overflow-hidden rounded-xl border-2 active:cursor-grabbing {draggedItem ===

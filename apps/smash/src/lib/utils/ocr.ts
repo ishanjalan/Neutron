@@ -8,7 +8,7 @@
  */
 
 import Tesseract from 'tesseract.js';
-import { PDFDocument, rgb, StandardFonts } from '@cantoo/pdf-lib';
+import { PDFDocument, rgb, StandardFonts, type PDFFont } from '@cantoo/pdf-lib';
 import { renderPageGS } from './ghostscript';
 
 export type OCRLanguage =
@@ -71,6 +71,25 @@ export const LANGUAGE_OPTIONS: Array<{ value: OCRLanguage; label: string; native
 	{ value: 'ara', label: 'Arabic', native: 'العربية' },
 	{ value: 'hin', label: 'Hindi', native: 'हिन्दी' },
 ];
+
+/**
+ * The searchable-PDF text layer is drawn with a built-in PDF font (WinAnsi), which can only
+ * encode Latin text. Other scripts can still be extracted as plain text.
+ */
+const SEARCHABLE_PDF_LANGUAGES = new Set<OCRLanguage>([
+	'eng',
+	'spa',
+	'fra',
+	'deu',
+	'ita',
+	'por',
+	'nld',
+	'pol',
+]);
+
+export function supportsSearchablePdf(language: OCRLanguage): boolean {
+	return SEARCHABLE_PDF_LANGUAGES.has(language);
+}
 
 export const OUTPUT_MODE_OPTIONS: Array<{ value: OCROutputMode; label: string; desc: string }> = [
 	{ value: 'searchable-pdf', label: 'Searchable PDF', desc: 'Add invisible text layer to PDF' },
@@ -159,6 +178,20 @@ async function ocrPage(worker: Tesseract.Worker, imageData: ImageData): Promise<
 	};
 }
 
+function encodableText(font: PDFFont, text: string): string | null {
+	const candidates = [text, text.normalize('NFD').replace(/\p{M}/gu, '')];
+	for (const candidate of candidates) {
+		if (!candidate.trim()) return null;
+		try {
+			font.encodeText(candidate);
+			return candidate;
+		} catch {
+			/* try the next candidate */
+		}
+	}
+	return null;
+}
+
 /**
  * Create a searchable PDF by adding an invisible text layer
  */
@@ -177,7 +210,12 @@ async function createSearchablePdf(
 		const { width, height } = page.getSize();
 
 		// Add invisible text layer
-		for (const word of ocrResult.words) {
+		for (const rawWord of ocrResult.words) {
+			// Standard fonts can't encode every Latin letter (e.g. Polish ł): retry without
+			// diacritics, and skip the word rather than failing the whole document.
+			const text = encodableText(font, rawWord.text);
+			if (!text) continue;
+			const word = { ...rawWord, text };
 			// Convert OCR coordinates (from scaled image) to PDF coordinates
 			const x = word.bbox.x0 / scale;
 			// PDF y-axis is from bottom, OCR is from top
@@ -208,7 +246,11 @@ async function createSearchablePdf(
  */
 export async function performOCR(file: File, options: OCROptions): Promise<OCRResult> {
 	const startTime = performance.now();
-	const { language, outputMode, onProgress } = options;
+	const { language, onProgress } = options;
+	// Non-Latin scripts can't go into the searchable PDF's text layer (see above)
+	const outputMode: OCROutputMode = supportsSearchablePdf(language)
+		? options.outputMode
+		: 'text-only';
 
 	onProgress?.(2, 'Initializing OCR engine...');
 

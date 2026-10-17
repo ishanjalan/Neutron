@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { acceptPdfFiles } from '$lib/utils/pdf-files';
 	import Header from '$lib/components/Header.svelte';
 	import PDFViewer from '$lib/components/PDFViewer.svelte';
 	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
@@ -15,12 +16,8 @@
 	let fileInput = $state<HTMLInputElement | null>(null);
 
 	async function handleFiles(files: FileList | File[]) {
-		const arr = Array.from(files);
-		const pdf = arr.find((f) => f.type === 'application/pdf' || f.name.endsWith('.pdf'));
-		if (!pdf) {
-			toast.error('Please select a PDF file');
-			return;
-		}
+		const [pdf] = await acceptPdfFiles(Array.from(files));
+		if (!pdf) return;
 		currentFile = pdf;
 		hasChanges = false;
 	}

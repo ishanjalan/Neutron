@@ -1,4 +1,6 @@
 /* eslint-disable */
+import { toast } from '@neutron/ui';
+import { isPdfFile } from '$lib/utils/pdf-files';
 export { formatBytes } from '@neutron/utils';
 
 export type PDFStatus = 'pending' | 'processing' | 'completed' | 'error';
@@ -379,13 +381,18 @@ function createPDFStore() {
 			const currentTool = settings.tool;
 			const largeFiles: File[] = [];
 
-			for (const file of fileArray) {
-				const isPDF = file.type === 'application/pdf';
-				const isImage = file.type.startsWith('image/');
+			const rejected: string[] = [];
 
-				// Validate file type based on current tool
-				if (currentTool === 'images-to-pdf' && !isImage) continue;
-				if (currentTool !== 'images-to-pdf' && !isPDF) continue;
+			for (const file of fileArray) {
+				const isImage = file.type.startsWith('image/');
+				const wantsImages = currentTool === 'images-to-pdf';
+
+				// Validate by content (a PDF's name/MIME type can be missing or wrong), and say so
+				// when something is skipped instead of dropping it silently.
+				if (wantsImages ? !isImage || file.size === 0 : !(await isPdfFile(file))) {
+					rejected.push(file.name);
+					continue;
+				}
 
 				// Queue large files for confirmation rather than adding immediately
 				if (file.size > LARGE_FILE_THRESHOLD_BYTES) {
@@ -406,6 +413,16 @@ function createPDFStore() {
 				};
 
 				items = [...items, item];
+			}
+
+			if (rejected.length > 0) {
+				const names =
+					rejected.slice(0, 2).join(', ') + (rejected.length > 2 ? ` +${rejected.length - 2}` : '');
+				toast.error(
+					`Skipped ${rejected.length} file${rejected.length === 1 ? '' : 's'} that ${
+						currentTool === 'images-to-pdf' ? "aren't images" : "aren't valid PDFs"
+					}: ${names}`
+				);
 			}
 
 			if (largeFiles.length > 0) {
