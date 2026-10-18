@@ -1,5 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { fixture, serveStaleHtml, expectHydrated } from './fixtures';
+import {
+	fixture,
+	serveStaleHtml,
+	expectHydrated,
+	expectAccessible,
+	expectDropZoneOpensPicker,
+} from './fixtures';
 
 test('optimize a GIF end to end', async ({ page }) => {
 	await page.goto('optimize');
@@ -18,4 +24,14 @@ test('recovers with one reload when the page was cached from before a deploy', a
 	// The recovery came from our reload guard, not from anything incidental
 	const guard = await page.evaluate(() => sessionStorage.getItem('neutron-stale-reload'));
 	expect(guard).not.toBeNull();
+});
+
+test('home and video-to-gif pages are accessible; the drop zone opens the picker', async ({
+	page,
+}) => {
+	await page.goto('./');
+	await expectAccessible(page, 2);
+	await page.goto('video-to-gif');
+	await expectDropZoneOpensPicker(page);
+	await expectAccessible(page, 4);
 });

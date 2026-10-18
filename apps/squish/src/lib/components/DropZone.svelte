@@ -314,17 +314,15 @@
 	}
 </script>
 
+<!-- Drag-and-drop target only. The click/keyboard target is the real <button> inside each layout,
+     so the folder picker is a sibling of it, never nested in it. -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="relative"
-	role="button"
-	tabindex="0"
-	aria-label="Drop zone for image files"
 	ondragenter={handleDragEnter}
 	ondragleave={handleDragLeave}
 	ondragover={handleDragOver}
 	ondrop={handleDrop}
-	onclick={openFilePicker}
-	onkeydown={(e) => e.key === 'Enter' && openFilePicker()}
 >
 	<input
 		bind:this={fileInput}
@@ -350,10 +348,16 @@
 	{#if hasImages}
 		<!-- Compact dropzone when images exist - minimum 44px touch target -->
 		<div
-			class="group flex min-h-[56px] cursor-pointer items-center justify-center gap-4 rounded-2xl border-2 border-dashed px-6 py-5 transition-all duration-300 sm:py-6 {isDragging
+			class="group relative flex min-h-[56px] cursor-pointer items-center justify-center gap-4 rounded-2xl border-2 border-dashed px-6 py-5 transition-all duration-300 sm:py-6 {isDragging
 				? 'border-accent-start bg-accent-start/5'
 				: 'border-surface-700 hover:border-accent-start/50'}"
 		>
+			<button
+				type="button"
+				onclick={openFilePicker}
+				aria-label="Drop images or folders, or click to browse"
+				class="focus-visible:outline-accent-start absolute inset-0 z-0 cursor-pointer rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2"
+			></button>
 			<div
 				class="bg-surface-800 group-hover:bg-accent-start/10 flex h-12 w-12 items-center justify-center rounded-xl transition-colors"
 			>
@@ -380,13 +384,21 @@
 				? 'border-accent-start bg-accent-start/5 scale-[1.01]'
 				: 'border-surface-700 hover:border-accent-start/50'}"
 		>
+			<button
+				type="button"
+				onclick={openFilePicker}
+				aria-label="Drop images or folders here, click to browse files"
+				class="focus-visible:outline-accent-start absolute inset-0 z-0 cursor-pointer rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2"
+			></button>
 			<!-- Background pattern -->
 			<div
-				class="absolute inset-0 opacity-[0.05]"
+				class="pointer-events-none absolute inset-0 opacity-[0.05]"
 				style="background-image: url(&quot;data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2310b981' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E&quot;);"
 			></div>
 
-			<div class="relative flex flex-col items-center justify-center px-6 text-center">
+			<div
+				class="pointer-events-none relative flex flex-col items-center justify-center px-6 text-center"
+			>
 				<!-- Icon -->
 				<div
 					class="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl transition-all duration-300 {isDragging
@@ -415,7 +427,7 @@
 					</p>
 					<button
 						onclick={openFolderPicker}
-						class="text-surface-400 hover:text-accent-start mt-1 flex items-center gap-1.5 text-sm transition-colors"
+						class="text-surface-400 hover:text-accent-start pointer-events-auto relative z-10 mt-1 flex items-center gap-1.5 text-sm transition-colors"
 					>
 						<FolderOpen class="h-4 w-4" />
 						<span class="underline-offset-2 hover:underline">or select a folder</span>

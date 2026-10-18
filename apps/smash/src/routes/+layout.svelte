@@ -74,7 +74,6 @@
 
 	onMount(() => {
 		locale = detectLocale();
-		document.documentElement.lang = locale;
 		setGhostscriptErrorHandler((error) => {
 			toast.error(`PDF processing engine crashed: ${error.message}. Please reload the page.`);
 		});

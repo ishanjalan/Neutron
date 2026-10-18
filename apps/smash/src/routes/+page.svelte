@@ -233,14 +233,14 @@
 							</div>
 
 							<div class="min-w-0 flex-1">
-								<h3
+								<h2
 									class="text-surface-100 group-hover:text-surface-50 flex items-center gap-2 text-base font-semibold transition-colors"
 								>
 									{tool.title}
 									<ArrowRight
 										class="text-accent-start h-4 w-4 -translate-x-2 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100"
 									/>
-								</h3>
+								</h2>
 								<p class="text-surface-500 mt-0.5 text-sm leading-relaxed">
 									{tool.description}
 								</p>

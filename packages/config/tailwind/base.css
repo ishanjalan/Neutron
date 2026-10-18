@@ -10,7 +10,7 @@
 	--color-surface-200: #e4e4e7;
 	--color-surface-300: #d4d4d8;
 	--color-surface-400: #a1a1aa;
-	--color-surface-500: #71717a;
+	--color-surface-500: #96969f; /* ≥4.5:1 for small text on surface-800 and darker */
 	--color-surface-600: #52525b;
 	--color-surface-700: #3f3f46;
 	--color-surface-800: #27272a;
@@ -39,7 +39,7 @@ html[data-theme='light'] {
 	--color-surface-200: #27272a;
 	--color-surface-300: #3f3f46;
 	--color-surface-400: #52525b;
-	--color-surface-500: #71717a;
+	--color-surface-500: #5e5e67; /* ≥4.5:1 for small text on surface-200 and lighter */
 	--color-surface-600: #a1a1aa;
 	--color-surface-700: #d4d4d8;
 	--color-surface-800: #e4e4e7;

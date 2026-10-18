@@ -1,5 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { fixture, serveStaleHtml, expectHydrated } from './fixtures';
+import {
+	fixture,
+	serveStaleHtml,
+	expectHydrated,
+	expectAccessible,
+	expectDropZoneOpensPicker,
+} from './fixtures';
 
 test('adding an image compresses it and offers a download', async ({ page }) => {
 	await page.goto('./');
@@ -18,4 +24,16 @@ test('recovers with one reload when the page was cached from before a deploy', a
 	// The recovery came from our reload guard, not from anything incidental
 	const guard = await page.evaluate(() => sessionStorage.getItem('neutron-stale-reload'));
 	expect(guard).not.toBeNull();
+});
+
+test('home page is accessible and its drop zone opens the file picker', async ({ page }) => {
+	await page.goto('./');
+	await expectDropZoneOpensPicker(page);
+	// The folder picker sits inside the drop area but is its own button
+	const [folderChooser] = await Promise.all([
+		page.waitForEvent('filechooser'),
+		page.getByRole('button', { name: /select a folder/i }).click(),
+	]);
+	expect(folderChooser).toBeTruthy();
+	await expectAccessible(page, 4);
 });

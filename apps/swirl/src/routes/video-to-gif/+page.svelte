@@ -433,10 +433,10 @@
 
 					<!-- Settings -->
 					<div class="glass rounded-2xl p-6">
-						<h3 class="text-surface-100 mb-6 flex items-center gap-2 text-lg font-semibold">
+						<h2 class="text-surface-100 mb-6 flex items-center gap-2 text-lg font-semibold">
 							<Film class="text-accent-start h-5 w-5" />
 							Conversion Settings
-						</h3>
+						</h2>
 
 						<div class="space-y-5">
 							<!-- FPS -->

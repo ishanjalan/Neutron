@@ -1,5 +1,11 @@
 import { test, expect, type Page } from '@playwright/test';
-import { fixture, serveStaleHtml, expectHydrated } from './fixtures';
+import {
+	fixture,
+	serveStaleHtml,
+	expectHydrated,
+	expectAccessible,
+	expectDropZoneOpensPicker,
+} from './fixtures';
 
 test.beforeEach(async ({ page }) => {
 	await page.addInitScript(() => localStorage.setItem('squash-onboarding-seen', 'true'));
@@ -61,4 +67,34 @@ test('does not reload in a loop when the page stays stale', async ({ page }) => 
 	await page.goto('./');
 	await page.waitForTimeout(4000); // long enough for a loop to show itself
 	expect(stale.navigations()).toBe(2); // the stale load plus exactly one reload
+});
+
+test.describe('with a French browser', () => {
+	test.use({ locale: 'fr-FR' });
+
+	test('keeps <html lang="en"> because the interface is English', async ({ page }) => {
+		await page.goto('./');
+		await page.waitForLoadState('networkidle');
+		await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+	});
+});
+
+test('home page is accessible and its drop zone opens the file picker', async ({ page }) => {
+	// Skip the first-visit welcome modal, which would sit on top of the drop zone
+	await page.addInitScript(() => localStorage.setItem('squash-onboarding-seen', 'true'));
+	await page.goto('./');
+	await expectDropZoneOpensPicker(page);
+	await expectAccessible(page, 3);
+
+	// Once a video is added the drop zone becomes the compact one — it must still work
+	await page.locator('input[type="file"]').first().setInputFiles(fixture('sample.mp4'));
+	await expect(page.getByText('sample.mp4').first()).toBeVisible();
+	await expectDropZoneOpensPicker(page);
+});
+
+test('audio and size-target pages are accessible', async ({ page }) => {
+	await page.goto('video-to-mp3');
+	await expectAccessible(page, 4);
+	await page.goto('compress-video-for-discord');
+	await expectAccessible(page, 3);
 });

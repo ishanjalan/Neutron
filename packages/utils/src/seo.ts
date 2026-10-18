@@ -6,7 +6,13 @@ export interface AppMeta {
 	description: string;
 }
 
-/** Maps browser language codes to supported locales, falling back to 'en'. */
+/**
+ * Maps browser language codes to supported locales, falling back to 'en'.
+ *
+ * Only the page <title>/description are translated — the interface itself is English — so
+ * callers must NOT set <html lang> from this: it would make screen readers pronounce English
+ * text with the wrong voice (and Arabic would also need dir="rtl").
+ */
 export function detectLocale(): Locale {
 	if (typeof navigator === 'undefined') return 'en';
 	const lang = navigator.language.split('-')[0].toLowerCase();

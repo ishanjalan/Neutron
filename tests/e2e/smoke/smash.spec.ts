@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { fixture, serveStaleHtml, expectHydrated } from './fixtures';
+import { fixture, serveStaleHtml, expectHydrated, expectAccessible } from './fixtures';
 
 test('PDF to images: load, convert, results offered', async ({ page }) => {
 	await page.goto('to-images');
@@ -19,4 +19,11 @@ test('recovers with one reload when the page was cached from before a deploy', a
 	// The recovery came from our reload guard, not from anything incidental
 	const guard = await page.evaluate(() => sessionStorage.getItem('neutron-stale-reload'));
 	expect(guard).not.toBeNull();
+});
+
+test('home and compress pages are accessible', async ({ page }) => {
+	await page.goto('./');
+	await expectAccessible(page, 2);
+	await page.goto('compress');
+	await expectAccessible(page, 9);
 });

@@ -65,7 +65,6 @@
 
 	onMount(() => {
 		locale = detectLocale();
-		document.documentElement.lang = locale;
 	});
 </script>
 

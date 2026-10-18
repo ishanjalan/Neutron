@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { expect, type Page } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
 export const fixture = (name: string) =>
 	fileURLToPath(new URL(`../../fixtures/${name}`, import.meta.url));
@@ -37,4 +38,47 @@ export async function expectHydrated(page: Page) {
 	const before = await html.getAttribute('data-theme');
 	await page.getByRole('button', { name: /Switch to (light|dark) mode/ }).click();
 	await expect(html).not.toHaveAttribute('data-theme', before ?? '');
+}
+
+/**
+ * Accessibility gate (axe, WCAG 2 A/AA + best practice). Anything structural — nested
+ * interactive controls, missing names/labels, heading order, link-only-by-colour — must be
+ * zero. Colour contrast is tracked separately: the remaining failures are brand accent
+ * colours (white on orange/green/blue, accent text on white), a design decision, so we
+ * ratchet the count (`maxContrastNodes`) to stop it growing rather than failing on it.
+ */
+export async function expectAccessible(page: Page, maxContrastNodes: number) {
+	await page.waitForLoadState('networkidle');
+	await page.waitForTimeout(1500); // let entry transitions finish so colours are settled
+	const results = await new AxeBuilder({ page })
+		.withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'])
+		.analyze();
+
+	const structural = results.violations
+		.filter((v) => v.id !== 'color-contrast')
+		.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(' | ')}`);
+	expect(structural, 'structural accessibility violations').toEqual([]);
+
+	const contrast = results.violations.find((v) => v.id === 'color-contrast')?.nodes.length ?? 0;
+	expect(contrast, 'colour-contrast failures must not grow').toBeLessThanOrEqual(maxContrastNodes);
+}
+
+/** The drop zone is a real button: click, Enter and Space each open the file picker. */
+export async function expectDropZoneOpensPicker(page: Page) {
+	await page.waitForLoadState('networkidle');
+	const zone = page.getByRole('button', { name: /click to browse/i }).first();
+	const [byClick] = await Promise.all([page.waitForEvent('filechooser'), zone.click()]);
+	expect(byClick).toBeTruthy();
+	await zone.focus();
+	const [byEnter] = await Promise.all([
+		page.waitForEvent('filechooser'),
+		page.keyboard.press('Enter'),
+	]);
+	expect(byEnter).toBeTruthy();
+	await zone.focus();
+	const [bySpace] = await Promise.all([
+		page.waitForEvent('filechooser'),
+		page.keyboard.press('Space'),
+	]);
+	expect(bySpace).toBeTruthy();
 }
