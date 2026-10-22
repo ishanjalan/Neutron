@@ -99,9 +99,12 @@ async function processQueue() {
 	}
 }
 
-// Convert HEIC (or an EXIF-rotated JPEG) to an upright PNG using the browser's native image decoder (createImageBitmap).
-// Supported on Safari (all), Chrome 104+ on macOS/iOS. HEIC originates from Apple
-// devices, so Firefox users essentially never encounter these files.
+// Convert HEIC (or an EXIF-rotated JPEG) to an upright PNG.
+//
+// HEIC is decoded natively where the platform has a decoder (Safari, and Chrome on macOS).
+// Everywhere else — Windows, Linux, Chromium builds without a system codec — that fails, yet
+// iPhone photos reach those machines constantly. So for HEIC we fall back to libheif (via
+// `heic-to`, WebAssembly), loaded on demand: browsers that can decode natively never download it.
 async function convertHeicToPng(
 	file: File,
 	isHeic = true
@@ -109,13 +112,13 @@ async function convertHeicToPng(
 	let bitmap: ImageBitmap;
 	try {
 		bitmap = await createImageBitmap(file);
-	} catch (error) {
-		throw new FatalImageError(
-			isHeic
-				? "This browser can't open HEIC photos. Use Safari, or Chrome on a Mac, or convert the photo to JPEG first."
-				: 'The browser could not read this photo. The file may be damaged.',
-			{ cause: error }
-		);
+	} catch (nativeError) {
+		if (!isHeic) {
+			throw new FatalImageError('The browser could not read this photo. The file may be damaged.', {
+				cause: nativeError,
+			});
+		}
+		return decodeHeicWithLibheif(file, nativeError);
 	}
 	const { width, height } = bitmap;
 
@@ -136,6 +139,27 @@ async function convertHeicToPng(
 			}
 		}, 'image/png');
 	});
+}
+
+/** libheif fallback for browsers with no native HEIC decoder (loaded only when needed). */
+async function decodeHeicWithLibheif(
+	file: File,
+	nativeError: unknown
+): Promise<{ blob: Blob; width: number; height: number }> {
+	try {
+		const { heicTo } = await import('heic-to');
+		const png = await heicTo({ blob: file, type: 'image/png' });
+		// PNG decodes natively everywhere — use it to read the dimensions
+		const decoded = await createImageBitmap(png);
+		const { width, height } = decoded;
+		decoded.close();
+		return { blob: png, width, height };
+	} catch (error) {
+		throw new FatalImageError(
+			'This HEIC photo could not be converted. It may be damaged, or use a HEIC variant Squish can’t read — try exporting it as JPEG.',
+			{ cause: error ?? nativeError }
+		);
+	}
 }
 
 /**

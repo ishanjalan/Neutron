@@ -7,11 +7,11 @@ interface PageSEO {
 
 export const squishSEO: PageSEO = {
 	intro:
-		'Compress and convert images in your browser without any upload — supports HEIC (iPhone photos, in Safari and Chrome on Mac), JPEG, PNG, WebP, AVIF, JPEG XL, and SVG. All processing runs locally on your device.',
+		'Compress and convert images in your browser without any upload — supports HEIC (iPhone photos), JPEG, PNG, WebP, AVIF, JPEG XL, and SVG. All processing runs locally on your device.',
 	faqs: [
 		{
 			q: 'What image formats can Squish compress?',
-			a: 'HEIC, JPEG, PNG, WebP, AVIF, JPEG XL, and SVG. It can also convert between most of these formats in a single step. HEIC needs a browser that can open it natively: Safari, or Chrome on a Mac. Elsewhere, convert HEIC to JPEG first.',
+			a: 'HEIC, JPEG, PNG, WebP, AVIF, JPEG XL, and SVG. It can also convert between most of these formats in a single step. HEIC photos from iPhones work in any modern browser. Where the browser can’t open HEIC itself (Windows, Linux), Squish loads a small converter the first time — about 3 MB, downloaded once and then cached.',
 		},
 		{
 			q: 'How much can Squish reduce image file size?',

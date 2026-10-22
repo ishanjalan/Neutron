@@ -71,3 +71,14 @@ All processing happens **100% locally** in your browser:
 ## 📄 License
 
 MIT License — see [LICENSE](../../LICENSE) for details.
+
+## HEIC support and licensing
+
+HEIC photos are decoded by the browser where it can (Safari, Chrome on macOS). Everywhere else
+— Windows, Linux, Chromium builds without a system codec — Squish falls back to
+[`heic-to`](https://github.com/hoppergee/heic-to), a WebAssembly build of
+[libheif](https://github.com/strukturag/libheif), which is licensed **LGPL-3.0**.
+
+It is a separate, lazily-loaded chunk (≈3 MB, fetched only when native decoding fails), imported
+unmodified from npm, so it can be replaced by swapping the dependency. Source for both projects is
+available at the links above.

@@ -37,3 +37,28 @@ test('home page is accessible and its drop zone opens the file picker', async ({
 	expect(folderChooser).toBeTruthy();
 	await expectAccessible(page, 4);
 });
+
+test('a HEIC photo converts even when the browser cannot decode HEIC natively', async ({
+	page,
+}) => {
+	// Stand in for Windows/Linux and Chromium builds without a system HEIC decoder
+	// (Playwright's Chromium on macOS may have one, which would hide the fallback).
+	await page.addInitScript(() => {
+		const native = window.createImageBitmap.bind(window);
+		window.createImageBitmap = ((source: ImageBitmapSource, ...rest: unknown[]) =>
+			source instanceof File && /\.hei[cf]$/i.test(source.name)
+				? Promise.reject(new DOMException('HEIC is not supported', 'InvalidStateError'))
+				: (native as (...args: unknown[]) => Promise<ImageBitmap>)(
+						source,
+						...rest
+					)) as typeof createImageBitmap;
+	});
+	await page.goto('./');
+	await page.waitForLoadState('networkidle');
+	await page.locator('input[type="file"]').first().setInputFiles(fixture('sample.heic'));
+	await expect(page.getByText('sample.heic').first()).toBeVisible();
+	await expect(page.getByRole('heading', { name: /image optimized/ })).toBeVisible({
+		timeout: 60_000,
+	});
+	await expect(page.getByRole('button', { name: /Download ZIP/ })).toBeVisible();
+});
