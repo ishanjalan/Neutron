@@ -209,8 +209,8 @@ importers:
   apps/squash:
     dependencies:
       '@mediabunny/mp3-encoder':
-        specifier: 1.61.6
-        version: 1.61.6(mediabunny@1.61.6)
+        specifier: 1.65.2
+        version: 1.65.2(mediabunny@1.65.2)
       '@neutron/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -224,8 +224,8 @@ importers:
         specifier: ^8.0.4
         version: 8.0.4
       mediabunny:
-        specifier: ^1.61.6
-        version: 1.61.6
+        specifier: ^1.65.2
+        version: 1.65.2
     devDependencies:
       '@sveltejs/adapter-static':
         specifier: ^4.0.0
@@ -373,8 +373,8 @@ importers:
         specifier: ^8.0.4
         version: 8.0.4
       mediabunny:
-        specifier: ^1.61.6
-        version: 1.61.6
+        specifier: ^1.65.2
+        version: 1.65.2
     devDependencies:
       '@sveltejs/adapter-static':
         specifier: ^4.0.0
@@ -727,8 +727,8 @@ packages:
   '@keyv/serialize@1.1.1':
     resolution: {integrity: sha512-dXn3FZhPv0US+7dtJsIi2R+c7qWYiReoEh5zUntWCf4oSpMNib8FDhSoed6m3QyZdx5hK7iLFkYk3rNxwt8vTA==}
 
-  '@mediabunny/mp3-encoder@1.61.6':
-    resolution: {integrity: sha512-QiXZY9e7+LhM/R+1rnQSKD+l53jRu+ku3OPVDcIHffDMSA0bjkRr1Dw2BY68AhBV5qibLoBiQeH+pToWjasxYA==}
+  '@mediabunny/mp3-encoder@1.65.2':
+    resolution: {integrity: sha512-iuGMybEg07MH7EnDhRXJ0hH80cSJ8ftri+HbTnrE8k/YUu5AcP5l7ZTANh2ZORSsXbWYj/Hu8U/mI8Ctdzb9Rw==}
     peerDependencies:
       mediabunny: ^1.0.0
 
@@ -764,6 +764,7 @@ packages:
   '@opentelemetry/sdk-trace-base@2.10.0':
     resolution: {integrity: sha512-GuYQQT7QD2EeO8lcZLRQzcbOyhqAzL+6WWTKTU9mSUBYBazkEDl+VrQcXQhbB08OWM9anD1aHleVadzulpOaUQ==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.10.0'
 
@@ -2361,8 +2362,8 @@ packages:
   mdn-data@2.27.1:
     resolution: {integrity: sha512-9Yubnt3e8A0OKwxYSXyhLymGW4sCufcLG6VdiDdUGVkPhpqLxlvP5vl1983gQjJl3tqbrM731mjaZaP68AgosQ==}
 
-  mediabunny@1.61.6:
-    resolution: {integrity: sha512-VHEZ53/7jGl4dQ+uOdndsZufFYwEUFWv9UXgvrGun3OapyzoqI9iaPOD7z3xxY/nAttLZBNwswgJzMtGJAquOQ==}
+  mediabunny@1.65.2:
+    resolution: {integrity: sha512-goZpibvo/5hkc/56WVNm93Ini+o7K4y8aXA20c/BN1B+m3L5aHQa8MTvO+S1APg/YI8kMILtrX6QCqUtxLW7bA==}
 
   min-indent@1.0.1:
     resolution: {integrity: sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg==}
@@ -3350,9 +3351,9 @@ snapshots:
 
   '@keyv/serialize@1.1.1': {}
 
-  '@mediabunny/mp3-encoder@1.61.6(mediabunny@1.61.6)':
+  '@mediabunny/mp3-encoder@1.65.2(mediabunny@1.65.2)':
     dependencies:
-      mediabunny: 1.61.6
+      mediabunny: 1.65.2
 
   '@okathira/ghostpdl-wasm@1.1.0':
     dependencies:
@@ -4841,7 +4842,7 @@ snapshots:
 
   mdn-data@2.27.1: {}
 
-  mediabunny@1.61.6:
+  mediabunny@1.65.2:
     dependencies:
       '@types/dom-mediacapture-transform': 0.1.12
       '@types/dom-webcodecs': 0.1.13
