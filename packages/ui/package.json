@@ -43,7 +43,7 @@
 		"svelte": "^5.0.0"
 	},
 	"devDependencies": {
-		"svelte": "^5.57.2",
+		"svelte": "^5.57.3",
 		"typescript": "^6.0.0"
 	},
 	"dependencies": {
