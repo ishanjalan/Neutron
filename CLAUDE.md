@@ -64,7 +64,7 @@ export default createViteConfig({
 
 `createViteConfig` wires up Tailwind v4, SvelteKit (adapter-static with `fallback: '404.html'`, `paths.base`, preprocess), and optional bundle analysis (`ANALYZE=true pnpm build`). COOP/COEP headers are applied to both dev server and preview (including SvelteKit's HTML responses, via a small plugin) when `crossOriginIsolation: true`.
 
-SvelteKit 3 conventions used here: `$lib` is gone — import with `#lib/...` (package.json `imports`, include file extensions, `.ts` for TypeScript files); use `$app/state` (not `$app/stores`), `resolve()`/`asset()` from `$app/paths` (no leading slash for pathnames), param matchers in a single `src/params.ts`, and service workers live in `src/service-worker/index.ts` with their own tsconfig (`$app/manifest`, `$app/env`). Requires Node ≥ 22.17 and TypeScript 6.
+SvelteKit 3 conventions used here: `$lib` is gone — import with `#lib/...` (package.json `imports`, include file extensions, `.ts` for TypeScript files); use `$app/state` (not `$app/stores`), `resolve()`/`asset()` from `$app/paths` (no leading slash for pathnames), param matchers in a single `src/params.ts`, and service workers live in `src/service-worker/index.ts` with their own tsconfig (`$app/manifest`, `$app/env`). Requires Node ≥ 22.17 and TypeScript 6. The Node version used locally and in CI lives in `.nvmrc` (CI reads it via `node-version-file`) — change it there.
 
 ### Shared UI package (`@neutron/ui`)
 
@@ -131,7 +131,7 @@ The base CSS defines a `surface-50`→`surface-950` scale (light↔dark), accent
 | App    | Key libs                                                                         | `vite.config` flags                                            |
 | ------ | -------------------------------------------------------------------------------- | -------------------------------------------------------------- |
 | heic   | ⚠️ deprecated — redirects to squish `/heic`. Not deployed in CI.                 |                                                                |
-| squish | icodec, heic-to, svgo, @sentry/sveltekit                                        | `wasmWorkers`, `optimizeDepsExclude: ['icodec']`               |
+| squish | icodec, heic-to, svgo, @sentry/sveltekit                                         | `wasmWorkers`, `optimizeDepsExclude: ['icodec']`               |
 | smash  | ghostscript-wasm-esm, @neslinesli93/qpdf-wasm, pdf-lib, pdfjs-dist, tesseract.js | `crossOriginIsolation`                                         |
 | squash | mediabunny, WebCodecs API, idb                                                   | `crossOriginIsolation`                                         |
 | swirl  | gifsicle-wasm-browser, gifski-wasm, idb                                          | `crossOriginIsolation`, `optimizeDepsExclude: ['gifski-wasm']` |
