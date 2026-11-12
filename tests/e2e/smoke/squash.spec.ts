@@ -94,7 +94,7 @@ test('home page is accessible and its drop zone opens the file picker', async ({
 
 test('audio and size-target pages are accessible', async ({ page }) => {
 	await page.goto('video-to-mp3');
-	await expectAccessible(page, 4);
+	await expectAccessible(page, 2);
 	await page.goto('compress-video-for-discord');
 	await expectAccessible(page, 3);
 });
