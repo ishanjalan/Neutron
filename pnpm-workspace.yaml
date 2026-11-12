@@ -26,4 +26,3 @@ overrides:
 allowBuilds:
   lefthook: true # syncs our git hooks
   tesseract.js: false # only prints a funding banner (opencollective-postinstall)
-  '@sentry/cli': false # downloads a binary for source-map uploads we never do

@@ -23,7 +23,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter squish --filter smash --filter squash --filter swirl check
       - run: pnpm test:unit
-      # Each app's own vitest config (runes / $lib aliases); heic is deprecated and skipped.
+      # Each app's own vitest config (Svelte runes / #lib imports).
       - run: pnpm test
 
   # ── Golden-path browser smoke tests (does NOT gate deploys; runs alongside them) ──

@@ -3,8 +3,8 @@ import { resolve } from 'path';
 
 export default defineConfig({
 	test: {
-		// Use jsdom for DOM testing
-		environment: 'jsdom',
+		// happy-dom everywhere (the app configs use it too) — one DOM implementation, no jsdom
+		environment: 'happy-dom',
 		// Root config only covers tests/unit. App tests run per-app (each app has its own
 		// vitest config for Svelte runes / $lib aliases): `pnpm test` (turbo -> vitest run).
 		include: ['tests/unit/**/*.{test,spec}.{js,ts}'],
@@ -23,10 +23,6 @@ export default defineConfig({
 		// Use an array so that more-specific subpath aliases are matched before
 		// their package-root prefix (e.g. @neutron/ui/motion before @neutron/ui).
 		alias: [
-			{
-				find: '@neutron/utils/validation',
-				replacement: resolve(__dirname, 'packages/utils/src/validation.ts'),
-			},
 			{
 				find: '@neutron/utils/comlink',
 				replacement: resolve(__dirname, 'packages/utils/src/comlink.ts'),

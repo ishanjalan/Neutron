@@ -1,9 +1,0 @@
-@import 'tailwindcss';
-@import '@neutron/config/tailwind/base.css';
-@source '../../../packages/ui/src';
-
-/* App-specific accent: Violet/Pink for HEIC */
-@theme {
-	--color-accent-start: #8b5cf6;
-	--color-accent-end: #ec4899;
-}

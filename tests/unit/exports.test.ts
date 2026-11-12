@@ -25,10 +25,6 @@ describe('@neutron/utils exports', () => {
 	it('exports revokeTrackedUrl', () =>
 		expect(neutronUtils.revokeTrackedUrl).toBeTypeOf('function'));
 	it('exports revokeAll', () => expect(neutronUtils.revokeAll).toBeTypeOf('function'));
-	it('exports validate', () => expect(neutronUtils.validate).toBeTypeOf('function'));
-	it('exports validateOrThrow', () => expect(neutronUtils.validateOrThrow).toBeTypeOf('function'));
-	it('exports getValidationErrors', () =>
-		expect(neutronUtils.getValidationErrors).toBeTypeOf('function'));
 	it('exports NEUTRON_APPS', () => expect(neutronUtils.NEUTRON_APPS).toBeTypeOf('object'));
 	it('has no undefined exports', () => {
 		for (const [key, value] of Object.entries(neutronUtils)) {

@@ -11,7 +11,6 @@ pnpm dev:squish       # :5176
 pnpm dev:smash        # :5174
 pnpm dev:squash       # :5175
 pnpm dev:swirl        # :5177
-# Note: heic app is deprecated (redirects to squish /heic). No dev:heic script.
 
 # Build
 pnpm build                        # all apps via Turborepo
@@ -41,7 +40,7 @@ npx playwright test homepage --project=chromium          # single spec + browser
 ### Monorepo layout
 
 ```
-apps/          heic | squish | smash | squash | swirl
+apps/          squish | smash | squash | swirl
 packages/      config | ui | utils
 tests/         unit/ | e2e/
 ```
@@ -57,7 +56,7 @@ SvelteKit 3 no longer reads `svelte.config.js`; all apps delegate entirely to on
 export default createViteConfig({
 	basePath: '/RepoName', // production base path (GitHub Pages repo name)
 	crossOriginIsolation: true, // smash, squash, swirl — needed for SharedArrayBuffer / WASM threads
-	wasmWorkers: true, // squish, heic — enables WASM chunking in workers
+	wasmWorkers: true, // squish — enables WASM chunking in workers
 	optimizeDepsExclude: ['icodec'], // WASM packages that must not be pre-bundled
 });
 ```
@@ -78,11 +77,10 @@ Subpath exports — import the narrowest one needed:
 
 | Import                       | Contents                                                                           |
 | ---------------------------- | ---------------------------------------------------------------------------------- |
-| `@neutron/utils`             | format, download, focus-trap, blob-url, worker-pool, validation, apps              |
+| `@neutron/utils`             | format, download, focus-trap, blob-url, worker-pool, apps                          |
 | `@neutron/utils/download`    | `downloadBlob`, `downloadAllAsZip`, `downloadMultipleFiles`, `copyBlobToClipboard` |
 | `@neutron/utils/comlink`     | Comlink re-export                                                                  |
 | `@neutron/utils/worker-pool` | `createWorkerPool`                                                                 |
-| `@neutron/utils/validation`  | Valibot schemas for PDF/video/image/GIF settings                                   |
 
 ZIP generation uses `fflate` (not JSZip) via `downloadAllAsZip`.
 
@@ -138,8 +136,7 @@ pnpm is pinned in `package.json` (`packageManager`; pnpm 12) and CI reads it via
 
 | App    | Key libs                                                                         | `vite.config` flags                                            |
 | ------ | -------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| heic   | ⚠️ deprecated — redirects to squish `/heic`. Not deployed in CI.                 |                                                                |
-| squish | icodec, heic-to, svgo, @sentry/sveltekit                                         | `wasmWorkers`, `optimizeDepsExclude: ['icodec']`               |
+| squish | icodec, heic-to, svgo                                                            | `wasmWorkers`, `optimizeDepsExclude: ['icodec']`               |
 | smash  | ghostscript-wasm-esm, @neslinesli93/qpdf-wasm, pdf-lib, pdfjs-dist, tesseract.js | `crossOriginIsolation`                                         |
 | squash | mediabunny, WebCodecs API, idb                                                   | `crossOriginIsolation`                                         |
 | swirl  | gifsicle-wasm-browser, gifski-wasm, idb                                          | `crossOriginIsolation`, `optimizeDepsExclude: ['gifski-wasm']` |
