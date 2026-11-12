@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Decisions and architecture
+
+Before changing tooling, dependency policy, deployment, or an app's core behaviour, read the index in
+[`docs/decisions/README.md`](docs/decisions/README.md) and open any ADR that applies. When you make a
+decision of that kind, add an ADR in the same PR (template in `docs/decisions/template.md`; never
+rewrite an accepted ADR, supersede it). [`docs/architecture.md`](docs/architecture.md) is the
+current-state map: parts, duplication, fragile spots.
+
 ## Commands
 
 ```bash
