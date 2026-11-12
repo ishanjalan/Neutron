@@ -65,11 +65,8 @@ backend. Page views are counted with GoatCounter only (ADR-0003).
   (ADR-0005). A fresh release in the lockfile fails installs until it ages.
 - **Version pins:** TypeScript is held at 6.x because Kit 3, svelte-check and typescript-eslint do
   not yet allow 7. Check before bumping.
-- **Known import cycles in Squish:** two (see ADR-0009).
-- **Unverified dead code:** knip flags 13 files, 12 plausibly dead plus one false positive. Smash:
-  BatchSummary, KeyboardShortcuts, PDFCard, PDFList, PageThumbnails, ToolSelector, Workspace,
-  `lib/index.ts`. Squash: QualityPreview, `lib/index.ts`. Squish: SampleImageDemo. Swirl:
-  `lib/index.ts`. The false positive is Smash `ghostscript.worker.ts`.
+- **Dead code:** `pnpm knip` (files, dependencies, unlisted) runs in CI and is currently clean. Unused
+  exports are not gated.
 - **Accessibility:** structural axe violations must be 0 (gated). Colour-contrast violations are
   ratcheted, not zero; the accent colours are a pending design decision.
 - **Missing route:** `/Squish/heic` returns 404 (ADR-0002).
@@ -77,5 +74,4 @@ backend. Page views are counted with GoatCounter only (ADR-0003).
 ## Checks that already guard this
 
 Type check (`pnpm check`), ESLint and Prettier, Vitest unit tests, Playwright smoke tests (hydration,
-drop zones, stale reload, `lang`), and an axe gate. Not guarded: bundle size, circular imports,
-unused code.
+drop zones, stale reload, `lang`), and an axe gate. Also `pnpm knip` for unused files and dependencies. Not guarded: bundle size, circular imports.
