@@ -1,3 +1,4 @@
+import { countDownload } from './analytics';
 import { zipSync } from 'fflate';
 
 export interface DownloadFile {
@@ -25,6 +26,7 @@ function deduplicateName(name: string, usedNames: Map<string, number>): string {
  * Download a blob as a file
  */
 export function downloadBlob(blob: Blob, filename: string): void {
+	countDownload();
 	const url = URL.createObjectURL(blob);
 	const a = document.createElement('a');
 	a.href = url;

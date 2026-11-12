@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { countFailure } from '@neutron/utils/analytics';
 	import { acceptPdfFiles } from '#lib/utils/pdf-files.ts';
 	import Header from '#lib/components/Header.svelte';
 	import PDFViewer from '#lib/components/PDFViewer.svelte';
@@ -197,6 +198,7 @@
 				);
 			} catch (error) {
 				console.error('Compression error:', error);
+				countFailure(error);
 				files = files.map((f) =>
 					f.id === pdfFile.id
 						? {

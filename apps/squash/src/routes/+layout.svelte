@@ -3,7 +3,7 @@
 	import favicon from '#lib/assets/favicon.svg';
 	import { onMount, tick } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
-	import { countPageview } from '@neutron/utils/analytics';
+	import { countPageview, installCrashTracking } from '@neutron/utils/analytics';
 	import { detectLocale, type Locale } from '@neutron/utils/seo';
 	import { squashMeta } from '#lib/seo.ts';
 	import { page } from '$app/state';
@@ -34,6 +34,7 @@
 	});
 
 	onMount(() => {
+		installCrashTracking();
 		locale = detectLocale();
 	});
 </script>

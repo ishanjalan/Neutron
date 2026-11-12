@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { countFailure } from '@neutron/utils/analytics';
 	import { acceptGifFiles } from '#lib/utils/files.ts';
 	import Header from '#lib/components/Header.svelte';
 	import { Footer } from '@neutron/ui';
@@ -199,6 +200,7 @@
 				);
 			} catch (error) {
 				console.error('Optimization error:', error);
+				countFailure(error);
 				files = files.map((f) =>
 					f.id === gifFile.id
 						? {

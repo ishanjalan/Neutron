@@ -4,7 +4,7 @@
 	import { Toast } from '@neutron/ui';
 	import { onMount, tick } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
-	import { countPageview } from '@neutron/utils/analytics';
+	import { countPageview, installCrashTracking } from '@neutron/utils/analytics';
 	import { detectLocale, type Locale } from '@neutron/utils/seo';
 	import { squishMeta } from '#lib/seo.ts';
 
@@ -30,6 +30,7 @@
 	});
 
 	onMount(() => {
+		installCrashTracking();
 		locale = detectLocale();
 	});
 </script>

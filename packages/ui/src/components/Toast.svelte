@@ -1,5 +1,6 @@
 <script lang="ts" module>
 	import { Check, X, AlertCircle, Info } from 'lucide-svelte';
+	import { countFailure } from '@neutron/utils/analytics';
 
 	export type ToastType = 'success' | 'error' | 'info';
 
@@ -55,6 +56,7 @@
 			return addToast(message, 'success', opts);
 		},
 		error: (message: string, options?: ToastOptions | number) => {
+			countFailure(message); // bucket only, never the message
 			const opts = typeof options === 'number' ? { duration: options } : options;
 			return addToast(message, 'error', { duration: 5000, ...opts });
 		},

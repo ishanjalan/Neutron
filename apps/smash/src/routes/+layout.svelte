@@ -5,7 +5,7 @@
 	import { Toast, toast } from '@neutron/ui';
 	import { onMount, tick } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
-	import { countPageview } from '@neutron/utils/analytics';
+	import { countPageview, installCrashTracking } from '@neutron/utils/analytics';
 	import { detectLocale, type Locale } from '@neutron/utils/seo';
 	import { smashLayoutMeta } from '#lib/seo.ts';
 	import { page } from '$app/state';
@@ -73,6 +73,7 @@
 	});
 
 	onMount(() => {
+		installCrashTracking();
 		locale = detectLocale();
 		setGhostscriptErrorHandler((error) => {
 			toast.error(`PDF processing engine crashed: ${error.message}. Please reload the page.`);

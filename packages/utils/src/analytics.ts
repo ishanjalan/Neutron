@@ -93,3 +93,87 @@ export function countPageview(vars: CountVars = {}): void {
 	pending.push(resolved);
 	waitForScript();
 }
+
+// ---------------------------------------------------------------------------
+// Events
+// ---------------------------------------------------------------------------
+
+/**
+ * What kind of thing went wrong. This is a closed vocabulary on purpose: raw error messages can
+ * contain file names, so only the bucket ever leaves the browser (see ADR-0010).
+ */
+export type FailureKind =
+	| 'unsupported'
+	| 'too-large'
+	| 'memory'
+	| 'password'
+	| 'network'
+	| 'invalid-input'
+	| 'crash'
+	| 'other';
+
+const FAILURE_PATTERNS: [FailureKind, RegExp][] = [
+	['password', /password|encrypt/i],
+	['memory', /out of memory|memory|allocation|RangeError/i],
+	['too-large', /too (large|big)|exceeds?|size limit|larger than/i],
+	['network', /network|fetch|cors|offline|failed to load/i],
+	['unsupported', /not supported|unsupported|can.?t (read|decode|encode)|webcodecs|codec/i],
+	[
+		'invalid-input',
+		/invalid|corrupt|malformed|not a (valid )?(pdf|image|gif|video)|need at least|select/i,
+	],
+	['crash', /crash|unexpected|reload/i],
+];
+
+/** Map any error or message onto a {@link FailureKind}. Never returns the message itself. */
+export function classifyFailure(error: unknown): FailureKind {
+	const message =
+		typeof error === 'string'
+			? error
+			: error instanceof Error
+				? error.message
+				: String(error ?? '');
+	for (const [kind, pattern] of FAILURE_PATTERNS) {
+		if (pattern.test(message)) return kind;
+	}
+	return 'other';
+}
+
+/** "/Smash/compress/" → "Smash/compress". Only plain path characters survive; capped in length. */
+export function eventRoute(pathname: string): string {
+	const clean = pathname.replace(/^\/+|\/+$/g, '');
+	if (!clean) return 'home';
+	return /^[A-Za-z0-9/_-]{1,60}$/.test(clean) ? clean : 'other';
+}
+
+/**
+ * Count a custom event. `name` must be a fixed string built from routes and buckets, never from
+ * user input, file names or error messages.
+ */
+export function countEvent(name: string): void {
+	if (typeof window === 'undefined') return;
+	countPageview({ path: name, title: name, event: true });
+}
+
+/** Count that something failed on the current page, by bucket only. */
+export function countFailure(error: unknown): void {
+	if (typeof window === 'undefined') return;
+	countEvent(`error: ${eventRoute(window.location.pathname)} (${classifyFailure(error)})`);
+}
+
+/** Count that a result was downloaded on the current page. */
+export function countDownload(): void {
+	if (typeof window === 'undefined') return;
+	countEvent(`download: ${eventRoute(window.location.pathname)}`);
+}
+
+let crashTracking = false;
+
+/** Count uncaught errors and rejected promises. Call once from the root layout. */
+export function installCrashTracking(): void {
+	if (typeof window === 'undefined' || crashTracking) return;
+	crashTracking = true;
+	const report = () => countEvent(`crash: ${eventRoute(window.location.pathname)}`);
+	window.addEventListener('error', report);
+	window.addEventListener('unhandledrejection', report);
+}

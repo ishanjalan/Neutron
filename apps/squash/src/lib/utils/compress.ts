@@ -1,3 +1,4 @@
+import { countFailure } from '@neutron/utils/analytics';
 import {
 	videos,
 	type VideoItem,
@@ -235,6 +236,7 @@ async function compressVideo(item: VideoItem) {
 		}
 
 		console.error('Compression error:', error);
+		countFailure(error);
 		const unreadable = isUnsupportedInputError(error);
 		videos.updateItem(item.id, {
 			status: 'error',
