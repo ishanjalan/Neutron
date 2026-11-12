@@ -42,7 +42,7 @@ export interface ViteConfigOptions {
 	optimizeDepsExclude?: string[];
 	/**
 	 * Enable the extended worker config with tailwindcss plugin and proper WASM chunking.
-	 * Use for apps that process files in workers with dynamic imports: squish, heic.
+	 * Use for apps that process files in workers with dynamic imports: squish.
 	 */
 	wasmWorkers?: boolean;
 	/**

@@ -28,10 +28,6 @@
 			"types": "./src/focus-trap.ts",
 			"default": "./src/focus-trap.ts"
 		},
-		"./validation": {
-			"types": "./src/validation.ts",
-			"default": "./src/validation.ts"
-		},
 		"./comlink": {
 			"types": "./src/comlink.ts",
 			"default": "./src/comlink.ts"
@@ -66,7 +62,6 @@
 	},
 	"dependencies": {
 		"comlink": "^4.4.2",
-		"fflate": "^0.8.3",
-		"valibot": "^1.5.0"
+		"fflate": "^0.8.3"
 	}
 }

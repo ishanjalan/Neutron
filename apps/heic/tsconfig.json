@@ -1,4 +1,0 @@
-{
-	"extends": ["../../packages/config/typescript/base.json", "$app/tsconfig"],
-	"include": ["src", "vite.config.ts"]
-}
