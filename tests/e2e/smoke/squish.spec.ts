@@ -62,3 +62,30 @@ test('a HEIC photo converts even when the browser cannot decode HEIC natively', 
 	});
 	await expect(page.getByRole('button', { name: /Download ZIP/ })).toBeVisible();
 });
+
+test('/heic is a real landing page that converts HEIC to JPG without touching saved settings', async ({
+	page,
+}) => {
+	await page.goto('heic');
+	await page.waitForLoadState('networkidle');
+	await expect(page).toHaveTitle(/HEIC to JPG/);
+	await expect(page.getByRole('heading', { level: 1 })).toHaveText(/HEIC to JPG/);
+	await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
+	await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/Squish\/heic$/);
+	await expectAccessible(page, 0);
+
+	await page.locator('input[type="file"]').first().setInputFiles(fixture('sample.heic'));
+	await expect(page.getByRole('heading', { name: /image optimized/ })).toBeVisible({
+		timeout: 60_000,
+	});
+	// The preset is for this visit only: nothing is written to the user's saved settings
+	const saved = await page.evaluate(() =>
+		Object.keys(localStorage).filter((k) => k.includes('settings'))
+	);
+	expect(saved).toEqual([]);
+
+	// The homepage links to it and keeps its own canonical
+	await page.goto('./');
+	await expect(page.getByRole('link', { name: /HEIC to JPG/ })).toBeVisible();
+	await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
+});

@@ -7,6 +7,7 @@
 	import { countPageview, installCrashTracking } from '@neutron/utils/analytics';
 	import { detectLocale, type Locale } from '@neutron/utils/seo';
 	import { squishMeta } from '#lib/seo.ts';
+	import { page } from '$app/state';
 
 	let { children } = $props();
 
@@ -15,6 +16,9 @@
 
 	let locale = $state<Locale>('en');
 	let meta = $derived(squishMeta[locale]);
+	// Homepage-only SEO — landing pages set their own <title>/meta/canonical, and unmatched
+	// URLs (404) get none, so neither inherits the homepage's canonical.
+	const isHome = $derived(page.route.id === '/');
 
 	// GoatCounter counts nothing on its own (no_onload in app.html) — send one
 	// pageview per navigation, once this route's <svelte:head> has applied its
@@ -37,14 +41,20 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<title>{meta.title}</title>
-	<meta name="description" content={meta.description} />
+	{#if isHome}
+		<title>{meta.title}</title>
+		<meta name="description" content={meta.description} />
+		<meta property="og:url" content={siteUrl} />
+		<meta property="og:title" content={meta.title} />
+		<meta property="og:description" content={meta.description} />
+		<meta name="twitter:title" content={meta.title} />
+		<meta name="twitter:description" content={meta.description} />
+		<meta name="robots" content="index, follow" />
+		<link rel="canonical" href={siteUrl} />
+	{/if}
 
 	<!-- Open Graph -->
 	<meta property="og:type" content="website" />
-	<meta property="og:url" content={siteUrl} />
-	<meta property="og:title" content={meta.title} />
-	<meta property="og:description" content={meta.description} />
 	<meta property="og:image" content={ogImage} />
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
@@ -52,13 +62,9 @@
 
 	<!-- Twitter Card -->
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content={meta.title} />
-	<meta name="twitter:description" content={meta.description} />
 	<meta name="twitter:image" content={ogImage} />
 
 	<!-- Additional SEO -->
-	<meta name="robots" content="index, follow" />
-	<link rel="canonical" href={siteUrl} />
 
 	<link rel="alternate" hreflang="x-default" href={siteUrl} />
 

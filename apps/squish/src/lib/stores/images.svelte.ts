@@ -185,6 +185,8 @@ async function getImageDimensions(
 function createImagesStore() {
 	let items = $state<ImageItem[]>([]);
 	let settings = $state<CompressionSettings>(loadSettings());
+	/** Saved values of settings a landing page overrides for this visit (see applyPagePreset). */
+	const presetBase: Partial<CompressionSettings> = {};
 	let batchStats = $state<BatchStats>({ startTime: null, endTime: null, totalImages: 0 });
 	let selectedIds = $state<Set<string>>(new Set());
 	let pendingSuggestion = $state<PendingSuggestion | null>(null);
@@ -405,9 +407,23 @@ function createImagesStore() {
 			items = restoredItems;
 		},
 
+		/**
+		 * Apply settings for this visit only (a landing page such as /heic). They are shown and used,
+		 * but never written to localStorage unless the user changes that setting themselves.
+		 */
+		applyPagePreset(preset: Partial<CompressionSettings>) {
+			for (const key of Object.keys(preset) as (keyof CompressionSettings)[]) {
+				if (!(key in presetBase)) (presetBase as Record<string, unknown>)[key] = settings[key];
+			}
+			settings = { ...settings, ...preset };
+		},
+
 		updateSettings(newSettings: Partial<CompressionSettings>) {
 			settings = { ...settings, ...newSettings };
-			saveSettings(settings);
+			// Anything the user changes explicitly is theirs to keep; untouched preset keys stay transient
+			for (const key of Object.keys(newSettings))
+				delete (presetBase as Record<string, unknown>)[key];
+			saveSettings({ ...settings, ...presetBase });
 
 			// Update output format for pending items
 			if (newSettings.outputFormat !== undefined) {

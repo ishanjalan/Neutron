@@ -72,7 +72,8 @@ backend. Page views are counted with GoatCounter only (ADR-0003).
   pattern: white text on a bright accent fill (`bg-accent-start text-white`, e.g. Smash compress,
   Swirl video-to-gif) and `opacity-70` captions. The fix used so far is black text on the accent
   fill and `.text-accent-readable` for accent-coloured text on the light theme.
-- **Missing route:** `/Squish/heic` returns 404 (ADR-0002).
+- **Landing pages:** Squish `/heic` is config-driven (`lib/landing-pages.ts`) on top of the shared
+  `SquishApp` component (ADR-0002). Squash does the same with `size-targets.ts`.
 
 ## Checks that already guard this
 

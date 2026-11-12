@@ -20,10 +20,14 @@ This retired the _app_, not HEIC support. The intended entry point for people se
 JPG" is a `/heic` landing route inside Squish. That route was announced in `1e3c99b` but does not
 exist today (`/Squish/heic` returns 404 while receiving real visits).
 
+Update 2026-11-12: the `/heic` route now exists (`routes/heic`, config in `lib/landing-pages.ts`). It
+is the normal Squish app with the output format preset to JPG for that visit only (the preset is
+never saved over the visitor's own settings), its own title, description and canonical, and an
+FAQ. The homepage links to it. Further landing pages should follow the same pattern.
+
 ## Consequences
 
-One fewer app to build, test and deploy. The libheif chunk is only downloaded when needed. The `/heic`
-route still has to be built.
+One fewer app to build, test and deploy. The libheif chunk is only downloaded when needed.
 
 ## Revisit if
 
