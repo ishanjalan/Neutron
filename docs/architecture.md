@@ -40,8 +40,8 @@ backend. Page views are counted with GoatCounter only (ADR-0003).
 
 ## What is duplicated
 
-- **Smash PDF summary:** a roughly 22-line block repeated across 7 tool pages. Candidate for one
-  component.
+- **Smash single-PDF card:** now `SelectedPdfSummary.svelte`, used by 7 tool pages. `split` and
+  `unlock` still have their own variants (extra lines in the card).
 - **DropZone:** `packages/ui` has one, and each app also has its own `DropZone.svelte`. Behaviour was
   fixed in the shared and Squish copies for accessibility; the others may have drifted. Not checked.
 - **Stale-deploy script (ADR-0008):** inline in all four `app.html` files.
