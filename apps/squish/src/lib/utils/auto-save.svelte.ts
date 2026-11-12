@@ -1,5 +1,5 @@
 import type { ImageItem } from '#lib/stores/images.svelte.ts';
-import { getOutputFilename } from './compress';
+import { getOutputFilename } from './output-filename';
 import { SvelteMap } from 'svelte/reactivity';
 
 let autoSaveDirHandle: FileSystemDirectoryHandle | null = null;
