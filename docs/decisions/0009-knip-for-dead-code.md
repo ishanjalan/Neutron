@@ -17,15 +17,17 @@ not auto-detect them), after which it ran in about 3 seconds and found real dead
 knip does not, but it is young, its benchmarks are self-reported, and its unused-export accuracy has
 not been checked. Do not replace knip; consider Rev-dep only as a circular-import check.
 
-Known knip false positive: `ghostscript.worker.ts` (loaded through `new URL(...)`).
+Config lives in `knip.json`. Known benign reports it ignores: `tailwindcss` (imported from CSS) and `$app` (SvelteKit virtual module in tsconfig).
 
 ## Consequences
 
-knip results are a report, not proof: verify each flagged file before deleting. At the time of
-writing, 13 flagged files remain unverified and Squish has 2 import cycles
-(`images.svelte.ts` ↔ `detect-format.ts`; `auto-save` → `compress` → `download` → `auto-save`).
+knip results are a report, not proof: verify each flagged file (grep for dynamic `new URL(...)` loads)
+before deleting. Update 2026-11-12: all 13 flagged files were verified unreferenced and deleted
+(`ghostscript.worker.ts` was not a false positive; the real worker is `ghostscript.comlink.ts`).
+`pnpm knip` (files, dependencies, unlisted) now runs in `ci.yml` and fails on regressions. Unused
+exports are not gated: they flag public API types and are noisy.
 
 ## Revisit if
 
-A CI gate is added (start with unused dependencies only), or Rev-dep's unused-export accuracy is
+Rev-dep's unused-export accuracy is
 shown to match knip's.

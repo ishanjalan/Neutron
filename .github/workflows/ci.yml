@@ -20,6 +20,7 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter squish --filter smash --filter squash --filter swirl check
+      - run: pnpm knip
       - run: pnpm test:unit
       - run: pnpm test
 
