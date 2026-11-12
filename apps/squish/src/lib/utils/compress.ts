@@ -7,7 +7,7 @@ import {
 import { optimize } from 'svgo';
 import { processImage as processImageInWorker, initPool } from './worker-pool';
 import { autoSaveFile, getAutoSaveState } from './download';
-import { getOutputFilename as getOutputFilenameShared } from '@neutron/utils';
+import { getOutputExtension } from './output-filename';
 import { readJpegOrientation } from './detect-format';
 
 /** An error whose message is already user-facing and which retrying won't fix. */
@@ -832,29 +832,6 @@ async function computeWebp3xSize(file: File, quality: number): Promise<number> {
 	}
 }
 
-export function getOutputExtension(format: OutputFormat): string {
-	const map: Record<OutputFormat, string> = {
-		jpeg: '.jpg',
-		png: '.png',
-		webp: '.webp',
-		avif: '.avif',
-		jxl: '.jxl',
-		svg: '.svg',
-	};
-	return map[format];
-}
-
-export function getOutputFilename(
-	originalName: string,
-	format: OutputFormat,
-	template?: string
-): string {
-	return getOutputFilenameShared(originalName, {
-		extension: getOutputExtension(format).slice(1),
-		template: template ?? '{name}-optimized.{ext}',
-	});
-}
-
 // Re-process a single image with a new output format
 export async function reprocessImage(id: string, newFormat: OutputFormat) {
 	const item = images.getItemById(id);
@@ -945,3 +922,5 @@ export async function reprocessAllImages() {
 	// End batch timing
 	images.endBatch();
 }
+
+export { getOutputExtension, getOutputFilename } from './output-filename';

@@ -2,8 +2,9 @@ import { SvelteSet } from 'svelte/reactivity';
 import { detectSvgEmbeddedRaster } from '#lib/utils/svg-analyze.ts';
 import { detectImageFormat } from '#lib/utils/detect-format.ts';
 import { toast } from '@neutron/ui';
+import type { ImageFormat } from '#lib/types/image-format.ts';
 
-export type ImageFormat = 'jpeg' | 'png' | 'webp' | 'avif' | 'jxl' | 'svg' | 'heic';
+export type { ImageFormat };
 export type OutputFormat = 'jpeg' | 'png' | 'webp' | 'avif' | 'jxl' | 'svg'; // HEIC is input-only
 export type ImageStatus = 'pending' | 'processing' | 'completed' | 'error';
 
