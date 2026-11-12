@@ -1,3 +1,29 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+
+# Pin patched versions of build-time transitive dependencies that have advisories.
+# (pnpm 11+ reads settings from here, not from a "pnpm" field in package.json.)
+minimumReleaseAgeExclude:
+  - '@turbo/darwin-64@2.11.11'
+  - '@turbo/darwin-arm64@2.11.11'
+  - '@turbo/linux-64@2.11.11'
+  - '@turbo/linux-arm64@2.11.11'
+  - '@turbo/windows-64@2.11.11'
+  - '@turbo/windows-arm64@2.11.11'
+  - prettier@3.10.0
+  - turbo@2.11.11
+  - vite@8.3.8
+
+overrides:
+  'brace-expansion@>=4.0.0 <5.0.12': '^5.0.12'
+  'source-map-js@<1.2.2': '^1.2.2'
+  'yaml@>=2.0.0 <2.8.3': '^2.8.3'
+  'esbuild@>=0.27.3 <0.28.1': '^0.28.1'
+
+# pnpm 10+ does not run dependency install scripts unless approved here (pnpm 11+ fails the
+# install on unreviewed ones). Each entry is a deliberate decision.
+allowBuilds:
+  lefthook: true # syncs our git hooks
+  tesseract.js: false # only prints a funding banner (opencollective-postinstall)
+  '@sentry/cli': false # downloads a binary for source-map uploads we never do
