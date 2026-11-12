@@ -312,7 +312,7 @@
 							href="https://mediabunny.dev"
 							target="_blank"
 							rel="noopener"
-							class="text-accent-start underline underline-offset-2 hover:no-underline"
+							class="text-accent-readable underline underline-offset-2 hover:no-underline"
 							>Mediabunny</a
 						>
 						+ WebCodecs. H.264, H.265, VP9, AV1 — all processed locally in your browser.

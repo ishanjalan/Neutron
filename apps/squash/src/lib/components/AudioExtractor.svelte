@@ -260,7 +260,7 @@
 									title={available[f] ? AUDIO_FORMATS[f].blurb : 'Not supported in this browser'}
 									class="rounded-lg px-3 py-2 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40 {format ===
 									f
-										? 'bg-accent-start shadow-accent-start/30 text-white shadow-md'
+										? 'bg-accent-start shadow-accent-start/30 text-black shadow-md'
 										: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700/50'}"
 								>
 									{AUDIO_FORMATS[f].label}
@@ -281,7 +281,7 @@
 										onclick={() => chooseBitrate(b)}
 										aria-pressed={bitrate === b}
 										class="rounded-lg px-3 py-2 text-sm transition-all {bitrate === b
-											? 'bg-accent-start shadow-accent-start/30 text-white shadow-md'
+											? 'bg-accent-start shadow-accent-start/30 text-black shadow-md'
 											: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700/50'}"
 									>
 										{b / 1000} kbps

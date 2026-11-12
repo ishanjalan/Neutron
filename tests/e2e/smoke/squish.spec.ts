@@ -35,7 +35,7 @@ test('home page is accessible and its drop zone opens the file picker', async ({
 		page.getByRole('button', { name: /select a folder/i }).click(),
 	]);
 	expect(folderChooser).toBeTruthy();
-	await expectAccessible(page, 4);
+	await expectAccessible(page, 0);
 });
 
 test('a HEIC photo converts even when the browser cannot decode HEIC natively', async ({

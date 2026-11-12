@@ -67,8 +67,11 @@ backend. Page views are counted with GoatCounter only (ADR-0003).
   not yet allow 7. Check before bumping.
 - **Dead code:** `pnpm knip` (files, dependencies, unlisted) runs in CI and is currently clean. Unused
   exports are not gated.
-- **Accessibility:** structural axe violations must be 0 (gated). Colour-contrast violations are
-  ratcheted, not zero; the accent colours are a pending design decision.
+- **Accessibility:** structural axe violations must be 0 (gated). Colour contrast is clean on every
+  home page in both themes and ratcheted to 0 on Squish. Remaining failures are on tool pages, all one
+  pattern: white text on a bright accent fill (`bg-accent-start text-white`, e.g. Smash compress,
+  Swirl video-to-gif) and `opacity-70` captions. The fix used so far is black text on the accent
+  fill and `.text-accent-readable` for accent-coloured text on the light theme.
 - **Missing route:** `/Squish/heic` returns 404 (ADR-0002).
 
 ## Checks that already guard this

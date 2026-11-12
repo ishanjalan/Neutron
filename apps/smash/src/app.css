@@ -2,11 +2,10 @@
 @import '@neutron/config/tailwind/base.css';
 @source '../../../packages/ui/src';
 
-/* App-specific accent: Sky/Cyan for PDFs + surface-500 override for WCAG AA */
+/* App-specific accent: Sky/Cyan for PDFs */
 @theme {
 	--color-accent-start: #0ea5e9;
 	--color-accent-end: #06b6d4;
-	--color-surface-500: #8b8b94;
 }
 
 /* ============================================

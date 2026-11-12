@@ -176,7 +176,7 @@
 							onclick={() => handlePresetClick(preset.value)}
 							class="relative flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all {!isLossless &&
 							images.settings.quality === preset.value
-								? 'bg-accent-start text-white shadow-md'
+								? 'bg-accent-start text-black shadow-md'
 								: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700/50'}"
 							title="{preset.desc} ({preset.value}%)"
 						>
@@ -192,7 +192,7 @@
 					<button
 						onclick={() => images.updateSettings({ lossless: true })}
 						class="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all {isLossless
-							? 'bg-accent-start text-white shadow-md'
+							? 'bg-accent-start text-black shadow-md'
 							: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700/50'}"
 						title="No quality loss — larger files. Best for WebP, AVIF, JXL."
 					>
@@ -244,7 +244,7 @@
 							onclick={() => handleFormatChange(format.value)}
 							class="rounded-lg px-3 py-2.5 text-sm font-medium transition-all {images.settings
 								.outputFormat === format.value
-								? 'bg-accent-start text-white shadow-md'
+								? 'bg-accent-start text-black shadow-md'
 								: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700/50'}"
 							title={format.title}
 						>
