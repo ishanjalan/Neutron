@@ -1,3 +1,4 @@
+import { countFailure } from '@neutron/utils/analytics';
 import {
 	images,
 	type OutputFormat,
@@ -649,6 +650,7 @@ async function compressImage(item: ImageItem) {
 	} catch (error) {
 		const errorTime = ((performance.now() - compressionStart) / 1000).toFixed(1);
 		console.error(`[compress] ${item.name}: Failed after ${errorTime}s:`, error);
+		countFailure(error);
 
 		let message = 'Compression failed';
 		let retryable = true;

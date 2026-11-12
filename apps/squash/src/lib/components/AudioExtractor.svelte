@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { countFailure } from '@neutron/utils/analytics';
 	import Header from '#lib/components/Header.svelte';
 	import { DropZone, Footer, Toast, toast, SEOSection, RelatedTools } from '@neutron/ui';
 	import { downloadAllAsZip, downloadBlob } from '@neutron/utils/download';
@@ -142,6 +143,7 @@
 				});
 			} else {
 				console.error('Audio extraction failed:', error);
+				countFailure(error);
 				patch(row.id, {
 					status: 'error',
 					error: error instanceof Error ? error.message : 'Audio extraction failed',

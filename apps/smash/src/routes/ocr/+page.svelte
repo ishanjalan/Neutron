@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { countFailure } from '@neutron/utils/analytics';
 	import { acceptPdfFiles } from '#lib/utils/pdf-files.ts';
 	import Header from '#lib/components/Header.svelte';
 	import { Footer, SEOSection, RelatedTools } from '@neutron/ui';
@@ -148,6 +149,7 @@
 				);
 			} catch (error) {
 				console.error('OCR error:', error);
+				countFailure(error);
 				files = files.map((f) =>
 					f.id === pdfFile.id
 						? {
