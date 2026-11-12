@@ -122,6 +122,14 @@ Every app's `src/app.css`:
 
 The base CSS defines a `surface-50`→`surface-950` scale (light↔dark), accent colors, `.gradient-text`, `.gradient-border`, `.glass`, and automatic light-mode inversion via `@media (prefers-color-scheme: light)`.
 
+### pnpm
+
+pnpm is pinned in `package.json` (`packageManager`; pnpm 12) and CI reads it via `pnpm/action-setup`. Project settings live in `pnpm-workspace.yaml` — pnpm 11+ ignores a `pnpm` field in `package.json` — currently `overrides` (patched build-time transitive dependencies) and `allowBuilds`.
+
+- **Install scripts are opt-in.** A dependency with an unreviewed install script fails the install (`ERR_PNPM_IGNORED_BUILDS`). Add it to `allowBuilds` as `true`/`false` after checking what the script does.
+- **Packages younger than 24 hours are rejected** (`minimumReleaseAge`, a supply-chain protection), including ones already in the lockfile. If an update pass picks up a just-published release, re-resolve (`pnpm clean --lockfile && pnpm install`) or wait a day.
+- `pnpm-lock.yaml` now has two documents: pnpm's own pinned binaries, then the dependency lock.
+
 ### CI / Deployment
 
 `.github/workflows/deploy.yml` detects which apps changed (via `dorny/paths-filter`) and only rebuilds those. Each app deploys to its own GitHub repository's `gh-pages` branch using `peaceiris/actions-gh-pages`. `pnpm install` runs with `--frozen-lockfile` by default in CI — **always commit `pnpm-lock.yaml` together with any `package.json` change**.
