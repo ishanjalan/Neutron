@@ -131,3 +131,30 @@ test('a ProRes file gets a plain-language error instead of an encoder message', 
 	// Retrying a file the browser can't decode would fail the same way
 	await expect(page.getByRole('button', { name: /Retry/ })).toHaveCount(0);
 });
+
+test('quality is one slider with plain-language levels, and the target size takes over', async ({
+	page,
+}) => {
+	await page.addInitScript(() => localStorage.setItem('squash-onboarding-seen', 'true'));
+	await page.goto('./');
+	await page.locator('input[type="file"]').first().setInputFiles(fixture('sample.mp4'));
+	const slider = page.getByRole('slider', { name: 'Quality' });
+	await expect(slider).toBeVisible();
+
+	await slider.fill('2');
+	await expect(page.getByText('Balanced', { exact: true }).first()).toBeVisible();
+	await slider.fill('0');
+	await expect(page.getByText('Smallest file, visible softness')).toBeVisible();
+
+	// Resolution sits next to it, not behind Advanced
+	await expect(page.getByLabel('Resolution')).toBeVisible();
+
+	// Choosing a target size hands control to it
+	await page
+		.getByRole('button', { name: /Select/ })
+		.first()
+		.click();
+	await page.getByRole('button', { name: /Discord/ }).click();
+	await expect(slider).toBeDisabled();
+	await expect(page.getByText('Using the target size')).toBeVisible();
+});

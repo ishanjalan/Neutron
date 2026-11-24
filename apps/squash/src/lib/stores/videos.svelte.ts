@@ -79,38 +79,15 @@ export const SIZE_PRESETS = {
 	email: { label: 'Email', sizeMB: 25, icon: '📧' },
 } as const;
 
-// Quality presets - CRF values (lower = better quality, larger file)
+// Quality levels, smallest file to best picture. The keys are what we save in settings and map to
+// the encoder's five relative levels (see QUALITY_MAP in webcodecs.ts); only the wording is ours.
+// Sizes depend on the footage, so none are promised here — estimates come from sampling the video.
 export const QUALITY_PRESETS = {
-	tiny: {
-		crf: 35,
-		label: 'Tiny',
-		desc: 'Max compression',
-		targetBitrate: '500k',
-	},
-	web: {
-		crf: 28,
-		label: 'Web',
-		desc: 'Balanced',
-		targetBitrate: '1000k',
-	},
-	social: {
-		crf: 23,
-		label: 'Social',
-		desc: 'Social media',
-		targetBitrate: '2000k',
-	},
-	high: {
-		crf: 18,
-		label: 'High',
-		desc: 'High quality',
-		targetBitrate: '4000k',
-	},
-	lossless: {
-		crf: 0,
-		label: 'Max Quality',
-		desc: 'Visually lossless',
-		targetBitrate: '0',
-	},
+	tiny: { label: 'Smallest', desc: 'Smallest file, visible softness' },
+	web: { label: 'Small', desc: 'Small file, fine for chat and the web' },
+	social: { label: 'Balanced', desc: 'Good for social posts' },
+	high: { label: 'High', desc: 'Close to the original' },
+	lossless: { label: 'Best', desc: 'Near-original quality, big file' },
 } as const;
 
 export const RESOLUTION_OPTIONS: { value: Resolution; label: string; pixels: string }[] = [
@@ -178,64 +155,6 @@ function getDefaultSettings(): CompressionSettings {
 }
 
 // Parse bitrate string to number (e.g., '1000k' -> 1000000)
-function parseBitrate(bitrate: string): number {
-	const match = bitrate.match(/^(\d+)([kmg])?$/i);
-	if (!match) return 1000000;
-
-	const value = parseInt(match[1], 10);
-	const unit = match[2]?.toLowerCase();
-
-	switch (unit) {
-		case 'k':
-			return value * 1000;
-		case 'm':
-			return value * 1000000;
-		case 'g':
-			return value * 1000000000;
-		default:
-			return value;
-	}
-}
-
-// Estimate output file size based on settings
-export function estimateFileSize(video: VideoItem, settings: CompressionSettings): number {
-	// If target size is set, return that
-	if (settings.targetSizeMB) {
-		return settings.targetSizeMB * 1024 * 1024;
-	}
-
-	const duration = getEffectiveDuration(video);
-	if (!duration || duration <= 0) return 0;
-
-	// Get video bitrate from quality preset
-	const preset = QUALITY_PRESETS[settings.quality];
-	const videoBitrate = parseBitrate(preset.targetBitrate);
-
-	// Lossless mode uses original bitrate as estimate
-	if (settings.quality === 'lossless') {
-		return video.originalSize * 0.9; // Slightly smaller due to better codec
-	}
-
-	// Get audio bitrate
-	let audioBitrate = 0;
-	if (settings.audioCodec !== 'none') {
-		const audioBitrateMap: Record<string, number> = {
-			'64k': 64000,
-			'128k': 128000,
-			'192k': 192000,
-			'256k': 256000,
-			'320k': 320000,
-		};
-		audioBitrate = audioBitrateMap[settings.audioBitrate] || 128000;
-	}
-
-	// Calculate: (video_bitrate + audio_bitrate) * duration / 8
-	const totalBitrate = videoBitrate + audioBitrate;
-	const estimatedBytes = (totalBitrate * duration) / 8;
-
-	return Math.round(estimatedBytes);
-}
-
 // Get effective duration considering trim settings
 export function getEffectiveDuration(video: VideoItem): number {
 	const fullDuration = video.duration || 0;

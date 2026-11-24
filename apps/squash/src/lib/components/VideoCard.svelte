@@ -1,10 +1,10 @@
 <script lang="ts">
+	import { estimates } from '#lib/stores/estimates.svelte.ts';
 	import {
 		videos,
 		type VideoItem,
 		type OutputFormat,
 		type Rotation,
-		estimateFileSize,
 		getEffectiveDuration,
 	} from '#lib/stores/videos.svelte.ts';
 	import { downloadVideo } from '#lib/utils/download.ts';
@@ -75,7 +75,9 @@
 				(item.trimStart !== undefined || item.trimEnd !== undefined) &&
 				item.duration
 				? Math.round((item.originalSize * getEffectiveDuration(item)) / item.duration)
-				: estimateFileSize(item, videos.settings)
+				: videos.settings.targetSizeMB
+					? videos.settings.targetSizeMB * 1024 * 1024
+					: (estimates.bytesFor(item, videos.settings) ?? 0)
 			: 0
 	);
 

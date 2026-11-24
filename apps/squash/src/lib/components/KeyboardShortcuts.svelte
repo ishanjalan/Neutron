@@ -30,13 +30,13 @@
 			],
 		},
 		{
-			category: 'Quality Presets',
+			category: 'Quality',
 			items: [
-				{ keys: ['1'], action: 'Tiny quality preset' },
-				{ keys: ['2'], action: 'Web quality preset' },
-				{ keys: ['3'], action: 'Social quality preset' },
-				{ keys: ['4'], action: 'High quality preset' },
-				{ keys: ['5'], action: 'Lossless quality preset' },
+				{ keys: ['1'], action: 'Quality: Smallest' },
+				{ keys: ['2'], action: 'Quality: Small' },
+				{ keys: ['3'], action: 'Quality: Balanced' },
+				{ keys: ['4'], action: 'Quality: High' },
+				{ keys: ['5'], action: 'Quality: Best' },
 			],
 		},
 		{

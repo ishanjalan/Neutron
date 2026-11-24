@@ -11,7 +11,7 @@ export const squashSEO: PageSEO = {
 	faqs: [
 		{
 			q: 'How do I make a video file smaller without losing quality?',
-			a: 'Drop your video into Squash and choose a quality preset. The "Web" preset reduces most videos by 60–70% with no noticeable quality difference. For the best result, lower the resolution (e.g. 1080p → 720p) alongside the quality setting.',
+			a: 'Drop your video into Squash and move the quality slider from Smallest to Best — it shows an estimated size for your video before you compress. For a smaller file still, lower the resolution (e.g. 1080p → 720p) alongside it.',
 		},
 		{
 			q: 'What is the best free video compressor online?',
@@ -19,7 +19,7 @@ export const squashSEO: PageSEO = {
 		},
 		{
 			q: 'How much can Squash reduce video file size?',
-			a: 'Typically 50–80%. A 200 MB screen recording often compresses to under 30 MB with the "Web" preset. Results vary by content — high-motion video compresses less than static presentations.',
+			a: 'It depends on the video and the level you pick: footage with little motion shrinks far more than fast action. The quality slider shows an estimated size for your own file before you compress, and the real size once it is done.',
 		},
 		{
 			q: 'Is my video private when I compress it?',

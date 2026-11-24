@@ -6,7 +6,6 @@
 		FRAME_RATE_OPTIONS,
 		AUDIO_BITRATE_OPTIONS,
 		SIZE_PRESETS,
-		estimateFileSize,
 		type OutputFormat,
 		type Resolution,
 		type MaxFrameRate,
@@ -18,19 +17,12 @@
 		initWebCodecs,
 		getCapabilitiesSync,
 	} from '#lib/utils/compress.ts';
-	import {
-		Settings2,
-		RefreshCw,
-		ChevronDown,
-		ChevronUp,
-		Volume2,
-		Maximize,
-		Info,
-		Play,
-	} from 'lucide-svelte';
+	import { Settings2, RefreshCw, ChevronDown, ChevronUp, Volume2, Info, Play } from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 	import { onMount } from 'svelte';
-	import { Tooltip } from '@neutron/ui';
+	import { Tooltip, QualitySlider, type QualityEstimate } from '@neutron/ui';
+	import { estimates } from '#lib/stores/estimates.svelte.ts';
+	import { estimateKey, QUALITY_KEYS } from '#lib/utils/estimate.ts';
 	import { clickOutside } from '@neutron/utils';
 
 	// Check codec availability (hardware support required for some)
@@ -66,9 +58,10 @@
 	// Older saved settings may hold opus/mp3, which are now handled as Auto
 	const isAutoAudio = (codec: AudioCodec) => codec !== 'copy' && codec !== 'none';
 
-	const presets = Object.entries(QUALITY_PRESETS).map(([key, value]) => ({
-		key: key as keyof typeof QUALITY_PRESETS,
-		...value,
+	const qualityStops = QUALITY_KEYS.map((key) => ({
+		key,
+		label: QUALITY_PRESETS[key].label,
+		hint: QUALITY_PRESETS[key].desc,
 	}));
 
 	const sizePresets = Object.entries(SIZE_PRESETS).map(([key, value]) => ({
@@ -86,6 +79,52 @@
 	const hasCompletedVideos = $derived(videos.items.some((i) => i.status === 'completed'));
 	const isAnyProcessing = $derived(videos.items.some((i) => i.status === 'processing'));
 	const hasTargetSize = $derived(videos.settings.targetSizeMB !== undefined);
+
+	// The slider's size predictions are about one video: the first waiting one, else the first.
+	const sliderItem = $derived(
+		pendingVideos[0] ?? videos.items.find((i) => i.status === 'completed') ?? videos.items[0]
+	);
+	const canEstimate = $derived(
+		!!sliderItem && !hasTargetSize && !isAnyProcessing && !sliderItem.losslessTrim
+	);
+
+	$effect(() => {
+		const item = sliderItem;
+		const settings = videos.settings;
+		if (item && canEstimate) estimates.ensure(item, settings);
+		else if (isAnyProcessing) estimates.stop();
+	});
+
+	const estimating = $derived(
+		canEstimate &&
+			(!estimates.current ||
+				(estimates.current.status === 'running' &&
+					estimates.current.key === estimateKey(sliderItem, videos.settings) &&
+					estimates.current.bytes?.[videos.settings.quality] === undefined))
+	);
+
+	// Scale the sampled video's result to everything waiting, so a batch shows a total
+	const sliderEstimates = $derived.by((): Record<string, QualityEstimate | undefined> => {
+		const current = estimates.current;
+		if (!canEstimate || !current?.bytes || current.status === 'failed') return {};
+		if (current.key !== estimateKey(sliderItem, videos.settings)) return {};
+		const scope = pendingVideos.length > 0 ? pendingVideos : [sliderItem];
+		const totalOriginal = scope.reduce((sum, v) => sum + v.originalSize, 0);
+		const out: Record<string, QualityEstimate> = {};
+		for (const key of QUALITY_KEYS) {
+			const bytes = current.bytes[key];
+			if (bytes === undefined) continue;
+			const ratio = bytes / sliderItem.originalSize;
+			out[key] = {
+				bytes: Math.round(ratio * totalOriginal),
+				savedPercent: Math.round((1 - ratio) * 100),
+			};
+		}
+		return out;
+	});
+	const estimateScope = $derived(
+		pendingVideos.length > 1 ? `for all ${pendingVideos.length} videos` : undefined
+	);
 
 	// Initialize target size input when it changes
 	$effect(() => {
@@ -160,28 +199,36 @@
 	<!-- Main settings row -->
 	<div class="p-4 sm:p-6">
 		<div class="flex flex-wrap items-center gap-3 sm:gap-4">
-			<!-- Quality Presets -->
-			<div class="flex flex-col gap-1.5">
-				<span class="text-surface-500 hidden text-[10px] tracking-wider uppercase sm:block"
-					>Quality</span
+			<!-- Quality: one slider from smallest file to best picture, with predicted sizes -->
+			<QualitySlider
+				stops={qualityStops}
+				value={videos.settings.quality}
+				onchange={(key) => handlePresetClick(key as keyof typeof QUALITY_PRESETS)}
+				estimates={sliderEstimates}
+				{estimateScope}
+				{estimating}
+				disabled={hasTargetSize}
+				disabledNote="Using the target size"
+			/>
+
+			<!-- Resolution sits beside quality: it is the other thing that decides file size -->
+			<label class="flex flex-col gap-1.5">
+				<span class="text-surface-500 text-[10px] tracking-wider uppercase">Resolution</span>
+				<select
+					value={videos.settings.resolution}
+					onchange={(e) => handleResolutionChange(e.currentTarget.value as Resolution)}
+					class="bg-surface-800/50 text-surface-200 focus-visible:ring-accent-start rounded-lg px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none"
+					title={hasTargetSize
+						? 'With a target size, “Original” lets Squash lower the resolution automatically when the file wouldn’t otherwise look good at that size.'
+						: 'Lowering the resolution shrinks the file a lot. 1080p is plenty for most uses.'}
 				>
-				<div class="flex gap-1">
-					{#each presets as preset (preset.key)}
-						<button
-							onclick={() => handlePresetClick(preset.key)}
-							class="rounded-lg px-3 py-2.5 text-sm font-medium transition-all sm:py-1.5 {videos
-								.settings.quality === preset.key && !hasTargetSize
-								? 'bg-accent-start shadow-accent-start/30 text-white shadow-md'
-								: hasTargetSize
-									? 'text-surface-500 hover:text-surface-400 hover:bg-surface-700/30'
-									: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700/50'}"
-							title={preset.desc}
-						>
-							{preset.label}
-						</button>
+					{#each RESOLUTION_OPTIONS as option (option.value)}
+						<option value={option.value}>
+							{option.label}{option.pixels ? ` · ${option.pixels}` : ''}
+						</option>
 					{/each}
-				</div>
-			</div>
+				</select>
+			</label>
 
 			<!-- OR divider -->
 			<div class="text-surface-600 hidden items-center gap-2 self-center sm:flex">
@@ -377,38 +424,8 @@
 			<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 				<!-- Resolution -->
 				<div>
-					<div class="mb-3 flex items-center gap-2">
-						<Maximize class="text-surface-400 h-4 w-4" />
-						<span class="text-surface-300 text-sm font-medium">Resolution</span>
-						<Tooltip
-							content="Downscaling reduces file size significantly. 1080p is usually sufficient for most uses. Higher resolutions are best for archival or professional work."
-						/>
-					</div>
-					<div class="grid grid-cols-2 gap-1.5">
-						{#each RESOLUTION_OPTIONS as option (option.value)}
-							<button
-								onclick={() => handleResolutionChange(option.value)}
-								class="rounded-lg px-3 py-2 text-left text-sm transition-all {videos.settings
-									.resolution === option.value
-									? 'bg-accent-start/20 text-accent-start ring-accent-start/50 ring-1'
-									: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700/50'}"
-							>
-								<div class="font-medium">{option.label}</div>
-								{#if option.pixels}
-									<div class="text-xs opacity-70">{option.pixels}</div>
-								{/if}
-							</button>
-						{/each}
-					</div>
-					{#if hasTargetSize}
-						<p class="text-surface-500 mt-2 text-xs">
-							With a target size, “Original” lets Squash lower the resolution automatically when the
-							file wouldn’t otherwise look good at that size.
-						</p>
-					{/if}
-
 					<!-- Frame rate: only ever lowers the source rate -->
-					<div class="mt-5">
+					<div>
 						<div class="mb-2 flex items-center gap-2">
 							<span class="text-surface-300 text-sm font-medium">Frame rate</span>
 							<Tooltip

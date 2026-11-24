@@ -9,7 +9,7 @@ Compress MP4, WebM, MOV, and MKV videos using the browser's native WebCodecs API
 - **WebCodecs-powered** — Uses native browser video encoding, not FFmpeg WASM
 - **Hardware acceleration** — GPU encoding where the browser supports it
 - **Pro codecs** — H.264, H.265/HEVC, VP9, AV1 for video; AAC, Opus for audio
-- **Quality presets** — Tiny, Web, Social, High, Lossless
+- **Quality slider** — Smallest, Small, Balanced, High, Best, with an estimated size for your video (from short sample encodes) and a resolution choice beside it
 - **Resolution control** — Downscale to 360p, 480p, 720p, 1080p, or 4K
 - **Audio options** — Adjust bitrate, codec, or strip audio entirely
 - **Batch processing** — Compress multiple videos at once
