@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
 	videos,
-	estimateFileSize,
 	getEffectiveDuration,
 	suggestOptimalSettings,
 	QUALITY_PRESETS,
@@ -101,12 +100,16 @@ describe('QUALITY_PRESETS', () => {
 		expect(Object.keys(QUALITY_PRESETS)).toEqual(['tiny', 'web', 'social', 'high', 'lossless']);
 	});
 
-	it('lossless has crf 0', () => {
-		expect(QUALITY_PRESETS.lossless.crf).toBe(0);
-	});
-
-	it('tiny has highest crf (most compression)', () => {
-		expect(QUALITY_PRESETS.tiny.crf).toBeGreaterThan(QUALITY_PRESETS.web.crf);
+	it('names the levels from smallest to best, each with a one-line description', () => {
+		expect(Object.values(QUALITY_PRESETS).map((p) => p.label)).toEqual([
+			'Smallest',
+			'Small',
+			'Balanced',
+			'High',
+			'Best',
+		]);
+		for (const preset of Object.values(QUALITY_PRESETS))
+			expect(preset.desc.length).toBeGreaterThan(0);
 	});
 });
 
@@ -139,31 +142,6 @@ describe('getEffectiveDuration', () => {
 	it('returns 0 for missing duration', () => {
 		const video = makeVideo({ duration: undefined });
 		expect(getEffectiveDuration(video)).toBe(0);
-	});
-});
-
-describe('estimateFileSize', () => {
-	it('returns targetSizeMB in bytes when set', () => {
-		const video = makeVideo();
-		const result = estimateFileSize(video, { ...defaultSettings, targetSizeMB: 10 });
-		expect(result).toBe(10 * 1024 * 1024);
-	});
-
-	it('returns 0 for zero duration', () => {
-		const video = makeVideo({ duration: 0 });
-		expect(estimateFileSize(video, defaultSettings)).toBe(0);
-	});
-
-	it('returns a positive estimate for a standard video', () => {
-		const video = makeVideo({ duration: 60 });
-		const result = estimateFileSize(video, defaultSettings);
-		expect(result).toBeGreaterThan(0);
-	});
-
-	it('lossless mode returns close to original size', () => {
-		const video = makeVideo({ originalSize: 50_000_000, duration: 60 });
-		const result = estimateFileSize(video, { ...defaultSettings, quality: 'lossless' });
-		expect(result).toBe(Math.round(50_000_000 * 0.9));
 	});
 });
 

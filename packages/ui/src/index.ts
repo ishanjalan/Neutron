@@ -9,6 +9,11 @@ export {
 	type ToastOptions,
 } from './components/Toast.svelte';
 export { default as ConfirmModal } from './components/ConfirmModal.svelte';
+export {
+	default as QualitySlider,
+	type QualityStop,
+	type QualityEstimate,
+} from './components/QualitySlider.svelte';
 export { default as Tooltip } from './components/Tooltip.svelte';
 export { default as DropZone, type FormatBadge } from './components/DropZone.svelte';
 export { default as ErrorPage } from './components/ErrorPage.svelte';
