@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { images, type OutputFormat, type ResizeMode } from '#lib/stores/images.svelte.ts';
-	import { toast } from '@neutron/ui';
+	import { toast, QualitySlider, type QualityEstimate } from '@neutron/ui';
+	import { estimates } from '#lib/stores/estimates.svelte.ts';
+	import { canEstimate, estimateKey } from '#lib/utils/estimate.ts';
+	import { QUALITY_LEVELS, levelFor } from '#lib/quality-levels.ts';
 	import { reprocessAllImages } from '#lib/utils/compress.ts';
 	import {
 		enableAutoSave,
@@ -11,7 +14,6 @@
 	import {
 		Shield,
 		RefreshCw,
-		Sparkles,
 		Sliders,
 		ChevronDown,
 		ChevronUp,
@@ -53,17 +55,9 @@
 		{ value: 'jxl', label: 'JXL', title: 'JPEG XL - best quality & progressive loading' },
 	];
 
-	// Simplified quality presets - 3 clear use cases
-	const presets = [
-		{ label: 'Compact', value: 60, desc: 'Smallest files — messaging, email', icon: '📦' },
-		{ label: 'Balanced', value: 80, desc: 'Best of both worlds', icon: '⚖️', recommended: true },
-		{ label: 'Quality', value: 95, desc: 'Archival, printing', icon: '✨' },
-	];
-
 	let isReprocessing = $state(false);
 
 	const hasCompletedImages = $derived(images.items.some((i) => i.status === 'completed'));
-	const isLossless = $derived(images.settings.lossless);
 
 	// Resize settings
 	const resizeEnabled = $derived(images.settings.resizeEnabled);
@@ -72,11 +66,64 @@
 	const resizeMaxWidth = $derived(images.settings.resizeMaxWidth);
 	const resizeMaxHeight = $derived(images.settings.resizeMaxHeight);
 
-	const currentPreset = $derived(presets.find((p) => p.value === images.settings.quality));
+	const qualityStops = QUALITY_LEVELS.map((l) => ({ key: l.key, label: l.label, hint: l.hint }));
 
-	function handlePresetClick(value: number) {
-		images.updateSettings({ quality: value, lossless: false });
+	function handleQualityChange(key: string) {
+		const level = QUALITY_LEVELS.find((l) => l.key === key);
+		if (!level) return;
+		// Lossless keeps the lossy quality the user last chose, so stepping back down restores it
+		images.updateSettings(
+			level.lossless ? { lossless: true } : { quality: level.quality, lossless: false }
+		);
 	}
+
+	// Size predictions are about one image: the first waiting raster one, else the first done one
+	const isProcessing = $derived(images.items.some((i) => i.status === 'processing'));
+	const sliderItem = $derived(
+		images.items.find((i) => i.status === 'pending' && i.format !== 'svg') ??
+			images.items.find((i) => i.status === 'completed' && i.format !== 'svg')
+	);
+	const sampling = $derived(!isProcessing && canEstimate(sliderItem, images.settings));
+
+	$effect(() => {
+		const item = sliderItem;
+		if (item && sampling) estimates.ensure(item, images.settings);
+		else if (isProcessing) estimates.stop();
+	});
+
+	const estimating = $derived(
+		sampling &&
+			!!sliderItem &&
+			(!estimates.current ||
+				(estimates.current.status === 'running' &&
+					estimates.current.key === estimateKey(sliderItem) &&
+					estimates.current.bytes[levelFor(images.settings).key] === undefined))
+	);
+
+	// Scale the sampled image's result to everything waiting, so a batch shows a total
+	const sliderEstimates = $derived.by((): Record<string, QualityEstimate | undefined> => {
+		const current = estimates.current;
+		if (!sampling || !sliderItem || !current || current.status === 'failed') return {};
+		if (current.key !== estimateKey(sliderItem)) return {};
+		const waiting = images.items.filter((i) => i.status === 'pending' && i.format !== 'svg');
+		const scope = waiting.length > 0 ? waiting : [sliderItem];
+		const totalOriginal = scope.reduce((sum, i) => sum + i.originalSize, 0);
+		const out: Record<string, QualityEstimate> = {};
+		for (const level of QUALITY_LEVELS) {
+			const bytes = current.bytes[level.key];
+			if (bytes === undefined) continue;
+			const ratio = bytes / sliderItem.originalSize;
+			out[level.key] = {
+				bytes: Math.round(ratio * totalOriginal),
+				savedPercent: Math.round((1 - ratio) * 100),
+			};
+		}
+		return out;
+	});
+	const estimateScope = $derived.by(() => {
+		const n = images.items.filter((i) => i.status === 'pending' && i.format !== 'svg').length;
+		return n > 1 ? `for all ${n} images` : undefined;
+	});
 
 	function handleFormatChange(format: 'same' | OutputFormat) {
 		const skipped = images.items.filter((i) => i.status === 'completed').length;
@@ -166,46 +213,15 @@
 
 		<!-- Row 1: Quality & Format -->
 		<div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
-			<!-- Quality Section -->
-			<div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-				<span class="text-surface-500 text-xs font-semibold tracking-wider uppercase">Quality</span>
-
-				<div class="bg-surface-800/50 flex max-w-full flex-wrap items-center gap-1 rounded-xl p-1">
-					{#each presets as preset (preset.value)}
-						<button
-							onclick={() => handlePresetClick(preset.value)}
-							class="relative flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all {!isLossless &&
-							images.settings.quality === preset.value
-								? 'bg-accent-start text-black shadow-md'
-								: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700/50'}"
-							title="{preset.desc} ({preset.value}%)"
-						>
-							<span class="text-base">{preset.icon}</span>
-							<span>{preset.label}</span>
-							{#if preset.recommended && (isLossless || images.settings.quality !== preset.value)}
-								<span
-									class="bg-accent-start absolute -top-1 -right-1 h-2 w-2 animate-pulse rounded-full"
-								></span>
-							{/if}
-						</button>
-					{/each}
-					<button
-						onclick={() => images.updateSettings({ lossless: true })}
-						class="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all {isLossless
-							? 'bg-accent-start text-black shadow-md'
-							: 'text-surface-400 hover:text-surface-200 hover:bg-surface-700/50'}"
-						title="No quality loss — larger files. Best for WebP, AVIF, JXL."
-					>
-						<Sparkles class="h-4 w-4" />
-						<span>Lossless</span>
-					</button>
-				</div>
-				{#if currentPreset && !isLossless}
-					<span class="text-surface-500 hidden text-xs tabular-nums sm:inline"
-						>{currentPreset.value}%</span
-					>
-				{/if}
-			</div>
+			<!-- Quality: one slider from smallest file to best picture, with predicted sizes -->
+			<QualitySlider
+				stops={qualityStops}
+				value={levelFor(images.settings).key}
+				onchange={handleQualityChange}
+				estimates={sliderEstimates}
+				{estimateScope}
+				{estimating}
+			/>
 
 			<!-- Divider -->
 			<div class="bg-surface-700/50 hidden h-10 w-px lg:block"></div>
