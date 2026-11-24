@@ -21,7 +21,7 @@ import {
 	type AudioCodec,
 	type OutputFormat,
 } from 'mediabunny';
-import { CompressionCancelledError } from './webcodecs';
+import { CompressionCancelledError, assertConversionValid } from './webcodecs';
 
 export type AudioFormat = 'mp3' | 'm4a' | 'opus' | 'wav';
 
@@ -160,6 +160,7 @@ export async function extractAudio(
 	});
 
 	if (!conversion.isValid) {
+		assertConversionValid(conversion);
 		throw new Error(`Your browser can’t encode ${info.label} audio. Try a different format.`);
 	}
 

@@ -98,3 +98,36 @@ test('audio and size-target pages are accessible', async ({ page }) => {
 	await page.goto('compress-video-for-discord');
 	await expectAccessible(page, 3);
 });
+
+test('a ProRes file gets a plain-language error instead of an encoder message', async ({
+	page,
+}) => {
+	// No browser's WebCodecs decodes ProRes, so mediabunny used to refuse with "discarded tracks".
+	await page.addInitScript(() => {
+		localStorage.setItem('squash-onboarding-seen', 'true');
+		// WebM, because Playwright's Chromium has no H.264 encoder and would fail on that first
+		localStorage.setItem(
+			'squash-settings-v2',
+			JSON.stringify({
+				quality: 'web',
+				outputFormat: 'webm',
+				resolution: 'original',
+				maxFrameRate: 0,
+				audioBitrate: '128k',
+				audioCodec: 'aac',
+				stripMetadata: false,
+			})
+		);
+	});
+	await page.goto('./');
+	await page.locator('input[type="file"]').first().setInputFiles(fixture('sample-prores.mov'));
+	await expect(page.getByText('sample-prores.mov').first()).toBeVisible();
+	await page
+		.getByRole('button', { name: /^\s*Compress/ })
+		.first()
+		.click();
+	await expect(page.getByText(/ProRes.*can’t decode/)).toBeVisible({ timeout: 30_000 });
+	await expect(page.getByText(/discarded|isValid/)).toHaveCount(0);
+	// Retrying a file the browser can't decode would fail the same way
+	await expect(page.getByRole('button', { name: /Retry/ })).toHaveCount(0);
+});

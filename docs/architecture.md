@@ -61,6 +61,8 @@ backend. Page views are counted with GoatCounter only (ADR-0003).
   and can break on bundler upgrades without a type error. Smoke tests are the safety net.
 - **Browser codec support** differs by browser: Squash H.264 needs a real Chrome, headless Chromium
   lacks it. Features must be feature-detected (ADR-0006).
+  ProRes cannot be decoded by any browser's WebCodecs (checked in Chrome 158: every ProRes profile is
+  unsupported), so Squash reports it plainly rather than attempting it.
 - **Supply chain:** pnpm rejects packages under 24 hours old and unreviewed install scripts
   (ADR-0005). A fresh release in the lockfile fails installs until it ages.
 - **Version pins:** TypeScript is held at 6.x because Kit 3, svelte-check and typescript-eslint do

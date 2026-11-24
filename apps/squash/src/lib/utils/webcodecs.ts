@@ -282,11 +282,61 @@ export class CompressionCancelledError extends Error {
 	}
 }
 
+/** The file is readable but one of its tracks uses a codec this browser cannot decode. */
+export class UndecodableSourceError extends Error {
+	constructor(
+		readonly trackType: string,
+		readonly codec: string | null
+	) {
+		super(undecodableMessage(trackType, codec));
+		this.name = 'UndecodableSourceError';
+	}
+}
+
+const CODEC_NAMES: Record<string, string> = {
+	prores: 'ProRes',
+	hevc: 'HEVC',
+	avc: 'H.264',
+	vp8: 'VP8',
+	vp9: 'VP9',
+	av1: 'AV1',
+};
+
+function undecodableMessage(trackType: string, codec: string | null): string {
+	const what = codec ? `the ${CODEC_NAMES[codec] ?? codec.toUpperCase()} codec` : 'a codec';
+	const fix =
+		codec === 'prores'
+			? 'Export it as H.264 or HEVC from your editor (or QuickTime: File → Export As) and try again.'
+			: 'Convert it to MP4 (H.264) first and try again.';
+	return `This ${trackType === 'audio' ? 'audio' : 'video'} uses ${what}, which your browser can’t decode. ${fix}`;
+}
+
+/**
+ * Throw a clear error when a conversion can't run. Mediabunny drops tracks it can't decode and,
+ * if nothing is left, refuses to execute with a message about "discarded tracks" — which says
+ * nothing useful to the person who dropped the file.
+ */
+export function assertConversionValid(conversion: Conversion): void {
+	if (conversion.isValid) return;
+	const unreadable = conversion.discardedTracks.find(
+		(d) => d.reason === 'undecodable_source_codec' || d.reason === 'unknown_source_codec'
+	);
+	if (unreadable) {
+		const { track } = unreadable;
+		throw new UndecodableSourceError(
+			track.type,
+			'codec' in track && typeof track.codec === 'string' ? track.codec : null
+		);
+	}
+	throw new Error('Your browser can’t convert this file with these settings.');
+}
+
 /** True when the input file's container/codec isn't something we can read. */
 export function isUnsupportedInputError(error: unknown): boolean {
 	let current: unknown = error;
 	for (let depth = 0; current && depth < 5; depth++) {
-		if (current instanceof UnsupportedInputFormatError) return true;
+		if (current instanceof UnsupportedInputFormatError || current instanceof UndecodableSourceError)
+			return true;
 		if (current instanceof Error) {
 			if (/unsupported or unrecognizable format/i.test(current.message)) return true;
 			current = current.cause;
@@ -443,6 +493,8 @@ export async function encodeWithWebCodecs(
 			showWarnings: false,
 		});
 
+		assertConversionValid(conversion);
+
 		// Cancel support: abort stops the conversion mid-encode
 		const onAbort = () => void conversion.cancel();
 		if (signal?.aborted) {
@@ -508,7 +560,8 @@ export async function encodeWithWebCodecs(
 			frameRateCapped: frameRate !== undefined,
 		};
 	} catch (error) {
-		if (error instanceof CompressionCancelledError) throw error;
+		if (error instanceof CompressionCancelledError || error instanceof UndecodableSourceError)
+			throw error;
 		console.error('WebCodecs encoding error:', error);
 		throw new Error(
 			`WebCodecs encoding failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -638,6 +691,7 @@ export async function trimWithoutReencode(
 		showWarnings: false,
 	});
 	if (!conversion.isValid) {
+		assertConversionValid(conversion);
 		throw new Error('This video can’t be cut this way. Turn off “Fast cut” to trim it normally.');
 	}
 
