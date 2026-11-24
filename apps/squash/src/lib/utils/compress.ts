@@ -27,6 +27,7 @@ import {
 	getRecommendedCodecs,
 	CompressionCancelledError,
 	isUnsupportedInputError,
+	UndecodableSourceError,
 	type WebCodecsCapabilities,
 } from './webcodecs';
 
@@ -241,7 +242,9 @@ async function compressVideo(item: VideoItem) {
 		videos.updateItem(item.id, {
 			status: 'error',
 			error: unreadable
-				? UNSUPPORTED_INPUT_MESSAGE
+				? error instanceof UndecodableSourceError
+					? error.message
+					: UNSUPPORTED_INPUT_MESSAGE
 				: error instanceof Error
 					? error.message
 					: 'Compression failed',
