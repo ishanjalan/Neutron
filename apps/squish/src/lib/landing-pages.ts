@@ -38,7 +38,7 @@ export const heicLanding: LandingPage = {
 		},
 		{
 			q: 'Does the conversion keep the photo quality?',
-			a: 'JPG is a lossy format, so there is a small quality trade-off. Use the Quality preset for the highest fidelity, or Compact for the smallest files.',
+			a: 'JPG is a lossy format, so there is a small quality trade-off. Move the quality slider to High for the highest fidelity, or Small for the smallest files.',
 		},
 		{
 			q: 'Is the location and camera data kept?',

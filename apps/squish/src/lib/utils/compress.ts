@@ -265,7 +265,7 @@ async function resizeImageBlob(
 }
 
 // Compress a single image at a specific quality level (used for binary search)
-async function compressAtQuality(
+export async function compressAtQuality(
 	item: ImageItem,
 	quality: number,
 	lossless: boolean,

@@ -35,7 +35,6 @@ test('home page is accessible and its drop zone opens the file picker', async ({
 		page.getByRole('button', { name: /select a folder/i }).click(),
 	]);
 	expect(folderChooser).toBeTruthy();
-	await expectAccessible(page, 0);
 });
 
 test('a HEIC photo converts even when the browser cannot decode HEIC natively', async ({
@@ -88,4 +87,22 @@ test('/heic is a real landing page that converts HEIC to JPG without touching sa
 	await page.goto('./');
 	await expect(page.getByRole('link', { name: /HEIC to JPG/ })).toBeVisible();
 	await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
+});
+
+test('quality is one slider with a predicted size for the dropped image', async ({ page }) => {
+	await page.goto('./');
+	await page.waitForLoadState('networkidle');
+	const slider = page.getByRole('slider', { name: 'Quality' });
+	await expect(slider).toBeVisible();
+	await expect(page.getByText('Best of both worlds')).toBeVisible();
+	await expectAccessible(page, 0);
+
+	await page.locator('input[type="file"]').first().setInputFiles(fixture('sample.jpg'));
+	await expect(page.getByText(/≈ .*(KB|MB)/).first()).toBeVisible({ timeout: 60_000 });
+
+	// Lossless is the far end of the same slider, not a separate button
+	await slider.fill('3');
+	await expect(page.getByText('No quality loss, larger files', { exact: false })).toBeVisible();
+	await slider.fill('0');
+	await expect(page.getByText('Smaller files — messaging, email')).toBeVisible();
 });

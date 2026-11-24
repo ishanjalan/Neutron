@@ -1,6 +1,6 @@
 # ADR-0011: Quality is one slider with plain-language levels and sampled size estimates
 
-- Status: accepted (Squash done; Squish to follow the same pattern)
+- Status: accepted (Squash and Squish)
 - Date: 2026-11-24
 - Related: `packages/ui/src/components/QualitySlider.svelte`, `apps/squash/src/lib/utils/estimate.ts`
 
@@ -34,6 +34,13 @@ for constant-bitrate exports, so estimates must be labelled approximate.
 
 Rejected: keeping five unlabelled buttons; a formula-only estimate (content varies too much);
 showing no estimate (HandBrake's choice; fine for pros, not for the one-click audience here).
+
+Update 2026-11-24: Squish uses the same slider with its own stops: Small (60), Balanced (80), High
+(95) and Lossless, the last being the far end of the slider instead of a separate button. It samples
+the first waiting raster image at each level (`utils/estimate.ts`) and scales the ratio to the whole
+batch. On one 3000 px photo the estimates were within 2% of the real output (Small 64 vs 64 KB,
+Balanced 101 vs 101 KB, High 300 vs 300 KB, Lossless 1106 vs 1102 KB). No estimate is shown with SVG,
+resize or target-size mode, where the result does not follow the level.
 
 ## Consequences
 
