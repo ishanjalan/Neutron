@@ -29,7 +29,6 @@
 	const autoSave = getAutoSaveState();
 	const fsapiSupported = isFileSystemAccessSupported();
 
-	const ADVANCED_COLLAPSED_KEY = 'squish-advanced-collapsed';
 	let showFormatGuide = $state(false);
 	let showReoptimizeConfirm = $state(false);
 	let formatNudgeDismissed = $state(false);
@@ -37,14 +36,9 @@
 	// Check if we're in preview mode (no images yet)
 	const isPreviewMode = $derived(images.items.length === 0);
 
-	// Load collapsed state from localStorage — default to collapsed for new users
+	// Always starts closed: an open panel pushes the drop zone below the fold, and it is not worth
+	// remembering across visits for that.
 	let showAdvanced = $state(false);
-	if (typeof localStorage !== 'undefined') {
-		const saved = localStorage.getItem(ADVANCED_COLLAPSED_KEY);
-		if (saved !== null) {
-			showAdvanced = saved !== 'true';
-		}
-	}
 
 	const formats: { value: 'same' | OutputFormat; label: string; title?: string }[] = [
 		{ value: 'same', label: 'Original', title: 'Keep same format as input' },
@@ -137,9 +131,6 @@
 
 	function toggleAdvanced() {
 		showAdvanced = !showAdvanced;
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem(ADVANCED_COLLAPSED_KEY, (!showAdvanced).toString());
-		}
 	}
 
 	function handleResizeToggle() {

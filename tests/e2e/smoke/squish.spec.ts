@@ -106,3 +106,18 @@ test('quality is one slider with a predicted size for the dropped image', async 
 	await slider.fill('0');
 	await expect(page.getByText('Smaller files — messaging, email')).toBeVisible();
 });
+
+test('Advanced options always start closed, even if an older visit left them open', async ({
+	page,
+}) => {
+	await page.addInitScript(() => localStorage.setItem('squish-advanced-collapsed', 'false'));
+	await page.goto('./');
+	await page.waitForLoadState('networkidle');
+	await expect(page.getByText('Metadata is removed')).toBeHidden();
+	// The drop zone stays in view without scrolling
+	const box = await page
+		.getByRole('button', { name: /drop|browse|choose|select/i })
+		.first()
+		.boundingBox();
+	expect(box?.y ?? Infinity).toBeLessThan(page.viewportSize()!.height);
+});
