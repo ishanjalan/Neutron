@@ -31,6 +31,7 @@ something is the way it is instead of reconstructing it from commit history.
 | [0009](0009-knip-for-dead-code.md)                    | knip is the dead-code tool; Rev-dep not adopted yet                          | accepted |
 | [0010](0010-privacy-safe-event-counting.md)           | Count failures and downloads as GoatCounter events, by route and bucket only | accepted |
 | [0011](0011-quality-slider-with-sampled-estimates.md) | Quality is one slider with plain levels and sampled size estimates           | accepted |
+| [0012](0012-failure-events-carry-a-fixed-cause.md)    | Failure events carry a cause from a fixed list                               | accepted |
 
 ADRs 0002–0009 were written retrospectively on 2026-11-12 from commit history and the session where
 each decision was made. Their commits are listed in each file.

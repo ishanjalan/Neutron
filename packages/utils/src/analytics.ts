@@ -125,6 +125,11 @@ const FAILURE_PATTERNS: [FailureKind, RegExp][] = [
 	['crash', /crash|unexpected|reload/i],
 ];
 
+function messageOf(error: unknown): string {
+	if (typeof error === 'string') return error;
+	return error instanceof Error ? error.message : String(error ?? '');
+}
+
 /** Map any error or message onto a {@link FailureKind}. Never returns the message itself. */
 export function classifyFailure(error: unknown): FailureKind {
 	const message =
@@ -137,6 +142,56 @@ export function classifyFailure(error: unknown): FailureKind {
 		if (pattern.test(message)) return kind;
 	}
 	return 'other';
+}
+
+/** Codec names we are willing to report. Anything else becomes "other". */
+const KNOWN_CODECS = ['prores', 'avc', 'hevc', 'av1', 'vp9', 'vp8', 'aac', 'opus', 'mp3'];
+
+/** The first error in a `cause` chain that says a source codec could not be decoded. */
+function findUndecodable(error: unknown): { codec?: unknown } | undefined {
+	let current = error;
+	for (let depth = 0; depth < 5 && current instanceof Error; depth++) {
+		if (current.name === 'UndecodableSourceError') return current as Error & { codec?: unknown };
+		current = current.cause;
+	}
+	return undefined;
+}
+
+/**
+ * A narrower reason within a {@link FailureKind}, so we can tell what to fix. Like the kind, it is
+ * always one of a fixed set of words chosen here — never text taken from the error (ADR-0012).
+ */
+export function failureCause(error: unknown): string | undefined {
+	const undecodable = findUndecodable(error);
+	if (undecodable) {
+		const { codec } = undecodable;
+		if (typeof codec !== 'string') return 'decode-unknown';
+		return `decode-${KNOWN_CODECS.includes(codec) ? codec : 'other'}`;
+	}
+
+	const message = messageOf(error);
+	const kind = classifyFailure(message);
+
+	if (kind === 'unsupported') {
+		const encoder = /\b(AVC|HEVC|AV1|VP9) (?:codec not supported|encoding is not supported)/i.exec(
+			message
+		);
+		if (encoder) return `encode-${encoder[1].toLowerCase()}`;
+		if (/can.?t encode .*audio/i.test(message)) return 'encode-audio';
+		if (/webcodecs (?:is )?not supported/i.test(message)) return 'no-webcodecs';
+		if (/unsupported or unrecognizable format|can.?t read this file/i.test(message))
+			return 'unreadable-file';
+		if (/\bAVI\b/.test(message)) return 'avi';
+		if (/\bHEI[CF]\b/i.test(message)) return 'heic';
+	}
+
+	if (kind === 'too-large') {
+		if (/resolution|dimension|width|height|\blevel\b/i.test(message)) return 'resolution';
+		if (/buffer/i.test(message)) return 'buffer';
+		if (/quota|storage/i.test(message)) return 'storage';
+	}
+
+	return undefined;
 }
 
 /** "/Smash/compress/" → "Smash/compress". Only plain path characters survive; capped in length. */
@@ -155,10 +210,14 @@ export function countEvent(name: string): void {
 	countPageview({ path: name, title: name, event: true });
 }
 
-/** Count that something failed on the current page, by bucket only. */
+/** Count that something failed on the current page, by bucket and fixed-list cause only. */
 export function countFailure(error: unknown): void {
 	if (typeof window === 'undefined') return;
-	countEvent(`error: ${eventRoute(window.location.pathname)} (${classifyFailure(error)})`);
+	const kind = findUndecodable(error) ? 'unsupported' : classifyFailure(error);
+	const cause = failureCause(error);
+	countEvent(
+		`error: ${eventRoute(window.location.pathname)} (${cause ? `${kind}: ${cause}` : kind})`
+	);
 }
 
 /** Count that a result was downloaded on the current page. */

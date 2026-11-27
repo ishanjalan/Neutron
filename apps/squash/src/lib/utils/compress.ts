@@ -121,6 +121,7 @@ async function processQueue() {
 
 	if (!capabilities.supported) {
 		// Mark all queued videos as error
+		countFailure('WebCodecs not supported');
 		while (queue.length > 0) {
 			const id = queue.shift()!;
 			videos.updateItem(id, {
